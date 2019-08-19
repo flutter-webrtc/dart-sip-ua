@@ -1,0 +1,921 @@
+%{
+  library sip_ua;
+
+  var URI = {};
+  var NameAddrHeader = {};
+  var startRule = '';
+  class Data {
+    var host;
+    var port;
+    var host_type;
+    var value;
+    var method;
+    var reason_phrase;
+    var uri;
+    var uri_headers;
+    var uri_params;
+    var scheme;
+    var user;
+    var sip_version;
+    var status_code;
+    var stale;
+  }
+
+  var data = Data();
+
+  parseInt(str){
+    return int.parse(str);
+  }
+}%
+
+### ABNF BASIC
+
+CRLF    <- "\r\n"
+DIGIT   <- [0-9]
+ALPHA   <- [a-zA-Z]
+HEXDIG  <- [0-9a-fA-F]
+WSP     <- SP / HTAB
+OCTET   <- [\u0000-\u00FF]
+DQUOTE  <- ["]
+SP      <- " "
+HTAB    <- "\t"
+
+
+### BASIC RULES
+
+alphanum    <- [a-zA-Z0-9]
+reserved    <- ";" / "/" / "?" / ":" / "@" / "&" / "=" / "+" / "$" / ","
+unreserved  <- alphanum / mark
+mark        <- "-" / "_" / "." / "!" / "~" / "*" / "'" / "(" / ")"
+escaped     <- ("%" HEXDIG HEXDIG) {return escaped.join(''); }
+
+### RFC3261 25: A recipient MAY replace any linear white space with a single SP
+### before interpreting the field value or forwarding the message downstream
+###
+LWS <- ( WSP* CRLF )? WSP+ {return " "; }
+
+SWS <- LWS?
+
+HCOLON  <- ( SP / HTAB )* ":" SWS {return ':'; }
+
+TEXT_UTF8_TRIM  <- TEXT_UTF8char+ ( LWS* TEXT_UTF8char)* {
+                    return text.substring(pos, _cursor); }
+
+UTF8_NONASCII   <- [\u0080-\uFFFF]
+
+TEXT_UTF8char   <- [\u21-\u7E] / UTF8_NONASCII
+
+UTF8_CONT       <- [\u80-\uBF]
+
+LHEX            <- DIGIT / [\u61-\u66]
+
+token           <- (alphanum / "-" / "." / "!" / "%" / "*"
+                  / "_" / "+" / "`" / "'" / "~" )+ {
+                  return text.substring(pos, _cursor); }
+
+token_nodot     <- ( alphanum / "-"  / "!" / "%" / "*"
+                  / "_" / "+" / "`" / "'" / "~" )+ {
+                  return text.substring(pos, _cursor); }
+
+separators      <- "(" / ")" / "<" / ">" / "@" / "," / ";" / ":" / "\\"
+                  / DQUOTE / "/" / "[" / "]" / "?" / "=" / "{" / "}"
+                  / SP / HTAB
+
+word            <- (alphanum / "-" / "." / "!" / "%" / "*" /
+                  "_" / "+" / "`" / "'" / "~" /
+                  "(" / ")" / "<" / ">" /
+                  ":" / "\\" / DQUOTE /
+                  "/" / "[" / "]" / "?" /
+                  "{" / "}" )+ {
+                  return text.substring(pos, _cursor); }
+
+STAR        <- SWS "*" SWS   {return "*"; }
+SLASH       <- SWS "/" SWS   {return "/"; }
+EQUAL       <- SWS "=" SWS   {return "="; }
+LPAREN      <- SWS "(" SWS   {return "("; }
+RPAREN      <- SWS ")" SWS   {return ")"; }
+RAQUOT      <- ">" SWS       {return ">"; }
+LAQUOT      <- SWS "<"       {return "<"; }
+COMMA       <- SWS "," SWS   {return ","; }
+SEMI        <- SWS ";" SWS   {return ";"; }
+COLON       <- SWS ":" SWS   {return ":"; }
+LDQUOT      <- SWS DQUOTE    {return "\""; }
+RDQUOT      <- DQUOTE SWS    {return "\""; }
+
+comment     <- LPAREN (ctext / quoted_pair / comment)* RPAREN
+
+ctext       <- [\u21-\u27] / [\u2A-\u5B] / [\u5D-\u7E] / UTF8_NONASCII / LWS
+
+quoted_string <- SWS DQUOTE ( qdtext / quoted_pair )* DQUOTE {
+                  return text.substring(pos, _cursor); }
+
+quoted_string_clean <- SWS DQUOTE ( qdtext / quoted_pair )* DQUOTE {
+                  var trimmed = input
+                      .substring(pos, _cursor)
+                      .trim();
+
+                  return trimmed
+                      .substring(1, trimmed.length - 1) ### remove outer quotes
+                      .replaceAll(r"\\([\x00-\x09\x0b-\x0c\x0e-\x7f])", "\$1"); } ### unquote contents
+
+qdtext   <- LWS / "\u21" / [\u23-\u5B] / [\u5D-\u7E] / UTF8_NONASCII
+
+quoted_pair <- "\\" ( [\u00-\u09] / [\u0B-\u0C] / [\u0E-\u7F] )
+
+
+###=======================
+### SIP URI
+###=======================
+
+SIP_URI_noparams   <- uri_scheme ":"  userinfo ? hostport {
+                    try {
+                        data.uri = new URI(data.scheme, data.user, data.host, data.port);
+                        /*
+                        delete data.scheme;
+                        delete data.user;
+                        delete data.host;
+                        delete data.host_type;
+                        delete data.port;
+                        */
+                      } catch(e) {
+                        data = null;
+                      }}
+
+SIP_URI         <- uri_scheme ":"  userinfo ? hostport uri_parameters headers ? {
+                    var header;
+                    try {
+                        data.uri = new URI(data.scheme, data.user, data.host, data.port, data.uri_params, data.uri_headers);
+                        /*
+                        delete data.scheme;
+                        delete data.user;
+                        delete data.host;
+                        delete data.host_type;
+                        delete data.port;
+                        delete data.uri_params;
+                        */
+                        if (startRule == 'SIP_URI') { data = data.uri;}
+                      } catch(e) {
+                        data = null;
+                      }}
+
+uri_scheme      <- uri_scheme_sips / uri_scheme_sip
+
+uri_scheme_sips <- "sips"i {
+                    data.scheme = $1.toLowerCase(); }
+
+uri_scheme_sip <- "sip"i {
+                    data.scheme = $1.toLowerCase(); }
+
+userinfo        <- user (":" password)? "@" {
+                    data.user = decodeURIComponent(text.substring(pos-1, _cursor));}
+
+user            <- ( unreserved / escaped / user_unreserved )+
+
+user_unreserved <- "&" / "=" / "+" / "$" / "," / ";" / "?" / "/"
+
+password        <- ( unreserved / escaped / "&" / "=" / "+" / "$" / "," )* {
+                    data.password = text.substring(pos, _cursor); }
+
+hostport        <- host ( ":" port )?
+
+host            <- ( hostname / IPv4address / IPv6reference ) {
+                    data.host = text.substring(pos, _cursor).toLowerCase();
+                    return data.host; }
+
+### 'hostname' grammar is relaxed from RFC 3261:
+### 'domainlabel' and 'toplabel' can end with dash or hypen
+
+hostname        <- ( domainlabel "." )* toplabel  "." ? {
+                  data.host_type = 'domain';
+                  return text.substring(pos, _cursor); }
+
+domainlabel     <- alphanum ( alphanum / "-" / "_" )*
+
+toplabel        <- ALPHA ( alphanum / "-" / "_" )*
+
+IPv6reference   <- "[" IPv6address "]" {
+                    data.host_type = 'IPv6';
+                    return text.substring(pos, _cursor); }
+
+IPv6address     <- ( h16 ":" h16 ":" h16 ":" h16 ":" h16 ":" h16 ":" ls32
+                  / "::" h16 ":" h16 ":" h16 ":" h16 ":" h16 ":" ls32
+                  / "::" h16 ":" h16 ":" h16 ":" h16 ":" ls32
+                  / "::" h16 ":" h16 ":" h16 ":" ls32
+                  / "::" h16 ":" h16 ":" ls32
+                  / "::" h16 ":" ls32
+                  / "::" ls32
+                  / "::" h16
+                  / h16 "::" h16 ":" h16 ":" h16 ":" h16 ":" ls32
+                  / h16 (":" h16)? "::" h16 ":" h16 ":" h16 ":" ls32
+                  / h16 (":" h16)? (":" h16)? "::" h16 ":" h16 ":" ls32
+                  / h16 (":" h16)? (":" h16)? (":" h16)? "::" h16 ":" ls32
+                  / h16 (":" h16)? (":" h16)? (":" h16)? (":" h16)? "::" ls32
+                  / h16 (":" h16)? (":" h16)? (":" h16)? (":" h16)? (":" h16)? "::" h16
+                  / h16 (":" h16)? (":" h16)? (":" h16)? (":" h16)? (":" h16)? (":" h16)? "::"
+                  ) {
+                  data.host_type = 'IPv6';
+                  return text.substring(pos, _cursor); }
+
+
+h16             <- HEXDIG HEXDIG? HEXDIG? HEXDIG?
+
+ls32            <- ( h16 ":" h16 ) / IPv4address
+
+
+IPv4address     <- dec_octet "." dec_octet "." dec_octet "." dec_octet {
+                    data.host_type = 'IPv4';
+                    return text.substring(pos, _cursor); }
+
+dec_octet       <- "25" [\u30-\u35]          ### 250-255
+                / "2" [\u30-\u34] DIGIT     ### 200-249
+                / "1" DIGIT DIGIT           ### 100-199
+                / [\u31-\u39] DIGIT         ### 10-99
+                / DIGIT                     ### 0-9
+
+port            <- (DIGIT ? DIGIT ? DIGIT ? DIGIT ? DIGIT ?) {
+                    data.port = $$ = parseInt($1.join());
+                    return data.port; }
+
+### URI PARAMETERS
+
+uri_parameters    <- ( ";" uri_parameter)*
+
+uri_parameter     <- transport_param / user_param / method_param
+                    / ttl_param / maddr_param / lr_param / other_param
+
+transport_param   <- "transport="i ( "udp"i / "tcp"i / "sctp"i
+                    / "tls"i / other_transport) {
+                      if(!data.uri_params) data.uri_params={};
+                      data.uri_params['transport'] = $1.toLowerCase(); }
+
+other_transport   <- token
+
+user_param        <- "user="i ( "phone"i / "ip"i / other_user) {
+                      if(!data.uri_params) data.uri_params={};
+                      data.uri_params['user'] = $1.toLowerCase(); }
+
+other_user        <- token
+
+method_param      <- "method="i Method {
+                      if(!data.uri_params) data.uri_params={};
+                      data.uri_params['method'] = $1; }
+
+ttl_param         <- "ttl="i ttl {
+                      if(!data.params) data.params={};
+                      data.params['ttl'] = $1; }
+
+maddr_param       <- "maddr="i host {
+                      if(!data.uri_params) data.uri_params={};
+                      data.uri_params['maddr'] = $1; }
+
+lr_param          <- "lr"i ('=' token)? {
+                      if(!data.uri_params) data.uri_params={};
+                      data.uri_params['lr'] = null; }
+
+other_param       <- pname ( "=" pvalue )? {
+                      if(!data.uri_params) data.uri_params = {};
+                      var value = $1;
+                      if (value == null){
+                        value = null;
+                      }
+                      else {
+                        value = value[1];
+                      }
+                      data.uri_params[value.toLowerCase()] = value;}
+
+pname             <- paramchar + {return $1.join(''); }
+
+pvalue            <- paramchar + {return $1.join(''); }
+
+paramchar         <- param_unreserved / unreserved / escaped
+
+param_unreserved   <- "[" / "]" / "/" / ":" / "&" / "+" / "$"
+
+
+### HEADERS
+
+headers           <- "?" header ( "&" header )*
+
+header            <- hname "=" hvalue  {
+                      var hname = $1.join('').toLowerCase();
+                      var hvalue = $2.join('');
+                      if(!data.uri_headers) data.uri_headers = {};
+                      if (!data.uri_headers[hname]) {
+                        data.uri_headers[hname] = [hvalue];
+                      } else {
+                        data.uri_headers[hname].push(hvalue);
+                      }}
+
+hname             <- ( hnv_unreserved / unreserved / escaped )+
+
+hvalue            <- ( hnv_unreserved / unreserved / escaped )*
+
+hnv_unreserved    <- "[" / "]" / "/" / "?" / ":" / "+" / "$"
+
+
+### FIRST LINE
+
+Request_Response   <- Status_Line / Request_Line
+
+
+### REQUEST LINE
+
+Request_Line      <- Method SP Request_URI SP SIP_Version
+
+Request_URI       <- SIP_URI / absoluteURI
+
+absoluteURI       <- scheme ":" ( hier_part / opaque_part )
+
+hier_part         <- ( net_path / abs_path ) ( "?" query )?
+
+net_path          <- "###" authority  abs_path ?
+
+abs_path          <- "/" path_segments
+
+opaque_part       <- uric_no_slash uric *
+
+uric              <- reserved / unreserved / escaped
+
+uric_no_slash     <- unreserved / escaped / ";" / "?" / ":" / "@" / "&" / "="
+                    / "+" / "$" / ","
+
+path_segments     <- segment ( "/" segment )*
+
+segment           <- pchar * ( ";" param )*
+
+param             <- pchar *
+
+pchar             <- unreserved / escaped /
+                    ":" / "@" / "&" / "=" / "+" / "$" / ","
+
+scheme            <- ( ALPHA ( ALPHA / DIGIT / "+" / "-" / "." )* ){
+                    data.scheme= text.substring(pos, _cursor); }
+
+authority         <- srvr / reg_name
+
+srvr              <- ( ( userinfo "@" )? hostport )?
+
+reg_name          <- ( unreserved / escaped / "$" / ","
+                    / ";" / ":" / "@" / "&" / "=" / "+" )+
+
+query             <- uric *
+
+SIP_Version       <- "SIP"i "/" DIGIT + "." DIGIT + {
+                    data.sip_version = text.substring(pos, _cursor); }
+
+### SIP METHODS
+
+INVITEm           <- "\u49\u4E\u56\u49\u54\u45" ### INVITE in caps
+
+ACKm              <- "\u41\u43\u4B" ### ACK in caps
+
+OPTIONSm          <- "\u4F\u50\u54\u49\u4F\u4E\u53" ### OPTIONS in caps
+
+BYEm              <- "\u42\u59\u45" ### BYE in caps
+
+CANCELm           <- "\u43\u41\u4E\u43\u45\u4C" ### CANCEL in caps
+
+REGISTERm         <- "\u52\u45\u47\u49\u53\u54\u45\u52" ### REGISTER in caps
+
+SUBSCRIBEm        <- "\u53\u55\u42\u53\u43\u52\u49\u42\u45" ### SUBSCRIBE in caps
+
+NOTIFYm           <- "\u4E\u4F\u54\u49\u46\u59" ### NOTIFY in caps
+
+REFERm            <- "\u52\u45\u46\u45\u52" ### REFER in caps
+
+Method            <- ( INVITEm / ACKm / OPTIONSm / BYEm / CANCELm / REGISTERm
+                    / SUBSCRIBEm / NOTIFYm / REFERm / extension_method ){
+                    data.method = text.substring(pos, _cursor);
+                    return data.method; }
+
+extension_method   <- token
+
+
+### STATUS LINE
+
+Status_Line     <- SIP_Version SP Status_Code SP Reason_Phrase
+
+Status_Code     <- extension_code {
+                  data.status_code = parseInt($1.join('')); }
+
+extension_code   <- DIGIT DIGIT DIGIT
+
+Reason_Phrase   <- (reserved / unreserved / escaped
+                  / UTF8_NONASCII / UTF8_CONT / SP / HTAB)* {
+                  data.reason_phrase = text.substring(pos, _cursor); }
+
+
+###=======================
+### HEADERS
+###=======================
+
+### Allow-Events
+
+Allow_Events <- event_type (COMMA event_type)*
+
+
+### CALL-ID
+
+Call_ID   <-  word ( "@" word )? {
+              data = text.substring(pos, _cursor); }
+
+### CONTACT
+
+Contact             <- ( STAR / (contact_param (COMMA contact_param)*) ) {
+                        var idx, length;
+                        length = data.multi_header.length;
+                        for (idx = 0; idx < length; idx++) {
+                          if (data.multi_header[idx].parsed == null) {
+                            data = null;
+                            break;
+                          }
+                        }
+                        if (data != null) {
+                          data = data.multi_header;
+                        } else {
+                          data = null;
+                        }}
+
+contact_param       <- (addr_spec / name_addr) (SEMI contact_params)* {
+                        var header;
+                        if(!data.multi_header) data.multi_header = [];
+                        try {
+                          header = new NameAddrHeader(data.uri, data.display_name, data.params);
+                          delete data.uri;
+                          delete data.display_name;
+                          delete data.params;
+                        } catch(e) {
+                          header = null;
+                        }
+                        data.multi_header.push( { 'possition': pos,
+                                                  '_cursor': _cursor,
+                                                  'parsed': header
+                                                });}
+
+name_addr           <- ( display_name )? LAQUOT SIP_URI RAQUOT
+
+addr_spec           <- SIP_URI_noparams
+
+display_name        <- (token ( LWS token )* / quoted_string_clean) {
+                        var display_name= $1;
+                        if (display_name is String) { ### quoted_string_clean
+                            data.display_name = display_name;
+                        } else { ### token ( LWS token )*
+                            data.display_name = display_name[1].reduce(function(acc, cur) {
+                                return acc + cur[0] + cur[1];
+                            }, display_name[0]);
+                        }}
+                        ### The previous rule is corrected from RFC3261
+                        ### See https://www.rfc-editor.org/errata/eid5598
+
+contact_params      <- c_p_q / c_p_expires / contact_extension
+
+c_p_q               <- "q"i EQUAL qvalue {
+                        if(!data.params) data.params = {};
+                        data.params['q'] = $1; }
+
+c_p_expires         <- "expires"i EQUAL delta_seconds {
+                        if(!data.params) data.params = {};
+                        data.params['expires'] = $1; }
+
+contact_extension   <- generic_param
+
+delta_seconds       <-  DIGIT+ {
+                        return parseInt($1.join('')); }
+
+qvalue              <- "0" ( "." DIGIT? DIGIT? DIGIT? )? {
+                        return parseFloat(text.substring(pos, _cursor)); }
+
+generic_param       <- token  ( EQUAL gen_value )? {
+                        if(!data.params) data.params = {};
+                        var param = $1;
+                        var value = $2;
+                        if (value == null){
+                          value = null;
+                        }
+                        else {
+                          value = value[1];
+                        }
+                        data.params[param.toLowerCase()] = value;}
+
+gen_value           <- token / host / quoted_string
+
+
+### CONTENT-DISPOSITION
+
+Content_Disposition     <- disp_type ( SEMI disp_param )*
+
+disp_type               <- "render"i / "session"i / "icon"i / "alert"i / disp_extension_token
+
+disp_param              <- handling_param / generic_param
+
+handling_param          <- "handling"i EQUAL ( "optional"i / "required"i / other_handling )
+
+other_handling          <- token
+
+disp_extension_token    <- token
+
+
+### CONTENT-ENCODING
+
+Content_Encoding    <- content_coding (COMMA content_coding)*
+
+content_coding      <- token
+
+
+### CONTENT-LENGTH
+
+Content_Length      <-  (DIGIT +) {
+                        data = parseInt($1.join('')); }
+
+### CONTENT-TYPE
+
+Content_Type        <- media_type {
+                        data = text.substring(pos, _cursor); }
+
+media_type          <- m_type SLASH m_subtype (SEMI m_parameter)*
+
+m_type              <- discrete_type / composite_type
+
+discrete_type       <- "text"i / "image"i / "audio"i / "video"i / "application"i
+                    / extension_token
+
+composite_type      <- "message"i / "multipart"i / extension_token
+
+extension_token     <- ietf_token / x_token
+
+ietf_token          <- token
+
+x_token             <- "x-"i token
+
+m_subtype           <- extension_token / iana_token
+
+iana_token          <- token
+
+m_parameter         <- m_attribute EQUAL m_value
+
+m_attribute         <- token
+
+m_value             <- token / quoted_string
+
+
+### CSEQ
+
+CSeq          <- CSeq_value LWS CSeq_method
+
+CSeq_value    <- DIGIT + {
+                  data.value=parseInt($1.join('')); }
+
+CSeq_method   <- Method
+
+
+### EXPIRES
+
+Expires     <- delta_seconds {data = $1; }
+
+
+Event             <- event_type ( SEMI event_param )* {
+                       data.event = $1.join('').toLowerCase(); }
+
+event_type        <- event_package ( "." event_template )*
+
+event_package     <- token_nodot
+
+event_template    <- token_nodot
+
+event_param       <- generic_param
+
+### FROM
+
+From        <- ( addr_spec / name_addr ) ( SEMI from_param )* {
+                var tag = data.tag;
+                try {
+                  data = new NameAddrHeader(data.uri, data.display_name, data.params);
+                  if (tag) {data.setParam('tag',tag)}
+                } catch(e) {
+                  data = null;
+                }}
+
+from_param   <- tag_param / generic_param
+
+tag_param   <- "tag"i EQUAL token {data.tag = $1; }
+
+
+### MAX-FORWARDS
+
+Max_Forwards   <- DIGIT+ {
+                  data = parseInt($1.join('')); }
+
+
+### MIN-EXPIRES
+
+Min_Expires   <- delta_seconds {data = $1; }
+
+### Name_Addr
+
+Name_Addr_Header <-  ( display_name )* LAQUOT SIP_URI RAQUOT ( SEMI generic_param )* {
+                      try {
+                        data = new NameAddrHeader(data.uri, data.display_name, data.params);
+                      } catch(e) {
+                        data = null;
+                      }}
+
+### PROXY-AUTHENTICATE
+
+Proxy_Authenticate   <- challenge
+
+challenge           <- ("Digest"i LWS digest_cln (COMMA digest_cln)*)
+                      / other_challenge
+
+other_challenge     <- auth_scheme LWS auth_param (COMMA auth_param)*
+
+auth_scheme         <- token
+
+auth_param          <- auth_param_name EQUAL ( token / quoted_string )
+
+auth_param_name     <- token
+
+digest_cln          <- realm / domain / nonce / opaque / stale / algorithm
+                      / qop_options / auth_param
+
+realm               <- "realm"i EQUAL realm_value
+
+realm_value         <- quoted_string_clean { data.realm = $1; }
+
+domain              <- "domain"i EQUAL LDQUOT URI ( SP+ URI )* RDQUOT
+
+URI                 <- absoluteURI / abs_path
+
+nonce               <- "nonce"i EQUAL nonce_value
+
+nonce_value         <- quoted_string_clean { data.nonce=$1; }
+
+opaque              <- "opaque"i EQUAL quoted_string_clean { data.opaque=$1; }
+
+stale               <- "stale"i EQUAL ( "true"i { data.stale=true; } / "false"i { data.stale=false; } )
+
+algorithm           <- "algorithm"i EQUAL ( "MD5"i / "MD5-sess"i
+                      / token ) {
+                      data.algorithm=$1.toUpperCase(); }
+
+qop_options         <- "qop"i EQUAL LDQUOT (qop_value ("," qop_value)*) RDQUOT
+
+qop_value           <- ( "auth-int"i / "auth"i / token ) {
+                        data.qop || (data.qop=[]);
+                        data.qop.push($1.toLowerCase()); }
+
+
+### PROXY-REQUIRE
+
+Proxy_Require   <- option_tag (COMMA option_tag)*
+
+option_tag     <- token
+
+
+### RECORD-ROUTE
+
+Record_Route   <- rec_route (COMMA rec_route)* {
+                  var idx, length;
+                  length = data.multi_header.length;
+                  for (idx = 0; idx < length; idx++) {
+                    if (data.multi_header[idx].parsed == null) {
+                      data = null;
+                      break;
+                    }
+                  }
+                  if (data != null) {
+                    data = data.multi_header;
+                  } else {
+                    data = null;
+                  }}
+
+rec_route     <- name_addr ( SEMI rr_param )* {
+                  var header;
+                  if(!data.multi_header) data.multi_header = [];
+                  try {
+                    header = new NameAddrHeader(data.uri, data.display_name, data.params);
+                    delete data.uri;
+                    delete data.display_name;
+                    delete data.params;
+                  } catch(e) {
+                    header = null;
+                  }
+                  data.multi_header.push( { 'possition': pos,
+                                            '_cursor': _cursor,
+                                            'parsed': header
+                                          });}
+
+rr_param      <- generic_param
+
+
+### REASON
+
+###Reason        <- ( "SIP"i / token ) ( SEMI "cause" EQUAL DIGIT + )? ( SEMI "text" EQUAL text:  )? {
+###  data.cause = $1;
+###  data.text = text;
+###}
+
+
+### Reason        <- ( "SIP"i / token ) ( SEMI generic_param )*;
+
+
+Reason        <- ( "SIP"i / token ) ( SEMI reason_param )* {
+                  data.protocol = $1.toLowerCase();
+
+                  if (!data.params) data.params = {};
+
+                  if (data.params.text && data.params.text[0] == '"') {
+                    var text = data.params.text;
+                    data.text = text.substring(1, text.length-1);
+                    delete data.params.text;
+                  }
+                }
+
+reason_param   <- ( reason_cause / generic_param )
+
+reason_cause   <- "cause"i EQUAL DIGIT + {
+                  data.cause = parseInt($1.join(''));
+                }
+
+
+### REQUIRE
+
+Require       <- option_tag (COMMA option_tag)*
+
+
+### ROUTE
+
+Route        <- route_param (COMMA route_param)*
+
+route_param   <- name_addr ( SEMI rr_param )*
+
+
+### SUBSCRIPTION-STATE
+
+Subscription_State   <- substate_value ( SEMI subexp_params )*
+
+substate_value       <- ( "active"i / "pending"i / "terminated"i
+                       / extension_substate ) {
+                        data.state = text.substring(pos, _cursor); }
+
+extension_substate   <- token
+
+subexp_params        <- ("reason"i EQUAL event_reason_value) {
+                        var reason = $1;
+                        if (reason != null) data.reason = reason; }
+                       / ("expires"i EQUAL delta_seconds) {
+                         var expires = $2;
+                        if (expires != null) data.expires = expires; }
+                       / ("retry_after"i EQUAL delta_seconds) {
+                         var retry_after = $3;
+                        if (retry_after != null) data.retry_after = retry_after; }
+                       / generic_param
+
+event_reason_value   <- "deactivated"i
+                       / "probation"i
+                       / "rejected"i
+                       / "timeout"i
+                       / "giveup"i
+                       / "noresource"i
+                       / "invariant"i
+                       / event_reason_extension
+
+event_reason_extension <- token
+
+
+### SUBJECT
+
+Subject   <- ( TEXT_UTF8_TRIM )?
+
+
+### SUPPORTED
+
+Supported   <- ( option_tag (COMMA option_tag)* )?
+
+
+### TO
+
+To         <- ( addr_spec / name_addr ) ( SEMI to_param )* {
+              var tag = data.tag;
+              try {
+                data = new NameAddrHeader(data.uri, data.display_name, data.params);
+                if (tag) {data.setParam('tag',tag)}
+              } catch(e) {
+                data = null;
+              }}
+
+to_param   <- tag_param / generic_param
+
+### VIA
+
+Via               <- via_param (COMMA via_param)*
+
+via_param         <- sent_protocol LWS sent_by ( SEMI via_params )*
+
+via_params        <- via_ttl / via_maddr / via_received / via_branch / response_port / via_extension
+
+via_ttl           <- "ttl"i EQUAL ttl {
+                      data.ttl = $1; }
+
+via_maddr         <- "maddr"i EQUAL host {
+                      data.maddr = $1; }
+
+via_received      <- "received"i EQUAL (IPv4address / IPv6address) {
+                      data.received = $1; }
+
+via_branch        <- "branch"i EQUAL token {
+                      data.branch = $1; }
+
+response_port     <- "rport"i (EQUAL (DIGIT*) )? {
+                      var response_port = $1;
+                      if(response_port != null)
+                        data.rport = response_port.join(''); }
+
+via_extension     <- generic_param
+
+sent_protocol     <- protocol_name SLASH protocol_version SLASH transport
+
+protocol_name     <- ( "SIP"i / token ) {
+                      data.protocol = $1; }
+
+protocol_version   <- token
+
+transport         <- ("UDP"i / "TCP"i / "TLS"i / "SCTP"i / other_transport) {
+                      data.transport = $1; }
+
+sent_by           <- via_host ( COLON via_port )?
+
+via_host          <- ( IPv4address / IPv6reference / hostname ) {
+                      data.host = text.substring(pos, _cursor); }
+
+via_port          <- (DIGIT ? DIGIT ? DIGIT ? DIGIT ? DIGIT ?) {
+                      data.port = parseInt($1.join('')); }
+
+ttl               <- (DIGIT DIGIT ? DIGIT ?) {
+                      return parseInt($1.join('')); }
+
+
+### WWW-AUTHENTICATE
+
+WWW_Authenticate   <- challenge
+
+
+### SESSION-EXPIRES
+
+Session_Expires   <- s_e_expires ( SEMI s_e_params )*
+
+s_e_expires       <- delta_seconds { data.expires = $1; }
+
+s_e_params        <- s_e_refresher / s_e_extension
+
+s_e_refresher     <- "refresher"i EQUAL ( "uac"i / "uas"i ) { data.refresher = $1.toLowerCase(); }
+
+s_e_extension     <- generic_param
+
+
+### EXTENSION-HEADER
+
+extension_header   <- header_name HCOLON header_value
+
+header_name       <- token
+
+header_value      <- (TEXT_UTF8char / UTF8_CONT / LWS)*
+
+message_body      <- OCTET*
+
+
+### UUID URI
+
+uuid_URI      <- "uuid:" uuid
+uuid          <- hex8 "-" hex4 "-" hex4 "-" hex4 "-" hex12 {
+                  data = text.substring(pos+5, _cursor); }
+hex4          <- HEXDIG HEXDIG HEXDIG HEXDIG
+hex8          <- hex4 hex4
+hex12         <- hex4 hex4 hex4
+
+
+### Refer-To
+
+Refer_To        <- ( addr_spec / name_addr ) ( SEMI generic_param )* {
+                try {
+                  data = new NameAddrHeader(data.uri, data.display_name, data.params);
+                } catch(e) {
+                  data = null;
+                }}
+
+### Replaces
+Replaces        <- call_id (SEMI replaces_param)*
+
+call_id          <-  word ( "@" word )? {
+                  data.call_id = text.substring(pos, _cursor); }
+
+replaces_param   <- to_tag / from_tag / early_flag / generic_param
+
+to_tag          <- "to-tag" EQUAL token {
+                    data.to_tag = $1; }
+
+from_tag        <- "from-tag" EQUAL token {
+                    data.from_tag = $1; }
+
+early_flag      <- "early-only" {
+                    data.early_only = true; }
