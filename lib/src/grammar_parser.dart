@@ -1698,8 +1698,10 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             {
             ///CODE_START
-            data.host_type = 'IPv4';
-            return input.substring(pos0, offset);
+            var data = {};
+            data['host_type'] = 'IPv4';
+            data['host'] = _text();
+            $$ =  data;
             ///CODE_END
             }
           }
@@ -4181,8 +4183,10 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data.host_type = 'IPv6';
-          return input.substring(pos0, offset);
+          var data = {};
+          data['host_type'] = 'IPv6';
+          data['host'] = _text();
+          $$ =  data;
           ///CODE_END
           }
         }
@@ -4237,8 +4241,10 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             {
             ///CODE_START
-            data.host_type = 'IPv6';
-            return input.substring(pos0, offset);
+            var data = {};
+            data['host_type'] = 'IPv6';
+            data['host'] = _text();
+            $$ =  data;
             ///CODE_END
             }
           }
@@ -4702,8 +4708,8 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data.method = input.substring(pos0, offset);
-          return data.method;
+          data.method = _text();
+          $$ =  data.method;
           ///CODE_END
           }
         }
@@ -5091,7 +5097,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data.reason_phrase = input.substring(pos0, offset);
+          data.reason_phrase = _text();
           ///CODE_END
           }
         }
@@ -5491,7 +5497,7 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             {
             ///CODE_START
-            data.sip_version = input.substring(pos0, offset);
+            data.sip_version = _text();
             ///CODE_END
             }
           }
@@ -5883,7 +5889,7 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             $$ = ((offset) {
             ///CODE_START
-            return input.substring(pos0, offset);
+            return _text();
             ///CODE_END
             })($start);
           }
@@ -6520,30 +6526,45 @@ class GrammarParser {
   
   dynamic _parse_authority() {
     var $$;
-    switch (_ch >= 126 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
-        while (true) {
-          var startPos0 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_srvr();
-          _startPos = startPos0;
-          if (success) break;
-          var startPos1 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_reg_name();
-          _startPos = startPos1;
-          break;
+      case 2:
+        var startPos0 = _startPos;
+        _startPos = _cursor;
+        switch (_ch >= 126 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+          case 0:
+            while (true) {
+              var startPos1 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_srvr();
+              _startPos = startPos1;
+              if (success) break;
+              var startPos2 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_reg_name();
+              _startPos = startPos2;
+              break;
+            }
+            break;
+          case 1:
+            $$ = null;
+            success = true;
+            break;
+          case 2:
+            var startPos3 = _startPos;
+            _startPos = _cursor;
+            $$ = _parse_srvr();
+            _startPos = startPos3;
+            break;
         }
+        if (!success && _cursor > _testing) {
+          _failure(_expect67);
+        }
+        _startPos = startPos0;
         break;
       case 1:
         $$ = null;
         success = true;
-        break;
-      case 2:
-        var startPos2 = _startPos;
-        _startPos = _cursor;
-        $$ = _parse_srvr();
-        _startPos = startPos2;
         break;
     }
     if (!success && _cursor > _testing) {
@@ -6706,7 +6727,7 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             {
             ///CODE_START
-            data.call_id = input.substring(pos0, offset);
+            data.call_id = _text();
             ///CODE_END
             }
           }
@@ -9743,8 +9764,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data.host = input.substring(pos0, offset).toLowerCase();
-          return data.host;
+          $$ =  $1;
           ///CODE_END
           }
         }
@@ -9843,8 +9863,10 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             {
             ///CODE_START
-            data.host_type = 'domain';
-            return input.substring(pos0, offset);
+            var data = {};
+            data['host_type'] = 'domain';
+            data['host'] = _text();
+            $$ =  data;
             ///CODE_END
             }
           }
@@ -11420,7 +11442,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data.password = input.substring(pos0, offset);
+          data.password = _text();
           ///CODE_END
           }
         }
@@ -11716,7 +11738,7 @@ class GrammarParser {
           ///CODE_START
           port = parseInt(port.join(''));
           data.port = port;
-          return port;
+          $$ = port;
           ///CODE_END
           })($start, $1);
         }
@@ -12293,7 +12315,7 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             $$ = ((offset) {
             ///CODE_START
-            return input.substring(pos0, offset);
+            return _text();
             ///CODE_END
             })($start);
           }
@@ -12495,7 +12517,7 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             $$ = ((offset) {
             ///CODE_START
-            return parseFloat(input.substring(pos0, offset));
+            return parseFloat(_text());
             ///CODE_END
             })($start);
           }
@@ -13573,7 +13595,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data.scheme= input.substring(pos0, offset);
+          data.scheme = _text();
           ///CODE_END
           }
         }
@@ -14341,7 +14363,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data.state = input.substring(pos0, offset);
+          data.state = _text();
           ///CODE_END
           }
         }
@@ -14621,7 +14643,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           $$ = ((offset) {
           ///CODE_START
-          return input.substring(pos0, offset);
+          return _text();
           ///CODE_END
           })($start);
         }
@@ -14753,7 +14775,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           $$ = ((offset) {
           ///CODE_START
-          return input.substring(pos0, offset);
+          return _text();
           ///CODE_END
           })($start);
         }
@@ -16145,7 +16167,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data.host = input.substring(pos0, offset);
+          data.host = _text();
           ///CODE_END
           }
         }
@@ -16828,7 +16850,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           $$ = ((offset) {
           ///CODE_START
-          return input.substring(pos0, offset);
+          return _text();
           ///CODE_END
           })($start);
         }
@@ -17179,7 +17201,7 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             {
             ///CODE_START
-            data = input.substring(pos0, offset);
+            $$ = _text();
             ///CODE_END
             }
           }
@@ -17606,7 +17628,7 @@ class GrammarParser {
           var pos0 = _startPos;
           $$ = ((offset, length) {
           ///CODE_START
-          data = parseInt(length.join(''));
+          $$ = parseInt(length.join(''));
           ///CODE_END
           })($start, $1);
         }
@@ -17638,7 +17660,7 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data = input.substring(pos0, offset);
+          $$ = _text();
           ///CODE_END
           }
         }
@@ -19806,7 +19828,7 @@ class GrammarParser {
         "param": _parse_param,  
         "pchar": _parse_pchar,  
         "scheme": _parse_scheme,  
-        "authority": _parse_authority,  
+        "authority": _parse_authority, 
         "srvr": _parse_srvr,  
         "reg_name": _parse_reg_name,  
         "query": _parse_query,  
@@ -19872,7 +19894,7 @@ class GrammarParser {
         "digest_cln": _parse_digest_cln,  
         "realm": _parse_realm,  
         "realm_value": _parse_realm_value,  
-        "domain": _parse_domain,  
+        "domain": _parse_domain, 
         "URI": _parse_URI,  
         "nonce": _parse_nonce,  
         "nonce_value": _parse_nonce_value,  
