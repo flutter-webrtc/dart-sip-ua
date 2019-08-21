@@ -1,5 +1,3 @@
-library sip_ua;
-
 import 'dart:math';
 import 'dart:core';
 
@@ -42,13 +40,11 @@ parseFloat(str) {
 }
 
 decodeURIComponent(str) {
-  //TODO:  ??
   return str;
 }
 
 encodeURIComponent(str) {
-  //TODO:  ??
-  return str;
+  return Uri.encodeFull(str);
 }
 
 unescape(str) {
@@ -181,7 +177,7 @@ normalizeTarget(target, domain) {
 }
 
 headerize(String string) {
-  const exceptions = {
+  var exceptions = {
     'Call-Id': 'Call-ID',
     'Cseq': 'CSeq',
     'Www-Authenticate': 'WWW-Authenticate'
@@ -196,10 +192,8 @@ headerize(String string) {
     if (part != 0) {
       hname += '-';
     }
-    hname += name[part].toUpperCase().codeUnitAt(0).toString() +
-        name[part].substring(1);
+    hname += new String.fromCharCodes([name[part].codeUnitAt(0)]).toUpperCase() + name[part].substring(1);
   }
-
   if (exceptions[hname] != null) {
     hname = exceptions[hname];
   }

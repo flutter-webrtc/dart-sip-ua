@@ -1,11 +1,11 @@
 %{
-  library sip_ua;
-
-  import 'package:sip_ua/src/URI.dart';
+  import 'dart:core';
+  import 'URI.dart';
 
   class NameAddrHeader {
     NameAddrHeader(a,[b, c, d]);
   }
+
   class Data {
     var host;
     var port;
@@ -69,7 +69,7 @@
   }
 
   decodeURIComponent(str){
-    return str;
+    return Uri.decodeComponent(str); // To decode url;
   }
 
   quote(s) {
@@ -139,10 +139,10 @@
         "quoted_string_clean": _parse_quoted_string_clean, 
         "qdtext": _parse_qdtext, 
         "quoted_pair": _parse_quoted_pair, 
-        "SIP_URI_noparams": _parse_SIP_URI_noparams, 
-        "SIP_URI": _parse_SIP_URI, 
+        "SIP_URI_noparams": _parse_SIP_URI_noparams,
+        "SIP_URI": _parse_SIP_URI,
         "uri_scheme": _parse_uri_scheme, 
-        "uri_scheme_sips": _parse_uri_scheme_sips, 
+        "uri_scheme_sips": _parse_uri_scheme_sips,
         "uri_scheme_sip": _parse_uri_scheme_sip, 
         "userinfo": _parse_userinfo, 
         "user": _parse_user, 
@@ -153,11 +153,11 @@
         "hostname": _parse_hostname, 
         "domainlabel": _parse_domainlabel, 
         "toplabel": _parse_toplabel,
-        "IPv6reference": _parse_IPv6reference, 
+        "IPv6reference": _parse_IPv6reference,
         "IPv6address": _parse_IPv6address, 
         "h16": _parse_h16, 
         "ls32": _parse_ls32, 
-        "IPv4address": _parse_IPv4address, 
+        "IPv4address": _parse_IPv4address,
         "dec_octet": _parse_dec_octet, 
         "port": _parse_port, 
         "uri_parameters": _parse_uri_parameters, 
@@ -176,12 +176,12 @@
         "headers": _parse_headers, 
         "header": _parse_header, 
         "hname": _parse_hname, 
-        "hvalue": _parse_hvalue, 
+        "hvalue": _parse_hvalue,
         "hnv_unreserved": _parse_hnv_unreserved, 
         "Request_Response": parse_Request_Response,
         "Request_Line": _parse_Request_Line, 
-        "Request_URI": _parse_Request_URI, 
-        "absoluteURI": _parse_absoluteURI, 
+        "Request_URI": _parse_Request_URI,
+        "absoluteURI": _parse_absoluteURI,
         "hier_part": _parse_hier_part, 
         "net_path": _parse_net_path, 
         "abs_path": _parse_abs_path, 
@@ -260,7 +260,7 @@
         "realm": _parse_realm, 
         "realm_value": _parse_realm_value, 
         "domain": _parse_domain,
-        "URI": _parse_URI, 
+        "URI": _parse_URI,
         "nonce": _parse_nonce, 
         "nonce_value": _parse_nonce_value, 
         "opaque": _parse_opaque, 
@@ -295,7 +295,7 @@
         "response_port": _parse_response_port,
         "sent_protocol": _parse_sent_protocol, 
         "protocol_name": _parse_protocol_name, 
-        "transport": _parse_transport, 
+        "transport": _parse_transport,
         "sent_by": _parse_sent_by, 
         "via_host": _parse_via_host, 
         "via_port": _parse_via_port, 
@@ -452,7 +452,7 @@ SIP_URI_noparams  <- uri_scheme ":"  userinfo ? hostport {
                         print('data = -1');
                       }}
 
-SIP_URI         <- uri_scheme ":"  userinfo ? hostport uri_parameters headers ? {
+SIP_URI         <- uri_scheme ":" userinfo? hostport uri_parameters headers? {
                     var header;
                     try {
                         data.uri = new URI(data.scheme, data.user, data.host, data.port, data.uri_params, data.uri_headers);
@@ -470,16 +470,16 @@ SIP_URI         <- uri_scheme ":"  userinfo ? hostport uri_parameters headers ? 
                         print('data = -1;');
                       }}
 
-uri_scheme      <- uri_scheme_sips / uri_scheme_sip
+uri_scheme      <- (uri_scheme_sips / uri_scheme_sip)
 
-uri_scheme_sips <- scheme: "sips"i {
+uri_scheme_sips <- scheme: "sip"i {
                     data.scheme = scheme.toLowerCase(); }
 
 uri_scheme_sip <- scheme: "sip"i {
                     data.scheme = scheme.toLowerCase(); }
 
 userinfo        <- user (":" password)? "@" {
-                    data.user = decodeURIComponent(input.substring(pos0 - 1, offset));}
+                    data.user = decodeURIComponent($1.join(''));}
 
 user            <- ( unreserved / escaped / user_unreserved )+
 
@@ -497,20 +497,24 @@ host            <- ( hostname / IPv4address / IPv6reference ) {
 ## 'domainlabel' and 'toplabel' can end with dash or hypen
 
 hostname        <- ( domainlabel "." )* toplabel  "." ? {
-                  var data = {};
-                  data['host_type'] = 'domain';
-                  data['host'] = _text();
-                  $$ =  data; }
+                  data.host = _text().toLowerCase();
+                  data.host_type = 'domain';
+                  var result = {};
+                  result['host_type'] = data.host_type;
+                  result['host'] = data.host;
+                  $$ =  result; }
 
 domainlabel     <- alphanum ( alphanum / "-" / "_" )*
 
 toplabel        <- ALPHA ( alphanum / "-" / "_" )*
 
 IPv6reference   <- "[" IPv6address "]" {
-                  var data = {};
-                  data['host_type'] = 'IPv6';
-                  data['host'] = _text();
-                  $$ =  data;}
+                  data.host = _text();
+                  data.host_type = 'IPv6';
+                  var result = {};
+                  result['host_type'] = data.host_type;
+                  result['host'] = data.host;
+                  $$ =  result;}
 
 IPv6address     <- ( h16 ":" h16 ":" h16 ":" h16 ":" h16 ":" h16 ":" ls32
                   / "::" h16 ":" h16 ":" h16 ":" h16 ":" h16 ":" ls32
@@ -528,10 +532,12 @@ IPv6address     <- ( h16 ":" h16 ":" h16 ":" h16 ":" h16 ":" h16 ":" ls32
                   / h16 (":" h16)? (":" h16)? (":" h16)? (":" h16)? (":" h16)? "::" h16
                   / h16 (":" h16)? (":" h16)? (":" h16)? (":" h16)? (":" h16)? (":" h16)? "::"
                   ) {
-                  var data = {};
-                  data['host_type'] = 'IPv6';
-                  data['host'] = _text();
-                  $$ =  data;}
+                  data.host = _text();
+                  data.host_type = 'IPv6';
+                  var result = {};
+                  result['host_type'] = data.host_type;
+                  result['host'] = data.host;
+                  $$ =  result;}
 
 
 h16             <- HEXDIG HEXDIG? HEXDIG? HEXDIG?
@@ -540,10 +546,12 @@ ls32            <- ( h16 ":" h16 ) / IPv4address
 
 
 IPv4address     <- dec_octet "." dec_octet "." dec_octet "." dec_octet {
-                  var data = {};
-                  data['host_type'] = 'IPv4';
-                  data['host'] = _text();
-                  $$ =  data; }
+                  data.host = _text();
+                  data.host_type = 'IPv4';
+                  var result = {};
+                  result['host_type'] = data.host_type;
+                  result['host'] = data.host;
+                  $$ =  result;}
 
 dec_octet       <- "25" [\x30-\x35]          ## 250-255
                 / "2" [\x30-\x34] DIGIT     ## 200-249
@@ -552,7 +560,7 @@ dec_octet       <- "25" [\x30-\x35]          ## 250-255
                 / DIGIT                     ## 0-9
 
 port            <- port: (DIGIT ? DIGIT ? DIGIT ? DIGIT ? DIGIT ?) {
-                    port = parseInt(port.join(''));
+                    port = parseInt(_text());
                     data.port = port;
                     $$ = port; }
 
@@ -565,41 +573,42 @@ uri_parameter     <- transport_param / user_param / method_param
 
 transport_param   <- "transport="i transport: ( "udp"i / "tcp"i / "sctp"i
                     / "tls"i / other_transport) {
-                      if(!data.uri_params) data.uri_params={};
+                      if(data.uri_params == null) data.uri_params={};
                       data.uri_params['transport'] = transport.toLowerCase(); }
 
 other_transport   <- token
 
 user_param        <- "user="i user: ( "phone"i / "ip"i / other_user) {
-                      if(!data.uri_params) data.uri_params={};
+                      if(data.uri_params == null) data.uri_params={};
                       data.uri_params['user'] = user.toLowerCase(); }
 
 other_user        <- token
 
 method_param      <- "method="i method: Method {
-                      if(!data.uri_params) data.uri_params={};
+                      if(data.uri_params == null) data.uri_params={};
                       data.uri_params['method'] = method; }
 
 ttl_param         <- "ttl="i ttl: ttl {
-                      if(null != data.params) data.params={};
+                      if(data.params == null) data.params={};
                       data.params['ttl'] = ttl; }
 
 maddr_param       <- "maddr="i maddr: host {
-                      if(null != data.uri_params) data.uri_params={};
+                      if(data.uri_params == null) data.uri_params={};
                       data.uri_params['maddr'] = maddr; }
 
 lr_param          <- "lr"i ('=' token)? {
-                      if(null != data.uri_params) data.uri_params={};
-                      data.uri_params['lr'] = 'undefined'; }
+                      if(data.uri_params == null) data.uri_params={};
+                      data.uri_params['lr'] = null; }
 
 other_param       <- param: pname value: ( "=" pvalue )? {
-                      if(null != data.uri_params) data.uri_params = {};
-                      if ( value == null){
-                        value = 'undefined';
-                      }
-                      else {
+                      if(data.uri_params == null) data.uri_params = {};
+                      if ( value == null) {
+                        value = null;
+                      } else {
                         value = value[1];
                       }
+                      if(param.toLowerCase() == 'transport')
+                        value = value.toLowerCase();
                       data.uri_params[param.toLowerCase()] = value;}
 
 pname             <- pname: paramchar + {return pname.join(''); }
@@ -618,11 +627,11 @@ headers           <- "?" header ( "&" header )*
 header            <- hname: hname "=" hvalue: hvalue  {
                       hname = hname.join('').toLowerCase();
                       hvalue = hvalue.join('');
-                      if(!data.uri_headers) data.uri_headers = {};
-                      if (!data.uri_headers[hname]) {
+                      if(data.uri_headers == null) data.uri_headers = {};
+                      if (data.uri_headers[hname] == null) {
                         data.uri_headers[hname] = [hvalue];
                       } else {
-                        data.uri_headers[hname].push(hvalue);
+                        data.uri_headers[hname].add(hvalue);
                       }}
 
 hname             <- ( hnv_unreserved / unreserved / escaped )+
@@ -757,7 +766,7 @@ Contact             <- ( STAR / (contact_param (COMMA contact_param)*) ) {
 
 contact_param       <- (addr_spec / name_addr) (SEMI contact_params)* {
                         var header;
-                        if(!data.multi_header) data.multi_header = [];
+                        if(data.multi_header = null) data.multi_header = [];
                         try {
                           header = new NameAddrHeader(data.uri, data.display_name, data.params);
                           data.uri = null;
@@ -766,7 +775,7 @@ contact_param       <- (addr_spec / name_addr) (SEMI contact_params)* {
                         } catch(e) {
                           header = null;
                         }
-                        data.multi_header.push( { 'possition': pos,
+                        data.multi_header.add( { 'possition': pos,
                                                   'offset': offset,
                                                   'parsed': header
                                                 });}
@@ -807,7 +816,7 @@ qvalue              <- "0" ( "." DIGIT? DIGIT? DIGIT? )? {
 generic_param       <- param: token  value: ( EQUAL gen_value )? {
                         if(data.params == null) data.params = new Map<String, dynamic>();
                         if (value == null){
-                          value = 'undefined';
+                          value = null;
                         }
                         else {
                           value = value[1];
@@ -976,8 +985,8 @@ algorithm           <- "algorithm"i EQUAL algorithm: ( "MD5"i / "MD5-sess"i
 qop_options         <- "qop"i EQUAL LDQUOT (qop_value ("," qop_value)*) RDQUOT
 
 qop_value           <- qop_value: ( "auth-int"i / "auth"i / token ) {
-                        if(null == data.qop) data.qop=[];
-                        data.qop.push(qop_value.toLowerCase()); }
+                        if(data.qop == null) data.qop=[];
+                        data.qop.add(qop_value.toLowerCase()); }
 
 
 ## PROXY-REQUIRE
@@ -1006,7 +1015,7 @@ Record_Route  <- rec_route (COMMA rec_route)* {
 
 rec_route     <- name_addr ( SEMI rr_param )* {
                   var header;
-                  if(!data.multi_header) data.multi_header = [];
+                  if(data.multi_header == null) data.multi_header = [];
                   try {
                     header = new NameAddrHeader(data.uri, data.display_name, data.params);
                     data.uri = null;
@@ -1015,7 +1024,7 @@ rec_route     <- name_addr ( SEMI rr_param )* {
                   } catch(e) {
                     header = null;
                   }
-                  data.multi_header.push( { 'possition': pos,
+                  data.multi_header.add( { 'possition': pos,
                                             'offset': offset,
                                             'parsed': header
                                           });}
@@ -1036,9 +1045,7 @@ rr_param      <- generic_param
 
 Reason        <- protocol: ( "SIP"i / token ) ( SEMI reason_param )* {
                   data.protocol = protocol.toLowerCase();
-
-                  if (null != data.params) data.params = {};
-
+                  if (data.params == null) data.params = {};
                   if (data.params['text'] != null && data.params['text'][0] == '"') {
                     var text = data.params['text'];
                     data.text = text.substring(1, text.length-1);

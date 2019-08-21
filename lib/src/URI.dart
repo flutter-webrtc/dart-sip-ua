@@ -1,5 +1,3 @@
-library sip_ua;
-
 import 'dart:convert';
 
 import 'Grammar.dart';
@@ -32,11 +30,11 @@ class URI {
   }
 
   var scheme;
-  var _parameters = {};
-  var _headers = {};
+  var _parameters;
+  var _headers;
   var user;
   var host;
-  var port;
+  int port;
 
   URI(scheme, user, host, port, [parameters, headers]) {
     // Checks.
@@ -45,42 +43,37 @@ class URI {
     }
 
     // Initialize parameters.
-    this._parameters = parameters ?? {};
-    this._headers = headers ?? {};
-
+    this._parameters = {};
+    this._headers =  {};
     this.scheme = scheme ?? JsSIP_C.SIP;
     this.user = user;
-    this.host = host;
+    this.host = host.toLowerCase();
     this.port = port;
 
-    for (var param in parameters) {
-      if (parameters.containsKey(param)) {
-        this.setParam(param, parameters[param]);
-      }
-    }
+    parameters.forEach((param, value) {
+      this.setParam(param, value);
+    });
 
-    for (var header in headers) {
-      if (headers.containsKey(header)) {
-        this.setHeader(header, headers[header]);
-      }
-    }
+    headers.forEach((header, value){
+      this.setHeader(header, value);
+    });
   }
 
   setParam(key, value) {
-    if (key) {
+    if (key != null) {
       this._parameters[key.toLowerCase()] =
           (value == null) ? null : value.toString();
     }
   }
 
   getParam(key) {
-    if (key) {
+    if (key != null) {
       return this._parameters[key.toLowerCase()];
     }
   }
 
   hasParam(key) {
-    if (key) {
+    if (key != null) {
       return (this._parameters.containsKey(key.toLowerCase()) && true) || false;
     }
   }
@@ -103,13 +96,13 @@ class URI {
   }
 
   getHeader(name) {
-    if (name) {
+    if (name != null) {
       return this._headers[Utils.headerize(name)];
     }
   }
 
   hasHeader(name) {
-    if (name) {
+    if (name != null) {
       return (this._headers.containsKey(Utils.headerize(name)) && true) ||
           false;
     }
@@ -139,34 +132,30 @@ class URI {
   }
 
   toString() {
-    const headers = [];
+    var headers = [];
 
     var uri = this.scheme + ':';
 
-    if (this.user) {
+    if (this.user != null) {
       uri += Utils.escapeUser(this.user) + '@';
     }
     uri += this.host;
-    if (this.port || this.port == 0) {
+    if (this.port != null || this.port == 0) {
       uri += ':' + this.port.toString();
     }
 
     this._parameters.forEach((key, parameter) {
-      if (this._parameters.containsKey(key)) {
-        uri += ';' + parameter;
-        if (this._parameters[key] != null) {
-          uri += '=' + this._parameters[key].toString();
-        }
+      uri += ';' + key;
+      if (this._parameters[key] != null) {
+        uri += '=' + this._parameters[key].toString();
       }
     });
 
     this._headers.forEach((key, header) {
-      if (this._headers.containsKey(key)) {
-        var header = this._headers[key];
-        header.forEach((item) {
-          headers.add(key + '=' + item.toString());
-        });
-      }
+      var hdrs = this._headers[key];
+      hdrs.forEach((item) {
+        headers.add(Utils.headerize(key) + '=' + item.toString());
+      });
     });
 
     if (headers.length > 0) {
@@ -176,14 +165,15 @@ class URI {
     return uri;
   }
 
-  toAor(show_port) {
-    var aor = '?' + this.scheme + ':';
+  toAor({show_port}) {
+    var aor = this.scheme + ':';
 
-    if (this.user) {
+    if (this.user != null) {
       aor += Utils.escapeUser(this.user) + '@';
     }
     aor += this.host;
-    if (show_port && (this.port || this.port == 0)) {
+    if ((show_port != null && show_port == true) &&
+        (this.port != null || this.port == 0)) {
       aor += ':' + this.port.toString();
     }
 
