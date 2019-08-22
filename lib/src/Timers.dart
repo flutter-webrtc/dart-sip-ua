@@ -1,0 +1,13 @@
+const  T1 = 500;
+const  T2 = 4000;
+const  T4 = 5000;
+const  TIMER_B  = 64 * T1;
+const  TIMER_D  = 0 * T1;
+const  TIMER_F  = 64 * T1;
+const  TIMER_H  = 64 * T1;
+const  TIMER_I  = 0 * T1;
+const  TIMER_J  = 0 * T1;
+const  TIMER_K  = 0 * T4;
+const  TIMER_L  = 64 * T1;
+const  TIMER_M  = 64 * T1;
+const  PROVISIONAL_RESPONSE_INTERVAL = 60000; // See RFC 3261 Section 13.3.1.1
