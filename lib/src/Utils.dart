@@ -32,7 +32,7 @@ isNaN(num) {
 }
 
 parseInt(str, radix) {
-  return int.parse(str, radix: radix);
+  return int.tryParse(str, radix: radix)?? null;
 }
 
 parseFloat(str) {
@@ -40,11 +40,15 @@ parseFloat(str) {
 }
 
 decodeURIComponent(str) {
-  return str;
+  try {
+    return Uri.decodeComponent(str);
+  } catch (_) {
+    return str;
+  }
 }
 
 encodeURIComponent(str) {
-  return Uri.encodeFull(str);
+  return Uri.encodeComponent(str);
 }
 
 unescape(str) {
@@ -107,9 +111,9 @@ hostType(host) {
 */
 escapeUser(user) => encodeURIComponent(decodeURIComponent(user))
     .replaceAll(new RegExp(r'%3A', caseSensitive: false), ':')
-    .replaceAll(new RegExp(r'%2B', caseSensitive: false), ':')
-    .replaceAll(new RegExp(r'%3F', caseSensitive: false), ':')
-    .replaceAll(new RegExp(r'%2F', caseSensitive: false), ':');
+    .replaceAll(new RegExp(r'%2B', caseSensitive: false), '+')
+    .replaceAll(new RegExp(r'%3F', caseSensitive: false), '?')
+    .replaceAll(new RegExp(r'%2F', caseSensitive: false), '/');
 
 /**
 * Normalize SIP URI.

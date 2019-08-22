@@ -22,7 +22,7 @@ class NameAddrHeader {
     }
   }
 
-  NameAddrHeader(uri, display_name, parameters) {
+  NameAddrHeader(uri, display_name, [parameters]) {
     // Checks.
     if (uri == null || uri is! URI) {
       throw new AssertionError('missing or invalid "uri" parameter');
@@ -33,8 +33,8 @@ class NameAddrHeader {
     this._parameters = {};
     this._display_name = display_name;
 
-    if(parameters != null) {
-      parameters.forEach((key,param) {
+    if (parameters != null) {
+      parameters.forEach((key, param) {
         this.setParam(key, param);
       });
     }
@@ -91,7 +91,9 @@ class NameAddrHeader {
   }
 
   toString() {
-    var body = this._display_name != null ? ('"' + this._quote(this._display_name) + '" ') : '';
+    var body = (this._display_name != null && this._display_name.length > 0)
+        ? ('"' + this._quote(this._display_name) + '" ')
+        : '';
 
     body += '<' + this._uri.toString() + '>';
 

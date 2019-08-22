@@ -29,14 +29,14 @@ class URI {
     }
   }
 
-  var scheme;
+  var _scheme;
   var _parameters;
   var _headers;
-  var user;
-  var host;
-  int port;
+  var _user;
+  var _host;
+  var _port;
 
-  URI(scheme, user, host, port, [parameters, headers]) {
+  URI(scheme, user, host, [port, parameters, headers]) {
     // Checks.
     if (host == null) {
       throw new AssertionError('missing or invalid "host" parameter');
@@ -44,22 +44,47 @@ class URI {
 
     // Initialize parameters.
     this._parameters = {};
-    this._headers =  {};
-    this.scheme = scheme ?? JsSIP_C.SIP;
-    this.user = user;
-    this.host = host.toLowerCase();
-    this.port = port;
+    this._headers = {};
+    this._scheme = scheme ?? JsSIP_C.SIP;
+    this._user = user;
+    this._host = host.toLowerCase();
+    this._port = port;
 
-    if(parameters != null) {
+    if (parameters != null) {
       parameters.forEach((param, value) {
         this.setParam(param, value);
       });
     }
-    if(headers != null) {
-      headers.forEach((header, value){
+    if (headers != null) {
+      headers.forEach((header, value) {
         this.setHeader(header, value);
       });
     }
+  }
+
+  get scheme => this._scheme;
+
+  set scheme(value) {
+    this._scheme = value.toLowerCase();
+  }
+
+  get user => this._user;
+
+  set user(value) {
+    this._user = value;
+  }
+
+  get host => this._host;
+
+  set host(value) {
+    this._host = value.toLowerCase();
+  }
+
+  get port => this._port;
+
+  set port(value) {
+    this._port =
+        value == 0 ? value : (value != null) ? Utils.parseInt(value, 10) : null;
   }
 
   setParam(key, value) {

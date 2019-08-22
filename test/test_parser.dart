@@ -48,8 +48,8 @@ var testFunctions = [
         expect(uri.getParam('foo'), 'ABc');
         expect(uri.getParam('baz'), null);
         expect(uri.getParam('nooo'), null);
-        //test.deepEqual(uri.getHeader('x-header-1'), [ 'AaA1', 'AAA2' ]);
-        //test.deepEqual(uri.getHeader('X-HEADER-2'), [ 'BbB' ]);
+        expect(uri.getHeader('x-header-1'), [ 'AaA1', 'AAA2' ]);
+        expect(uri.getHeader('X-HEADER-2'), [ 'BbB' ]);
         expect(uri.getHeader('nooo'), null);
         print('uri => ' + uri.toString());
         expect(uri.toString(),
@@ -60,8 +60,7 @@ var testFunctions = [
         uri.user = 'Iñaki:PASSWD';
         expect(uri.user, 'Iñaki:PASSWD');
         expect(uri.deleteParam('foo'), 'ABc');
-        uri.deleteHeader('x-header-1');
-        //test.deepEqual(uri.deleteHeader('x-header-1'), [ 'AaA1', 'AAA2' ]);
+        expect(uri.deleteHeader('x-header-1'), [ 'AaA1', 'AAA2' ]);
         uri.deleteHeader('x-header-1');
         expect(uri.toString(),
             'sip:I%C3%B1aki:PASSWD@versatica.com:6060;transport=tcp;baz?X-Header-2=BbB');
@@ -188,7 +187,7 @@ var testFunctions = [
         expect(via.host_type, 'IPv6');
         expect(via.port, 6060);
         expect(via.branch, '1234');
-        //test.deepEqual(via.params, { param1: 'Foo', param2: undefined, param3: 'Bar' });
+        expect(via.params, { 'branch': '1234', 'param1': 'Foo', 'param2': null, 'param3': 'Bar' });
       }),
   () => test("Parser: CSeq.", () {
         const data = '123456  CHICKEN';
