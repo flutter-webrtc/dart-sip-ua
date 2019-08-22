@@ -1,10 +1,7 @@
 %{
   import 'dart:core';
   import 'URI.dart';
-
-  class NameAddrHeader {
-    NameAddrHeader(a,[b, c, d]);
-  }
+  import 'NameAddrHeader.dart';
 
   class Data {
     var host;
@@ -50,7 +47,6 @@
     var event;
     var transport;
     var text;
-    NameAddrHeader nameAddrHeader;
     Data();
     setParam(k, v){}
   }
@@ -106,11 +102,11 @@
         "HTAB": _parse_HTAB, 
         "alphanum": _parse_alphanum, 
         "reserved": _parse_reserved, 
-        "unreserved": _parse_unreserved, 
+        "unreserved": _parse_unreserved,
         "mark": _parse_mark, 
         "escaped": _parse_escaped, 
         "LWS": _parse_LWS, 
-        "SWS": _parse_SWS, 
+        "SWS": _parse_SWS,
         "HCOLON": _parse_HCOLON, 
         "TEXT_UTF8_TRIM": _parse_TEXT_UTF8_TRIM, 
         "TEXT_UTF8char": _parse_TEXT_UTF8char, 
@@ -127,7 +123,7 @@
         "LPAREN": _parse_LPAREN, 
         "RPAREN": _parse_RPAREN, 
         "RAQUOT": _parse_RAQUOT, 
-        "LAQUOT": _parse_LAQUOT, 
+        "LAQUOT": _parse_LAQUOT,
         "COMMA": _parse_COMMA, 
         "SEMI": _parse_SEMI, 
         "COLON": _parse_COLON, 
@@ -135,8 +131,8 @@
         "RDQUOT": _parse_RDQUOT, 
         "comment": parse_comment,
         "ctext": _parse_ctext, 
-        "quoted_string": _parse_quoted_string, 
-        "quoted_string_clean": _parse_quoted_string_clean, 
+        "quoted_string": _parse_quoted_string,
+        "quoted_string_clean": _parse_quoted_string_clean,
         "qdtext": _parse_qdtext, 
         "quoted_pair": _parse_quoted_pair, 
         "SIP_URI_noparams": _parse_SIP_URI_noparams,
@@ -217,7 +213,7 @@
         "Contact": parse_Contact,
         "contact_param": _parse_contact_param, 
         "name_addr": _parse_name_addr, 
-        "display_name": _parse_display_name, 
+        "display_name": _parse_display_name,
         "contact_params": _parse_contact_params, 
         "c_p_q": _parse_c_p_q, 
         "c_p_expires": _parse_c_p_expires, 
@@ -423,11 +419,8 @@ quoted_string <- SWS DQUOTE ( qdtext / quoted_pair )* DQUOTE {
                   return _text(); }
 
 quoted_string_clean <- SWS DQUOTE ( qdtext / quoted_pair )* DQUOTE {
-                  var trimmed = input
-                      .substring(pos0, offset)
-                      .trim();
-
-                  return trimmed
+                  var trimmed = _text() .trim();
+                  $$ = trimmed
                       .substring(1, trimmed.length - 1) /// remove outer quotes
                       .replaceAll("\\([\x00-\x09\x0b-\x0c\x0e-\x7f])", '\$1'); } ## unquote contents
 
@@ -449,7 +442,7 @@ SIP_URI_noparams  <- uri_scheme ":"  userinfo ? hostport {
                         data.host_type = null;
                         data.port = null;
                       } catch(e) {
-                        print('data = -1');
+                        $$ = -1;
                       }}
 
 SIP_URI         <- uri_scheme ":" userinfo? hostport uri_parameters headers? {
@@ -467,7 +460,7 @@ SIP_URI         <- uri_scheme ":" userinfo? hostport uri_parameters headers? {
                            $$ = data.uri;
                         }
                       } catch(e) {
-                        print('data = -1;');
+                        $$ == -1;
                       }}
 
 uri_scheme      <- (uri_scheme_sips / uri_scheme_sip)
@@ -754,14 +747,14 @@ Contact             <- ( STAR / (contact_param (COMMA contact_param)*) ) {
                         length = data.multi_header.length;
                         for (idx = 0; idx < length; idx++) {
                           if (data.multi_header[idx].parsed == null) {
-                            data = null;
+                            $$ == null;
                             break;
                           }
                         }
                         if (data != null) {
-                          data = data.multi_header;
+                          $$ = data.multi_header;
                         } else {
-                          print('data = -1');
+                          $$ == -1;
                         }}
 
 contact_param       <- (addr_spec / name_addr) (SEMI contact_params)* {
@@ -784,13 +777,17 @@ name_addr           <- ( display_name )? LAQUOT SIP_URI RAQUOT
 
 addr_spec           <- SIP_URI_noparams
 
-display_name        <- display_name: (token ( LWS token )* / quoted_string_clean) {
+display_name        <- (LWS*)? display_name: (token ( LWS token )* / quoted_string_clean) (LWS*)?  {
                         if (display_name is String) { // quoted_string_clean
-                            data.display_name = display_name;
+                          data.display_name = display_name;
+                          $$ = display_name;
                         } else { // token ( LWS token )*
-                            data.display_name = display_name[1].reduce((acc, cur) {
-                                return acc + cur[0] + cur[1];
-                            }, display_name[0]);
+                          if(display_name[1] is List){
+                            data.display_name = display_name[1].fold(display_name[0], (aac, next) => aac + next[0] + next[1]);
+                          } else if(display_name[1] is String){
+                            data.display_name = display_name[1];
+                          }
+                          $$ = data.display_name;
                         }}
                         ## The previous rule is corrected from RFC3261
                         ## See https:##www.rfc-editor.org/errata/eid5598
@@ -914,10 +911,10 @@ event_param       <- generic_param
 From        <- ( addr_spec / name_addr ) ( SEMI from_param )* {
                 var tag = data.tag;
                 try {
-                  data.nameAddrHeader = new NameAddrHeader(data.uri, data.display_name, data.params);
+                  $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
                   if (tag) {data.setParam('tag',tag);}
                 } catch(e) {
-                  print('data = -1');
+                  $$ == -1;
                 }}
 
 from_param  <- tag_param / generic_param
@@ -939,9 +936,9 @@ Min_Expires  <- min_expires: delta_seconds {data = min_expires; }
 
 Name_Addr_Header <-  ( display_name )* LAQUOT SIP_URI RAQUOT ( SEMI generic_param )* {
                       try {
-                        data.nameAddrHeader = new NameAddrHeader(data.uri, data.display_name, data.params);
+                        $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
                       } catch(e) {
-                        print('data = -1');
+                        $$ == -1;
                       }}
 
 ## PROXY-AUTHENTICATE
@@ -1003,14 +1000,14 @@ Record_Route  <- rec_route (COMMA rec_route)* {
                   length = data.multi_header.length;
                   for (idx = 0; idx < length; idx++) {
                     if (data.multi_header[idx].parsed == null) {
-                      data = null;
+                      $$ = null;
                       break;
                     }
                   }
-                  if (data != null) {
-                    data = data.multi_header;
+                  if(data.multi_header != null) {
+                    $$ = data.multi_header;
                   } else {
-                    print('data = -1');
+                    $$ == -1;
                   }}
 
 rec_route     <- name_addr ( SEMI rr_param )* {
@@ -1117,10 +1114,10 @@ Supported  <- ( option_tag (COMMA option_tag)* )?
 To         <- ( addr_spec / name_addr ) ( SEMI to_param )* {
               var tag = data.tag;
               try {
-                data.nameAddrHeader = new NameAddrHeader(data.uri, data.display_name, data.params);
+                $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
                 if (tag) {data.setParam('tag',tag);}
               } catch(e) {
-                print('data = -1');
+                $$ = -1;
               }}
 
 to_param   <- tag_param / generic_param
@@ -1216,9 +1213,9 @@ hex12         <- hex4 hex4 hex4
 
 Refer_To        <- ( addr_spec / name_addr ) ( SEMI generic_param )* {
                 try {
-                  data.nameAddrHeader = new NameAddrHeader(data.uri, data.display_name, data.params);
+                  $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
                 } catch(e) {
-                  print('data = -1');
+                  $$ = -1;
                 }}
 
 ## Replaces
