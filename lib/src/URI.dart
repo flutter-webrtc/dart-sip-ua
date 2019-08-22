@@ -50,13 +50,16 @@ class URI {
     this.host = host.toLowerCase();
     this.port = port;
 
-    parameters.forEach((param, value) {
-      this.setParam(param, value);
-    });
-
-    headers.forEach((header, value){
-      this.setHeader(header, value);
-    });
+    if(parameters != null) {
+      parameters.forEach((param, value) {
+        this.setParam(param, value);
+      });
+    }
+    if(headers != null) {
+      headers.forEach((header, value){
+        this.setHeader(header, value);
+      });
+    }
   }
 
   setParam(key, value) {
@@ -72,10 +75,11 @@ class URI {
     }
   }
 
-  hasParam(key) {
+  bool hasParam(key) {
     if (key != null) {
       return (this._parameters.containsKey(key.toLowerCase()) && true) || false;
     }
+    return false;
   }
 
   deleteParam(parameter) {

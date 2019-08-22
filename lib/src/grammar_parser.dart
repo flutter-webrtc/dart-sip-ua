@@ -33,6 +33,7 @@ class Data {
   var qop;
   var protocol;
   var realm;
+  var auth_params;
   var cause;
   var expires;
   var refresher;
@@ -61,7 +62,7 @@ class GrammarParser {
   
   static final List<String> _expect10 = <String>["alphanum", "mark"];
   
-  static final List<String> _expect100 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "algorithm", "alphanum", "domain", "nonce", "opaque", "qop", "realm", "stale", "~"];
+  static final List<String> _expect100 = <String>["algorithm", "domain", "nonce", "opaque", "qop", "realm", "stale"];
   
   static final List<String> _expect101 = <String>["realm"];
   
@@ -75,69 +76,67 @@ class GrammarParser {
   
   static final List<String> _expect106 = <String>["stale"];
   
-  static final List<String> _expect107 = <String>["false", "true"];
+  static final List<String> _expect107 = <String>["algorithm"];
   
-  static final List<String> _expect108 = <String>["algorithm"];
+  static final List<String> _expect108 = <String>["!", "%", "\'", "*", "+", "-", ".", "MD5", "MD5-sess", "_", "`", "alphanum", "~"];
   
-  static final List<String> _expect109 = <String>["!", "%", "\'", "*", "+", "-", ".", "MD5", "MD5-sess", "_", "`", "alphanum", "~"];
+  static final List<String> _expect109 = <String>["qop"];
   
   static final List<String> _expect11 = <String>["mark"];
   
-  static final List<String> _expect110 = <String>["qop"];
+  static final List<String> _expect110 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "auth", "auth-int", "~"];
   
-  static final List<String> _expect111 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "auth", "auth-int", "~"];
+  static final List<String> _expect111 = <String>["!", "%", "\'", "*", "+", "-", ".", "SIP", "_", "`", "alphanum", "~"];
   
-  static final List<String> _expect112 = <String>["!", "%", "\'", "*", "+", "-", ".", "SIP", "_", "`", "alphanum", "~"];
+  static final List<String> _expect112 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "cause", "~"];
   
-  static final List<String> _expect113 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "cause", "~"];
+  static final List<String> _expect113 = <String>["cause"];
   
-  static final List<String> _expect114 = <String>["cause"];
+  static final List<String> _expect114 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "active", "alphanum", "pending", "terminated", "~"];
   
-  static final List<String> _expect115 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "active", "alphanum", "pending", "terminated", "~"];
+  static final List<String> _expect115 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "expires", "reason", "retry_after", "~"];
   
-  static final List<String> _expect116 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "expires", "reason", "retry_after", "~"];
+  static final List<String> _expect116 = <String>["reason"];
   
-  static final List<String> _expect117 = <String>["reason"];
+  static final List<String> _expect117 = <String>["retry_after"];
   
-  static final List<String> _expect118 = <String>["retry_after"];
+  static final List<String> _expect118 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "deactivated", "giveup", "invariant", "noresource", "probation", "rejected", "timeout", "~"];
   
-  static final List<String> _expect119 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "deactivated", "giveup", "invariant", "noresource", "probation", "rejected", "timeout", "~"];
+  static final List<String> _expect119 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "branch", "maddr", "received", "rport", "ttl", "~"];
   
   static final List<String> _expect12 = <String>["\'%\'"];
   
-  static final List<String> _expect120 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "branch", "maddr", "received", "rport", "ttl", "~"];
+  static final List<String> _expect120 = <String>["ttl"];
   
-  static final List<String> _expect121 = <String>["ttl"];
+  static final List<String> _expect121 = <String>["maddr"];
   
-  static final List<String> _expect122 = <String>["maddr"];
+  static final List<String> _expect122 = <String>["received"];
   
-  static final List<String> _expect123 = <String>["received"];
+  static final List<String> _expect123 = <String>["branch"];
   
-  static final List<String> _expect124 = <String>["branch"];
+  static final List<String> _expect124 = <String>["rport"];
   
-  static final List<String> _expect125 = <String>["rport"];
+  static final List<String> _expect125 = <String>["!", "%", "\'", "*", "+", "-", ".", "SCTP", "TCP", "TLS", "UDP", "_", "`", "alphanum", "~"];
   
-  static final List<String> _expect126 = <String>["!", "%", "\'", "*", "+", "-", ".", "SCTP", "TCP", "TLS", "UDP", "_", "`", "alphanum", "~"];
+  static final List<String> _expect126 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "refresher", "~"];
   
-  static final List<String> _expect127 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "refresher", "~"];
+  static final List<String> _expect127 = <String>["refresher"];
   
-  static final List<String> _expect128 = <String>["refresher"];
+  static final List<String> _expect128 = <String>["uac", "uas"];
   
-  static final List<String> _expect129 = <String>["uac", "uas"];
+  static final List<String> _expect129 = <String>["uuid:"];
   
   static final List<String> _expect13 = <String>["%"];
   
-  static final List<String> _expect130 = <String>["uuid:"];
+  static final List<String> _expect130 = <String>["uuid"];
   
-  static final List<String> _expect131 = <String>["uuid"];
+  static final List<String> _expect131 = <String>["!", "%", "\'", "\'early-only\'", "*", "+", "-", ".", "_", "`", "alphanum", "from-tag", "to-tag", "~"];
   
-  static final List<String> _expect132 = <String>["!", "%", "\'", "\'early-only\'", "*", "+", "-", ".", "_", "`", "alphanum", "from-tag", "to-tag", "~"];
+  static final List<String> _expect132 = <String>["to-tag"];
   
-  static final List<String> _expect133 = <String>["to-tag"];
+  static final List<String> _expect133 = <String>["from-tag"];
   
-  static final List<String> _expect134 = <String>["from-tag"];
-  
-  static final List<String> _expect135 = <String>["\'early-only\'"];
+  static final List<String> _expect134 = <String>["\'early-only\'"];
   
   static final List<String> _expect14 = <String>[];
   
@@ -327,7 +326,7 @@ class GrammarParser {
   
   static final List<String> _expect99 = <String>["Digest"];
   
-  static final List<bool> _lookahead = _unmap([0x2800001, 0x1ac0093, 0x700000, 0x51a00000, 0x7e03ff6c, 0x7e0fffff, 0x731fffff, 0x7e5800e0, 0x7a1fffff, 0x4e3fffff, 0x35ffe38, 0x79c00000, 0xeffffff, 0x701ffb30, 0x687fffff, 0x18ffffff, 0x660, 0x10000000, 0x30000000, 0x407fe594, 0x41ffffff, 0x63ffffff, 0x2affe01c, 0x43ffffff, 0x47fffffe, 0x1ffb651, 0x7fffffe, 0xe000000, 0x3ff6ca3, 0xffffffc, 0x1c008000, 0x7fed946, 0x1ffffff8, 0x3a801010, 0xffdb28c, 0x3ffffff0, 0x75022020, 0x3ff87318, 0x7fffffe0, 0x7fffffd5, 0x7ff0e331, 0x7fffffd0, 0x7fffffab, 0x7fe00c63, 0x7fffffeb, 0x7fffff43, 0x7fdc1cc7, 0x7fffff93, 0x7ffffe87, 0x3c398f, 0x7fffff2c, 0x7ffffd0f, 0x7800031f, 0x703fffff, 0x7fffffff, 0x7ffffe03, 0x7ffffc0f, 0x7fc07fff, 0x7f83ffff, 0x2207ffff, 0x4200, 0x2216800, 0x20, 0x780ffe80, 0x70000003, 0x3f03fff, 0x7fe00000, 0x3f, 0x1fc000, 0x1000, 0x40098580, 0x20026175, 0x400008d]);
+  static final List<bool> _lookahead = _unmap([0x2800001, 0x1ac0093, 0x700000, 0x51a00000, 0x7e03ff6c, 0x7e0fffff, 0x731fffff, 0x7e5800e0, 0x7a1fffff, 0x4e3fffff, 0x35ffe38, 0x79c00000, 0xeffffff, 0x701ffb30, 0x687fffff, 0x18ffffff, 0x660, 0x10000000, 0x30000000, 0x407fe594, 0x41ffffff, 0x63ffffff, 0x2afffb98, 0x43ffffff, 0x47fffffe, 0x55fff331, 0x7fffffe, 0xffffffd, 0x3ff6ca3, 0xffffffc, 0x1c000000, 0x7fed946, 0x1ffffff8, 0x38010000, 0xffdb28c, 0x3ffffff0, 0x75002020, 0x1ffb6518, 0x7fffffe0, 0x6a044040, 0x7ff0e631, 0x7fffffc0, 0x7fffffab, 0x7fe1c663, 0x7fffffa1, 0x7fffff57, 0x7fc018c7, 0x7fffffd7, 0x7ffffe87, 0x7fb8398f, 0x7fffff27, 0x7ffffd0f, 0x78731f, 0x7ffffe58, 0x7ffffa1f, 0x7000063f, 0x607fffff, 0x7fffffff, 0x7ffffc07, 0x7ffff83f, 0x7f80ffff, 0x7f03ffff, 0x440fffff, 0x8400, 0x442d000, 0x40, 0x701ffd00, 0x60000007, 0x7e07fff, 0x7fc00000, 0x7f, 0x3f8000, 0x2000, 0x130b00, 0x4004c2eb, 0x1800011a, 0xec01]);
   
   static final List<bool> _mapping0 = _unmap([0x3ffffff, 0x7fffffe]);
   
@@ -427,85 +426,81 @@ class GrammarParser {
   
   static final List<int> _strings5 = <int>[115, 99, 116, 112];
   
-  static final List<int> _strings50 = <int>[102, 97, 108, 115, 101];
+  static final List<int> _strings50 = <int>[97, 108, 103, 111, 114, 105, 116, 104, 109];
   
-  static final List<int> _strings51 = <int>[116, 114, 117, 101];
+  static final List<int> _strings51 = <int>[77, 68, 53];
   
-  static final List<int> _strings52 = <int>[97, 108, 103, 111, 114, 105, 116, 104, 109];
+  static final List<int> _strings52 = <int>[77, 68, 53, 45, 115, 101, 115, 115];
   
-  static final List<int> _strings53 = <int>[77, 68, 53];
+  static final List<int> _strings53 = <int>[113, 111, 112];
   
-  static final List<int> _strings54 = <int>[77, 68, 53, 45, 115, 101, 115, 115];
+  static final List<int> _strings54 = <int>[97, 117, 116, 104, 45, 105, 110, 116];
   
-  static final List<int> _strings55 = <int>[113, 111, 112];
+  static final List<int> _strings55 = <int>[97, 117, 116, 104];
   
-  static final List<int> _strings56 = <int>[97, 117, 116, 104, 45, 105, 110, 116];
+  static final List<int> _strings56 = <int>[99, 97, 117, 115, 101];
   
-  static final List<int> _strings57 = <int>[97, 117, 116, 104];
+  static final List<int> _strings57 = <int>[97, 99, 116, 105, 118, 101];
   
-  static final List<int> _strings58 = <int>[99, 97, 117, 115, 101];
+  static final List<int> _strings58 = <int>[112, 101, 110, 100, 105, 110, 103];
   
-  static final List<int> _strings59 = <int>[97, 99, 116, 105, 118, 101];
+  static final List<int> _strings59 = <int>[116, 101, 114, 109, 105, 110, 97, 116, 101, 100];
   
   static final List<int> _strings6 = <int>[116, 99, 112];
   
-  static final List<int> _strings60 = <int>[112, 101, 110, 100, 105, 110, 103];
+  static final List<int> _strings60 = <int>[114, 101, 97, 115, 111, 110];
   
-  static final List<int> _strings61 = <int>[116, 101, 114, 109, 105, 110, 97, 116, 101, 100];
+  static final List<int> _strings61 = <int>[114, 101, 116, 114, 121, 95, 97, 102, 116, 101, 114];
   
-  static final List<int> _strings62 = <int>[114, 101, 97, 115, 111, 110];
+  static final List<int> _strings62 = <int>[100, 101, 97, 99, 116, 105, 118, 97, 116, 101, 100];
   
-  static final List<int> _strings63 = <int>[114, 101, 116, 114, 121, 95, 97, 102, 116, 101, 114];
+  static final List<int> _strings63 = <int>[103, 105, 118, 101, 117, 112];
   
-  static final List<int> _strings64 = <int>[100, 101, 97, 99, 116, 105, 118, 97, 116, 101, 100];
+  static final List<int> _strings64 = <int>[105, 110, 118, 97, 114, 105, 97, 110, 116];
   
-  static final List<int> _strings65 = <int>[103, 105, 118, 101, 117, 112];
+  static final List<int> _strings65 = <int>[110, 111, 114, 101, 115, 111, 117, 114, 99, 101];
   
-  static final List<int> _strings66 = <int>[105, 110, 118, 97, 114, 105, 97, 110, 116];
+  static final List<int> _strings66 = <int>[112, 114, 111, 98, 97, 116, 105, 111, 110];
   
-  static final List<int> _strings67 = <int>[110, 111, 114, 101, 115, 111, 117, 114, 99, 101];
+  static final List<int> _strings67 = <int>[114, 101, 106, 101, 99, 116, 101, 100];
   
-  static final List<int> _strings68 = <int>[112, 114, 111, 98, 97, 116, 105, 111, 110];
+  static final List<int> _strings68 = <int>[116, 105, 109, 101, 111, 117, 116];
   
-  static final List<int> _strings69 = <int>[114, 101, 106, 101, 99, 116, 101, 100];
+  static final List<int> _strings69 = <int>[116, 116, 108];
   
   static final List<int> _strings7 = <int>[116, 108, 115];
   
-  static final List<int> _strings70 = <int>[116, 105, 109, 101, 111, 117, 116];
+  static final List<int> _strings70 = <int>[109, 97, 100, 100, 114];
   
-  static final List<int> _strings71 = <int>[116, 116, 108];
+  static final List<int> _strings71 = <int>[114, 101, 99, 101, 105, 118, 101, 100];
   
-  static final List<int> _strings72 = <int>[109, 97, 100, 100, 114];
+  static final List<int> _strings72 = <int>[98, 114, 97, 110, 99, 104];
   
-  static final List<int> _strings73 = <int>[114, 101, 99, 101, 105, 118, 101, 100];
+  static final List<int> _strings73 = <int>[114, 112, 111, 114, 116];
   
-  static final List<int> _strings74 = <int>[98, 114, 97, 110, 99, 104];
+  static final List<int> _strings74 = <int>[83, 67, 84, 80];
   
-  static final List<int> _strings75 = <int>[114, 112, 111, 114, 116];
+  static final List<int> _strings75 = <int>[84, 67, 80];
   
-  static final List<int> _strings76 = <int>[83, 67, 84, 80];
+  static final List<int> _strings76 = <int>[84, 76, 83];
   
-  static final List<int> _strings77 = <int>[84, 67, 80];
+  static final List<int> _strings77 = <int>[85, 68, 80];
   
-  static final List<int> _strings78 = <int>[84, 76, 83];
+  static final List<int> _strings78 = <int>[114, 101, 102, 114, 101, 115, 104, 101, 114];
   
-  static final List<int> _strings79 = <int>[85, 68, 80];
+  static final List<int> _strings79 = <int>[117, 97, 99];
   
   static final List<int> _strings8 = <int>[117, 100, 112];
   
-  static final List<int> _strings80 = <int>[114, 101, 102, 114, 101, 115, 104, 101, 114];
+  static final List<int> _strings80 = <int>[117, 97, 115];
   
-  static final List<int> _strings81 = <int>[117, 97, 99];
+  static final List<int> _strings81 = <int>[117, 117, 105, 100, 58];
   
-  static final List<int> _strings82 = <int>[117, 97, 115];
+  static final List<int> _strings82 = <int>[116, 111, 45, 116, 97, 103];
   
-  static final List<int> _strings83 = <int>[117, 117, 105, 100, 58];
+  static final List<int> _strings83 = <int>[102, 114, 111, 109, 45, 116, 97, 103];
   
-  static final List<int> _strings84 = <int>[116, 111, 45, 116, 97, 103];
-  
-  static final List<int> _strings85 = <int>[102, 114, 111, 109, 45, 116, 97, 103];
-  
-  static final List<int> _strings86 = <int>[101, 97, 114, 108, 121, 45, 111, 110, 108, 121];
+  static final List<int> _strings84 = <int>[101, 97, 114, 108, 121, 45, 111, 110, 108, 121];
   
   static final List<int> _strings9 = <int>[117, 115, 101, 114, 61];
   
@@ -551,123 +546,123 @@ class GrammarParser {
   
   static final List<List<int>> _transitions24 = [[0, 9], [11, 12], [14, 127]];
   
-  static final List<List<int>> _transitions25 = [[33, 33, 36, 38, 47, 57, 59, 59, 61, 61, 63, 63, 65, 90, 95, 95, 97, 122, 126, 126]];
+  static final List<List<int>> _transitions25 = [[33, 33, 37, 38, 41, 43, 45, 57, 59, 59, 61, 61, 63, 63, 65, 90, 95, 95, 97, 122, 126, 126]];
   
-  static final List<List<int>> _transitions26 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 38, 38, 43, 44, 47, 47, 59, 59, 61, 61, 63, 63], [37, 37]];
+  static final List<List<int>> _transitions26 = [[33, 33, 37, 38, 41, 42, 45, 57, 59, 59, 61, 61, 63, 63, 65, 90, 95, 95, 97, 122, 126, 126]];
   
-  static final List<List<int>> _transitions27 = [[36, 36], [38, 38], [43, 43], [44, 44], [47, 47], [59, 59], [61, 61], [63, 63]];
+  static final List<List<int>> _transitions27 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 38, 38, 43, 44, 47, 47, 59, 59, 61, 61, 63, 63], [37, 37]];
   
-  static final List<List<int>> _transitions28 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36], [37, 37], [38, 38], [43, 43], [44, 44], [61, 61]];
+  static final List<List<int>> _transitions28 = [[36, 36], [38, 38], [43, 43], [44, 44], [47, 47], [59, 59], [61, 61], [63, 63]];
   
-  static final List<List<int>> _transitions29 = [[48, 57, 65, 91, 97, 122]];
+  static final List<List<int>> _transitions29 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36], [37, 37], [38, 38], [43, 43], [44, 44], [61, 61]];
   
   static final List<List<int>> _transitions3 = [[48, 57, 65, 90, 97, 122]];
   
-  static final List<List<int>> _transitions30 = [[48, 57], [65, 90, 97, 122], [91, 91]];
+  static final List<List<int>> _transitions30 = [[48, 57, 65, 91, 97, 122]];
   
-  static final List<List<int>> _transitions31 = [[45, 45], [48, 57, 65, 90, 97, 122], [95, 95]];
+  static final List<List<int>> _transitions31 = [[48, 57], [65, 90, 97, 122], [91, 91]];
   
-  static final List<List<int>> _transitions32 = [[48, 58, 65, 70, 97, 102]];
+  static final List<List<int>> _transitions32 = [[45, 45], [48, 57, 65, 90, 97, 122], [95, 95]];
   
-  static final List<List<int>> _transitions33 = [[48, 57, 65, 70, 97, 102], [58, 58]];
+  static final List<List<int>> _transitions33 = [[48, 58, 65, 70, 97, 102]];
   
-  static final List<List<int>> _transitions34 = [[48, 57], [65, 70, 97, 102]];
+  static final List<List<int>> _transitions34 = [[48, 57, 65, 70, 97, 102], [58, 58]];
   
-  static final List<List<int>> _transitions35 = [[48, 48], [49, 49], [50, 50], [51, 57]];
+  static final List<List<int>> _transitions35 = [[48, 57], [65, 70, 97, 102]];
   
-  static final List<List<int>> _transitions36 = [[33, 33, 37, 38, 41, 43, 48, 58, 65, 91, 93, 93, 95, 95, 97, 107, 110, 115, 118, 122, 126, 126], [76, 108], [77, 109], [84, 116], [85, 117]];
+  static final List<List<int>> _transitions36 = [[48, 48], [49, 49], [50, 50], [51, 57]];
   
-  static final List<List<int>> _transitions37 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 114, 118, 122, 126, 126], [83, 115], [84, 116], [85, 117]];
+  static final List<List<int>> _transitions37 = [[33, 33, 37, 38, 41, 43, 48, 58, 65, 91, 93, 93, 95, 95, 97, 107, 110, 115, 118, 122, 126, 126], [76, 108], [77, 109], [84, 116], [85, 117]];
   
-  static final List<List<int>> _transitions38 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 104, 106, 111, 113, 122, 126, 126], [73, 105], [80, 112]];
+  static final List<List<int>> _transitions38 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 114, 118, 122, 126, 126], [83, 115], [84, 116], [85, 117]];
   
-  static final List<List<int>> _transitions39 = [[33, 33, 37, 38, 41, 43, 48, 58, 65, 91, 93, 93, 95, 95, 97, 122, 126, 126]];
+  static final List<List<int>> _transitions39 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 104, 106, 111, 113, 122, 126, 126], [73, 105], [80, 112]];
   
   static final List<List<int>> _transitions4 = [[36, 36], [38, 38], [43, 43], [44, 44], [47, 47], [58, 58], [59, 59], [61, 61], [63, 63], [64, 64]];
   
-  static final List<List<int>> _transitions40 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 38, 38, 43, 43, 47, 47, 58, 58, 91, 91, 93, 93], [37, 37]];
+  static final List<List<int>> _transitions40 = [[33, 33, 37, 38, 41, 43, 48, 58, 65, 91, 93, 93, 95, 95, 97, 122, 126, 126]];
   
-  static final List<List<int>> _transitions41 = [[36, 36], [38, 38], [43, 43], [47, 47], [58, 58], [91, 91], [93, 93]];
+  static final List<List<int>> _transitions41 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 38, 38, 43, 43, 47, 47, 58, 58, 91, 91, 93, 93], [37, 37]];
   
-  static final List<List<int>> _transitions42 = [[33, 33, 36, 37, 41, 43, 48, 58, 63, 63, 65, 91, 93, 93, 95, 95, 97, 122, 126, 126]];
+  static final List<List<int>> _transitions42 = [[36, 36], [38, 38], [43, 43], [47, 47], [58, 58], [91, 91], [93, 93]];
   
-  static final List<List<int>> _transitions43 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 43, 43, 47, 47, 58, 58, 63, 63, 91, 91, 93, 93], [37, 37]];
+  static final List<List<int>> _transitions43 = [[33, 33, 36, 37, 41, 43, 48, 58, 63, 63, 65, 91, 93, 93, 95, 95, 97, 122, 126, 126]];
   
-  static final List<List<int>> _transitions44 = [[36, 36], [43, 43], [47, 47], [58, 58], [63, 63], [91, 91], [93, 93]];
+  static final List<List<int>> _transitions44 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 43, 43, 47, 47, 58, 58, 63, 63, 91, 91, 93, 93], [37, 37]];
   
-  static final List<List<int>> _transitions45 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 82, 84, 90, 96, 122, 126, 126], [83, 115]];
+  static final List<List<int>> _transitions45 = [[36, 36], [43, 43], [47, 47], [58, 58], [63, 63], [91, 91], [93, 93]];
   
-  static final List<List<int>> _transitions46 = [[65, 90, 97, 114, 116, 122], [83, 115]];
+  static final List<List<int>> _transitions46 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 82, 84, 90, 96, 122, 126, 126], [83, 115]];
   
-  static final List<List<int>> _transitions47 = [[33, 33, 36, 38, 44, 46, 58, 59, 61, 61, 64, 90, 95, 95, 97, 122, 126, 126], [35, 35, 47, 47]];
+  static final List<List<int>> _transitions47 = [[65, 90, 97, 114, 116, 122], [83, 115]];
   
-  static final List<List<int>> _transitions48 = [[35, 35, 47, 47]];
+  static final List<List<int>> _transitions48 = [[33, 33, 36, 38, 44, 46, 58, 59, 61, 61, 64, 90, 95, 95, 97, 122, 126, 126], [35, 35, 47, 47]];
   
-  static final List<List<int>> _transitions49 = [[35, 35], [47, 47]];
+  static final List<List<int>> _transitions49 = [[35, 35, 47, 47]];
   
   static final List<List<int>> _transitions5 = [[33, 33, 41, 42, 45, 46, 95, 95, 126, 126], [48, 57, 65, 90, 97, 122]];
   
-  static final List<List<int>> _transitions50 = [[33, 33, 36, 38, 44, 46, 58, 59, 61, 61, 64, 90, 95, 95, 97, 122, 126, 126]];
+  static final List<List<int>> _transitions50 = [[35, 35], [47, 47]];
   
-  static final List<List<int>> _transitions51 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 38, 38, 43, 44, 47, 47, 58, 59, 61, 61, 63, 64], [37, 37]];
+  static final List<List<int>> _transitions51 = [[33, 33, 36, 38, 44, 46, 58, 59, 61, 61, 64, 90, 95, 95, 97, 122, 126, 126]];
   
-  static final List<List<int>> _transitions52 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36], [37, 37], [38, 38], [43, 43], [44, 44], [58, 58], [59, 59], [61, 61], [63, 63], [64, 64]];
+  static final List<List<int>> _transitions52 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 38, 38, 43, 44, 47, 47, 58, 59, 61, 61, 63, 64], [37, 37]];
   
-  static final List<List<int>> _transitions53 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36], [37, 37], [38, 38], [43, 43], [44, 44], [58, 58], [61, 61], [64, 64]];
+  static final List<List<int>> _transitions53 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36], [37, 37], [38, 38], [43, 43], [44, 44], [58, 58], [59, 59], [61, 61], [63, 63], [64, 64]];
   
-  static final List<List<int>> _transitions54 = [[43, 43], [45, 45], [46, 46], [48, 57], [65, 90, 97, 122]];
+  static final List<List<int>> _transitions54 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36], [37, 37], [38, 38], [43, 43], [44, 44], [58, 58], [61, 61], [64, 64]];
   
-  static final List<List<int>> _transitions55 = [[33, 33, 36, 38, 47, 57, 59, 59, 61, 61, 63, 63, 65, 91, 95, 95, 97, 122, 126, 126]];
+  static final List<List<int>> _transitions55 = [[43, 43], [45, 45], [46, 46], [48, 57], [65, 90, 97, 122]];
   
-  static final List<List<int>> _transitions56 = [[33, 33, 36, 38, 43, 46, 58, 59, 61, 61, 64, 90, 95, 95, 97, 122, 126, 126]];
+  static final List<List<int>> _transitions56 = [[33, 33, 37, 38, 41, 43, 45, 57, 59, 59, 61, 61, 63, 63, 65, 91, 95, 95, 97, 122, 126, 126]];
   
-  static final List<List<int>> _transitions57 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36], [37, 37], [38, 38], [43, 43], [44, 44], [58, 58], [59, 59], [61, 61], [64, 64]];
+  static final List<List<int>> _transitions57 = [[33, 33, 36, 38, 43, 46, 58, 59, 61, 61, 64, 90, 95, 95, 97, 122, 126, 126]];
   
-  static final List<List<int>> _transitions58 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 68, 72, 74, 77, 80, 81, 84, 90, 96, 122, 126, 126], [65, 65], [66, 66], [67, 67], [73, 73], [78, 78], [79, 79], [82, 82], [83, 83]];
+  static final List<List<int>> _transitions58 = [[33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36], [37, 37], [38, 38], [43, 43], [44, 44], [58, 58], [59, 59], [61, 61], [64, 64]];
   
-  static final List<List<int>> _transitions59 = [[9, 9], [32, 32], [33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 38, 38, 43, 44, 47, 47, 58, 59, 61, 61, 63, 64], [37, 37], [128, 65535]];
+  static final List<List<int>> _transitions59 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 68, 72, 74, 77, 80, 81, 84, 90, 96, 122, 126, 126], [65, 65], [66, 66], [67, 67], [73, 73], [78, 78], [79, 79], [82, 82], [83, 83]];
   
   static final List<List<int>> _transitions6 = [[33, 33], [39, 39], [40, 40], [41, 41], [42, 42], [45, 45], [46, 46], [95, 95], [126, 126]];
   
-  static final List<List<int>> _transitions60 = [[0, 41], [42, 1114111]];
+  static final List<List<int>> _transitions60 = [[9, 9], [32, 32], [33, 33, 41, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36, 38, 38, 43, 44, 47, 47, 58, 59, 61, 61, 63, 64], [37, 37], [128, 65535]];
   
-  static final List<List<int>> _transitions61 = [[0, 114, 116, 1114111], [83, 115]];
+  static final List<List<int>> _transitions61 = [[0, 41], [42, 1114111]];
   
-  static final List<List<int>> _transitions62 = [[33, 33], [34, 36, 38, 38, 40, 41, 44, 44, 47, 47, 58, 64, 91, 95, 123, 125, 127, 1114111], [37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 122, 126, 126]];
+  static final List<List<int>> _transitions62 = [[0, 114, 116, 1114111], [83, 115]];
   
-  static final List<List<int>> _transitions63 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 100, 102, 112, 114, 122, 126, 126], [69, 101], [81, 113]];
+  static final List<List<int>> _transitions63 = [[33, 33], [34, 36, 38, 38, 40, 41, 44, 44, 47, 47, 58, 64, 91, 95, 123, 125, 127, 1114111], [37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 122, 126, 126]];
   
-  static final List<List<int>> _transitions64 = [[33, 33], [34, 36, 38, 38, 40, 41, 44, 44, 47, 47, 58, 64, 92, 95, 123, 125, 127, 1114111], [37, 37, 39, 39, 42, 43, 45, 46, 126, 126], [48, 57, 65, 90, 96, 122], [91, 91]];
+  static final List<List<int>> _transitions64 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 100, 102, 112, 114, 122, 126, 126], [69, 101], [81, 113]];
   
-  static final List<List<int>> _transitions65 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 96, 98, 104, 106, 113, 116, 122, 126, 126], [65, 97], [73, 105], [82, 114], [83, 115]];
+  static final List<List<int>> _transitions65 = [[33, 33], [34, 36, 38, 38, 40, 41, 44, 44, 47, 47, 58, 64, 92, 95, 123, 125, 127, 1114111], [37, 37, 39, 39, 42, 43, 45, 46, 126, 126], [48, 57, 65, 90, 96, 122], [91, 91]];
   
-  static final List<List<int>> _transitions66 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 103, 105, 122, 126, 126], [72, 104]];
+  static final List<List<int>> _transitions66 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 96, 98, 104, 106, 113, 116, 122, 126, 126], [65, 97], [73, 105], [82, 114], [83, 115]];
   
-  static final List<List<int>> _transitions67 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 110, 112, 113, 115, 122, 126, 126], [79, 111], [82, 114]];
+  static final List<List<int>> _transitions67 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 103, 105, 122, 126, 126], [72, 104]];
   
-  static final List<List<int>> _transitions68 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 65, 97, 73, 105, 77, 109, 84, 116, 86, 118, 120, 122, 126, 126]];
+  static final List<List<int>> _transitions68 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 110, 112, 113, 115, 122, 126, 126], [79, 111], [82, 114]];
   
-  static final List<List<int>> _transitions69 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [65, 97, 73, 105, 84, 116, 86, 118], [77, 109]];
+  static final List<List<int>> _transitions69 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 65, 97, 73, 105, 77, 109, 84, 116, 86, 118, 120, 122, 126, 126]];
   
   static final List<List<int>> _transitions7 = [[9, 9, 13, 13, 32, 32]];
   
-  static final List<List<int>> _transitions70 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [65, 97], [73, 105], [84, 116], [86, 118]];
+  static final List<List<int>> _transitions70 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [65, 97, 73, 105, 84, 116, 86, 118], [77, 109]];
   
-  static final List<List<int>> _transitions71 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [77, 109]];
+  static final List<List<int>> _transitions71 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [65, 97], [73, 105], [84, 116], [86, 118]];
   
-  static final List<List<int>> _transitions72 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 126, 126], [120, 122]];
+  static final List<List<int>> _transitions72 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [77, 109]];
   
-  static final List<List<int>> _transitions73 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [96, 119]];
+  static final List<List<int>> _transitions73 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 126, 126], [120, 122]];
   
-  static final List<List<int>> _transitions74 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 115, 117, 122, 126, 126], [84, 116]];
+  static final List<List<int>> _transitions74 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [96, 119]];
   
-  static final List<List<int>> _transitions75 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 67, 69, 90, 96, 122, 126, 126], [68, 100]];
+  static final List<List<int>> _transitions75 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 115, 117, 122, 126, 126], [84, 116]];
   
-  static final List<List<int>> _transitions76 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 96, 96, 98, 99, 101, 109, 80, 112, 116, 122, 126, 126], [65, 97], [68, 100], [78, 110], [79, 111], [81, 113], [82, 114], [83, 115]];
+  static final List<List<int>> _transitions76 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 67, 69, 90, 96, 122, 126, 126], [68, 100]];
   
-  static final List<List<int>> _transitions77 = [[47, 47], [65, 90, 97, 122]];
+  static final List<List<int>> _transitions77 = [[65, 97], [68, 100], [78, 110], [79, 111], [81, 113], [82, 114], [83, 115]];
   
-  static final List<List<int>> _transitions78 = [[70, 102], [84, 116]];
+  static final List<List<int>> _transitions78 = [[47, 47], [65, 90, 97, 122]];
   
   static final List<List<int>> _transitions79 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 76, 78, 90, 96, 122, 126, 126], [77, 109]];
   
@@ -1134,7 +1129,7 @@ class GrammarParser {
   
   dynamic _parse_COLON() {
     var $$;
-    switch (_ch >= 58 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -1192,7 +1187,7 @@ class GrammarParser {
     } else {
       _cachePos[33] = pos;
     }  
-    switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -1290,7 +1285,7 @@ class GrammarParser {
   
   dynamic _parse_CSeq_value() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -1352,7 +1347,7 @@ class GrammarParser {
     }  
     _token = 1;    
     _tokenStart = _cursor;    
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -1424,7 +1419,7 @@ class GrammarParser {
     } else {
       _cachePos[28] = pos;
     }  
-    switch (_ch >= 61 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -1650,7 +1645,7 @@ class GrammarParser {
     } else {
       _cachePos[62] = pos;
     }  
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
@@ -1732,12 +1727,12 @@ class GrammarParser {
     } else {
       _cachePos[59] = pos;
     }  
-    switch (_getState(_transitions32)) {
+    switch (_getState(_transitions33)) {
       case 0:
       case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_getState(_transitions33)) {
+        switch (_getState(_transitions34)) {
           case 0:
             while (true) {
               var ch0 = _ch, pos0 = _cursor, startPos1 = _startPos;
@@ -4278,7 +4273,7 @@ class GrammarParser {
     } else {
       _cachePos[32] = pos;
     }  
-    switch (_ch >= 60 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -4335,7 +4330,7 @@ class GrammarParser {
     } else {
       _cachePos[36] = pos;
     }  
-    switch (_ch >= 34 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -4383,7 +4378,7 @@ class GrammarParser {
   
   dynamic _parse_LPAREN() {
     var $$;
-    switch (_ch >= 40 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -4566,7 +4561,7 @@ class GrammarParser {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_getState(_transitions58)) {
+        switch (_getState(_transitions59)) {
           case 0:
             var startPos1 = _startPos;
             _startPos = _cursor;
@@ -4968,7 +4963,7 @@ class GrammarParser {
   
   dynamic _parse_RPAREN() {
     var $$;
-    switch (_ch >= 41 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -5025,7 +5020,7 @@ class GrammarParser {
         var testing0 = _testing; 
         for (var reps = []; ; ) {
           _testing = _cursor;
-          switch (_getState(_transitions59)) {
+          switch (_getState(_transitions60)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -5156,7 +5151,7 @@ class GrammarParser {
   
   dynamic _parse_Request_URI() {
     var $$;
-    switch (_getState(_transitions46)) {
+    switch (_getState(_transitions47)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -5200,7 +5195,7 @@ class GrammarParser {
     } else {
       _cachePos[34] = pos;
     }  
-    switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -5532,7 +5527,7 @@ class GrammarParser {
     } else {
       _cachePos[27] = pos;
     }  
-    switch (_ch >= 47 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -5621,7 +5616,7 @@ class GrammarParser {
   
   dynamic _parse_STAR() {
     var $$;
-    switch (_ch >= 42 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -5720,7 +5715,7 @@ class GrammarParser {
   
   dynamic _parse_Status_Code() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -5959,7 +5954,7 @@ class GrammarParser {
     } else {
       _cachePos[182] = pos;
     }  
-    switch (_getState(_transitions77)) {
+    switch (_getState(_transitions78)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -6013,7 +6008,7 @@ class GrammarParser {
     }  
     _token = 12;    
     _tokenStart = _cursor;    
-    switch (_ch >= 128 && _ch <= 191 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 191 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -6050,7 +6045,7 @@ class GrammarParser {
     }  
     _token = 11;    
     _tokenStart = _cursor;    
-    switch (_ch >= 128 && _ch <= 65535 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 65535 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -6182,7 +6177,7 @@ class GrammarParser {
           $$ = _matchChar(58, ':');
           if (!success) break;
           seq[1] = $$;
-          switch (_getState(_transitions47)) {
+          switch (_getState(_transitions48)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -6283,7 +6278,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings52, 'algorithm', true);
+          $$ = _matchString(_strings50, 'algorithm', true);
           if (!success) break;
           var seq = new List(3)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -6300,12 +6295,12 @@ class GrammarParser {
               while (true) {
                 var startPos2 = _startPos;
                 _startPos = _cursor;
-                $$ = _matchString(_strings53, 'MD5', true);
+                $$ = _matchString(_strings51, 'MD5', true);
                 _startPos = startPos2;
                 if (success) break;
                 var startPos3 = _startPos;
                 _startPos = _cursor;
-                $$ = _matchString(_strings54, 'MD5-sess', true);
+                $$ = _matchString(_strings52, 'MD5-sess', true);
                 _startPos = startPos3;
                 if (success) break;
                 var startPos4 = _startPos;
@@ -6322,7 +6317,7 @@ class GrammarParser {
               break;
           }
           if (!success && _cursor > _testing) {
-            _failure(_expect109);
+            _failure(_expect108);
           }
           if (!success) break;
           seq[2] = $$;
@@ -6335,7 +6330,7 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, algorithm) {
             ///CODE_START
-            data.algorithm=algorithm.toUpperCase();
+            data.algorithm=algorithm.toUpperCase(); return data.algorithm;
             ///CODE_END
             })($start, $3);
           }
@@ -6353,7 +6348,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect108);
+      _failure(_expect107);
     }
     return $$;
   }
@@ -6418,7 +6413,7 @@ class GrammarParser {
           $$ = _parse_EQUAL();
           if (!success) break;
           seq[1] = $$;
-          switch (_getState(_transitions62)) {
+          switch (_getState(_transitions63)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -6457,6 +6452,20 @@ class GrammarParser {
           if (!success) break;
           seq[2] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $3 = seq[2];
+            final $start = startPos0;
+            var pos0 = _startPos;
+            $$ = ((offset, key, value) {
+            ///CODE_START
+            print(key + ' => ' + value);
+            if(data.auth_params == null) data.auth_params = [];
+            data.auth_params[key] = value;
+            ///CODE_END
+            })($start, $1, $3);
+          }
           break;
         }
         if (!success) {
@@ -6528,7 +6537,7 @@ class GrammarParser {
       case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_ch >= 126 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+        switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
           case 0:
             while (true) {
               var startPos1 = _startPos;
@@ -6596,7 +6605,7 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, expires) {
             ///CODE_START
-            if(data.params == null) data.params = new Map<String, dynamic>();
+            if(data.params == null) data.params = {};
             data.params['expires'] = expires;
             ///CODE_END
             })($start, $3);
@@ -6646,7 +6655,7 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, q) {
             ///CODE_START
-            if(data.params == null) data.params = new Map<String, dynamic>();
+            if(data.params == null) data.params = {};
             data.params['q'] = q;
             ///CODE_END
             })($start, $3);
@@ -6758,103 +6767,128 @@ class GrammarParser {
     } else {
       _cachePos[173] = pos;
     }  
-    switch (_getState(_transitions75)) {
+    switch (_getState(_transitions13)) {
       case 0:
+      case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        $$ = _parse_other_challenge();
+        switch (_getState(_transitions76)) {
+          case 0:
+            var startPos1 = _startPos;
+            _startPos = _cursor;
+            $$ = _parse_other_challenge();
+            _startPos = startPos1;
+            break;
+          case 1:
+          case 3:
+            while (true) {
+              var startPos2 = _startPos;
+              _startPos = _cursor;
+              switch ((_ch == 100 || _ch == 68 ) ? 0 : _ch == -1 ? 2 : 1) {
+                case 0:
+                case 2:
+                  var ch0 = _ch, pos0 = _cursor, startPos3 = _startPos;
+                  _startPos = _cursor;
+                  while (true) {  
+                    $$ = _matchString(_strings44, 'Digest', true);
+                    if (!success) break;
+                    var seq = new List(4)..[0] = $$;
+                    $$ = _parse_LWS();
+                    if (!success) break;
+                    seq[1] = $$;
+                    $$ = _parse_digest_cln();
+                    if (!success) break;
+                    seq[2] = $$;
+                    var testing0 = _testing; 
+                    for (var reps = []; ; ) {
+                      _testing = _cursor;
+                      switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+                        case 0:
+                        case 2:
+                          var ch1 = _ch, pos1 = _cursor, startPos4 = _startPos;
+                          _startPos = _cursor;
+                          while (true) {  
+                            $$ = _parse_COMMA();
+                            if (!success) break;
+                            var seq = new List(2)..[0] = $$;
+                            $$ = _parse_digest_cln();
+                            if (!success) break;
+                            seq[1] = $$;
+                            $$ = seq;
+                            break;
+                          }
+                          if (!success) {
+                            _ch = ch1;
+                            _cursor = pos1;
+                          }
+                          _startPos = startPos4;
+                          break;
+                        case 1:
+                          $$ = null;
+                          success = false;
+                          break;
+                      }
+                      if (!success && _cursor > _testing) {
+                        _failure(_expect29);
+                      }
+                      if (success) {  
+                        reps.add($$);
+                      } else {
+                        success = true;
+                        _testing = testing0;
+                        $$ = reps;
+                        break; 
+                      }
+                    }
+                    if (!success) break;
+                    seq[3] = $$;
+                    $$ = seq;
+                    break;
+                  }
+                  if (!success) {
+                    _ch = ch0;
+                    _cursor = pos0;
+                  }
+                  _startPos = startPos3;
+                  break;
+                case 1:
+                  $$ = null;
+                  success = false;
+                  break;
+              }
+              if (!success && _cursor > _testing) {
+                _failure(_expect99);
+              }
+              _startPos = startPos2;
+              if (success) break;
+              var startPos5 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_other_challenge();
+              _startPos = startPos5;
+              break;
+            }
+            break;
+          case 2:
+            $$ = null;
+            success = false;
+            break;
+        }
+        if (!success && _cursor > _testing) {
+          _failure(_expect98);
+        }
+        if (success) {    
+          final $1 = $$;
+          final $start = startPos0;
+          var pos0 = _startPos, offset = $start;
+          $$ = ((offset) {
+          ///CODE_START
+          return data;
+          ///CODE_END
+          })($start);
+        }
         _startPos = startPos0;
         break;
       case 1:
-      case 3:
-        while (true) {
-          var startPos1 = _startPos;
-          _startPos = _cursor;
-          switch ((_ch == 100 || _ch == 68 ) ? 0 : _ch == -1 ? 2 : 1) {
-            case 0:
-            case 2:
-              var ch0 = _ch, pos0 = _cursor, startPos2 = _startPos;
-              _startPos = _cursor;
-              while (true) {  
-                $$ = _matchString(_strings44, 'Digest', true);
-                if (!success) break;
-                var seq = new List(4)..[0] = $$;
-                $$ = _parse_LWS();
-                if (!success) break;
-                seq[1] = $$;
-                $$ = _parse_digest_cln();
-                if (!success) break;
-                seq[2] = $$;
-                var testing0 = _testing; 
-                for (var reps = []; ; ) {
-                  _testing = _cursor;
-                  switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
-                    case 0:
-                    case 2:
-                      var ch1 = _ch, pos1 = _cursor, startPos3 = _startPos;
-                      _startPos = _cursor;
-                      while (true) {  
-                        $$ = _parse_COMMA();
-                        if (!success) break;
-                        var seq = new List(2)..[0] = $$;
-                        $$ = _parse_digest_cln();
-                        if (!success) break;
-                        seq[1] = $$;
-                        $$ = seq;
-                        break;
-                      }
-                      if (!success) {
-                        _ch = ch1;
-                        _cursor = pos1;
-                      }
-                      _startPos = startPos3;
-                      break;
-                    case 1:
-                      $$ = null;
-                      success = false;
-                      break;
-                  }
-                  if (!success && _cursor > _testing) {
-                    _failure(_expect29);
-                  }
-                  if (success) {  
-                    reps.add($$);
-                  } else {
-                    success = true;
-                    _testing = testing0;
-                    $$ = reps;
-                    break; 
-                  }
-                }
-                if (!success) break;
-                seq[3] = $$;
-                $$ = seq;
-                break;
-              }
-              if (!success) {
-                _ch = ch0;
-                _cursor = pos0;
-              }
-              _startPos = startPos2;
-              break;
-            case 1:
-              $$ = null;
-              success = false;
-              break;
-          }
-          if (!success && _cursor > _testing) {
-            _failure(_expect99);
-          }
-          _startPos = startPos1;
-          if (success) break;
-          var startPos4 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_other_challenge();
-          _startPos = startPos4;
-          break;
-        }
-        break;
-      case 2:
         $$ = null;
         success = false;
         break;
@@ -6870,7 +6904,7 @@ class GrammarParser {
   
   dynamic _parse_composite_type() {
     var $$;
-    switch (_getState(_transitions71)) {
+    switch (_getState(_transitions72)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -6941,7 +6975,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          switch (_getState(_transitions61)) {
+          switch (_getState(_transitions62)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -6976,7 +7010,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos4 = _startPos;
@@ -7025,7 +7059,7 @@ class GrammarParser {
             {
             ///CODE_START
             var header;
-            if(data.multi_header = null) data.multi_header = [];
+            if(data.multi_header == null) data.multi_header = [];
             try {
               header = new NameAddrHeader(data.uri, data.display_name, data.params);
               data.uri = null;
@@ -7065,7 +7099,7 @@ class GrammarParser {
   
   dynamic _parse_contact_params() {
     var $$;
-    switch (_getState(_transitions63)) {
+    switch (_getState(_transitions64)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -7219,7 +7253,7 @@ class GrammarParser {
     } else {
       _cachePos[63] = pos;
     }  
-    switch (_getState(_transitions35)) {
+    switch (_getState(_transitions36)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -7393,7 +7427,7 @@ class GrammarParser {
     } else {
       _cachePos[131] = pos;
     }  
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -7456,156 +7490,89 @@ class GrammarParser {
     } else {
       _cachePos[178] = pos;
     }  
-    switch (_getState(_transitions76)) {
+    switch (_getState(_transitions77)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        $$ = _parse_auth_param();
+        $$ = _parse_algorithm();
         _startPos = startPos0;
         break;
       case 1:
-        while (true) {
-          var startPos1 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_algorithm();
-          _startPos = startPos1;
-          if (success) break;
-          var startPos2 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_auth_param();
-          _startPos = startPos2;
-          break;
-        }
+        var startPos1 = _startPos;
+        _startPos = _cursor;
+        $$ = _parse_domain();
+        _startPos = startPos1;
         break;
       case 2:
-        while (true) {
-          var startPos3 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_domain();
-          _startPos = startPos3;
-          if (success) break;
-          var startPos4 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_auth_param();
-          _startPos = startPos4;
-          break;
-        }
+        var startPos2 = _startPos;
+        _startPos = _cursor;
+        $$ = _parse_nonce();
+        _startPos = startPos2;
         break;
       case 3:
-        while (true) {
-          var startPos5 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_nonce();
-          _startPos = startPos5;
-          if (success) break;
-          var startPos6 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_auth_param();
-          _startPos = startPos6;
-          break;
-        }
+        var startPos3 = _startPos;
+        _startPos = _cursor;
+        $$ = _parse_opaque();
+        _startPos = startPos3;
         break;
       case 4:
+        var startPos4 = _startPos;
+        _startPos = _cursor;
+        $$ = _parse_qop_options();
+        _startPos = startPos4;
+        break;
+      case 5:
+        var startPos5 = _startPos;
+        _startPos = _cursor;
+        $$ = _parse_realm();
+        _startPos = startPos5;
+        break;
+      case 6:
+        var startPos6 = _startPos;
+        _startPos = _cursor;
+        $$ = _parse_stale();
+        _startPos = startPos6;
+        break;
+      case 7:
+        $$ = null;
+        success = false;
+        break;
+      case 8:
         while (true) {
           var startPos7 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_opaque();
+          $$ = _parse_realm();
           _startPos = startPos7;
           if (success) break;
           var startPos8 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_auth_param();
+          $$ = _parse_domain();
           _startPos = startPos8;
-          break;
-        }
-        break;
-      case 5:
-        while (true) {
+          if (success) break;
           var startPos9 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_qop_options();
+          $$ = _parse_nonce();
           _startPos = startPos9;
           if (success) break;
           var startPos10 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_auth_param();
+          $$ = _parse_opaque();
           _startPos = startPos10;
-          break;
-        }
-        break;
-      case 6:
-        while (true) {
+          if (success) break;
           var startPos11 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_realm();
+          $$ = _parse_stale();
           _startPos = startPos11;
           if (success) break;
           var startPos12 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_auth_param();
+          $$ = _parse_algorithm();
           _startPos = startPos12;
-          break;
-        }
-        break;
-      case 7:
-        while (true) {
+          if (success) break;
           var startPos13 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_stale();
-          _startPos = startPos13;
-          if (success) break;
-          var startPos14 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_auth_param();
-          _startPos = startPos14;
-          break;
-        }
-        break;
-      case 8:
-        $$ = null;
-        success = false;
-        break;
-      case 9:
-        while (true) {
-          var startPos15 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_realm();
-          _startPos = startPos15;
-          if (success) break;
-          var startPos16 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_domain();
-          _startPos = startPos16;
-          if (success) break;
-          var startPos17 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_nonce();
-          _startPos = startPos17;
-          if (success) break;
-          var startPos18 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_opaque();
-          _startPos = startPos18;
-          if (success) break;
-          var startPos19 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_stale();
-          _startPos = startPos19;
-          if (success) break;
-          var startPos20 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_algorithm();
-          _startPos = startPos20;
-          if (success) break;
-          var startPos21 = _startPos;
-          _startPos = _cursor;
           $$ = _parse_qop_options();
-          _startPos = startPos21;
-          if (success) break;
-          var startPos22 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_auth_param();
-          _startPos = startPos22;
+          _startPos = startPos13;
           break;
         }
         break;
@@ -7621,7 +7588,7 @@ class GrammarParser {
   
   dynamic _parse_discrete_type() {
     var $$;
-    switch (_getState(_transitions70)) {
+    switch (_getState(_transitions71)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -7695,7 +7662,7 @@ class GrammarParser {
   
   dynamic _parse_disp_param() {
     var $$;
-    switch (_getState(_transitions66)) {
+    switch (_getState(_transitions67)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -7730,7 +7697,7 @@ class GrammarParser {
   
   dynamic _parse_disp_type() {
     var $$;
-    switch (_getState(_transitions65)) {
+    switch (_getState(_transitions66)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -7856,7 +7823,7 @@ class GrammarParser {
           _testing = testing0;
           if (!success) break;
           var seq = new List(3)..[0] = $$;
-          switch (_getState(_transitions62)) {
+          switch (_getState(_transitions63)) {
             case 0:
               var ch1 = _ch, pos1 = _cursor, startPos2 = _startPos;
               _startPos = _cursor;
@@ -8045,14 +8012,14 @@ class GrammarParser {
             ///CODE_START
             if (display_name is String) { // quoted_string_clean
               data.display_name = display_name;
-              $$ = display_name;
+              return display_name;
             } else { // token ( LWS token )*
               if(display_name[1] is List){
                 data.display_name = display_name[1].fold(display_name[0], (aac, next) => aac + next[0] + next[1]);
               } else if(display_name[1] is String){
                 data.display_name = display_name[1];
               }
-              $$ = data.display_name;
+              return data.display_name;
             }
             ///CODE_END
             })($start, $2);
@@ -8199,7 +8166,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_getState(_transitions31)) {
+            switch (_getState(_transitions32)) {
               case 0:
                 var startPos1 = _startPos;
                 _startPos = _cursor;
@@ -8266,7 +8233,7 @@ class GrammarParser {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        $$ = _matchString(_strings86, 'early-only', false);
+        $$ = _matchString(_strings84, 'early-only', false);
         if (success) {    
           final $1 = $$;
           final $start = startPos0;
@@ -8286,7 +8253,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect135);
+      _failure(_expect134);
     }
     _token = null;
     _tokenStart = null;
@@ -8447,7 +8414,7 @@ class GrammarParser {
         while (true) {
           var startPos1 = _startPos;
           _startPos = _cursor;
-          $$ = _matchString(_strings64, 'deactivated', true);
+          $$ = _matchString(_strings62, 'deactivated', true);
           _startPos = startPos1;
           if (success) break;
           var startPos2 = _startPos;
@@ -8461,7 +8428,7 @@ class GrammarParser {
         while (true) {
           var startPos3 = _startPos;
           _startPos = _cursor;
-          $$ = _matchString(_strings65, 'giveup', true);
+          $$ = _matchString(_strings63, 'giveup', true);
           _startPos = startPos3;
           if (success) break;
           var startPos4 = _startPos;
@@ -8475,7 +8442,7 @@ class GrammarParser {
         while (true) {
           var startPos5 = _startPos;
           _startPos = _cursor;
-          $$ = _matchString(_strings66, 'invariant', true);
+          $$ = _matchString(_strings64, 'invariant', true);
           _startPos = startPos5;
           if (success) break;
           var startPos6 = _startPos;
@@ -8489,7 +8456,7 @@ class GrammarParser {
         while (true) {
           var startPos7 = _startPos;
           _startPos = _cursor;
-          $$ = _matchString(_strings67, 'noresource', true);
+          $$ = _matchString(_strings65, 'noresource', true);
           _startPos = startPos7;
           if (success) break;
           var startPos8 = _startPos;
@@ -8503,7 +8470,7 @@ class GrammarParser {
         while (true) {
           var startPos9 = _startPos;
           _startPos = _cursor;
-          $$ = _matchString(_strings68, 'probation', true);
+          $$ = _matchString(_strings66, 'probation', true);
           _startPos = startPos9;
           if (success) break;
           var startPos10 = _startPos;
@@ -8517,7 +8484,7 @@ class GrammarParser {
         while (true) {
           var startPos11 = _startPos;
           _startPos = _cursor;
-          $$ = _matchString(_strings69, 'rejected', true);
+          $$ = _matchString(_strings67, 'rejected', true);
           _startPos = startPos11;
           if (success) break;
           var startPos12 = _startPos;
@@ -8531,7 +8498,7 @@ class GrammarParser {
         while (true) {
           var startPos13 = _startPos;
           _startPos = _cursor;
-          $$ = _matchString(_strings70, 'timeout', true);
+          $$ = _matchString(_strings68, 'timeout', true);
           _startPos = startPos13;
           if (success) break;
           var startPos14 = _startPos;
@@ -8548,7 +8515,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect119);
+      _failure(_expect118);
     }
     return $$;
   }
@@ -8638,6 +8605,17 @@ class GrammarParser {
           if (!success) break;
           seq[1] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $start = startPos0;
+            var pos0 = _startPos, offset = $start;
+            $$ = ((offset) {
+            ///CODE_START
+            return _text().toLowerCase();
+            ///CODE_END
+            })($start);
+          }
           break;
         }
         if (!success) {
@@ -8662,7 +8640,7 @@ class GrammarParser {
   
   dynamic _parse_extension_code() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
@@ -8750,7 +8728,7 @@ class GrammarParser {
     } else {
       _cachePos[149] = pos;
     }  
-    switch (_getState(_transitions72)) {
+    switch (_getState(_transitions73)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -8788,7 +8766,7 @@ class GrammarParser {
   
   dynamic _parse_from_param() {
     var $$;
-    switch (_getState(_transitions74)) {
+    switch (_getState(_transitions75)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -8829,7 +8807,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings85, 'from-tag', false);
+          $$ = _matchString(_strings83, 'from-tag', false);
           if (!success) break;
           var seq = new List(3)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -8865,14 +8843,14 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect134);
+      _failure(_expect133);
     }
     return $$;
   }
   
   dynamic _parse_gen_value() {
     var $$;
-    switch (_getState(_transitions64)) {
+    switch (_getState(_transitions65)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -8966,7 +8944,7 @@ class GrammarParser {
           var seq = new List(2)..[0] = $$;
           var testing0 = _testing;
           _testing = _cursor;
-          switch (_ch >= 61 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+          switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
             case 0:
             case 2:
               var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -9007,12 +8985,12 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, param, value) {
             ///CODE_START
-            if(data.params == null) data.params = new Map<String, dynamic>();
-            if (value == null){
-              value = null;
-            }
-            else {
+            if(data.params == null) data.params = {};
+            if (value != null) {
               value = value[1];
+            }
+            if(param.toLowerCase() == 'branch'){
+              data.branch = value;
             }
             data.params[param.toLowerCase()] = value;
             ///CODE_END
@@ -9122,7 +9100,7 @@ class GrammarParser {
           $$ = _parse_EQUAL();
           if (!success) break;
           seq[1] = $$;
-          switch (_getState(_transitions67)) {
+          switch (_getState(_transitions68)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -9199,7 +9177,7 @@ class GrammarParser {
     } else {
       _cachePos[81] = pos;
     }  
-    switch (_getState(_transitions42)) {
+    switch (_getState(_transitions43)) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -9535,13 +9513,13 @@ class GrammarParser {
   
   dynamic _parse_hier_part() {
     var $$;
-    switch (_getState(_transitions48)) {
+    switch (_getState(_transitions49)) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          switch (_getState(_transitions49)) {
+          switch (_getState(_transitions50)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -9635,13 +9613,13 @@ class GrammarParser {
   
   dynamic _parse_hname() {
     var $$;
-    switch (_getState(_transitions42)) {
+    switch (_getState(_transitions43)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
         var testing0;
         for (var first = true, reps; ;) {  
-          switch (_getState(_transitions43)) {  
+          switch (_getState(_transitions44)) {  
             case 0:  
               var startPos1 = _startPos;  
               _startPos = _cursor;  
@@ -9714,7 +9692,7 @@ class GrammarParser {
     }  
     _token = 18;    
     _tokenStart = _cursor;    
-    switch (_getState(_transitions44)) {
+    switch (_getState(_transitions45)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -9785,12 +9763,12 @@ class GrammarParser {
     } else {
       _cachePos[54] = pos;
     }  
-    switch (_getState(_transitions29)) {
+    switch (_getState(_transitions30)) {
       case 0:
       case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_getState(_transitions30)) {
+        switch (_getState(_transitions31)) {
           case 0:
             while (true) {
               var startPos1 = _startPos;
@@ -9986,7 +9964,7 @@ class GrammarParser {
     } else {
       _cachePos[53] = pos;
     }  
-    switch (_getState(_transitions29)) {
+    switch (_getState(_transitions30)) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -10063,7 +10041,7 @@ class GrammarParser {
         var testing0 = _testing; 
         for (var reps = []; ; ) {
           _testing = _cursor;
-          switch (_getState(_transitions43)) {
+          switch (_getState(_transitions44)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -10209,7 +10187,7 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             {
             ///CODE_START
-            if(data.uri_params == null) data.uri_params={};
+            if(data.uri_params == null) data.uri_params ={ };
             data.uri_params['lr'] = null;
             ///CODE_END
             }
@@ -10244,7 +10222,7 @@ class GrammarParser {
     } else {
       _cachePos[61] = pos;
     }  
-    switch (_getState(_transitions34)) {
+    switch (_getState(_transitions35)) {
       case 0:
         while (true) {
           var startPos0 = _startPos;
@@ -10402,7 +10380,7 @@ class GrammarParser {
   
   dynamic _parse_m_subtype() {
     var $$;
-    switch (_getState(_transitions73)) {
+    switch (_getState(_transitions74)) {
       case 0:
         while (true) {
           var startPos0 = _startPos;
@@ -10437,7 +10415,7 @@ class GrammarParser {
   
   dynamic _parse_m_type() {
     var $$;
-    switch (_getState(_transitions69)) {
+    switch (_getState(_transitions70)) {
       case 0:
         while (true) {
           var startPos0 = _startPos;
@@ -10478,7 +10456,7 @@ class GrammarParser {
   
   dynamic _parse_m_value() {
     var $$;
-    switch (_getState(_transitions62)) {
+    switch (_getState(_transitions63)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -10539,7 +10517,7 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, maddr) {
             ///CODE_START
-            if(data.uri_params == null) data.uri_params={};
+            if(data.uri_params == null) data.uri_params = {};
             data.uri_params['maddr'] = maddr;
             ///CODE_END
             })($start, $2);
@@ -10638,7 +10616,7 @@ class GrammarParser {
   
   dynamic _parse_media_type() {
     var $$;
-    switch (_getState(_transitions68)) {
+    switch (_getState(_transitions69)) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -10656,7 +10634,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -10737,7 +10715,7 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, method) {
             ///CODE_START
-            if(data.uri_params == null) data.uri_params={};
+            if(data.uri_params == null) data.uri_params = {};
             data.uri_params['method'] = method;
             ///CODE_END
             })($start, $2);
@@ -10913,7 +10891,7 @@ class GrammarParser {
   
   dynamic _parse_nonce_value() {
     var $$;
-    switch (_ch >= 34 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var startPos0 = _startPos;
@@ -10925,7 +10903,7 @@ class GrammarParser {
           var pos0 = _startPos;
           $$ = ((offset, nonce) {
           ///CODE_START
-          data.nonce=nonce;
+          data.nonce = nonce; return nonce;
           ///CODE_END
           })($start, $1);
         }
@@ -10968,7 +10946,7 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, opaque) {
             ///CODE_START
-            data.opaque=opaque;
+            data.opaque = opaque; return opaque;
             ///CODE_END
             })($start, $3);
           }
@@ -10993,7 +10971,7 @@ class GrammarParser {
   
   dynamic _parse_opaque_part() {
     var $$;
-    switch (_getState(_transitions50)) {
+    switch (_getState(_transitions51)) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -11090,7 +11068,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -11173,7 +11151,7 @@ class GrammarParser {
   
   dynamic _parse_other_param() {
     var $$;
-    switch (_getState(_transitions39)) {
+    switch (_getState(_transitions40)) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -11226,9 +11204,7 @@ class GrammarParser {
             $$ = ((offset, param, value) {
             ///CODE_START
             if(data.uri_params == null) data.uri_params = {};
-            if ( value == null) {
-              value = null;
-            } else {
+            if ( value != null) {
               value = value[1];
             }
             if(param.toLowerCase() == 'transport')
@@ -11347,7 +11323,7 @@ class GrammarParser {
     var $$;
     _token = 17;  
     _tokenStart = _cursor;  
-    switch (_getState(_transitions41)) {
+    switch (_getState(_transitions42)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -11415,7 +11391,7 @@ class GrammarParser {
     } else {
       _cachePos[78] = pos;
     }  
-    switch (_getState(_transitions40)) {
+    switch (_getState(_transitions41)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -11459,7 +11435,7 @@ class GrammarParser {
         var testing0 = _testing; 
         for (var reps = []; ; ) {
           _testing = _cursor;
-          switch (_getState(_transitions28)) {
+          switch (_getState(_transitions29)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -11628,7 +11604,7 @@ class GrammarParser {
     } else {
       _cachePos[98] = pos;
     }  
-    switch (_getState(_transitions53)) {
+    switch (_getState(_transitions54)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -11700,7 +11676,7 @@ class GrammarParser {
   
   dynamic _parse_pname() {
     var $$;
-    switch (_getState(_transitions39)) {
+    switch (_getState(_transitions40)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -11845,7 +11821,7 @@ class GrammarParser {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_getState(_transitions45)) {
+        switch (_getState(_transitions46)) {
           case 0:
             var startPos1 = _startPos;
             _startPos = _cursor;
@@ -11873,7 +11849,7 @@ class GrammarParser {
             break;
         }
         if (!success && _cursor > _testing) {
-          _failure(_expect112);
+          _failure(_expect111);
         }
         if (success) {    
           final $1 = $$;
@@ -11882,6 +11858,7 @@ class GrammarParser {
           $$ = ((offset, via_protocol) {
           ///CODE_START
           data.protocol = via_protocol;
+          return data.protocol;
           ///CODE_END
           })($start, $1);
         }
@@ -11894,7 +11871,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect112);
+      _failure(_expect111);
     }
     return $$;
   }
@@ -11922,7 +11899,7 @@ class GrammarParser {
   
   dynamic _parse_pvalue() {
     var $$;
-    switch (_getState(_transitions39)) {
+    switch (_getState(_transitions40)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -12036,7 +12013,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings55, 'qop', true);
+          $$ = _matchString(_strings53, 'qop', true);
           if (!success) break;
           var seq = new List(5)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -12112,7 +12089,7 @@ class GrammarParser {
               break;
           }
           if (!success && _cursor > _testing) {
-            _failure(_expect111);
+            _failure(_expect110);
           }
           if (!success) break;
           seq[3] = $$;
@@ -12134,7 +12111,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect110);
+      _failure(_expect109);
     }
     return $$;
   }
@@ -12165,12 +12142,12 @@ class GrammarParser {
             while (true) {
               var startPos2 = _startPos;
               _startPos = _cursor;
-              $$ = _matchString(_strings56, 'auth-int', true);
+              $$ = _matchString(_strings54, 'auth-int', true);
               _startPos = startPos2;
               if (success) break;
               var startPos3 = _startPos;
               _startPos = _cursor;
-              $$ = _matchString(_strings57, 'auth', true);
+              $$ = _matchString(_strings55, 'auth', true);
               _startPos = startPos3;
               if (success) break;
               var startPos4 = _startPos;
@@ -12187,7 +12164,7 @@ class GrammarParser {
             break;
         }
         if (!success && _cursor > _testing) {
-          _failure(_expect111);
+          _failure(_expect110);
         }
         if (success) {    
           final $1 = $$;
@@ -12197,6 +12174,7 @@ class GrammarParser {
           ///CODE_START
           if(data.qop == null) data.qop=[];
           data.qop.add(qop_value.toLowerCase());
+          return data.qop;
           ///CODE_END
           })($start, $1);
         }
@@ -12209,7 +12187,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect111);
+      _failure(_expect110);
     }
     if (_cacheable[189]) {
       _addToCache($$, pos, 189);
@@ -12338,7 +12316,7 @@ class GrammarParser {
     } else {
       _cachePos[40] = pos;
     }  
-    switch (_ch >= 34 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -12436,7 +12414,7 @@ class GrammarParser {
     } else {
       _cachePos[41] = pos;
     }  
-    switch (_ch >= 34 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -12660,7 +12638,7 @@ class GrammarParser {
   
   dynamic _parse_realm_value() {
     var $$;
-    switch (_ch >= 34 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var startPos0 = _startPos;
@@ -12673,6 +12651,7 @@ class GrammarParser {
           $$ = ((offset, realm) {
           ///CODE_START
           data.realm = realm;
+          return data.realm;
           ///CODE_END
           })($start, $1);
         }
@@ -12697,7 +12676,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings58, 'cause', true);
+          $$ = _matchString(_strings56, 'cause', true);
           if (!success) break;
           var seq = new List(3)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -12753,7 +12732,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect114);
+      _failure(_expect113);
     }
     return $$;
   }
@@ -12793,7 +12772,7 @@ class GrammarParser {
             break;
         }
         if (!success && _cursor > _testing) {
-          _failure(_expect113);
+          _failure(_expect112);
         }
         _startPos = startPos0;
         break;
@@ -12803,7 +12782,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect113);
+      _failure(_expect112);
     }
     return $$;
   }
@@ -12831,7 +12810,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -12920,13 +12899,13 @@ class GrammarParser {
   
   dynamic _parse_reg_name() {
     var $$;
-    switch (_getState(_transitions56)) {
+    switch (_getState(_transitions57)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
         var testing0;
         for (var first = true, reps; ;) {  
-          switch (_getState(_transitions57)) {  
+          switch (_getState(_transitions58)) {  
             case 0:  
               var startPos1 = _startPos;  
               _startPos = _cursor;  
@@ -13104,7 +13083,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect132);
+      _failure(_expect131);
     }
     return $$;
   }
@@ -13208,12 +13187,12 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings75, 'rport', true);
+          $$ = _matchString(_strings73, 'rport', true);
           if (!success) break;
           var seq = new List(2)..[0] = $$;
           var testing0 = _testing;
           _testing = _cursor;
-          switch (_ch >= 61 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+          switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
             case 0:
             case 2:
               var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -13300,7 +13279,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect125);
+      _failure(_expect124);
     }
     return $$;
   }
@@ -13328,7 +13307,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -13426,7 +13405,7 @@ class GrammarParser {
   
   dynamic _parse_s_e_expires() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -13506,7 +13485,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect127);
+      _failure(_expect126);
     }
     return $$;
   }
@@ -13519,7 +13498,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings80, 'refresher', true);
+          $$ = _matchString(_strings78, 'refresher', true);
           if (!success) break;
           var seq = new List(3)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -13530,12 +13509,12 @@ class GrammarParser {
               while (true) {
                 var startPos1 = _startPos;
                 _startPos = _cursor;
-                $$ = _matchString(_strings81, 'uac', true);
+                $$ = _matchString(_strings79, 'uac', true);
                 _startPos = startPos1;
                 if (success) break;
                 var startPos2 = _startPos;
                 _startPos = _cursor;
-                $$ = _matchString(_strings82, 'uas', true);
+                $$ = _matchString(_strings80, 'uas', true);
                 _startPos = startPos2;
                 break;
               }
@@ -13547,7 +13526,7 @@ class GrammarParser {
               break;
           }
           if (!success && _cursor > _testing) {
-            _failure(_expect129);
+            _failure(_expect128);
           }
           if (!success) break;
           seq[2] = $$;
@@ -13578,7 +13557,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect128);
+      _failure(_expect127);
     }
     return $$;
   }
@@ -13602,7 +13581,7 @@ class GrammarParser {
               var testing0 = _testing; 
               for (var reps = []; ; ) {
                 _testing = _cursor;
-                switch (_getState(_transitions54)) {
+                switch (_getState(_transitions55)) {
                   case 0:
                     var startPos2 = _startPos;
                     _startPos = _cursor;
@@ -13781,7 +13760,7 @@ class GrammarParser {
   
   dynamic _parse_sent_by() {
     var $$;
-    switch (_getState(_transitions29)) {
+    switch (_getState(_transitions30)) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -13792,7 +13771,7 @@ class GrammarParser {
           var seq = new List(2)..[0] = $$;
           var testing0 = _testing;
           _testing = _cursor;
-          switch (_ch >= 58 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+          switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
             case 0:
             case 2:
               var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -13883,7 +13862,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect112);
+      _failure(_expect111);
     }
     return $$;
   }
@@ -13897,7 +13876,7 @@ class GrammarParser {
         _startPos = _cursor;
         var testing0 = _testing;
         _testing = _cursor;
-        switch (_getState(_transitions55)) {
+        switch (_getState(_transitions56)) {
           case 0:
           case 2:
             var ch0 = _ch, pos0 = _cursor, startPos1 = _startPos;
@@ -13987,51 +13966,23 @@ class GrammarParser {
           $$ = _parse_EQUAL();
           if (!success) break;
           seq[1] = $$;
-          switch (_getState(_transitions78)) {
-            case 0:
-              var startPos1 = _startPos;
-              _startPos = _cursor;
-              $$ = _matchString(_strings50, 'false', true);
-              if (success) {    
-                final $1 = $$;
-                final $start = startPos1;
-                var pos0 = _startPos, offset = $start;
-                {
-                ///CODE_START
-                data.stale=false;
-                ///CODE_END
-                }
-              }
-              _startPos = startPos1;
-              break;
-            case 1:
-              var startPos2 = _startPos;
-              _startPos = _cursor;
-              $$ = _matchString(_strings51, 'true', true);
-              if (success) {    
-                final $1 = $$;
-                final $start = startPos2;
-                var pos0 = _startPos, offset = $start;
-                {
-                ///CODE_START
-                data.stale=true;
-                ///CODE_END
-                }
-              }
-              _startPos = startPos2;
-              break;
-            case 2:
-            case 3:
-              $$ = null;
-              success = false;
-              break;
-          }
-          if (!success && _cursor > _testing) {
-            _failure(_expect107);
-          }
+          $$ = _parse_token();
           if (!success) break;
           seq[2] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $3 = seq[2];
+            final $start = startPos0;
+            var pos0 = _startPos;
+            $$ = ((offset, stale) {
+            ///CODE_START
+            data.stale = stale.toLowerCase() == 'true';
+            return stale;
+            ///CODE_END
+            })($start, $3);
+          }
           break;
         }
         if (!success) {
@@ -14125,7 +14076,7 @@ class GrammarParser {
               var ch1 = _ch, pos1 = _cursor, startPos5 = _startPos;
               _startPos = _cursor;
               while (true) {  
-                $$ = _matchString(_strings62, 'reason', true);
+                $$ = _matchString(_strings60, 'reason', true);
                 if (!success) break;
                 var seq = new List(3)..[0] = $$;
                 $$ = _parse_EQUAL();
@@ -14149,7 +14100,7 @@ class GrammarParser {
               break;
           }
           if (!success && _cursor > _testing) {
-            _failure(_expect117);
+            _failure(_expect116);
           }
           if (success) {    
             final $1 = $$;
@@ -14171,7 +14122,7 @@ class GrammarParser {
               var ch2 = _ch, pos2 = _cursor, startPos7 = _startPos;
               _startPos = _cursor;
               while (true) {  
-                $$ = _matchString(_strings63, 'retry_after', true);
+                $$ = _matchString(_strings61, 'retry_after', true);
                 if (!success) break;
                 var seq = new List(3)..[0] = $$;
                 $$ = _parse_EQUAL();
@@ -14195,7 +14146,7 @@ class GrammarParser {
               break;
           }
           if (!success && _cursor > _testing) {
-            _failure(_expect118);
+            _failure(_expect117);
           }
           if (success) {    
             final $1 = $$;
@@ -14230,7 +14181,7 @@ class GrammarParser {
               var ch3 = _ch, pos3 = _cursor, startPos10 = _startPos;
               _startPos = _cursor;
               while (true) {  
-                $$ = _matchString(_strings62, 'reason', true);
+                $$ = _matchString(_strings60, 'reason', true);
                 if (!success) break;
                 var seq = new List(3)..[0] = $$;
                 $$ = _parse_EQUAL();
@@ -14254,7 +14205,7 @@ class GrammarParser {
               break;
           }
           if (!success && _cursor > _testing) {
-            _failure(_expect117);
+            _failure(_expect116);
           }
           if (success) {    
             final $1 = $$;
@@ -14322,7 +14273,7 @@ class GrammarParser {
               var ch5 = _ch, pos5 = _cursor, startPos14 = _startPos;
               _startPos = _cursor;
               while (true) {  
-                $$ = _matchString(_strings63, 'retry_after', true);
+                $$ = _matchString(_strings61, 'retry_after', true);
                 if (!success) break;
                 var seq = new List(3)..[0] = $$;
                 $$ = _parse_EQUAL();
@@ -14346,7 +14297,7 @@ class GrammarParser {
               break;
           }
           if (!success && _cursor > _testing) {
-            _failure(_expect118);
+            _failure(_expect117);
           }
           if (success) {    
             final $1 = $$;
@@ -14369,7 +14320,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect116);
+      _failure(_expect115);
     }
     return $$;
   }
@@ -14391,7 +14342,7 @@ class GrammarParser {
             while (true) {
               var startPos2 = _startPos;
               _startPos = _cursor;
-              $$ = _matchString(_strings59, 'active', true);
+              $$ = _matchString(_strings57, 'active', true);
               _startPos = startPos2;
               if (success) break;
               var startPos3 = _startPos;
@@ -14405,7 +14356,7 @@ class GrammarParser {
             while (true) {
               var startPos4 = _startPos;
               _startPos = _cursor;
-              $$ = _matchString(_strings60, 'pending', true);
+              $$ = _matchString(_strings58, 'pending', true);
               _startPos = startPos4;
               if (success) break;
               var startPos5 = _startPos;
@@ -14419,7 +14370,7 @@ class GrammarParser {
             while (true) {
               var startPos6 = _startPos;
               _startPos = _cursor;
-              $$ = _matchString(_strings61, 'terminated', true);
+              $$ = _matchString(_strings59, 'terminated', true);
               _startPos = startPos6;
               if (success) break;
               var startPos7 = _startPos;
@@ -14436,7 +14387,7 @@ class GrammarParser {
             break;
         }
         if (!success && _cursor > _testing) {
-          _failure(_expect115);
+          _failure(_expect114);
         }
         if (success) {    
           final $1 = $$;
@@ -14457,7 +14408,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect115);
+      _failure(_expect114);
     }
     return $$;
   }
@@ -14525,7 +14476,7 @@ class GrammarParser {
   
   dynamic _parse_to_param() {
     var $$;
-    switch (_getState(_transitions74)) {
+    switch (_getState(_transitions75)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -14566,7 +14517,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings84, 'to-tag', false);
+          $$ = _matchString(_strings82, 'to-tag', false);
           if (!success) break;
           var seq = new List(3)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -14602,7 +14553,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect133);
+      _failure(_expect132);
     }
     return $$;
   }
@@ -14891,7 +14842,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_getState(_transitions31)) {
+            switch (_getState(_transitions32)) {
               case 0:
                 var startPos1 = _startPos;
                 _startPos = _cursor;
@@ -14967,7 +14918,7 @@ class GrammarParser {
             while (true) {
               var startPos2 = _startPos;
               _startPos = _cursor;
-              $$ = _matchString(_strings76, 'SCTP', true);
+              $$ = _matchString(_strings74, 'SCTP', true);
               _startPos = startPos2;
               if (success) break;
               var startPos3 = _startPos;
@@ -14981,12 +14932,12 @@ class GrammarParser {
             while (true) {
               var startPos4 = _startPos;
               _startPos = _cursor;
-              $$ = _matchString(_strings77, 'TCP', true);
+              $$ = _matchString(_strings75, 'TCP', true);
               _startPos = startPos4;
               if (success) break;
               var startPos5 = _startPos;
               _startPos = _cursor;
-              $$ = _matchString(_strings78, 'TLS', true);
+              $$ = _matchString(_strings76, 'TLS', true);
               _startPos = startPos5;
               if (success) break;
               var startPos6 = _startPos;
@@ -15000,7 +14951,7 @@ class GrammarParser {
             while (true) {
               var startPos7 = _startPos;
               _startPos = _cursor;
-              $$ = _matchString(_strings79, 'UDP', true);
+              $$ = _matchString(_strings77, 'UDP', true);
               _startPos = startPos7;
               if (success) break;
               var startPos8 = _startPos;
@@ -15017,7 +14968,7 @@ class GrammarParser {
             break;
         }
         if (!success && _cursor > _testing) {
-          _failure(_expect126);
+          _failure(_expect125);
         }
         if (success) {    
           final $1 = $$;
@@ -15038,7 +14989,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect126);
+      _failure(_expect125);
     }
     return $$;
   }
@@ -15053,7 +15004,7 @@ class GrammarParser {
           $$ = _matchString(_strings4, 'transport=', true);
           if (!success) break;
           var seq = new List(2)..[0] = $$;
-          switch (_getState(_transitions37)) {
+          switch (_getState(_transitions38)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -15162,12 +15113,12 @@ class GrammarParser {
     } else {
       _cachePos[227] = pos;
     }  
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+        switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
           case 0:
           case 2:
             var ch0 = _ch, pos0 = _cursor, startPos1 = _startPos;
@@ -15255,7 +15206,7 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, ttl) {
             ///CODE_START
-            if(data.params == null) data.params={};
+            if(data.params == null) data.params = {};
             data.params['ttl'] = ttl;
             ///CODE_END
             })($start, $2);
@@ -15320,7 +15271,7 @@ class GrammarParser {
   
   dynamic _parse_uri_parameter() {
     var $$;
-    switch (_getState(_transitions36)) {
+    switch (_getState(_transitions37)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -15622,7 +15573,7 @@ class GrammarParser {
     } else {
       _cachePos[93] = pos;
     }  
-    switch (_getState(_transitions51)) {
+    switch (_getState(_transitions52)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -15658,7 +15609,7 @@ class GrammarParser {
   
   dynamic _parse_uric_no_slash() {
     var $$;
-    switch (_getState(_transitions52)) {
+    switch (_getState(_transitions53)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -15739,13 +15690,13 @@ class GrammarParser {
   
   dynamic _parse_user() {
     var $$;
-    switch (_getState(_transitions25)) {
+    switch (_getState(_transitions26)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
         var testing0;
         for (var first = true, reps; ;) {  
-          switch (_getState(_transitions26)) {  
+          switch (_getState(_transitions27)) {  
             case 0:  
               var startPos1 = _startPos;  
               _startPos = _cursor;  
@@ -15815,7 +15766,7 @@ class GrammarParser {
           $$ = _matchString(_strings9, 'user=', true);
           if (!success) break;
           var seq = new List(2)..[0] = $$;
-          switch (_getState(_transitions38)) {
+          switch (_getState(_transitions39)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -15898,7 +15849,7 @@ class GrammarParser {
     var $$;
     _token = 15;  
     _tokenStart = _cursor;  
-    switch (_getState(_transitions27)) {
+    switch (_getState(_transitions28)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -15978,15 +15929,37 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _parse_user();
-          if (!success) break;
-          var seq = new List(3)..[0] = $$;
           var testing0 = _testing;
+          _testing = _cursor;
+          $$ = _matchChar(43, '+');
+          success = true; 
+          _testing = testing0;
+          if (!success) break;
+          var seq = new List(4)..[0] = $$;
+          switch (_getState(_transitions26)) {
+            case 0:
+              var startPos1 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_user();
+              _startPos = startPos1;
+              break;
+            case 1:
+            case 2:
+              $$ = null;
+              success = false;
+              break;
+          }
+          if (!success && _cursor > _testing) {
+            _failure(_expect34);
+          }
+          if (!success) break;
+          seq[1] = $$;
+          var testing1 = _testing;
           _testing = _cursor;
           switch (_ch == 58 ? 0 : _ch == -1 ? 2 : 1) {
             case 0:
             case 2:
-              var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
+              var ch1 = _ch, pos1 = _cursor, startPos2 = _startPos;
               _startPos = _cursor;
               while (true) {  
                 $$ = _matchChar(58, ':');
@@ -16002,7 +15975,7 @@ class GrammarParser {
                 _ch = ch1;
                 _cursor = pos1;
               }
-              _startPos = startPos1;
+              _startPos = startPos2;
               break;
             case 1:
               $$ = null;
@@ -16013,24 +15986,26 @@ class GrammarParser {
             _failure(_expect15);
           }
           success = true; 
-          _testing = testing0;
-          if (!success) break;
-          seq[1] = $$;
-          $$ = _matchChar(64, '@');
+          _testing = testing1;
           if (!success) break;
           seq[2] = $$;
+          $$ = _matchChar(64, '@');
+          if (!success) break;
+          seq[3] = $$;
           $$ = seq;
           if (success) {    
             final $1 = seq[0];
             final $2 = seq[1];
             final $3 = seq[2];
+            final $4 = seq[3];
             final $start = startPos0;
-            var pos0 = _startPos, offset = $start;
-            {
+            var pos0 = _startPos;
+            $$ = ((offset, plus, user) {
             ///CODE_START
-            data.user = decodeURIComponent($1.join(''));
+            data.user = (plus !=null ? plus : '') + decodeURIComponent(user.join(''));
+            return data.user;
             ///CODE_END
-            }
+            })($start, $1, $2);
           }
           break;
         }
@@ -16124,7 +16099,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect131);
+      _failure(_expect130);
     }
     _token = null;
     _tokenStart = null;
@@ -16139,7 +16114,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings74, 'branch', true);
+          $$ = _matchString(_strings72, 'branch', true);
           if (!success) break;
           var seq = new List(3)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -16157,7 +16132,8 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, via_branch) {
             ///CODE_START
-            data.branch = via_branch;
+            data.branch = _text();
+            return data.branch;
             ///CODE_END
             })($start, $3);
           }
@@ -16175,7 +16151,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect124);
+      _failure(_expect123);
     }
     return $$;
   }
@@ -16203,12 +16179,12 @@ class GrammarParser {
   
   dynamic _parse_via_host() {
     var $$;
-    switch (_getState(_transitions29)) {
+    switch (_getState(_transitions30)) {
       case 0:
       case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_getState(_transitions30)) {
+        switch (_getState(_transitions31)) {
           case 0:
             while (true) {
               var startPos1 = _startPos;
@@ -16288,7 +16264,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings72, 'maddr', true);
+          $$ = _matchString(_strings70, 'maddr', true);
           if (!success) break;
           var seq = new List(3)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -16324,7 +16300,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect122);
+      _failure(_expect121);
     }
     return $$;
   }
@@ -16358,7 +16334,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -16413,7 +16389,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect112);
+      _failure(_expect111);
     }
     if (_cacheable[212]) {
       _addToCache($$, pos, 212);
@@ -16531,7 +16507,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect120);
+      _failure(_expect119);
     }
     return $$;
   }
@@ -16607,7 +16583,8 @@ class GrammarParser {
           var pos0 = _startPos;
           $$ = ((offset, via_sent_by_port) {
           ///CODE_START
-          data.port = parseInt(via_sent_by_port.join(''));
+          data.port = parseInt(_text());
+          return data.port;
           ///CODE_END
           })($start, $1);
         }
@@ -16632,7 +16609,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings73, 'received', true);
+          $$ = _matchString(_strings71, 'received', true);
           if (!success) break;
           var seq = new List(3)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -16697,7 +16674,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect123);
+      _failure(_expect122);
     }
     return $$;
   }
@@ -16710,7 +16687,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings71, 'ttl', true);
+          $$ = _matchString(_strings69, 'ttl', true);
           if (!success) break;
           var seq = new List(3)..[0] = $$;
           $$ = _parse_EQUAL();
@@ -16746,7 +16723,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect121);
+      _failure(_expect120);
     }
     return $$;
   }
@@ -17146,7 +17123,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -17208,7 +17185,7 @@ class GrammarParser {
   
   dynamic parse_CSeq() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -17224,6 +17201,18 @@ class GrammarParser {
           if (!success) break;
           seq[2] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $3 = seq[2];
+            final $start = startPos0;
+            var pos0 = _startPos, offset = $start;
+            $$ = ((offset) {
+            ///CODE_START
+            return data;
+            ///CODE_END
+            })($start);
+          }
           break;
         }
         if (!success) {
@@ -17327,7 +17316,7 @@ class GrammarParser {
       case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_getState(_transitions60)) {
+        switch (_getState(_transitions61)) {
           case 0:
             var startPos1 = _startPos;
             _startPos = _cursor;
@@ -17343,7 +17332,7 @@ class GrammarParser {
                   var testing0 = _testing; 
                   for (var reps = []; ; ) {
                     _testing = _cursor;
-                    switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+                    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
                       case 0:
                       case 2:
                         var ch1 = _ch, pos1 = _cursor, startPos3 = _startPos;
@@ -17424,7 +17413,7 @@ class GrammarParser {
                     var testing1 = _testing; 
                     for (var reps = []; ; ) {
                       _testing = _cursor;
-                      switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+                      switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
                         case 0:
                         case 2:
                           var ch3 = _ch, pos3 = _cursor, startPos7 = _startPos;
@@ -17502,7 +17491,7 @@ class GrammarParser {
           var idx, length;
           length = data.multi_header.length;
           for (idx = 0; idx < length; idx++) {
-            if (data.multi_header[idx].parsed == null) {
+            if (data.multi_header[idx]['parsed'] == null) {
               $$ == null;
               break;
             }
@@ -17542,7 +17531,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -17616,7 +17605,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -17678,11 +17667,11 @@ class GrammarParser {
   
   dynamic parse_Content_Length() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+        switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
           case 0:
             var startPos1 = _startPos;
             _startPos = _cursor;
@@ -17744,7 +17733,7 @@ class GrammarParser {
   
   dynamic parse_Content_Type() {
     var $$;
-    switch (_getState(_transitions68)) {
+    switch (_getState(_transitions69)) {
       case 0:
       case 2:
         var startPos0 = _startPos;
@@ -17787,7 +17776,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -17833,9 +17822,10 @@ class GrammarParser {
             final $2 = seq[1];
             final $start = startPos0;
             var pos0 = _startPos;
-            $$ = ((offset, event_type) {
+            $$ = ((offset, event) {
             ///CODE_START
-            data.event = event_type.join('').toLowerCase();
+            data.event = event;
+            return data;
             ///CODE_END
             })($start, $1);
           }
@@ -17860,7 +17850,7 @@ class GrammarParser {
   
   dynamic parse_Expires() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -17897,7 +17887,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          switch (_getState(_transitions61)) {
+          switch (_getState(_transitions62)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -17932,7 +17922,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos4 = _startPos;
@@ -18038,7 +18028,7 @@ class GrammarParser {
   
   dynamic parse_Max_Forwards() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -18089,7 +18079,7 @@ class GrammarParser {
   
   dynamic parse_Min_Expires() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -18168,7 +18158,7 @@ class GrammarParser {
           var testing1 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos2 = _startPos;
@@ -18281,7 +18271,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -18349,7 +18339,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          switch (_getState(_transitions45)) {
+          switch (_getState(_transitions46)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -18377,14 +18367,14 @@ class GrammarParser {
               break;
           }
           if (!success && _cursor > _testing) {
-            _failure(_expect112);
+            _failure(_expect111);
           }
           if (!success) break;
           var seq = new List(2)..[0] = $$;
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos4 = _startPos;
@@ -18439,6 +18429,7 @@ class GrammarParser {
               data.text = text.substring(1, text.length-1);
               data.params['text'] = null;
             }
+            return data;
             ///CODE_END
             })($start, $1);
           }
@@ -18456,7 +18447,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect112);
+      _failure(_expect111);
     }
     return $$;
   }
@@ -18475,7 +18466,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -18566,7 +18557,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          switch (_getState(_transitions61)) {
+          switch (_getState(_transitions62)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -18601,7 +18592,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos4 = _startPos;
@@ -18690,7 +18681,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -18731,6 +18722,17 @@ class GrammarParser {
           if (!success) break;
           seq[1] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $start = startPos0;
+            var pos0 = _startPos;
+            $$ = ((offset, call_id) {
+            ///CODE_START
+            return data;
+            ///CODE_END
+            })($start, $1);
+          }
           break;
         }
         if (!success) {
@@ -18752,7 +18754,7 @@ class GrammarParser {
   
   dynamic parse_Request_Response() {
     var $$;
-    switch (_getState(_transitions45)) {
+    switch (_getState(_transitions46)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -18799,7 +18801,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -18873,7 +18875,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -18935,7 +18937,7 @@ class GrammarParser {
   
   dynamic parse_Session_Expires() {
     var $$;
-    switch (_ch >= 48 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -18947,7 +18949,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -18988,6 +18990,17 @@ class GrammarParser {
           if (!success) break;
           seq[1] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $start = startPos0;
+            var pos0 = _startPos, offset = $start;
+            $$ = ((offset) {
+            ///CODE_START
+            return data;
+            ///CODE_END
+            })($start);
+          }
           break;
         }
         if (!success) {
@@ -19061,7 +19074,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -19116,7 +19129,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect115);
+      _failure(_expect114);
     }
     return $$;
   }
@@ -19142,7 +19155,7 @@ class GrammarParser {
               var testing1 = _testing; 
               for (var reps = []; ; ) {
                 _testing = _cursor;
-                switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+                switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
                   case 0:
                   case 2:
                     var ch1 = _ch, pos1 = _cursor, startPos2 = _startPos;
@@ -19222,7 +19235,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          switch (_getState(_transitions61)) {
+          switch (_getState(_transitions62)) {
             case 0:
               var startPos1 = _startPos;
               _startPos = _cursor;
@@ -19257,7 +19270,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 59 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos4 = _startPos;
@@ -19348,7 +19361,7 @@ class GrammarParser {
           var testing0 = _testing; 
           for (var reps = []; ; ) {
             _testing = _cursor;
-            switch (_ch >= 44 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
               case 0:
               case 2:
                 var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
@@ -19389,6 +19402,17 @@ class GrammarParser {
           if (!success) break;
           seq[1] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $start = startPos0;
+            var pos0 = _startPos, offset = $start;
+            {
+            ///CODE_START
+            $$ = data;
+            ///CODE_END
+            }
+          }
           break;
         }
         if (!success) {
@@ -19403,7 +19427,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect112);
+      _failure(_expect111);
     }
     return $$;
   }
@@ -19431,7 +19455,7 @@ class GrammarParser {
   
   dynamic parse_comment() {
     var $$;
-    switch (_ch >= 40 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+    switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -19733,7 +19757,7 @@ class GrammarParser {
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
         _startPos = _cursor;
         while (true) {  
-          $$ = _matchString(_strings83, 'uuid:', false);
+          $$ = _matchString(_strings81, 'uuid:', false);
           if (!success) break;
           var seq = new List(2)..[0] = $$;
           $$ = _parse_uuid();
@@ -19755,7 +19779,7 @@ class GrammarParser {
         break;
     }
     if (!success && _cursor > _testing) {
-      _failure(_expect130);
+      _failure(_expect129);
     }
     return $$;
   }
@@ -19851,7 +19875,7 @@ class GrammarParser {
         "separators": parse_separators, 
         "word": _parse_word,  
         "STAR": _parse_STAR,  
-        "SLASH": _parse_SLASH,  
+        "SLASH": _parse_SLASH, 
         "EQUAL": _parse_EQUAL,  
         "LPAREN": _parse_LPAREN,  
         "RPAREN": _parse_RPAREN,  
@@ -19873,9 +19897,9 @@ class GrammarParser {
         "uri_scheme": _parse_uri_scheme,  
         "uri_scheme_sips": _parse_uri_scheme_sips, 
         "uri_scheme_sip": _parse_uri_scheme_sip,  
-        "userinfo": _parse_userinfo,  
+        "userinfo": _parse_userinfo, 
         "user": _parse_user,  
-        "user_unreserved": _parse_user_unreserved,  
+        "user_unreserved": _parse_user_unreserved, 
         "password": _parse_password,  
         "hostport": _parse_hostport,  
         "host": _parse_host,  
@@ -19891,7 +19915,7 @@ class GrammarParser {
         "port": _parse_port,  
         "uri_parameters": _parse_uri_parameters,  
         "uri_parameter": _parse_uri_parameter,  
-        "transport_param": _parse_transport_param,  
+        "transport_param": _parse_transport_param, 
         "user_param": _parse_user_param,  
         "method_param": _parse_method_param,  
         "ttl_param": _parse_ttl_param,  
@@ -19906,7 +19930,7 @@ class GrammarParser {
         "header": _parse_header,  
         "hname": _parse_hname,  
         "hvalue": _parse_hvalue, 
-        "hnv_unreserved": _parse_hnv_unreserved,  
+        "hnv_unreserved": _parse_hnv_unreserved, 
         "Request_Response": parse_Request_Response, 
         "Request_Line": _parse_Request_Line,  
         "Request_URI": _parse_Request_URI, 
@@ -19926,7 +19950,7 @@ class GrammarParser {
         "srvr": _parse_srvr,  
         "reg_name": _parse_reg_name,  
         "query": _parse_query,  
-        "SIP_Version": _parse_SIP_Version,  
+        "SIP_Version": _parse_SIP_Version, 
         "INVITEm": _parse_INVITEm,  
         "ACKm": _parse_ACKm,  
         "OPTIONSm": _parse_OPTIONSm,  
@@ -19936,11 +19960,11 @@ class GrammarParser {
         "SUBSCRIBEm": _parse_SUBSCRIBEm,  
         "NOTIFYm": _parse_NOTIFYm,  
         "REFERm": _parse_REFERm,  
-        "Method": _parse_Method,  
+        "Method": _parse_Method, 
         "Status_Line": _parse_Status_Line,  
         "Status_Code": _parse_Status_Code,  
         "extension_code": _parse_extension_code,  
-        "Reason_Phrase": _parse_Reason_Phrase,  
+        "Reason_Phrase": _parse_Reason_Phrase, 
         "Allow_Events": parse_Allow_Events, 
         "Call_ID": parse_Call_ID, 
         "Contact": parse_Contact, 
@@ -19984,10 +20008,10 @@ class GrammarParser {
         "Proxy_Authenticate": parse_Proxy_Authenticate, 
         "challenge": _parse_challenge,  
         "other_challenge": _parse_other_challenge,  
-        "auth_param": _parse_auth_param,  
-        "digest_cln": _parse_digest_cln,  
-        "realm": _parse_realm,  
-        "realm_value": _parse_realm_value,  
+        "auth_param": _parse_auth_param, 
+        "digest_cln": _parse_digest_cln, 
+        "realm": _parse_realm, 
+        "realm_value": _parse_realm_value, 
         "domain": _parse_domain, 
         "URI": _parse_URI, 
         "nonce": _parse_nonce,  
@@ -20022,7 +20046,7 @@ class GrammarParser {
         "via_received": _parse_via_received,  
         "via_branch": _parse_via_branch,  
         "response_port": _parse_response_port, 
-        "sent_protocol": _parse_sent_protocol,  
+        "sent_protocol": _parse_sent_protocol, 
         "protocol_name": _parse_protocol_name,  
         "transport": _parse_transport, 
         "sent_by": _parse_sent_by,  

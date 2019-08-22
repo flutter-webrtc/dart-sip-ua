@@ -31,6 +31,7 @@
     var qop;
     var protocol;
     var realm;
+    var auth_params;
     var cause;
     var expires;
     var refresher;
@@ -118,7 +119,7 @@
         "separators": parse_separators,
         "word": _parse_word, 
         "STAR": _parse_STAR, 
-        "SLASH": _parse_SLASH, 
+        "SLASH": _parse_SLASH,
         "EQUAL": _parse_EQUAL, 
         "LPAREN": _parse_LPAREN, 
         "RPAREN": _parse_RPAREN, 
@@ -140,9 +141,9 @@
         "uri_scheme": _parse_uri_scheme, 
         "uri_scheme_sips": _parse_uri_scheme_sips,
         "uri_scheme_sip": _parse_uri_scheme_sip, 
-        "userinfo": _parse_userinfo, 
+        "userinfo": _parse_userinfo,
         "user": _parse_user, 
-        "user_unreserved": _parse_user_unreserved, 
+        "user_unreserved": _parse_user_unreserved,
         "password": _parse_password, 
         "hostport": _parse_hostport, 
         "host": _parse_host, 
@@ -158,7 +159,7 @@
         "port": _parse_port, 
         "uri_parameters": _parse_uri_parameters, 
         "uri_parameter": _parse_uri_parameter, 
-        "transport_param": _parse_transport_param, 
+        "transport_param": _parse_transport_param,
         "user_param": _parse_user_param, 
         "method_param": _parse_method_param, 
         "ttl_param": _parse_ttl_param, 
@@ -173,7 +174,7 @@
         "header": _parse_header, 
         "hname": _parse_hname, 
         "hvalue": _parse_hvalue,
-        "hnv_unreserved": _parse_hnv_unreserved, 
+        "hnv_unreserved": _parse_hnv_unreserved,
         "Request_Response": parse_Request_Response,
         "Request_Line": _parse_Request_Line, 
         "Request_URI": _parse_Request_URI,
@@ -193,7 +194,7 @@
         "srvr": _parse_srvr, 
         "reg_name": _parse_reg_name, 
         "query": _parse_query, 
-        "SIP_Version": _parse_SIP_Version, 
+        "SIP_Version": _parse_SIP_Version,
         "INVITEm": _parse_INVITEm, 
         "ACKm": _parse_ACKm, 
         "OPTIONSm": _parse_OPTIONSm, 
@@ -203,11 +204,11 @@
         "SUBSCRIBEm": _parse_SUBSCRIBEm, 
         "NOTIFYm": _parse_NOTIFYm, 
         "REFERm": _parse_REFERm, 
-        "Method": _parse_Method, 
+        "Method": _parse_Method,
         "Status_Line": _parse_Status_Line, 
         "Status_Code": _parse_Status_Code, 
         "extension_code": _parse_extension_code, 
-        "Reason_Phrase": _parse_Reason_Phrase, 
+        "Reason_Phrase": _parse_Reason_Phrase,
         "Allow_Events": parse_Allow_Events,
         "Call_ID": parse_Call_ID,
         "Contact": parse_Contact,
@@ -251,10 +252,10 @@
         "Proxy_Authenticate": parse_Proxy_Authenticate,
         "challenge": _parse_challenge, 
         "other_challenge": _parse_other_challenge, 
-        "auth_param": _parse_auth_param, 
-        "digest_cln": _parse_digest_cln, 
-        "realm": _parse_realm, 
-        "realm_value": _parse_realm_value, 
+        "auth_param": _parse_auth_param,
+        "digest_cln": _parse_digest_cln,
+        "realm": _parse_realm,
+        "realm_value": _parse_realm_value,
         "domain": _parse_domain,
         "URI": _parse_URI,
         "nonce": _parse_nonce, 
@@ -289,7 +290,7 @@
         "via_received": _parse_via_received, 
         "via_branch": _parse_via_branch, 
         "response_port": _parse_response_port,
-        "sent_protocol": _parse_sent_protocol, 
+        "sent_protocol": _parse_sent_protocol,
         "protocol_name": _parse_protocol_name, 
         "transport": _parse_transport,
         "sent_by": _parse_sent_by, 
@@ -433,7 +434,7 @@ quoted_pair <- "\\" ( [\x00-\x09] / [\x0B-\x0C] / [\x0E-\x7F] )
 ## SIP URI
 ##=======================
 
-SIP_URI_noparams  <- uri_scheme ":"  userinfo ? hostport {
+SIP_URI_noparams  <- uri_scheme ":"  userinfo? hostport {
                     try {
                         data.uri = new URI(data.scheme, data.user, data.host, data.port);
                         data.scheme = null;
@@ -471,10 +472,12 @@ uri_scheme_sips <- scheme: "sip"i {
 uri_scheme_sip <- scheme: "sip"i {
                     data.scheme = scheme.toLowerCase(); }
 
-userinfo        <- user (":" password)? "@" {
-                    data.user = decodeURIComponent($1.join(''));}
+userinfo        <- plus: "+"? user: ( user) (":" password)? "@" {
+                    data.user = (plus !=null ? plus : '') + decodeURIComponent(user.join(''));
+                    return data.user;
+                  }
 
-user            <- ( unreserved / escaped / user_unreserved )+
+user            <- ( user_unreserved / unreserved / escaped )+
 
 user_unreserved <- "&" / "=" / "+" / "$" / "," / ";" / "?" / "/"
 
@@ -578,31 +581,29 @@ user_param        <- "user="i user: ( "phone"i / "ip"i / other_user) {
 other_user        <- token
 
 method_param      <- "method="i method: Method {
-                      if(data.uri_params == null) data.uri_params={};
+                      if(data.uri_params == null) data.uri_params = {};
                       data.uri_params['method'] = method; }
 
 ttl_param         <- "ttl="i ttl: ttl {
-                      if(data.params == null) data.params={};
+                      if(data.params == null) data.params = {};
                       data.params['ttl'] = ttl; }
 
 maddr_param       <- "maddr="i maddr: host {
-                      if(data.uri_params == null) data.uri_params={};
+                      if(data.uri_params == null) data.uri_params = {};
                       data.uri_params['maddr'] = maddr; }
 
 lr_param          <- "lr"i ('=' token)? {
-                      if(data.uri_params == null) data.uri_params={};
+                      if(data.uri_params == null) data.uri_params ={ };
                       data.uri_params['lr'] = null; }
 
 other_param       <- param: pname value: ( "=" pvalue )? {
                       if(data.uri_params == null) data.uri_params = {};
-                      if ( value == null) {
-                        value = null;
-                      } else {
+                      if ( value != null) {
                         value = value[1];
                       }
                       if(param.toLowerCase() == 'transport')
                         value = value.toLowerCase();
-                      data.uri_params[param.toLowerCase()] = value;}
+                      data.uri_params[param.toLowerCase()] = value; }
 
 pname             <- pname: paramchar + {return pname.join(''); }
 
@@ -746,7 +747,7 @@ Contact             <- ( STAR / (contact_param (COMMA contact_param)*) ) {
                         var idx, length;
                         length = data.multi_header.length;
                         for (idx = 0; idx < length; idx++) {
-                          if (data.multi_header[idx].parsed == null) {
+                          if (data.multi_header[idx]['parsed'] == null) {
                             $$ == null;
                             break;
                           }
@@ -759,7 +760,7 @@ Contact             <- ( STAR / (contact_param (COMMA contact_param)*) ) {
 
 contact_param       <- (addr_spec / name_addr) (SEMI contact_params)* {
                         var header;
-                        if(data.multi_header = null) data.multi_header = [];
+                        if(data.multi_header == null) data.multi_header = [];
                         try {
                           header = new NameAddrHeader(data.uri, data.display_name, data.params);
                           data.uri = null;
@@ -780,26 +781,27 @@ addr_spec           <- SIP_URI_noparams
 display_name        <- (LWS*)? display_name: (token ( LWS token )* / quoted_string_clean) (LWS*)?  {
                         if (display_name is String) { // quoted_string_clean
                           data.display_name = display_name;
-                          $$ = display_name;
+                          return display_name;
                         } else { // token ( LWS token )*
                           if(display_name[1] is List){
                             data.display_name = display_name[1].fold(display_name[0], (aac, next) => aac + next[0] + next[1]);
                           } else if(display_name[1] is String){
                             data.display_name = display_name[1];
                           }
-                          $$ = data.display_name;
-                        }}
+                          return data.display_name;
+                        }
+                        }
                         ## The previous rule is corrected from RFC3261
                         ## See https:##www.rfc-editor.org/errata/eid5598
 
 contact_params      <- c_p_q / c_p_expires / contact_extension
 
 c_p_q               <- "q"i EQUAL q: qvalue {
-                        if(data.params == null) data.params = new Map<String, dynamic>();
+                        if(data.params == null) data.params = {};
                         data.params['q'] = q; }
 
 c_p_expires         <- "expires"i EQUAL expires: delta_seconds {
-                        if(data.params == null) data.params = new Map<String, dynamic>();
+                        if(data.params == null) data.params = {};
                         data.params['expires'] = expires; }
 
 contact_extension   <- generic_param
@@ -811,12 +813,12 @@ qvalue              <- "0" ( "." DIGIT? DIGIT? DIGIT? )? {
                         return parseFloat(_text()); }
 
 generic_param       <- param: token  value: ( EQUAL gen_value )? {
-                        if(data.params == null) data.params = new Map<String, dynamic>();
-                        if (value == null){
-                          value = null;
-                        }
-                        else {
+                        if(data.params == null) data.params = {};
+                        if (value != null) {
                           value = value[1];
+                        }
+                        if(param.toLowerCase() == 'branch'){
+                          data.branch = value;
                         }
                         data.params[param.toLowerCase()] = value;}
 
@@ -883,22 +885,23 @@ m_value             <- token / quoted_string
 
 ## CSEQ
 
-CSeq          <- CSeq_value LWS CSeq_method
+CSeq          <- CSeq_value LWS CSeq_method {return data;}
 
 CSeq_value    <- cseq_value: DIGIT + {
                   data.value=parseInt(cseq_value.join('')); }
 
 CSeq_method   <- Method
 
-
 ## EXPIRES
 
 Expires     <- expires: delta_seconds {data = expires; }
 
-Event             <- event_type: event_type ( SEMI event_param )* {
-                       data.event = event_type.join('').toLowerCase(); }
+Event             <- event: event_type ( SEMI event_param )* {
+                    data.event = event;
+                    return data;
+                  }
 
-event_type        <- event_package ( "." event_template )*
+event_type        <- event_package ( "." event_template )* {return _text().toLowerCase();}
 
 event_package     <- token_nodot
 
@@ -945,23 +948,28 @@ Name_Addr_Header <-  ( display_name )* LAQUOT SIP_URI RAQUOT ( SEMI generic_para
 
 Proxy_Authenticate  <- proxy_authenticate: challenge
 
-challenge           <- ("Digest"i LWS digest_cln (COMMA digest_cln)*)
-                      / other_challenge
+challenge           <- (("Digest"i LWS digest_cln (COMMA digest_cln)*)
+                      / other_challenge) {return data;}
 
 other_challenge     <- auth_scheme LWS auth_param (COMMA auth_param)*
 
 auth_scheme         <- token
 
-auth_param          <- auth_param_name EQUAL ( token / quoted_string )
+auth_param          <- key: auth_param_name EQUAL value: ( token / quoted_string ) {
+                        print(key + ' => ' + value);
+                        if(data.auth_params == null) data.auth_params = [];
+                        data.auth_params[key] = value;
+                      }
 
 auth_param_name     <- token
 
-digest_cln          <- realm / domain / nonce / opaque / stale / algorithm
-                      / qop_options / auth_param
+digest_cln          <- realm / domain / nonce / opaque / stale / algorithm / qop_options
 
 realm               <- "realm"i EQUAL realm_value
 
-realm_value         <- realm: quoted_string_clean { data.realm = realm; }
+realm_value         <- realm: quoted_string_clean {
+                      data.realm = realm;
+                      return data.realm;}
 
 domain              <- "domain"i EQUAL LDQUOT URI ( SP+ URI )* RDQUOT
 
@@ -969,21 +977,24 @@ URI                 <- absoluteURI / abs_path
 
 nonce               <- "nonce"i EQUAL nonce_value
 
-nonce_value         <- nonce: quoted_string_clean { data.nonce=nonce; }
+nonce_value         <- nonce: quoted_string_clean { data.nonce = nonce; return nonce; }
 
-opaque              <- "opaque"i EQUAL opaque: quoted_string_clean { data.opaque=opaque; }
+opaque              <- "opaque"i EQUAL opaque: quoted_string_clean { data.opaque = opaque; return opaque; }
 
-stale               <- "stale"i EQUAL ( "true"i { data.stale=true; } / "false"i { data.stale=false; } )
+stale               <- "stale"i EQUAL stale: token {
+                      data.stale = stale.toLowerCase() == 'true';
+                      return stale;}
 
-algorithm           <- "algorithm"i EQUAL algorithm: ( "MD5"i / "MD5-sess"i
-                      / token ) {
-                      data.algorithm=algorithm.toUpperCase(); }
+algorithm           <- "algorithm"i EQUAL algorithm: ( "MD5"i / "MD5-sess"i / token ) {
+                      data.algorithm=algorithm.toUpperCase(); return data.algorithm;}
 
 qop_options         <- "qop"i EQUAL LDQUOT (qop_value ("," qop_value)*) RDQUOT
 
 qop_value           <- qop_value: ( "auth-int"i / "auth"i / token ) {
                         if(data.qop == null) data.qop=[];
-                        data.qop.add(qop_value.toLowerCase()); }
+                        data.qop.add(qop_value.toLowerCase());
+                        return data.qop;
+                      }
 
 
 ## PROXY-REQUIRE
@@ -1048,6 +1059,7 @@ Reason        <- protocol: ( "SIP"i / token ) ( SEMI reason_param )* {
                     data.text = text.substring(1, text.length-1);
                     data.params['text'] = null;
                   }
+                  return data;
                 }
 
 reason_param  <- ( reason_cause / generic_param )
@@ -1124,7 +1136,9 @@ to_param   <- tag_param / generic_param
 
 ## VIA
 
-Via               <- via_param (COMMA via_param)*
+Via        <- via_param (COMMA via_param)* {
+               $$ = data;
+             }
 
 via_param         <- sent_protocol LWS sent_by ( SEMI via_params )*
 
@@ -1140,7 +1154,9 @@ via_received      <- "received"i EQUAL via_received: (IPv4address / IPv6address)
                       data.received = via_received; }
 
 via_branch        <- "branch"i EQUAL via_branch: token {
-                      data.branch = via_branch; }
+                      data.branch = _text();
+                      return data.branch;
+                    }
 
 response_port     <- "rport"i (EQUAL response_port: (DIGIT*) )? {
                       if(response_port != null)
@@ -1151,7 +1167,9 @@ via_extension     <- generic_param
 sent_protocol     <- protocol_name SLASH protocol_version SLASH transport
 
 protocol_name     <- via_protocol: ( "SIP"i / token ) {
-                      data.protocol = via_protocol; }
+                      data.protocol = via_protocol;
+                      return data.protocol;
+                    }
 
 protocol_version  <- token
 
@@ -1164,7 +1182,9 @@ via_host          <- ( IPv4address / IPv6reference / hostname ) {
                       data.host = _text(); }
 
 via_port          <- via_sent_by_port: (DIGIT ? DIGIT ? DIGIT ? DIGIT ? DIGIT ?) {
-                      data.port = parseInt(via_sent_by_port.join('')); }
+                      data.port = parseInt(_text());
+                      return data.port;
+                    }
 
 ttl               <- ttl: (DIGIT DIGIT ? DIGIT ?) {
                       return parseInt(ttl.join('')); }
@@ -1177,7 +1197,8 @@ WWW_Authenticate  <- www_authenticate: challenge
 
 ## SESSION-EXPIRES
 
-Session_Expires   <- s_e_expires ( SEMI s_e_params )*
+Session_Expires   <- s_e_expires ( SEMI s_e_params )* {
+                        return data;}
 
 s_e_expires       <- expires: delta_seconds { data.expires = expires; }
 
@@ -1219,7 +1240,8 @@ Refer_To        <- ( addr_spec / name_addr ) ( SEMI generic_param )* {
                 }}
 
 ## Replaces
-Replaces        <- call_id: call_id (SEMI replaces_param)*
+Replaces        <- call_id: call_id (SEMI replaces_param)* {
+                  return data;}
 
 call_id          <-  word ( "@" word )? {
                   data.call_id = _text(); }

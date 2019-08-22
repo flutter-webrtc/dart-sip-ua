@@ -33,16 +33,18 @@ class NameAddrHeader {
     this._parameters = {};
     this._display_name = display_name;
 
-    parameters.forEach((key,param) {
-      this.setParam(key, param);
-    });
+    if(parameters != null) {
+      parameters.forEach((key,param) {
+        this.setParam(key, param);
+      });
+    }
   }
 
   get uri => _uri;
 
   get display_name => _display_name;
 
-  set_display_name(value) {
+  set display_name(value) {
     this._display_name = (value == 0) ? '0' : value;
   }
 
@@ -59,10 +61,11 @@ class NameAddrHeader {
     }
   }
 
-  hasParam(key) {
-    if (key) {
-      return this._parameters[key.toLowerCase()] != null;
+  bool hasParam(key) {
+    if (key != null) {
+      return this._parameters.containsKey(key.toLowerCase());
     }
+    return false;
   }
 
   deleteParam(parameter) {
@@ -88,7 +91,7 @@ class NameAddrHeader {
   }
 
   toString() {
-    var body = this._display_name != null ? (this._quote(this._display_name) + ' ') : '';
+    var body = this._display_name != null ? ('"' + this._quote(this._display_name) + '" ') : '';
 
     body += '<' + this._uri.toString() + '>';
 
