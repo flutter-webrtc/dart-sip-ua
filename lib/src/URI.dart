@@ -21,10 +21,9 @@ class URI {
     * it is an invalid URI.
     */
   static parse(uri) {
-    uri = Grammar.parse(uri, 'SIP_URI');
-    if (uri != -1) {
-      return uri;
-    } else {
+    try{
+      return Grammar.parse(uri, 'SIP_URI');
+    } catch(_){
       return null;
     }
   }

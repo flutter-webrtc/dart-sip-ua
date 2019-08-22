@@ -122,9 +122,9 @@ escapeUser(user) => encodeURIComponent(decodeURIComponent(user))
 * Detects the domain part (if given) and properly hex-escapes the user portion.
 * If the user portion has only 'tel' number symbols the user portion is clean of 'tel' visual separators.
 */
-normalizeTarget(target, domain) {
+normalizeTarget(target, [domain]) {
   // If no target is given then raise an error.
-  if (!target) {
+  if (target == null) {
     return null;
     // If a URI instance is given then return it.
   } else if (target is URI) {
@@ -140,7 +140,7 @@ normalizeTarget(target, domain) {
 
     switch (target_array.length) {
       case 1:
-        if (!domain) {
+        if (domain == null) {
           return null;
         }
         target_user = target;
@@ -151,12 +151,12 @@ normalizeTarget(target, domain) {
         target_domain = target_array[1];
         break;
       default:
-        target_user = target_array.slice(0, target_array.length - 1).join('@');
+        target_user = target_array.sublist(0, target_array.length - 1).join('@');
         target_domain = target_array[target_array.length - 1];
     }
 
     // Remove the URI scheme (if present).
-    target_user = target_user.replace(
+    target_user = target_user.replaceAll(
         new RegExp(r'^(sips?|tel):', caseSensitive: false), '');
 
     // Remove 'tel' visual separators if the user portion just contains 'tel' number symbols.
@@ -168,13 +168,8 @@ normalizeTarget(target, domain) {
     target = JsSIP_C.SIP + ':' + escapeUser(target_user) + '@' + target_domain;
 
     // Finally parse the resulting URI.
-    var uri;
-
-    if ((uri = URI.parse(target))) {
-      return uri;
-    } else {
-      return null;
-    }
+    var uri = URI.parse(target);
+    return uri;
   } else {
     return null;
   }

@@ -144,7 +144,7 @@
         "userinfo": _parse_userinfo,
         "user": _parse_user, 
         "user_unreserved": _parse_user_unreserved,
-        "password": _parse_password, 
+        "password": _parse_password,
         "hostport": _parse_hostport, 
         "host": _parse_host, 
         "hostname": _parse_hostname, 
@@ -482,7 +482,9 @@ user            <- ( user_unreserved / unreserved / escaped )+
 user_unreserved <- "&" / "=" / "+" / "$" / "," / ";" / "?" / "/"
 
 password        <- ( unreserved / escaped / "&" / "=" / "+" / "$" / "," )* {
-                    data.password = _text(); }
+                    data.password = _text();
+                    $$ = data.password;
+                  }
 
 hostport        <- host ( ":" port )?
 

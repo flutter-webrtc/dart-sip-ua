@@ -11503,6 +11503,7 @@ class GrammarParser {
           {
           ///CODE_START
           data.password = _text();
+          $$ = data.password;
           ///CODE_END
           }
         }
@@ -19900,7 +19901,7 @@ class GrammarParser {
         "userinfo": _parse_userinfo, 
         "user": _parse_user,  
         "user_unreserved": _parse_user_unreserved, 
-        "password": _parse_password,  
+        "password": _parse_password, 
         "hostport": _parse_hostport,  
         "host": _parse_host,  
         "hostname": _parse_hostname,  
