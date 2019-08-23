@@ -92,16 +92,16 @@ class NameAddrHeader {
 
   toString() {
     var body = (this._display_name != null && this._display_name.length > 0)
-        ? ('"' + this._quote(this._display_name) + '" ')
+        ? '"${this._quote(this._display_name)}" '
         : '';
 
-    body += '<' + this._uri.toString() + '>';
+    body += '<${this._uri.toString()}>';
 
     this._parameters.forEach((key, value) {
       if (this._parameters.containsKey(key)) {
-        body += ';' + key;
+        body += ';${key}';
         if (value != null) {
-          body += '=' + value;
+          body += '=${value}';
         }
       }
     });

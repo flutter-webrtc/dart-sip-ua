@@ -21,9 +21,9 @@ class URI {
     * it is an invalid URI.
     */
   static parse(uri) {
-    try{
+    try {
       return Grammar.parse(uri, 'SIP_URI');
-    } catch(_){
+    } catch (_) {
       return null;
     }
   }
@@ -162,47 +162,46 @@ class URI {
   toString() {
     var headers = [];
 
-    var uri = this.scheme + ':';
+    var uri = '${this._scheme}:';
 
     if (this.user != null) {
-      uri += Utils.escapeUser(this.user) + '@';
+      uri += '${Utils.escapeUser(this.user)}@';
     }
     uri += this.host;
     if (this.port != null || this.port == 0) {
-      uri += ':' + this.port.toString();
+      uri += ':${this.port.toString()}';
     }
 
     this._parameters.forEach((key, parameter) {
-      uri += ';' + key;
+      uri += ';${key}';
       if (this._parameters[key] != null) {
-        uri += '=' + this._parameters[key].toString();
+        uri += '=${this._parameters[key].toString()}';
       }
     });
 
     this._headers.forEach((key, header) {
       var hdrs = this._headers[key];
       hdrs.forEach((item) {
-        headers.add(Utils.headerize(key) + '=' + item.toString());
+        headers.add('${Utils.headerize(key)}=${item.toString()}');
       });
     });
 
     if (headers.length > 0) {
-      uri += '?' + headers.join('&');
+      uri += '?${headers.join('&')}';
     }
 
     return uri;
   }
 
-  toAor({show_port}) {
-    var aor = this.scheme + ':';
+  toAor({show_port = false}) {
+    var aor = '${this._scheme}:';
 
-    if (this.user != null) {
-      aor += Utils.escapeUser(this.user) + '@';
+    if (this._user != null) {
+      aor += '${Utils.escapeUser(this._user)}@';
     }
-    aor += this.host;
-    if ((show_port != null && show_port == true) &&
-        (this.port != null || this.port == 0)) {
-      aor += ':' + this.port.toString();
+    aor += this._host;
+    if (show_port && (this._port != null || this._port == 0)) {
+      aor += ':${this._port}';
     }
 
     return aor;
