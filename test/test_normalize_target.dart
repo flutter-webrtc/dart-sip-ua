@@ -1,10 +1,9 @@
 import 'package:test/test.dart';
 import 'package:sip_ua/src/Utils.dart' as Utils;
-import 'package:sip_ua/src/URI.dart';
 
 var testFunctions = [
   () => test("NormalizeTarget: valid targets", () {
-        const domain = 'jssip.net';
+        var domain = 'jssip.net';
 
         test_ok(given_data, expected) {
           var uri = Utils.normalizeTarget(given_data, domain);
@@ -35,7 +34,7 @@ var testFunctions = [
         test_ok('+ALICE-123.456.78-9', 'sip:+ALICE-123.456.78-9@jssip.net');
       }),
   () => test("NormalizeTarget: invalid targets", () {
-        const domain = 'jssip.net';
+        var domain = 'jssip.net';
 
         test_error(given_data) {
           expect(Utils.normalizeTarget(given_data, domain), null);

@@ -1,14 +1,33 @@
-import 'dart:math';
+import 'dart:math' as DartMath;
 import 'dart:core';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-
 import 'Grammar.dart';
 import 'URI.dart';
 import 'Constants.dart' as JsSIP_C;
 
-final _random = Random();
-random() => _random.nextInt(0x7FFFFFFF);
+test100(status_code){
+  return status_code.contains(new RegExp(r'^100$'));
+}
+
+test1XX(status_code){
+  return status_code.contains(new RegExp(r'^1[0-9]{2}$'));
+}
+
+test2XX(status_code){
+  return status_code.contains(new RegExp(r'^2[0-9]{2}$'));
+}
+
+class Math {
+  static final _random = DartMath.Random();
+  static floor(num){
+    return num.floor();
+  }
+  static random() => _random.nextInt(0x7FFFFFFF);
+  static pow(a, b){
+    return DartMath.pow(a, b);
+  }
+}
 
 str_utf8_length(string) => unescape(encodeURIComponent(string)).length;
 
@@ -73,7 +92,7 @@ createRandomToken(size, {base = 32}) {
   var i, r, token = '';
 
   for (i = 0; i < size; i++) {
-    r = (random() * base) | 0;
+    r = (Math.random() * base) | 0;
     token += r.toRadixString(base);
   }
 
@@ -86,8 +105,8 @@ newTag() => createRandomToken(10);
 newUUID() {
   String tmp = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
   var UUID = tmp.replaceAllMapped(new RegExp(r'[xy]', caseSensitive: false),
-      (Match m) {
-    var r = random() * 16 | 0, v = m[1] == 'x' ? r : ((r & 0x3) | 0x8);
+      (m) {
+    var r = Math.random() * 16 | 0, v = m[1] == 'x' ? r : ((r & 0x3) | 0x8);
     return v.toString(16);
   });
 
@@ -95,7 +114,7 @@ newUUID() {
 }
 
 hostType(host) {
-  if (!host) {
+  if (host == null) {
     return null;
   } else {
     host = Grammar.parse(host, 'host');
@@ -203,14 +222,13 @@ headerize(String string) {
 }
 
 sipErrorCause(status_code) {
+  var reason = JsSIP_C.Causes.SIP_FAILURE_CODE;
   JsSIP_C.SIP_ERROR_CAUSES.forEach((key, value) {
-    //TODO:  ???
-    if (value.firstWhere((item) => item == status_code) != -1) {
-      return JsSIP_C.causes[key];
+    if (value.contains(status_code)) {
+      reason = key;
     }
   });
-
-  return JsSIP_C.Causes.SIP_FAILURE_CODE;
+  return reason;
 }
 
 /**
@@ -218,7 +236,7 @@ sipErrorCause(status_code) {
 */
 getRandomTestNetIP() {
   getOctet(from, to) {
-    return num.parse((random() * (to - from + 1)) + from).floor();
+    return num.parse(Math.floor(Math.random() * (to - from + 1)) + from);
   }
 
   return '192.0.2.' + getOctet(1, 254).toString();

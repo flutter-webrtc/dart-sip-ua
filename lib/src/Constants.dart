@@ -1,4 +1,3 @@
-
 var USER_AGENT =  'dart-sip-ua v0.0.1';
 
   // SIP scheme.
@@ -7,34 +6,34 @@ var SIPS = 'sips';
 
   // End and Failure causes.
 class Causes {
-    // Generic error causes.
-    static var CONNECTION_ERROR = 'Connection Error';
-    static var REQUEST_TIMEOUT  = 'Request Timeout';
-    static var SIP_FAILURE_CODE = 'SIP Failure Code';
-    static var INTERNAL_ERROR   = 'Internal Error';
+  // Generic error causes.
+  static final CONNECTION_ERROR = 'Connection Error';
+  static final REQUEST_TIMEOUT  = 'Request Timeout';
+  static final SIP_FAILURE_CODE = 'SIP Failure Code';
+  static final INTERNAL_ERROR   = 'Internal Error';
 
-    // SIP error causes.
-    static var BUSY                 = 'Busy';
-    static var REJECTED             = 'Rejected';
-    static var REDIRECTED           = 'Redirected';
-    static var UNAVAILABLE          = 'Unavailable';
-    static var NOT_FOUND            = 'Not Found';
-    static var ADDRESS_INCOMPLETE   = 'Address Incomplete';
-    static var INCOMPATIBLE_SDP     = 'Incompatible SDP';
-    static var MISSING_SDP          = 'Missing SDP';
-    static var AUTHENTICATION_ERROR = 'Authentication Error';
+  // SIP error causes.
+  static final BUSY                 = 'Busy';
+  static final REJECTED             = 'Rejected';
+  static final REDIRECTED           = 'Redirected';
+  static final UNAVAILABLE          = 'Unavailable';
+  static final NOT_FOUND            = 'Not Found';
+  static final ADDRESS_INCOMPLETE   = 'Address Incomplete';
+  static final INCOMPATIBLE_SDP     = 'Incompatible SDP';
+  static final MISSING_SDP          = 'Missing SDP';
+  static final AUTHENTICATION_ERROR = 'Authentication Error';
 
     // Session error causes.
-    static var BYE                      = 'Terminated';
-    static var WEBRTC_ERROR             = 'WebRTC Error';
-    static var CANCELED                 = 'Canceled';
-    static var NO_ANSWER                = 'No Answer';
-    static var EXPIRES                  = 'Expires';
-    static var NO_ACK                   = 'No ACK';
-    static var DIALOG_ERROR             = 'Dialog Error';
-    static var USER_DENIED_MEDIA_ACCESS = 'User Denied Media Access';
-    static var BAD_MEDIA_DESCRIPTION    = 'Bad Media Description';
-    static var RTP_TIMEOUT              = 'RTP Timeout';
+  static final BYE                      = 'Terminated';
+  static final WEBRTC_ERROR             = 'WebRTC Error';
+  static final CANCELED                 = 'Canceled';
+  static final NO_ANSWER                = 'No Answer';
+  static final EXPIRES                  = 'Expires';
+  static final NO_ACK                   = 'No ACK';
+  static final DIALOG_ERROR             = 'Dialog Error';
+  static final USER_DENIED_MEDIA_ACCESS = 'User Denied Media Access';
+  static final BAD_MEDIA_DESCRIPTION    = 'Bad Media Description';
+  static final RTP_TIMEOUT              = 'RTP Timeout';
 }
   var SIP_ERROR_CAUSES = {
     Causes.REDIRECTED           : [ 300, 301, 302, 305, 380 ],
@@ -47,49 +46,49 @@ class Causes {
     Causes.AUTHENTICATION_ERROR : [ 401, 407 ]
   };
 
-  var causes = {
-    'CONNECTION_ERROR': Causes.CONNECTION_ERROR,
-    'REQUEST_TIMEOUT': Causes.REQUEST_TIMEOUT,
-    'SIP_FAILURE_CODE': Causes.SIP_FAILURE_CODE,
-    'INTERNAL_ERROR': Causes.INTERNAL_ERROR,
+  class causes {
+  static final CONNECTION_ERROR = Causes.CONNECTION_ERROR;
+  static final REQUEST_TIMEOUT = Causes.REQUEST_TIMEOUT;
+  static final SIP_FAILURE_CODE = Causes.SIP_FAILURE_CODE;
+  static final INTERNAL_ERROR = Causes.INTERNAL_ERROR;
 
     // SIP error causes.
-    'BUSY': Causes.BUSY,
-    'REJECTED ': Causes.REJECTED,
-    'REDIRECTED': Causes.REDIRECTED,
-    'UNAVAILABLE': Causes.UNAVAILABLE,
-    'NOT_FOUND': Causes.NOT_FOUND,
-    'ADDRESS_INCOMPLETE': Causes.ADDRESS_INCOMPLETE,
-    'INCOMPATIBLE_SDP': Causes.INCOMPATIBLE_SDP,
-    'MISSING_SDP': Causes.MISSING_SDP,
-    'AUTHENTICATION_ERROR': Causes.AUTHENTICATION_ERROR,
+  static final BUSY = Causes.BUSY;
+  static final REJECTED = Causes.REJECTED;
+  static final REDIRECTED = Causes.REDIRECTED;
+  static final UNAVAILABLE = Causes.UNAVAILABLE;
+  static final NOT_FOUND = Causes.NOT_FOUND;
+  static final ADDRESS_INCOMPLETE = Causes.ADDRESS_INCOMPLETE;
+  static final INCOMPATIBLE_SDP = Causes.INCOMPATIBLE_SDP;
+  static final MISSING_SDP = Causes.MISSING_SDP;
+  static final AUTHENTICATION_ERROR = Causes.AUTHENTICATION_ERROR;
 
     // Session error causes.
-    'BYE': Causes.BYE,
-    'WEBRTC_ERROR': Causes.WEBRTC_ERROR,
-    'CANCELED': Causes.CANCELED,
-    'NO_ANSWER': Causes.NO_ANSWER,
-    'EXPIRES': Causes.EXPIRES,
-    'NO_ACK': Causes.NO_ACK,
-    'DIALOG_ERROR': Causes.DIALOG_ERROR,
-    'USER_DENIED_MEDIA_ACCESS': Causes.USER_DENIED_MEDIA_ACCESS,
-    'BAD_MEDIA_DESCRIPTION': Causes.BAD_MEDIA_DESCRIPTION,
-    'RTP_TIMEOUT': Causes.RTP_TIMEOUT,
-  };
+  static final BYE = Causes.BYE;
+  static final WEBRTC_ERROR = Causes.WEBRTC_ERROR;
+  static final CANCELED = Causes.CANCELED;
+  static final NO_ANSWER = Causes.NO_ANSWER;
+  static final EXPIRES = Causes.EXPIRES;
+  static final NO_ACK = Causes.NO_ACK;
+  static final DIALOG_ERROR = Causes.DIALOG_ERROR;
+  static final USER_DENIED_MEDIA_ACCESS = Causes.USER_DENIED_MEDIA_ACCESS;
+  static final BAD_MEDIA_DESCRIPTION = Causes.BAD_MEDIA_DESCRIPTION;
+  static final RTP_TIMEOUT = Causes.RTP_TIMEOUT;
+  }
 
   // SIP Methods.
-  var ACK       = 'ACK';
-  var BYE       = 'BYE';
-  var CANCEL    = 'CANCEL';
-  var INFO      = 'INFO';
-  var INVITE    = 'INVITE';
-  var MESSAGE   = 'MESSAGE';
-  var NOTIFY    = 'NOTIFY';
-  var OPTIONS   = 'OPTIONS';
-  var REGISTER  = 'REGISTER';
-  var REFER     = 'REFER';
-  var UPDATE    = 'UPDATE';
-  var SUBSCRIBE = 'SUBSCRIBE';
+  const ACK       = 'ACK';
+  const BYE       = 'BYE';
+  const CANCEL    = 'CANCEL';
+  const INFO      = 'INFO';
+  const INVITE    = 'INVITE';
+  const MESSAGE   = 'MESSAGE';
+  const NOTIFY    = 'NOTIFY';
+  const OPTIONS   = 'OPTIONS';
+  const REGISTER  = 'REGISTER';
+  const REFER     = 'REFER';
+  const UPDATE    = 'UPDATE';
+  const SUBSCRIBE = 'SUBSCRIBE';
 
   /* SIP Response Reasons
    * DOC: https://www.iana.org/assignments/sip-parameters

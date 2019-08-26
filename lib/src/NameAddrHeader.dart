@@ -9,7 +9,7 @@ class NameAddrHeader {
   Map<String, dynamic> _parameters;
   var _display_name;
   /**
-   * Parse the given string and returns a NameAddrHeader instance or undefined if
+   * Parse the given string and returns a NameAddrHeader instance or null if
    * it is an invalid NameAddrHeader.
    */
   static parse(name_addr_header) {

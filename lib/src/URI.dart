@@ -17,7 +17,7 @@ class URI {
   final JsonDecoder decoder = new JsonDecoder();
   final JsonEncoder encoder = new JsonEncoder();
   /**
-    * Parse the given string and returns a JsSIP.URI instance or undefined if
+    * Parse the given string and returns a JsSIP.URI instance or null if
     * it is an invalid URI.
     */
   static parse(uri) {

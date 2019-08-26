@@ -8,9 +8,9 @@ var testFunctions = [
   () =>
       test("DigestAuthentication: parse no auth testrealm@host.com -RFC 2617-",
           () {
-        const method = 'GET';
-        const ruri = '/dir/index.html';
-        const cnonce = '0a4f113b';
+        var method = 'GET';
+        var ruri = '/dir/index.html';
+        var cnonce = '0a4f113b';
         var credentials = Credentials.fromMap({
           'username': 'Mufasa',
           'password': 'Circle Of Life',
@@ -33,8 +33,8 @@ var testFunctions = [
         expect(digest.response, '6629fae49393a05397450978507c4ef1');
       }),
   () => test('DigestAuthentication: digest authenticate qop = null', () {
-        const method = 'REGISTER';
-        const ruri = 'sip:testrealm@host.com';
+        var method = 'REGISTER';
+        var ruri = 'sip:testrealm@host.com';
         var credentials = Credentials.fromMap({
           'username': 'testuser',
           'password': 'testpassword',
@@ -57,9 +57,9 @@ var testFunctions = [
         expect(digest.response, 'f99e05f591f147facbc94ff23b4b1dee');
       }),
   () => test('DigestAuthentication: digest authenticate qop = auth', () {
-        const method = 'REGISTER';
-        const ruri = 'sip:testrealm@host.com';
-        const cnonce = '0a4f113b';
+        var method = 'REGISTER';
+        var ruri = 'sip:testrealm@host.com';
+        var cnonce = '0a4f113b';
         var credentials = Credentials.fromMap({
           'username': 'testuser',
           'password': 'testpassword',
@@ -84,9 +84,9 @@ var testFunctions = [
   () => test(
           'DigestAuthentication: digest authenticate qop = auth-int and empty body',
           () {
-        const method = 'REGISTER';
-        const ruri = 'sip:testrealm@host.com';
-        const cnonce = '0a4f113b';
+        var method = 'REGISTER';
+        var ruri = 'sip:testrealm@host.com';
+        var cnonce = '0a4f113b';
         var credentials = Credentials.fromMap({
           'username': 'testuser',
           'password': 'testpassword',
@@ -111,10 +111,10 @@ var testFunctions = [
   () => test(
           'DigestAuthentication: digest authenticate qop = auth-int and non-empty body',
           () {
-        const method = 'REGISTER';
-        const ruri = 'sip:testrealm@host.com';
-        const body = 'TEST BODY';
-        const cnonce = '0a4f113b';
+        var method = 'REGISTER';
+        var ruri = 'sip:testrealm@host.com';
+        var body = 'TEST BODY';
+        var cnonce = '0a4f113b';
         var credentials = Credentials.fromMap({
           'username': 'testuser',
           'password': 'testpassword',

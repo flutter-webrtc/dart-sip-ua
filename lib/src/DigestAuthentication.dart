@@ -233,7 +233,9 @@ class DigestAuthentication {
       auth_params.add('cnonce="${this._cnonce}"');
       auth_params.add('nc=${this._ncHex}');
     }
-
+    if(this._stale != null){
+      auth_params.add('stale=${this._stale? 'true' : 'false'}');
+    }
     return 'Digest ${auth_params.join(', ')}';
   }
 }
