@@ -181,12 +181,12 @@
         "absoluteURI": _parse_absoluteURI,
         "hier_part": _parse_hier_part, 
         "net_path": _parse_net_path, 
-        "abs_path": _parse_abs_path, 
+        "abs_path": _parse_abs_path,
         "opaque_part": _parse_opaque_part, 
         "uric": _parse_uric, 
-        "uric_no_slash": _parse_uric_no_slash, 
-        "path_segments": _parse_path_segments, 
-        "segment": _parse_segment, 
+        "uric_no_slash": _parse_uric_no_slash,
+        "path_segments": _parse_path_segments,
+        "segment": _parse_segment,
         "param": _parse_param, 
         "pchar": _parse_pchar, 
         "scheme": _parse_scheme, 
@@ -648,11 +648,11 @@ Request_Line      <- Method SP Request_URI SP SIP_Version
 
 Request_URI       <- SIP_URI / absoluteURI
 
-absoluteURI       <- scheme ":" ( hier_part / opaque_part )
+absoluteURI       <- scheme ":" ( hier_part / opaque_part ) { $$ = data; }
 
 hier_part         <- ( net_path / abs_path ) ( "?" query )?
 
-net_path          <- "##" authority  abs_path ?
+net_path          <- "//" authority  abs_path ?
 
 abs_path          <- "/" path_segments
 
