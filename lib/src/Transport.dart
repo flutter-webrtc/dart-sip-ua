@@ -186,7 +186,7 @@ class Transport {
     this.recover_attempts += 1;
 
     var k =
-        Math.floor((Math.random() * Math.pow(2, this.recover_attempts)) + 1);
+        Math.floor((Math.randomDouble() * Math.pow(2, this.recover_attempts)) + 1);
 
     if (k < this.recovery_options['min_interval']) {
       k = this.recovery_options['min_interval'];
@@ -236,7 +236,7 @@ class Transport {
       return;
     }
 
-    var idx = Math.floor((Math.random() * candidates.length));
+    var idx = Math.floor((Math.randomDouble() * candidates.length));
 
     this.socket = candidates[idx]['socket'];
   }

@@ -102,6 +102,5 @@ var testFunctions = [
 ];
 
 void main() {
-  //testFunctions.forEach((func) => func());
-  testFunctions[1]();
+  testFunctions.forEach((func) => func());
 }
