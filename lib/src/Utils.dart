@@ -23,7 +23,7 @@ class Math {
   static floor(num){
     return num.floor();
   }
-  static random() => _random.nextInt(0x7FFFFFFF);
+  static random() => _random.nextDouble();
   static pow(a, b){
     return DartMath.pow(a, b);
   }

@@ -14,6 +14,7 @@ class WebSocketInterface {
   var _ws = null;
   var _closed = false;
   var _connected = false;
+  var weight;
 
   dynamic onconnect;
   dynamic ondisconnect;
