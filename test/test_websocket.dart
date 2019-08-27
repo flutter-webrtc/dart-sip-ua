@@ -6,7 +6,7 @@ import 'package:sip_ua/src/WebSocketInterface.dart';
 var testFunctions = [
   () => test("WebSocket: EchoTest", () async {
    var completer = new Completer();
-   var server = HttpServer.bind('127.0.0.1', 4040).then((server) async {
+   HttpServer.bind('127.0.0.1', 4040).then((server) async {
     try {
       await for (var req in server) {
         if (req.uri.path == '/sip') {
