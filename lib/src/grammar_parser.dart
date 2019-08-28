@@ -21,7 +21,7 @@ class Data {
   var status_code;
   var stale;
   var algorithm;
-  Map<String,dynamic> params = new Map<String,dynamic>();
+  var params = {};
   var multi_header;
   var call_id;
   var display_name;
@@ -51,7 +51,6 @@ class Data {
   var transport;
   var text;
   Data();
-  setParam(k, v){}
 }
 class GrammarParser {
   static final List<String> _ascii = new List<String>.generate(128, (c) => new String.fromCharCode(c));
@@ -5086,6 +5085,7 @@ class GrammarParser {
           {
           ///CODE_START
           data.reason_phrase = _text();
+          $$ = data.reason_phrase;
           ///CODE_END
           }
         }
@@ -5126,6 +5126,20 @@ class GrammarParser {
           if (!success) break;
           seq[4] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $3 = seq[2];
+            final $4 = seq[3];
+            final $5 = seq[4];
+            final $start = startPos0;
+            var pos0 = _startPos, offset = $start;
+            {
+            ///CODE_START
+            $$ = data;
+            ///CODE_END
+            }
+          }
           break;
         }
         if (!success) {
@@ -5152,6 +5166,16 @@ class GrammarParser {
         var startPos0 = _startPos;
         _startPos = _cursor;
         $$ = _parse_absoluteURI();
+        if (success) {    
+          final $1 = $$;
+          final $start = startPos0;
+          var pos0 = _startPos, offset = $start;
+          {
+          ///CODE_START
+          $$ = data;
+          ///CODE_END
+          }
+        }
         _startPos = startPos0;
         break;
       case 1:
@@ -5165,6 +5189,16 @@ class GrammarParser {
           var startPos2 = _startPos;
           _startPos = _cursor;
           $$ = _parse_absoluteURI();
+          if (success) {    
+            final $1 = $$;
+            final $start = startPos2;
+            var pos0 = _startPos, offset = $start;
+            {
+            ///CODE_START
+            $$ = data;
+            ///CODE_END
+            }
+          }
           _startPos = startPos2;
           break;
         }
@@ -5723,6 +5757,7 @@ class GrammarParser {
           $$ = ((offset, status_code) {
           ///CODE_START
           data.status_code = parseInt(status_code.join(''));
+          return data.status_code;
           ///CODE_END
           })($start, $1);
         }
@@ -7076,9 +7111,8 @@ class GrammarParser {
             } catch(e) {
               header = null;
             }
-            data.multi_header.add( { 'possition': pos,
-                                      'offset': offset,
-                                      'parsed': header
+            data.multi_header.add( { 'raw': _text(),
+                                     'parsed': header
                                     });
             ///CODE_END
             }
@@ -17711,7 +17745,7 @@ class GrammarParser {
           var pos0 = _startPos;
           $$ = ((offset, length) {
           ///CODE_START
-          $$ = parseInt(length.join(''));
+          return parseInt(length.join(''));
           ///CODE_END
           })($start, $1);
         }
@@ -17971,7 +18005,7 @@ class GrammarParser {
             var tag = data.tag;
             try {
               $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
-              if (tag) {data.setParam('tag',tag);}
+              if (tag) {$$.setParam('tag',tag);}
             } catch(e) {
               $$ == -1;
             }
@@ -18057,7 +18091,7 @@ class GrammarParser {
           var pos0 = _startPos;
           $$ = ((offset, forwards) {
           ///CODE_START
-          data = parseInt(forwards.join(''));
+          return parseInt(forwards.join(''));
           ///CODE_END
           })($start, $1);
         }
@@ -18752,29 +18786,54 @@ class GrammarParser {
   
   dynamic parse_Request_Response() {
     var $$;
-    switch (_getState(_transitions46)) {
+    switch (_getState(_transitions13)) {
       case 0:
+      case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        $$ = _parse_Request_Line();
+        switch (_getState(_transitions46)) {
+          case 0:
+            var startPos1 = _startPos;
+            _startPos = _cursor;
+            $$ = _parse_Request_Line();
+            _startPos = startPos1;
+            break;
+          case 1:
+          case 3:
+            while (true) {
+              var startPos2 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_Status_Line();
+              _startPos = startPos2;
+              if (success) break;
+              var startPos3 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_Request_Line();
+              _startPos = startPos3;
+              break;
+            }
+            break;
+          case 2:
+            $$ = null;
+            success = false;
+            break;
+        }
+        if (!success && _cursor > _testing) {
+          _failure(_expect56);
+        }
+        if (success) {    
+          final $1 = $$;
+          final $start = startPos0;
+          var pos0 = _startPos, offset = $start;
+          {
+          ///CODE_START
+          $$ = data;
+          ///CODE_END
+          }
+        }
         _startPos = startPos0;
         break;
       case 1:
-      case 3:
-        while (true) {
-          var startPos1 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_Status_Line();
-          _startPos = startPos1;
-          if (success) break;
-          var startPos2 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_Request_Line();
-          _startPos = startPos2;
-          break;
-        }
-        break;
-      case 2:
         $$ = null;
         success = false;
         break;
@@ -19319,7 +19378,7 @@ class GrammarParser {
             var tag = data.tag;
             try {
               $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
-              if (tag) {data.setParam('tag',tag);}
+              if (tag != null) {$$.setParam('tag',tag);}
             } catch(e) {
               $$ = -1;
             }
@@ -19823,27 +19882,6 @@ class GrammarParser {
     return Uri.decodeComponent(str); // To decode url; 
   } 
    
-  quote(s) { 
-    /* 
-     * ECMA-262, 5th ed., 7.8.4: All characters may appear literally in a 
-     * string literal except for the closing quote character, backslash, 
-     * carriage return, line separator, paragraph separator, and line feed. 
-     * Any character may appear in the form of an escape sequence. 
-     * 
-     * For portability, we also escape escape all control and non-ASCII 
-     * characters. Note that "\0" and "\v" escape sequences are not used 
-     * because JSHint does not like the first and IE the second. 
-     */ 
-     return '"' + s 
-      .replaceAll('\\', '\\\\')  // backslash 
-      .replaceAll('"', '\\"')    // closing quote character 
-      .replaceAll('\x08', '\\b') // backspace 
-      .replaceAll('\t', '\\t')   // horizontal tab 
-      .replaceAll('\n', '\\n')   // line feed 
-      .replaceAll('\f', '\\f')   // form feed 
-      .replaceAll('\r', '\\r')   // carriage return 
-      + '"'; 
-  } 
   parse(input, startRule) { 
       var parseFunctions = {  
         "CRLF": _parse_CRLF, 
@@ -19864,7 +19902,7 @@ class GrammarParser {
         "SWS": _parse_SWS, 
         "HCOLON": _parse_HCOLON,  
         "TEXT_UTF8_TRIM": _parse_TEXT_UTF8_TRIM,  
-        "TEXT_UTF8char": _parse_TEXT_UTF8char,  
+        "TEXT_UTF8char": _parse_TEXT_UTF8char, 
         "UTF8_NONASCII": _parse_UTF8_NONASCII,  
         "UTF8_CONT": _parse_UTF8_CONT,  
         "LHEX": parse_LHEX, 
@@ -19959,7 +19997,7 @@ class GrammarParser {
         "NOTIFYm": _parse_NOTIFYm,  
         "REFERm": _parse_REFERm,  
         "Method": _parse_Method, 
-        "Status_Line": _parse_Status_Line,  
+        "Status_Line": _parse_Status_Line, 
         "Status_Code": _parse_Status_Code,  
         "extension_code": _parse_extension_code,  
         "Reason_Phrase": _parse_Reason_Phrase, 
@@ -20081,7 +20119,7 @@ class GrammarParser {
    
       if (startRule != null) { 
           if (parseFunctions[startRule] == null) { 
-            throw new ArgumentError("Invalid rule name: " + quote(startRule) + "."); 
+            throw new ArgumentError("Invalid rule name: " + startRule + "."); 
           } 
         } else { 
           startRule = "CRLF"; 

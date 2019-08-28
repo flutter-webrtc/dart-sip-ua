@@ -19,7 +19,7 @@
     var status_code;
     var stale;
     var algorithm;
-    Map<String,dynamic> params = new Map<String,dynamic>();
+    var params = {};
     var multi_header;
     var call_id;
     var display_name;
@@ -49,9 +49,9 @@
     var transport;
     var text;
     Data();
-    setParam(k, v){}
   }
 }%
+
 {
   var startRule;
   var input;
@@ -66,30 +66,9 @@
   }
 
   decodeURIComponent(str){
-    return Uri.decodeComponent(str); // To decode url;
+    return Uri.decodeComponent(str);
   }
 
-  quote(s) {
-    /*
-     * ECMA-262, 5th ed., 7.8.4: All characters may appear literally in a
-     * string literal except for the closing quote character, backslash,
-     * carriage return, line separator, paragraph separator, and line feed.
-     * Any character may appear in the form of an escape sequence.
-     *
-     * For portability, we also escape escape all control and non-ASCII
-     * characters. Note that "\0" and "\v" escape sequences are not used
-     * because JSHint does not like the first and IE the second.
-     */
-     return '"' + s
-      .replaceAll('\\', '\\\\')  // backslash
-      .replaceAll('"', '\\"')    // closing quote character
-      .replaceAll('\x08', '\\b') // backspace
-      .replaceAll('\t', '\\t')   // horizontal tab
-      .replaceAll('\n', '\\n')   // line feed
-      .replaceAll('\f', '\\f')   // form feed
-      .replaceAll('\r', '\\r')   // carriage return
-      + '"';
-  }
   parse(input, startRule) {
       var parseFunctions = { 
         "CRLF": _parse_CRLF,
@@ -110,7 +89,7 @@
         "SWS": _parse_SWS,
         "HCOLON": _parse_HCOLON, 
         "TEXT_UTF8_TRIM": _parse_TEXT_UTF8_TRIM, 
-        "TEXT_UTF8char": _parse_TEXT_UTF8char, 
+        "TEXT_UTF8char": _parse_TEXT_UTF8char,
         "UTF8_NONASCII": _parse_UTF8_NONASCII, 
         "UTF8_CONT": _parse_UTF8_CONT, 
         "LHEX": parse_LHEX,
@@ -205,7 +184,7 @@
         "NOTIFYm": _parse_NOTIFYm, 
         "REFERm": _parse_REFERm, 
         "Method": _parse_Method,
-        "Status_Line": _parse_Status_Line, 
+        "Status_Line": _parse_Status_Line,
         "Status_Code": _parse_Status_Code, 
         "extension_code": _parse_extension_code, 
         "Reason_Phrase": _parse_Reason_Phrase,
@@ -327,7 +306,7 @@
 
       if (startRule != null) {
           if (parseFunctions[startRule] == null) {
-            throw new ArgumentError("Invalid rule name: " + quote(startRule) + ".");
+            throw new ArgumentError("Invalid rule name: " + startRule + ".");
           }
         } else {
           startRule = "CRLF";
@@ -639,14 +618,13 @@ hnv_unreserved    <- "[" / "]" / "/" / "?" / ":" / "+" / "$"
 
 ## FIRST LINE
 
-Request_Response  <- Status_Line / Request_Line
-
+Request_Response  <- (Status_Line / Request_Line) { $$ = data; }
 
 ## REQUEST LINE
 
-Request_Line      <- Method SP Request_URI SP SIP_Version
+Request_Line      <- Method SP Request_URI SP SIP_Version { $$ = data; }
 
-Request_URI       <- SIP_URI / absoluteURI
+Request_URI       <- SIP_URI / absoluteURI { $$ = data; }
 
 absoluteURI       <- scheme ":" ( hier_part / opaque_part ) { $$ = data; }
 
@@ -720,13 +698,17 @@ extension_method  <- token
 Status_Line     <- SIP_Version SP Status_Code SP Reason_Phrase
 
 Status_Code     <- status_code: extension_code {
-                  data.status_code = parseInt(status_code.join('')); }
+                  data.status_code = parseInt(status_code.join(''));
+                  return data.status_code;
+                  }
 
 extension_code  <- DIGIT DIGIT DIGIT
 
 Reason_Phrase   <- (reserved / unreserved / escaped
                   / UTF8_NONASCII / UTF8_CONT / SP / HTAB)* {
-                  data.reason_phrase = _text(); }
+                  data.reason_phrase = _text();
+                  $$ = data.reason_phrase;
+                  }
 
 
 ##=======================
@@ -771,9 +753,8 @@ contact_param       <- (addr_spec / name_addr) (SEMI contact_params)* {
                         } catch(e) {
                           header = null;
                         }
-                        data.multi_header.add( { 'possition': pos,
-                                                  'offset': offset,
-                                                  'parsed': header
+                        data.multi_header.add( { 'raw': _text(),
+                                                 'parsed': header
                                                 });}
 
 name_addr           <- ( display_name )? LAQUOT SIP_URI RAQUOT
@@ -852,7 +833,7 @@ content_coding      <- token
 ## CONTENT-LENGTH
 
 Content_Length      <- length: (DIGIT +) {
-                        $$ = parseInt(length.join('')); }
+                        return parseInt(length.join('')); }
 
 ## CONTENT-TYPE
 
@@ -917,7 +898,7 @@ From        <- ( addr_spec / name_addr ) ( SEMI from_param )* {
                 var tag = data.tag;
                 try {
                   $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
-                  if (tag) {data.setParam('tag',tag);}
+                  if (tag) {$$.setParam('tag',tag);}
                 } catch(e) {
                   $$ == -1;
                 }}
@@ -930,7 +911,7 @@ tag_param   <- "tag"i EQUAL tag: token {data.tag = tag; }
 ## MAX-FORWARDS
 
 Max_Forwards  <- forwards: DIGIT+ {
-                  data = parseInt(forwards.join('')); }
+                  return parseInt(forwards.join('')); }
 
 
 ## MIN-EXPIRES
@@ -1129,7 +1110,7 @@ To         <- ( addr_spec / name_addr ) ( SEMI to_param )* {
               var tag = data.tag;
               try {
                 $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
-                if (tag) {data.setParam('tag',tag);}
+                if (tag != null) {$$.setParam('tag',tag);}
               } catch(e) {
                 $$ = -1;
               }}
