@@ -6,24 +6,21 @@ final logger = Logger('Socket');
 debug(msg) => logger.debug(msg);
 debugerror(error) => logger.error(error);
 
-/**
- * Interface documentation: https://jssip.net/documentation/$last_version/api/socket/
- *
- * interface Socket {
- *  attribute String via_transport
- *  attribute String url
- *  attribute String sip_uri
- *
- *  method connect();
- *  method disconnect();
- *  method send(data);
- *
- *  attribute EventHandler onconnect
- *  attribute EventHandler ondisconnect
- *  attribute EventHandler ondata
- * }
- *
- */
+/// Socket Interface.
+abstract class Socket {
+
+  get via_transport;
+  get url;
+  get sip_uri;
+
+  connect();
+  disconnect();
+  send(data);
+
+  dynamic onconnect;
+  dynamic ondisconnect;
+  dynamic ondata;
+}
 
 isSocket(socket) {
   // Ignore if an array is given.
@@ -57,10 +54,13 @@ isSocket(socket) {
     return false;
   }
 
+  if(socket is! Socket)
+    return false;
+
   // Check Methods.
   if (socket.connect == null || socket.connect is! Function)
     return false;
-  else if (socket.disconnect == null|| socket.disconnect is! Function)
+  else if (socket.disconnect == null || socket.disconnect is! Function)
     return false;
   else if (socket.send == null || socket.send is! Function) return false;
 

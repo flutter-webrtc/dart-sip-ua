@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'Socket.dart';
 import 'logger.dart';
 import 'Grammar.dart';
 
@@ -7,17 +7,20 @@ final logger = Logger('WebSocketInterface');
 debug(msg) => logger.debug(msg);
 debugerror(error) => logger.error(error);
 
-class WebSocketInterface {
-  var _url = null;
-  var _sip_uri = null;
-  var _via_transport = null;
-  var _ws = null;
+class WebSocketInterface implements Socket {
+  String _url;
+  String _sip_uri;
+  String _via_transport;
+  var _ws;
   var _closed = false;
   var _connected = false;
   var weight;
 
+  @override
   dynamic onconnect;
+  @override
   dynamic ondisconnect;
+  @override
   dynamic ondata;
 
   WebSocketInterface(url) {
@@ -31,23 +34,27 @@ class WebSocketInterface {
       debugerror('invalid WebSocket URI scheme: ${parsed_url.scheme}');
       throw new AssertionError('Invalid argument: ${url}');
     } else {
-      var port = parsed_url.port != null? ':${parsed_url.port}' : '';
+      var port = parsed_url.port != null ? ':${parsed_url.port}' : '';
       this._sip_uri = 'sip:${parsed_url.host}${port};transport=ws';
       debug('SIP URI: ${this._sip_uri}');
       this._via_transport = parsed_url.scheme.toUpperCase();
     }
   }
 
+  @override
   get via_transport => this._via_transport;
 
   set via_transport(value) {
     this._via_transport = value.toUpperCase();
   }
 
+  @override
   get sip_uri => this._sip_uri;
 
+  @override
   get url => this._url;
 
+  @override
   connect() async {
     debug('connect()');
     if (this.isConnected()) {
@@ -69,9 +76,8 @@ class WebSocketInterface {
         this._onMessage(data);
       }, onDone: () {
         logger.debug('Closed by server!');
-         _connected = false;
+        _connected = false;
         this._onClose(true, 0, 'Closed by server!');
-
       });
       _connected = true;
       this._onOpen();
@@ -81,6 +87,7 @@ class WebSocketInterface {
     }
   }
 
+  @override
   disconnect() {
     debug('disconnect()');
     if (this._closed) return;
@@ -95,6 +102,7 @@ class WebSocketInterface {
     }
   }
 
+  @override
   send(message) {
     debug('send()');
     if (this._closed) {
@@ -114,7 +122,7 @@ class WebSocketInterface {
   }
 
   isConnecting() {
-    return false;// TODO: this._ws && this._ws.readyState == this._ws.CONNECTING;
+    return false; // TODO: this._ws && this._ws.readyState == this._ws.CONNECTING;
   }
 
   /**
