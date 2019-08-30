@@ -143,7 +143,7 @@ class DigestAuthentication {
     // Fill other attributes.
 
     this._method = method;
-    this._uri = ruri;
+    this._uri = ruri ?? '';
     this._cnonce = cnonce ?? Utils.createRandomToken(12);
     this._nc += 1;
     var hex = _nc.toRadixString(16);

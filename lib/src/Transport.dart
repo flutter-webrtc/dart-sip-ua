@@ -106,7 +106,7 @@ class Transport {
 
   get sip_uri => this.socket.sip_uri;
 
-  connect() {
+  connect(){
     debug('connect()');
 
     if (this.isConnected()) {
@@ -131,7 +131,6 @@ class Transport {
       this.socket.ondata = this._onData;
       this.socket.connect();
     }
-
     return;
   }
 
@@ -254,18 +253,12 @@ class Transport {
       clearTimeout(this.recovery_timer);
       this.recovery_timer = null;
     }
-
     this.onconnect({'socket': this});
   }
 
-  _onDisconnect(error, code, reason) {
+  _onDisconnect(data) {
     this.status = C.STATUS_DISCONNECTED;
-    this.ondisconnect({
-      'socket': this.socket,
-      'error': error,
-      'code': code,
-      'reason': reason
-    });
+    this.ondisconnect(data);
 
     if (this.close_requested) {
       return;
@@ -274,30 +267,27 @@ class Transport {
     else {
       this.sockets.forEach((socket) {
         if (this.socket == socket['socket']) {
-          socket.status = C.SOCKET_STATUS_ERROR;
+          socket['status'] = C.SOCKET_STATUS_ERROR;
         }
-      }, this);
+      });
     }
 
-    this._reconnect(error);
+    this._reconnect(data['error']);
   }
 
   _onData(data) {
     // CRLF Keep Alive response from server. Ignore it.
     if (data == '\r\n') {
       debug('received message with CRLF Keep Alive response');
-
       return;
     }
     // Binary message.
     else if (data is! String) {
       try {
-        /// TODO: ??
-        //data = String.fromCharCode.apply(null, new Uint8Array(data));
+        data = new String.fromCharCodes(data);
       } catch (evt) {
         debug('received binary message failed to be converted into string,' +
             ' message discarded');
-
         return;
       }
 

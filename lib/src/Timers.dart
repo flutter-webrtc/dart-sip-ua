@@ -17,16 +17,16 @@ class Timers {
       60000; // See RFC 3261 Section 13.3.1.1
 }
 
+setTimeout(fn, duration) {
+  return new Timer(new Duration(milliseconds: duration), fn);
+}
+
 clearTimeout(Timer timer) {
   timer.cancel();
 }
 
-setTimeout(fn, duration) {
-  return new Timer(duration, fn);
-}
-
 setInterval(fn, interval) {
-  return new Timer.periodic(interval, fn);
+  return new Timer.periodic(new Duration(milliseconds: interval), fn);
 }
 
 clearInterval(Timer timer) {

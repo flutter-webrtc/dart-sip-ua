@@ -51,8 +51,8 @@ class OutgoingRequest {
     // Fill the Common SIP Request Headers.
 
     // Route.
-    if (params.route_set != null) {
-      this.setHeader('route', params.route_set);
+    if (params['route_set'] != null) {
+      this.setHeader('route', params['route_set']);
     } else if (ua.configuration.use_preloaded_route) {
       this.setHeader('route', '<${ua.transport.sip_uri};lr>');
     }
@@ -65,21 +65,20 @@ class OutgoingRequest {
     this.setHeader('max-forwards', JsSIP_C.MAX_FORWARDS);
 
     // To
-    var to_uri = params.to_uri ?? ruri;
-    var to_params = params.to_tag ? {'tag': params.to_tag} : null;
-    var to_display_name =
-        params.to_display_name != null ? params.to_display_name : null;
+    var to_uri = params['to_uri'] ?? ruri;
+    var to_params = params['to_tag'] != null ? {'tag': params['to_tag']} : null;
+    var to_display_name = params['to_display_name'];
 
     this.to = new NameAddrHeader(to_uri, to_display_name, to_params);
     this.setHeader('to', this.to.toString());
 
     // From.
-    var from_uri = params.from_uri ?? ua.configuration.uri;
-    var from_params = {'tag': params.from_tag ?? Utils.newTag()};
+    var from_uri = params['from_uri'] ?? ua.configuration.uri;
+    var from_params = {'tag': params['from_tag'] ?? Utils.newTag()};
     var display_name;
 
-    if (params.from_display_name != null) {
-      display_name = params.from_display_name;
+    if (params['from_display_name'] != null) {
+      display_name = params['from_display_name'];
     } else if (ua.configuration.display_name != null) {
       display_name = ua.configuration.display_name;
     } else {
@@ -90,14 +89,14 @@ class OutgoingRequest {
     this.setHeader('from', this.from.toString());
 
     // Call-ID.
-    var call_id = params.call_id ??
+    var call_id = params['call_id'] ??
         (ua.configuration.jssip_id + Utils.createRandomToken(15));
 
     this.call_id = call_id;
     this.setHeader('call-id', call_id);
 
     // CSeq.
-    var cseq = params.cseq ?? Utils.Math.floor(Utils.Math.random() * 10000);
+    var cseq = params['cseq'] ?? Utils.Math.floor(Utils.Math.random() * 10000);
 
     this.cseq = cseq;
     this.setHeader('cseq', '${cseq} ${method}');
@@ -212,25 +211,21 @@ class OutgoingRequest {
 
   toString() {
     var msg = '${this.method} ${this.ruri} SIP/2.0\r\n';
+    this.headers.forEach((headerName, headerValue) {
+      msg += '${headerName}: ${headerValue[0]}\r\n';
+    });
 
-    for (var headerName in this.headers) {
-      if (this.headers.containsKey(headerName)) {
-        for (var headerValue in this.headers[headerName]) {
-          msg += '${headerName}: ${headerValue}\r\n';
-        }
-      }
-    }
-
-    for (var header in this.extraHeaders) {
+    this.extraHeaders.forEach((header) {
       msg += '${header.trim()}\r\n';
-    }
+    });
 
     // Supported.
     var supported = [];
 
     switch (this.method) {
       case JsSIP_C.REGISTER:
-        supported.add(['path', 'gruu']);
+        supported.add('path');
+        supported.add('gruu');
         break;
       case JsSIP_C.INVITE:
         if (this.ua.configuration.session_timers) {
@@ -239,7 +234,8 @@ class OutgoingRequest {
         if (this.ua.contact.pub_gruu || this.ua.contact.temp_gruu) {
           supported.add('gruu');
         }
-        supported.add(['ice', 'replaces']);
+        supported.add('ice');
+        supported.add('replaces');
         break;
       case JsSIP_C.UPDATE:
         if (this.ua.configuration.session_timers) {
@@ -255,7 +251,7 @@ class OutgoingRequest {
 
     // Allow.
     msg += 'Allow: ${JsSIP_C.ALLOWED_METHODS}\r\n';
-    msg += 'Supported: ${supported}\r\n';
+    msg += 'Supported: ${supported.join(', ')}\r\n';
     msg += 'User-Agent: ${userAgent}\r\n';
 
     if (this.body != null) {
@@ -274,7 +270,7 @@ class OutgoingRequest {
     var request = new OutgoingRequest(this.method, this.ruri, this.ua);
 
     this.headers.forEach((name, value) {
-      request.headers[name] = this.headers[name].slice();
+      request.headers[name] = this.headers[name];
     });
 
     request.body = this.body;
@@ -574,7 +570,8 @@ class IncomingRequest extends IncomingMessage {
         if (this.ua.contact.pub_gruu || this.ua.contact.temp_gruu) {
           supported.add('gruu');
         }
-        supported.add(['ice', 'replaces']);
+        supported.add('ice');
+        supported.add('replaces');
         break;
       case JsSIP_C.UPDATE:
         if (this.ua.configuration.session_timers) {
@@ -598,7 +595,7 @@ class IncomingRequest extends IncomingMessage {
       response += 'Accept: ${JsSIP_C.ACCEPTED_BODY_TYPES}\r\n';
     }
 
-    response += 'Supported: ${supported}\r\n';
+    response += 'Supported: ${supported.join(', ')}\r\n';
 
     if (body != null) {
       var length = Utils.str_utf8_length(body);

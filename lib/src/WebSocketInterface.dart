@@ -110,7 +110,7 @@ class WebSocketInterface implements Socket {
     }
     try {
       this._ws.add(message);
-      return message;
+      return true;
     } catch (error) {
       logger.failure('send() | error sending message: ' + error.toString());
       throw error;
@@ -148,7 +148,7 @@ class WebSocketInterface implements Socket {
   }
 
   _onMessage(data) {
-    debug('Received WebSocket message: ' + data);
+    debug('Received WebSocket message');
     this.ondata(data);
   }
 

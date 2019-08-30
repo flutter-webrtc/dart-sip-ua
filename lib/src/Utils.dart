@@ -2,6 +2,9 @@ import 'dart:math' as DartMath;
 import 'dart:core';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:uuid/uuid.dart';
+import 'package:random_string/random_string.dart';
+
 import 'Grammar.dart';
 import 'URI.dart';
 import 'Constants.dart' as JsSIP_C;
@@ -90,29 +93,12 @@ isEmpty(value) {
 
 // Used by 'newTag'.
 createRandomToken(size, {base = 32}) {
-  var i, r, token = '';
-
-  for (i = 0; i < size; i++) {
-    r = (Math.random() * base) | 0;
-    token += r.toRadixString(base);
-  }
-
-  return token;
+  return randomAlphaNumeric(size).toLowerCase();
 }
 
 newTag() => createRandomToken(10);
 
-// https://stackoverflow.com/users/109538/broofa.
-newUUID() {
-  String tmp = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
-  var UUID = tmp.replaceAllMapped(new RegExp(r'[xy]', caseSensitive: false),
-      (m) {
-    var r = Math.random() * 16 | 0, v = m[1] == 'x' ? r : ((r & 0x3) | 0x8);
-    return v.toString(16);
-  });
-
-  return UUID;
-}
+newUUID() => new Uuid().v4();
 
 hostType(host) {
   if (host == null) {
@@ -252,5 +238,5 @@ closeMediaStream(stream) {
 }
 
 cloneArray(array) {
-  return (array && array.slice()) ?? [];
+  return (array != null && array is List)? array.sublist(0) : [];
 }
