@@ -4,10 +4,6 @@ import 'Transactions.dart' as Transactions;
 import 'UA.dart' as UA;
 import 'logger.dart';
 
-final logger = Logger('RequestSender');
-debug(msg) => logger.debug(msg);
-debugerror(error) => logger.error(error);
-
 // Default event handlers.
 var EventHandlers = {
   'onRequestTimeout': () => {},
@@ -25,6 +21,9 @@ class RequestSender {
   var _challenged;
   var _staled;
   var clientTransaction;
+  final logger = new Logger('RequestSender');
+  debug(msg) => logger.debug(msg);
+  debugerror(error) => logger.error(error);
 
   RequestSender(ua, request, eventHandlers) {
     this._ua = ua;

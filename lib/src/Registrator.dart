@@ -6,10 +6,6 @@ import 'SIPMessage.dart' as SIPMessage;
 import 'RequestSender.dart';
 import 'logger.dart';
 
-final logger = Logger('Registrator');
-debug(msg) => logger.debug(msg);
-debugerror(error) => logger.error(error);
-
 const MIN_REGISTER_EXPIRES = 10; // In seconds.
 
 class Registrator {
@@ -26,6 +22,9 @@ class Registrator {
   var _contact;
   var _extraHeaders;
   var _extraContactParams;
+  final logger = Logger('Registrator');
+  debug(msg) => logger.debug(msg);
+  debugerror(error) => logger.error(error);
 
   Registrator(ua, [transport]) {
     var reg_id = 1; // Force reg_id to 1.
@@ -77,8 +76,7 @@ class Registrator {
     if (extraHeaders is! List) {
       extraHeaders = [];
     }
-
-    this._extraHeaders = extraHeaders.slice();
+    this._extraHeaders = extraHeaders;
   }
 
   setExtraContactParams(extraContactParams) {
@@ -89,16 +87,12 @@ class Registrator {
     // Reset it.
     this._extraContactParams = '';
 
-    for (var param_key in extraContactParams) {
-      if (extraContactParams.containsKey(param_key)) {
-        var param_value = extraContactParams[param_key];
-
-        this._extraContactParams += (';${param_key}');
-        if (param_value != null) {
-          this._extraContactParams += ('=${param_value}');
-        }
+    extraContactParams.forEach((param_key, param_value) {
+      this._extraContactParams += (';${param_key}');
+      if (param_value != null) {
+        this._extraContactParams += ('=${param_value}');
       }
-    }
+    });
   }
 
   register() {
@@ -162,7 +156,7 @@ class Registrator {
             return;
           }
 
-          var contacts =  [];
+          var contacts = [];
           response.headers['Contact'].forEach((item) {
             contacts.add(item['parsed']);
           });
@@ -248,7 +242,7 @@ class Registrator {
     request_sender.send();
   }
 
-  unregister([options]) {
+  unregister(unregister_all) {
     if (this._registered == null) {
       debug('already unregistered');
 
@@ -263,9 +257,9 @@ class Registrator {
       this._registrationTimer = null;
     }
 
-    var extraHeaders = this._extraHeaders.slice();
+    var extraHeaders = [];
 
-    if (options.all != null) {
+    if (unregister_all) {
       extraHeaders.add('Contact: *${this._extraContactParams}');
     } else {
       extraHeaders.add(
@@ -293,7 +287,7 @@ class Registrator {
         this._unregistered(null, JsSIP_C.causes.CONNECTION_ERROR);
       },
       // Increase the CSeq on authentication.
-      'onAuthenticated': () {
+      'onAuthenticated': (request) {
         this._cseq += 1;
       },
       'onReceiveResponse': (response) {
@@ -314,7 +308,7 @@ class Registrator {
 
   close() {
     if (this._registered != null) {
-      this.unregister();
+      this.unregister(false);
     }
   }
 

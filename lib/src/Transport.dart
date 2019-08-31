@@ -4,10 +4,6 @@ import 'Utils.dart';
 import 'Timers.dart';
 import 'logger.dart';
 
-final logger = Logger('Transport');
-debug(msg) => logger.debug(msg);
-debugerror(error) => logger.error(error);
-
 /**
  * Constants
  */
@@ -42,6 +38,9 @@ class Transport {
   var recover_attempts;
   var recovery_timer;
   var close_requested;
+  final logger = Logger('Transport');
+  debug(msg) => logger.debug(msg);
+  debugerror(error) => logger.error(error);
 
   dynamic onconnecting;
   dynamic ondisconnect;
@@ -106,7 +105,7 @@ class Transport {
 
   get sip_uri => this.socket.sip_uri;
 
-  connect(){
+  connect() {
     debug('connect()');
 
     if (this.isConnected()) {
@@ -184,8 +183,8 @@ class Transport {
   _reconnect(error) {
     this.recover_attempts += 1;
 
-    var k =
-        Math.floor((Math.randomDouble() * Math.pow(2, this.recover_attempts)) + 1);
+    var k = Math.floor(
+        (Math.randomDouble() * Math.pow(2, this.recover_attempts)) + 1);
 
     if (k < this.recovery_options['min_interval']) {
       k = this.recovery_options['min_interval'];

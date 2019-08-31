@@ -6,10 +6,6 @@ import 'RequestSender.dart';
 import 'Exceptions.dart' as Exceptions;
 import 'logger.dart';
 
-final logger = Logger('Message');
-debug(msg) => logger.debug(msg);
-debugerror(error) => logger.error(error);
-
 class Message extends EventEmitter {
   var _ua;
   var _request;
@@ -19,6 +15,9 @@ class Message extends EventEmitter {
   var _remote_identity;
   var _is_replied;
   var _data;
+  final logger = new Logger('Message');
+  debug(msg) => logger.debug(msg);
+  debugerror(error) => logger.error(error);
 
   Message(ua) {
     this._ua = ua;

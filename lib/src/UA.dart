@@ -16,10 +16,6 @@ import 'sanityCheck.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'logger.dart';
 
-final logger = Logger('UA');
-debug(msg) => logger.debug(msg);
-debugerror(error) => logger.error(error);
-
 class C {
   // UA status codes.
   static const STATUS_INIT = 0;
@@ -55,7 +51,7 @@ class Contact {
     }
 
     if (outbound &&
-        (anonymous? this.temp_gruu == null : this.pub_gruu == null)) {
+        (anonymous ? this.temp_gruu == null : this.pub_gruu == null)) {
       contact += ';ob';
     }
 
@@ -86,6 +82,9 @@ class UA extends EventEmitter {
   var _data;
   var _closeTimer;
   var _registrator;
+  final logger = new Logger('UA');
+  debug(msg) => logger.debug(msg);
+  debugerror(error) => logger.error(error);
 
   UA(configuration) {
     debug('new() [configuration:${configuration.toString()}]');
@@ -113,7 +112,7 @@ class UA extends EventEmitter {
 
     // Check configuration argument.
     if (configuration == null) {
-      throw new Exceptions.TypeError('Not enough arguments');
+      throw new Exceptions.ConfigurationError('Not enough arguments');
     }
 
     // Load configuration.
@@ -186,11 +185,11 @@ class UA extends EventEmitter {
   /**
    * Unregister.
    */
-  unregister(options) {
+  unregister({unregister_all = false}) {
     debug('unregister()');
 
     this._dynConfiguration.register = false;
-    this._registrator.unregister(options);
+    this._registrator.unregister(unregister_all);
   }
 
   /**
@@ -225,12 +224,13 @@ class UA extends EventEmitter {
    */
   call(target, options) {
     debug('call()');
-
-    var session = MediaSessionFactory.createRTCSession(this);
-
-    session.connect(target, options);
-
-    return session;
+    if (this._configuration.session_factory != null) {
+      var session = this._configuration.session_factory.createSession(this);
+      session.connect(target, options);
+      return session;
+    } else {
+      throw new Exceptions.NotSupportedError("SessionFactory [this._configuration.session_factory] doesn't exist!");
+    }
   }
 
   /**
@@ -245,11 +245,8 @@ class UA extends EventEmitter {
    */
   sendMessage(target, body, options) {
     debug('sendMessage()');
-
     var message = new Message(this);
-
     message.send(target, body, options);
-
     return message;
   }
 
@@ -258,7 +255,6 @@ class UA extends EventEmitter {
    */
   terminateSessions(options) {
     debug('terminateSessions()');
-
     this._sessions.forEach((idx, value) {
       if (!this._sessions[idx].isEnded()) {
         this._sessions[idx].terminate(options);
@@ -553,7 +549,8 @@ class UA extends EventEmitter {
     if (request.to_tag == null) {
       switch (method) {
         case JsSIP_C.INVITE:
-          if (MediaSessionFactory.supportWebRTC()) {
+          if (SessionFactory.supportWebRTC() &&
+              this._configuration.session_factory != null) {
             if (request.hasHeader('replaces')) {
               var replaces = request.replaces;
 
@@ -570,7 +567,7 @@ class UA extends EventEmitter {
                 request.reply(481);
               }
             } else {
-              session = MediaSessionFactory.createRTCSession(this);
+              session = this._configuration.session_factory.createSession(this);
               session.init_incoming(request);
             }
           } else {

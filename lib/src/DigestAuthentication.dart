@@ -1,10 +1,6 @@
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 
-final logger = Logger('DigestAuthentication');
-debug(msg) => logger.debug(msg);
-debugerror(error) => logger.error(error);
-
 class Challenge {
   var algorithm;
   var realm;
@@ -47,6 +43,9 @@ class DigestAuthentication {
   var _ha1;
   var _response;
   Credentials _credentials;
+  final logger = new Logger('DigestAuthentication');
+  debug(msg) => logger.debug(msg);
+  debugerror(error) => logger.error(error);
 
   DigestAuthentication(this._credentials);
 
@@ -184,7 +183,8 @@ class DigestAuthentication {
           '${this._ha1}:${this._nonce}:${this._ncHex}:${this._cnonce}:auth:${ha2}');
     } else if (this._qop == 'auth-int') {
       // HA2 = MD5(A2) = MD5(method:digestURI:MD5(entityBody)).
-      a2 ='${this._method}:${this._uri}:${Utils.calculateMD5(body != null ? body : '')}';
+      a2 =
+          '${this._method}:${this._uri}:${Utils.calculateMD5(body != null ? body : '')}';
       ha2 = Utils.calculateMD5(a2);
 
       debug('authenticate() | using qop=auth-int [a2:${a2}]');
@@ -233,8 +233,8 @@ class DigestAuthentication {
       auth_params.add('cnonce="${this._cnonce}"');
       auth_params.add('nc=${this._ncHex}');
     }
-    if(this._stale != null){
-      auth_params.add('stale=${this._stale? 'true' : 'false'}');
+    if (this._stale != null) {
+      auth_params.add('stale=${this._stale ? 'true' : 'false'}');
     }
     return 'Digest ${auth_params.join(', ')}';
   }

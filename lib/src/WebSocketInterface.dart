@@ -3,11 +3,8 @@ import 'Socket.dart';
 import 'logger.dart';
 import 'Grammar.dart';
 
-final logger = Logger('WebSocketInterface');
-debug(msg) => logger.debug(msg);
-debugerror(error) => logger.error(error);
-
 class WebSocketInterface implements Socket {
+  final logger = Logger('WebSocketInterface');
   String _url;
   String _sip_uri;
   String _via_transport;
@@ -40,6 +37,9 @@ class WebSocketInterface implements Socket {
       this._via_transport = parsed_url.scheme.toUpperCase();
     }
   }
+  debug(msg) => logger.debug(msg);
+
+  debugerror(error) => logger.error(error);
 
   @override
   get via_transport => this._via_transport;
