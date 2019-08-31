@@ -82,14 +82,14 @@ class NonInviteClientTransaction extends EventEmitter {
     clearTimeout(this.K);
     this.stateChanged(C.STATUS_TERMINATED);
     this.ua.destroyTransaction(this);
-    this.eventHandlers.onTransportError();
+    this.eventHandlers['onTransportError']();
   }
 
   timer_F() {
     debugnict('Timer F expired for transaction ${this.id}');
     this.stateChanged(C.STATUS_TERMINATED);
     this.ua.destroyTransaction(this);
-    this.eventHandlers.onRequestTimeout();
+    this.eventHandlers['onRequestTimeout']();
   }
 
   timer_K() {
@@ -105,7 +105,7 @@ class NonInviteClientTransaction extends EventEmitter {
         case C.STATUS_TRYING:
         case C.STATUS_PROCEEDING:
           this.stateChanged(C.STATUS_PROCEEDING);
-          this.eventHandlers.onReceiveResponse(response);
+          this.eventHandlers['onReceiveResponse'](response);
           break;
       }
     } else {
@@ -183,7 +183,7 @@ class InviteClientTransaction extends EventEmitter {
 
     if (this.state != C.STATUS_ACCEPTED) {
       debugict('transport error occurred, deleting transaction ${this.id}');
-      this.eventHandlers.onTransportError();
+      this.eventHandlers['onTransportError']();
     }
 
     this.stateChanged(C.STATUS_TERMINATED);
@@ -207,7 +207,7 @@ class InviteClientTransaction extends EventEmitter {
     if (this.state == C.STATUS_CALLING) {
       this.stateChanged(C.STATUS_TERMINATED);
       this.ua.destroyTransaction(this);
-      this.eventHandlers.onRequestTimeout();
+      this.eventHandlers['onRequestTimeout']();
     }
   }
 
@@ -268,10 +268,10 @@ class InviteClientTransaction extends EventEmitter {
       switch (this.state) {
         case C.STATUS_CALLING:
           this.stateChanged(C.STATUS_PROCEEDING);
-          this.eventHandlers.onReceiveResponse(response);
+          this.eventHandlers['onReceiveResponse'](response);
           break;
         case C.STATUS_PROCEEDING:
-          this.eventHandlers.onReceiveResponse(response);
+          this.eventHandlers['onReceiveResponse'](response);
           break;
       }
     } else if (status_code >= 200 && status_code <= 299) {
@@ -282,10 +282,10 @@ class InviteClientTransaction extends EventEmitter {
           this.M = setTimeout(() {
             this.timer_M();
           }, Timers.TIMER_M);
-          this.eventHandlers.onReceiveResponse(response);
+          this.eventHandlers['onReceiveResponse'](response);
           break;
         case C.STATUS_ACCEPTED:
-          this.eventHandlers.onReceiveResponse(response);
+          this.eventHandlers['onReceiveResponse'](response);
           break;
       }
     } else if (status_code >= 300 && status_code <= 699) {
@@ -294,7 +294,7 @@ class InviteClientTransaction extends EventEmitter {
         case C.STATUS_PROCEEDING:
           this.stateChanged(C.STATUS_COMPLETED);
           this.sendACK(response);
-          this.eventHandlers.onReceiveResponse(response);
+          this.eventHandlers['onReceiveResponse'](response);
           break;
         case C.STATUS_COMPLETED:
           this.sendACK(response);
@@ -331,7 +331,7 @@ class AckClientTransaction extends EventEmitter {
 
   onTransportError() {
     debugact('transport error occurred for transaction ${this.id}');
-    this.eventHandlers.onTransportError();
+    this.eventHandlers['onTransportError']();
   }
 }
 

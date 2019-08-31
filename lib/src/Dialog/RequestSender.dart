@@ -47,10 +47,10 @@ class DialogRequestSender {
 
   send() {
     var request_sender = new RequestSender(this._ua, this._request, {
-      'onRequestTimeout': () => {this._eventHandlers.onRequestTimeout()},
-      'onTransportError': () => {this._eventHandlers.onTransportError()},
+      'onRequestTimeout': () => {this._eventHandlers['onRequestTimeout']()},
+      'onTransportError': () => {this._eventHandlers['onTransportError']()},
       'onAuthenticated': (request) =>
-          {this._eventHandlers.onAuthenticated(request)},
+          {this._eventHandlers['onAuthenticated'](request)},
       'onReceiveResponse': (response) => {this._receiveResponse(response)}
     });
 
@@ -84,14 +84,14 @@ class DialogRequestSender {
   _receiveResponse(response) {
     // RFC3261 12.2.1.2 408 or 481 is received for a request within a dialog.
     if (response.status_code == 408 || response.status_code == 481) {
-      this._eventHandlers.onDialogError(response);
+      this._eventHandlers['onDialogError'](response);
     } else if (response.method == DartSIP_C.INVITE &&
         response.status_code == 491) {
       if (this._reattempt != null) {
         if (response.status_code >= 200 && response.status_code < 300) {
-          this._eventHandlers.onSuccessResponse(response);
+          this._eventHandlers['onSuccessResponse'](response);
         } else if (response.status_code >= 300) {
-          this._eventHandlers.onErrorResponse(response);
+          this._eventHandlers['onErrorResponse'](response);
         }
       } else {
         this._request.cseq.value = this._dialog.local_seqnum += 1;
@@ -104,9 +104,9 @@ class DialogRequestSender {
         }, 1000);
       }
     } else if (response.status_code >= 200 && response.status_code < 300) {
-      this._eventHandlers.onSuccessResponse(response);
+      this._eventHandlers['onSuccessResponse'](response);
     } else if (response.status_code >= 300) {
-      this._eventHandlers.onErrorResponse(response);
+      this._eventHandlers['onErrorResponse'](response);
     }
   }
 }

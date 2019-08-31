@@ -145,7 +145,7 @@ class Dialog {
     var request = this._createRequest(method, extraHeaders, body);
 
     // Increase the local CSeq on authentication.
-    eventHandlers.onAuthenticated = (request) {
+    eventHandlers['onAuthenticated'] = (request) {
       this._local_seqnum += 1;
     };
 

@@ -91,8 +91,8 @@ class DTMF extends EventEmitter {
               'succeeded', {'originator': 'remote', 'response': response});
         },
         'onErrorResponse': (response) {
-          if (this.eventHandlers.onFailed != null) {
-            this.eventHandlers.onFailed();
+          if (this.eventHandlers['onFailed'] != null) {
+            this.eventHandlers['onFailed']();
           }
 
           this.emit('failed', {'originator': 'remote', 'response': response});

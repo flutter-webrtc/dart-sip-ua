@@ -2256,8 +2256,8 @@ class RTCSession extends EventEmitter implements Media.Session {
     }
 
     onFailed([response]) {
-      if (eventHandlers.failed != null) {
-        eventHandlers.failed(response);
+      if (eventHandlers['failed'] != null) {
+        eventHandlers['failed'](response);
       }
     }
 
@@ -2294,8 +2294,8 @@ class RTCSession extends EventEmitter implements Media.Session {
 
       try {
         await this._connection.setRemoteDescription(answer);
-        if (eventHandlers.succeeded != null) {
-          eventHandlers.succeeded(response);
+        if (eventHandlers['succeeded'] != null) {
+          eventHandlers['succeeded'](response);
         }
       } catch (error) {
         onFailed();
@@ -2363,8 +2363,8 @@ class RTCSession extends EventEmitter implements Media.Session {
     }
 
     onFailed([response]) {
-      if (eventHandlers.failed != null) {
-        eventHandlers.failed(response);
+      if (eventHandlers['failed'] != null) {
+        eventHandlers['failed'](response);
       }
     }
 
@@ -2404,8 +2404,8 @@ class RTCSession extends EventEmitter implements Media.Session {
 
         try {
           await this._connection.setRemoteDescription(answer);
-          if (eventHandlers.succeeded != null) {
-            eventHandlers.succeeded(response);
+          if (eventHandlers['succeeded'] != null) {
+            eventHandlers['succeeded'](response);
           }
         } catch (error) {
           onFailed(error);
@@ -2415,8 +2415,8 @@ class RTCSession extends EventEmitter implements Media.Session {
         }
       }
       // No SDP answer.
-      else if (eventHandlers.succeeded != null) {
-        eventHandlers.succeeded(response);
+      else if (eventHandlers['succeeded'] != null) {
+        eventHandlers['succeeded'](response);
       }
     }
 
