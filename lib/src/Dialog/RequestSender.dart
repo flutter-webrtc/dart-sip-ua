@@ -6,16 +6,15 @@ import '../Timers.dart';
 
 // Default event handlers.
 var EventHandlers = {
-  'onRequestTimeout'  : () => {},
-  'onTransportError'  : () => {},
-  'onSuccessResponse' : () => {},
-  'onErrorResponse'   : () => {},
-  'onAuthenticated'   : () => {},
-  'onDialogError'     : () => {}
+  'onRequestTimeout': () => {},
+  'onTransportError': () => {},
+  'onSuccessResponse': () => {},
+  'onErrorResponse': () => {},
+  'onAuthenticated': () => {},
+  'onDialogError': () => {}
 };
 
-class DialogRequestSender
-{
+class DialogRequestSender {
   var _dialog;
   var _ua;
   var _request;
@@ -24,8 +23,7 @@ class DialogRequestSender
   var _reattemptTimer;
   var _request_sender;
 
-  DialogRequestSender(dialog, request, eventHandlers)
-  {
+  DialogRequestSender(dialog, request, eventHandlers) {
     this._dialog = dialog;
     this._ua = dialog._ua;
     this._request = request;
@@ -36,12 +34,9 @@ class DialogRequestSender
     this._reattemptTimer = null;
 
     // Define the null handlers.
-    EventHandlers.forEach((handler, fn)
-    {
-      if (EventHandlers.containsKey(handler))
-      {
-        if (this._eventHandlers[handler] == null)
-        {
+    EventHandlers.forEach((handler, fn) {
+      if (EventHandlers.containsKey(handler)) {
+        if (this._eventHandlers[handler] == null) {
           this._eventHandlers[handler] = EventHandlers[handler];
         }
       }
@@ -50,43 +45,34 @@ class DialogRequestSender
 
   get request => this._request;
 
-  send()
-  {
+  send() {
     var request_sender = new RequestSender(this._ua, this._request, {
-      'onRequestTimeout' : () =>
-      {
-        this._eventHandlers.onRequestTimeout()
-      },
-      'onTransportError' : () =>
-      {
-        this._eventHandlers.onTransportError()
-      },
-      'onAuthenticated' : (request) =>
-      {
-        this._eventHandlers.onAuthenticated(request)
-      },
-      'onReceiveResponse' : (response) =>
-      {
-        this._receiveResponse(response)
-      }
+      'onRequestTimeout': () => {this._eventHandlers.onRequestTimeout()},
+      'onTransportError': () => {this._eventHandlers.onTransportError()},
+      'onAuthenticated': (request) =>
+          {this._eventHandlers.onAuthenticated(request)},
+      'onReceiveResponse': (response) => {this._receiveResponse(response)}
     });
 
     request_sender.send();
 
     // RFC3261 14.2 Modifying an Existing Session -UAC BEHAVIOR-.
     if ((this._request.method == JsSIP_C.INVITE ||
-          (this._request.method == JsSIP_C.UPDATE && this._request.body)) &&
-        request_sender.clientTransaction.state != Transactions.C.STATUS_TERMINATED)
-    {
+            (this._request.method == JsSIP_C.UPDATE && this._request.body)) &&
+        request_sender.clientTransaction.state !=
+            Transactions.C.STATUS_TERMINATED) {
       this._dialog.uac_pending_reply = true;
 
-      var stateChanged = ()
-      {
-        if (request_sender.clientTransaction.state == Transactions.C.STATUS_ACCEPTED ||
-            request_sender.clientTransaction.state == Transactions.C.STATUS_COMPLETED ||
-            request_sender.clientTransaction.state == Transactions.C.STATUS_TERMINATED)
-        {
-          request_sender.clientTransaction.removeListener('stateChanged', stateChanged);
+      var stateChanged;
+      stateChanged = () {
+        if (request_sender.clientTransaction.state ==
+                Transactions.C.STATUS_ACCEPTED ||
+            request_sender.clientTransaction.state ==
+                Transactions.C.STATUS_COMPLETED ||
+            request_sender.clientTransaction.state ==
+                Transactions.C.STATUS_TERMINATED) {
+          request_sender.clientTransaction
+              .remove('stateChanged', stateChanged);
           this._dialog.uac_pending_reply = false;
         }
       };
@@ -95,46 +81,31 @@ class DialogRequestSender
     }
   }
 
-  _receiveResponse(response)
-  {
+  _receiveResponse(response) {
     // RFC3261 12.2.1.2 408 or 481 is received for a request within a dialog.
-    if (response.status_code == 408 || response.status_code == 481)
-    {
+    if (response.status_code == 408 || response.status_code == 481) {
       this._eventHandlers.onDialogError(response);
-    }
-    else if (response.method == JsSIP_C.INVITE && response.status_code == 491)
-    {
-      if (this._reattempt != null)
-      {
-        if (response.status_code >= 200 && response.status_code < 300)
-        {
+    } else if (response.method == JsSIP_C.INVITE &&
+        response.status_code == 491) {
+      if (this._reattempt != null) {
+        if (response.status_code >= 200 && response.status_code < 300) {
           this._eventHandlers.onSuccessResponse(response);
-        }
-        else if (response.status_code >= 300)
-        {
+        } else if (response.status_code >= 300) {
           this._eventHandlers.onErrorResponse(response);
         }
-      }
-      else
-      {
+      } else {
         this._request.cseq.value = this._dialog.local_seqnum += 1;
-        this._reattemptTimer = setTimeout(()
-        {
+        this._reattemptTimer = setTimeout(() {
           // TODO: look at dialog state instead.
-          if (this._dialog.owner.status != RTCSession.C.STATUS_TERMINATED)
-          {
+          if (this._dialog.owner.status != RTCSession.C.STATUS_TERMINATED) {
             this._reattempt = true;
             this._request_sender.send();
           }
         }, 1000);
       }
-    }
-    else if (response.status_code >= 200 && response.status_code < 300)
-    {
+    } else if (response.status_code >= 200 && response.status_code < 300) {
       this._eventHandlers.onSuccessResponse(response);
-    }
-    else if (response.status_code >= 300)
-    {
+    } else if (response.status_code >= 300) {
       this._eventHandlers.onErrorResponse(response);
     }
   }
