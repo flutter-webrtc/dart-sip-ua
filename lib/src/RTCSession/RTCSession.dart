@@ -713,8 +713,9 @@ class RTCSession extends EventEmitter implements Media.Session {
       case Media.C.STATUS_CONFIRMED:
         debug('terminating session');
 
-        reason_phrase =
-            options['reason_phrase'] ?? DartSIP_C.REASON_PHRASE[status_code] ?? '';
+        reason_phrase = options['reason_phrase'] ??
+            DartSIP_C.REASON_PHRASE[status_code] ??
+            '';
 
         if (status_code && (status_code < 200 || status_code >= 700)) {
           throw new Exceptions.InvalidStateError(
@@ -738,10 +739,11 @@ class RTCSession extends EventEmitter implements Media.Session {
           var dialog = this._dialog;
 
           // Send the BYE as soon as the ACK is received...
-          /// TODO:  changet to this.receiveRequest = xxx
+          /// TODO:  changet to this.receiveRequest = Function
           var receiveRequest = (method) {
             if (method == DartSIP_C.ACK) {
-              this.sendRequest(DartSIP_C.BYE, {extraHeaders, body});
+              this.sendRequest(
+                  DartSIP_C.BYE, {'extraHeaders': extraHeaders, 'body': body});
               dialog.terminate();
             }
           };
@@ -750,7 +752,8 @@ class RTCSession extends EventEmitter implements Media.Session {
           this._request.server_transaction.on('stateChanged', () {
             if (this._request.server_transaction.state ==
                 Transactions.C.STATUS_TERMINATED) {
-              this.sendRequest(DartSIP_C.BYE, {extraHeaders, body});
+              this.sendRequest(
+                  DartSIP_C.BYE, {'extraHeaders': extraHeaders, 'body': body});
               dialog.terminate();
             }
           });
@@ -763,7 +766,8 @@ class RTCSession extends EventEmitter implements Media.Session {
           // Restore the dialog into 'ua' so the ACK can reach 'this' session.
           this._ua.newDialog(dialog);
         } else {
-          this.sendRequest(DartSIP_C.BYE, {extraHeaders, body});
+          this.sendRequest(
+              DartSIP_C.BYE, {'extraHeaders': extraHeaders, 'body': body});
 
           this._ended('local', null, cause);
         }
@@ -2050,43 +2054,43 @@ class RTCSession extends EventEmitter implements Media.Session {
         this.emit('getusermediafailed', error);
         throw error;
       }
+    }
 
-      if (this._status == Media.C.STATUS_TERMINATED) {
+    if (this._status == Media.C.STATUS_TERMINATED) {
+      throw new Exceptions.InvalidStateError('terminated');
+    }
+
+    this._localMediaStream = stream;
+
+    if (stream != null) {
+      this._connection.addStream(stream);
+    }
+
+    // TODO: should this be triggered here?
+    this._connecting(this._request);
+    try {
+      var desc =
+          await this._createLocalDescription('offer', rtcOfferConstraints);
+      if (this._is_canceled || this._status == Media.C.STATUS_TERMINATED) {
         throw new Exceptions.InvalidStateError('terminated');
       }
 
-      this._localMediaStream = stream;
+      this._request.body = desc;
+      this._status = Media.C.STATUS_INVITE_SENT;
 
-      if (stream != null) {
-        this._connection.addStream(stream);
+      debug('emit "sending" [request:${this._request.toString()}]');
+
+      // Emit 'sending' so the app can mangle the body before the request is sent.
+      this.emit('sending', {'request': this._request});
+
+      request_sender.send();
+    } catch (error) {
+      this._failed('local', null, DartSIP_C.causes.WEBRTC_ERROR);
+      if (this._status == Media.C.STATUS_TERMINATED) {
+        return;
       }
-
-      // TODO: should this be triggered here?
-      this._connecting(this._request);
-      try {
-        var desc =
-            await this._createLocalDescription('offer', rtcOfferConstraints);
-        if (this._is_canceled || this._status == Media.C.STATUS_TERMINATED) {
-          throw new Exceptions.InvalidStateError('terminated');
-        }
-
-        this._request.body = desc;
-        this._status = Media.C.STATUS_INVITE_SENT;
-
-        debug('emit "sending" [request:${this._request.toString()}]');
-
-        // Emit 'sending' so the app can mangle the body before the request is sent.
-        this.emit('sending', {'request': this._request});
-
-        request_sender.send();
-      } catch (error) {
-        this._failed('local', null, DartSIP_C.causes.WEBRTC_ERROR);
-        if (this._status == Media.C.STATUS_TERMINATED) {
-          return;
-        }
-        debugerror(error);
-        throw error;
-      }
+      debugerror(error);
+      throw error;
     }
   }
 
@@ -2183,7 +2187,8 @@ class RTCSession extends EventEmitter implements Media.Session {
 
       if (response.body == null) {
         this._acceptAndTerminate(response, 400, DartSIP_C.causes.MISSING_SDP);
-        this._failed('remote', response, DartSIP_C.causes.BAD_MEDIA_DESCRIPTION);
+        this._failed(
+            'remote', response, DartSIP_C.causes.BAD_MEDIA_DESCRIPTION);
         return;
       }
 
@@ -2222,7 +2227,8 @@ class RTCSession extends EventEmitter implements Media.Session {
         this._confirmed('local', null);
       } catch (error) {
         this._acceptAndTerminate(response, 488, 'Not Acceptable Here');
-        this._failed('remote', response, DartSIP_C.causes.BAD_MEDIA_DESCRIPTION);
+        this._failed(
+            'remote', response, DartSIP_C.causes.BAD_MEDIA_DESCRIPTION);
         debugerror(
             'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
         this.emit('peerconnection:setremotedescriptionfailed', error);
@@ -2488,7 +2494,8 @@ class RTCSession extends EventEmitter implements Media.Session {
     var extraHeaders = [];
 
     if (status_code != null) {
-      reason_phrase = reason_phrase ?? DartSIP_C.REASON_PHRASE[status_code] ?? '';
+      reason_phrase =
+          reason_phrase ?? DartSIP_C.REASON_PHRASE[status_code] ?? '';
       extraHeaders
           .add('Reason: SIP ;cause=${status_code}; text="${reason_phrase}"');
     }
