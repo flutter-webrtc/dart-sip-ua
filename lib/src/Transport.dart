@@ -25,10 +25,10 @@ class C {
 }
 
 /*
- * Manages one or multiple JsSIP.Socket instances.
+ * Manages one or multiple DartSIP.Socket instances.
  * Is reponsible for transport recovery logic among all socket instances.
  *
- * @socket JsSIP::Socket instance
+ * @socket DartSIP::Socket instance
  */
 class Transport {
   var status;
@@ -76,7 +76,7 @@ class Transport {
     sockets.forEach((socket) {
       if (!Socket.isSocket(socket)) {
         throw new Exceptions.TypeError(
-            'Invalid argument.' + ' invalid \'JsSIP.Socket\' instance');
+            'Invalid argument.' + ' invalid \'DartSIP.Socket\' instance');
       }
 
       if (socket.weight != null && socket.weight is! num) {

@@ -1,7 +1,7 @@
 import 'Utils.dart' as Utils;
 import 'UA.dart' as UA;
 import 'Timers.dart';
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 import 'SIPMessage.dart' as SIPMessage;
 import 'RequestSender.dart';
 import 'logger.dart';
@@ -110,7 +110,7 @@ class Registrator {
     print(this._contact);
 
     var request = new SIPMessage.OutgoingRequest(
-        JsSIP_C.REGISTER,
+        DartSIP_C.REGISTER,
         this._registrar,
         this._ua,
         {
@@ -122,10 +122,10 @@ class Registrator {
 
     var request_sender = new RequestSender(this._ua, request, {
       'onRequestTimeout': () {
-        this._registrationFailure(null, JsSIP_C.causes.REQUEST_TIMEOUT);
+        this._registrationFailure(null, DartSIP_C.causes.REQUEST_TIMEOUT);
       },
       'onTransportError': () {
-        this._registrationFailure(null, JsSIP_C.causes.CONNECTION_ERROR);
+        this._registrationFailure(null, DartSIP_C.causes.CONNECTION_ERROR);
       },
       // Increase the CSeq on authentication.
       'onAuthenticated': (request) {
@@ -229,7 +229,7 @@ class Registrator {
             debug('423 response received for REGISTER without Min-Expires');
 
             this._registrationFailure(
-                response, JsSIP_C.causes.SIP_FAILURE_CODE);
+                response, DartSIP_C.causes.SIP_FAILURE_CODE);
           }
         } else {
           var cause = Utils.sipErrorCause(response.status_code);
@@ -269,7 +269,7 @@ class Registrator {
     extraHeaders.add('Expires: 0');
 
     var request = new SIPMessage.OutgoingRequest(
-        JsSIP_C.REGISTER,
+        DartSIP_C.REGISTER,
         this._registrar,
         this._ua,
         {
@@ -281,10 +281,10 @@ class Registrator {
 
     var request_sender = new RequestSender(this._ua, request, {
       'onRequestTimeout': () {
-        this._unregistered(null, JsSIP_C.causes.REQUEST_TIMEOUT);
+        this._unregistered(null, DartSIP_C.causes.REQUEST_TIMEOUT);
       },
       'onTransportError': () {
-        this._unregistered(null, JsSIP_C.causes.CONNECTION_ERROR);
+        this._unregistered(null, DartSIP_C.causes.CONNECTION_ERROR);
       },
       // Increase the CSeq on authentication.
       'onAuthenticated': (request) {

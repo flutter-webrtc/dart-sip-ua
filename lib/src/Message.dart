@@ -1,5 +1,5 @@
 import 'package:events2/events2.dart';
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 import 'SIPMessage.dart' as SIPMessage;
 import 'Utils.dart' as Utils;
 import 'RequestSender.dart';
@@ -72,7 +72,7 @@ class Message extends EventEmitter {
     extraHeaders.add('Content-Type: ${contentType}');
 
     this._request = new SIPMessage.OutgoingRequest(
-        JsSIP_C.MESSAGE, target, this._ua, null, extraHeaders);
+        DartSIP_C.MESSAGE, target, this._ua, null, extraHeaders);
     if (body != null) {
       this._request.body = body;
     }
@@ -175,14 +175,14 @@ class Message extends EventEmitter {
     if (this._closed != null) {
       return;
     }
-    this._failed('system', null, JsSIP_C.causes.REQUEST_TIMEOUT);
+    this._failed('system', null, DartSIP_C.causes.REQUEST_TIMEOUT);
   }
 
   _onTransportError() {
     if (this._closed != null) {
       return;
     }
-    this._failed('system', null, JsSIP_C.causes.CONNECTION_ERROR);
+    this._failed('system', null, DartSIP_C.causes.CONNECTION_ERROR);
   }
 
   _close() {

@@ -27,7 +27,7 @@ class InvalidStateError extends ErrorImpl {
     this.code = 2;
     this.name = 'INVALID_STATE_ERROR';
     this.status = status;
-    this.message = 'Invalid status: ${status}';
+    this.message = 'Invalid status: ${status.toString()}';
   }
 }
 

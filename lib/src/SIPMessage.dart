@@ -3,7 +3,7 @@ import 'NameAddrHeader.dart';
 import 'Exceptions.dart' as Exceptions;
 import 'Grammar.dart';
 import 'Utils.dart' as Utils;
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 import 'logger.dart';
 
 final logger = Logger('SIPMessage');
@@ -62,7 +62,7 @@ class OutgoingRequest {
     this.setHeader('via', '');
 
     // Max-Forwards.
-    this.setHeader('max-forwards', JsSIP_C.MAX_FORWARDS);
+    this.setHeader('max-forwards', DartSIP_C.MAX_FORWARDS);
 
     // To
     var to_uri = params['to_uri'] ?? ruri;
@@ -223,11 +223,11 @@ class OutgoingRequest {
     var supported = [];
 
     switch (this.method) {
-      case JsSIP_C.REGISTER:
+      case DartSIP_C.REGISTER:
         supported.add('path');
         supported.add('gruu');
         break;
-      case JsSIP_C.INVITE:
+      case DartSIP_C.INVITE:
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
@@ -237,7 +237,7 @@ class OutgoingRequest {
         supported.add('ice');
         supported.add('replaces');
         break;
-      case JsSIP_C.UPDATE:
+      case DartSIP_C.UPDATE:
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
@@ -247,11 +247,11 @@ class OutgoingRequest {
 
     supported.add('outbound');
 
-    var userAgent = this.ua.configuration.user_agent ?? JsSIP_C.USER_AGENT;
+    var userAgent = this.ua.configuration.user_agent ?? DartSIP_C.USER_AGENT;
 
     // Allow.
-    msg += 'Allow: ${JsSIP_C.ALLOWED_METHODS}\r\n';
-    msg += 'Supported: ${supported.join(', ')}\r\n';
+    msg += 'Allow: ${DartSIP_C.ALLOWED_METHODS}\r\n';
+    msg += 'Supported: ${supported.join(',')}\r\n';
     msg += 'User-Agent: ${userAgent}\r\n';
 
     if (this.body != null) {
@@ -287,7 +287,7 @@ class OutgoingRequest {
 class InitialOutgoingInviteRequest extends OutgoingRequest {
   var transaction;
   InitialOutgoingInviteRequest(ruri, ua, [params, extraHeaders, body])
-      : super(JsSIP_C.INVITE, ruri, ua, params, extraHeaders, body) {
+      : super(DartSIP_C.INVITE, ruri, ua, params, extraHeaders, body) {
     this.transaction = null;
   }
 
@@ -527,12 +527,12 @@ class IncomingRequest extends IncomingMessage {
       throw new Exceptions.TypeError('Invalid reason_phrase: ${reason}');
     }
 
-    reason = reason ?? JsSIP_C.REASON_PHRASE[code] ?? '';
+    reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
     extraHeaders = Utils.cloneArray(extraHeaders);
 
     var response = 'SIP/2.0 ${code} ${reason}\r\n';
 
-    if (this.method == JsSIP_C.INVITE && code > 100 && code <= 200) {
+    if (this.method == DartSIP_C.INVITE && code > 100 && code <= 200) {
       var headers = this.getHeaders('record-route');
 
       for (var header in headers) {
@@ -563,7 +563,7 @@ class IncomingRequest extends IncomingMessage {
 
     // Supported.
     switch (this.method) {
-      case JsSIP_C.INVITE:
+      case DartSIP_C.INVITE:
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
@@ -573,7 +573,7 @@ class IncomingRequest extends IncomingMessage {
         supported.add('ice');
         supported.add('replaces');
         break;
-      case JsSIP_C.UPDATE:
+      case DartSIP_C.UPDATE:
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
@@ -586,16 +586,16 @@ class IncomingRequest extends IncomingMessage {
     supported.add('outbound');
 
     // Allow and Accept.
-    if (this.method == JsSIP_C.OPTIONS) {
-      response += 'Allow: ${JsSIP_C.ALLOWED_METHODS}\r\n';
-      response += 'Accept: ${JsSIP_C.ACCEPTED_BODY_TYPES}\r\n';
+    if (this.method == DartSIP_C.OPTIONS) {
+      response += 'Allow: ${DartSIP_C.ALLOWED_METHODS}\r\n';
+      response += 'Accept: ${DartSIP_C.ACCEPTED_BODY_TYPES}\r\n';
     } else if (code == 405) {
-      response += 'Allow: ${JsSIP_C.ALLOWED_METHODS}\r\n';
+      response += 'Allow: ${DartSIP_C.ALLOWED_METHODS}\r\n';
     } else if (code == 415) {
-      response += 'Accept: ${JsSIP_C.ACCEPTED_BODY_TYPES}\r\n';
+      response += 'Accept: ${DartSIP_C.ACCEPTED_BODY_TYPES}\r\n';
     }
 
-    response += 'Supported: ${supported.join(', ')}\r\n';
+    response += 'Supported: ${supported.join(',')}\r\n';
 
     if (body != null) {
       var length = Utils.str_utf8_length(body);
@@ -627,7 +627,7 @@ class IncomingRequest extends IncomingMessage {
       throw new Exceptions.TypeError('Invalid reason_phrase: ${reason}');
     }
 
-    reason = reason ?? JsSIP_C.REASON_PHRASE[code] ?? '';
+    reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
 
     var response = 'SIP/2.0 ${code} ${reason}\r\n';
 

@@ -1,5 +1,5 @@
 import 'Utils.dart' as Utils;
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 import 'Grammar.dart';
 import 'URI.dart';
 import 'Socket.dart' as Socket;
@@ -17,7 +17,7 @@ class Settings {
   var display_name = null;
   var uri = null;
   var contact_uri = null;
-  var user_agent = JsSIP_C.USER_AGENT;
+  var user_agent = DartSIP_C.USER_AGENT;
 
   // SIP instance id (GRUU).
   var instance_id = null;
@@ -27,7 +27,7 @@ class Settings {
 
   // Session parameters.
   var session_timers = true;
-  var session_timers_refresh_method = JsSIP_C.UPDATE;
+  var session_timers_refresh_method = DartSIP_C.UPDATE;
   var no_answer_timeout = 60;
 
   // Registration parameters.
@@ -46,10 +46,11 @@ class Settings {
   */
   var via_host = '${Utils.createRandomToken(12)}.invalid';
 
-  // JsSIP ID
+  // DartSIP ID
   var jssip_id = null;
 
   var hostport_params = null;
+  var session_factory = null;
 }
 
 var settings = new Settings();
@@ -86,7 +87,7 @@ class Checks {
         throw new Exceptions.ConfigurationError("uri", null);
       }
       if (!uri.contains(new RegExp(r'^sip:', caseSensitive: false))) {
-        uri = '${JsSIP_C.SIP}:${uri}';
+        uri = '${DartSIP_C.SIP}:${uri}';
       }
       var parsed = URI.parse(uri);
       if (parsed == null) {
@@ -177,7 +178,7 @@ class Checks {
       if (method == null) return;
       if (method is String) {
         method = method.toUpperCase();
-        if (method == JsSIP_C.INVITE || method == JsSIP_C.UPDATE) {
+        if (method == DartSIP_C.INVITE || method == DartSIP_C.UPDATE) {
           dst.session_timers_refresh_method = method;
         }
       }
@@ -216,7 +217,7 @@ class Checks {
       if (registrar_server == null) return;
       if (!registrar_server
           .contains(new RegExp(r'^sip:', caseSensitive: false))) {
-        registrar_server = '${JsSIP_C.SIP}:${registrar_server}';
+        registrar_server = '${DartSIP_C.SIP}:${registrar_server}';
       }
       var parsed = URI.parse(registrar_server);
       if (parsed == null || parsed.user != null) {

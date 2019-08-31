@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'Grammar.dart';
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 import 'Utils.dart' as Utils;
 
 /**
@@ -17,7 +17,7 @@ class URI {
   final JsonDecoder decoder = new JsonDecoder();
   final JsonEncoder encoder = new JsonEncoder();
   /**
-    * Parse the given string and returns a JsSIP.URI instance or null if
+    * Parse the given string and returns a DartSIP.URI instance or null if
     * it is an invalid URI.
     */
   static parse(uri) {
@@ -44,7 +44,7 @@ class URI {
     // Initialize parameters.
     this._parameters = {};
     this._headers = {};
-    this._scheme = scheme ?? JsSIP_C.SIP;
+    this._scheme = scheme ?? DartSIP_C.SIP;
     this._user = user;
     this._host = host.toLowerCase();
     this._port = port;

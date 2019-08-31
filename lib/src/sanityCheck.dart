@@ -1,4 +1,4 @@
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 import 'SIPMessage.dart' as SIPMessage;
 import 'Utils.dart' as Utils;
 import 'logger.dart';
@@ -115,7 +115,7 @@ rfc3261_8_2_2_2() {
   }
 
   // INVITE request.
-  if (message.method == JsSIP_C.INVITE) {
+  if (message.method == DartSIP_C.INVITE) {
     // If the branch matches the key of any IST then assume it is a retransmission
     // and ignore the INVITE.
     // TODO: we should reply the last response.
@@ -207,7 +207,7 @@ reply(status_code) {
 
   var to;
   var response =
-      'SIP/2.0 ${status_code} ${JsSIP_C.REASON_PHRASE[status_code]}\r\n';
+      'SIP/2.0 ${status_code} ${DartSIP_C.REASON_PHRASE[status_code]}\r\n';
 
   for (var via in vias) {
     response += 'Via: ${via}\r\n';

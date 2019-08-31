@@ -29,7 +29,7 @@ isSocket(socket) {
   }
 
   if (socket == null) {
-    debugerror('null JsSIP.Socket instance');
+    debugerror('null DartSIP.Socket instance');
 
     return false;
   }
@@ -37,17 +37,17 @@ isSocket(socket) {
   // Check Properties.
   try {
     if (!Utils.isString(socket.url)) {
-      debugerror('missing or invalid JsSIP.Socket url property');
+      debugerror('missing or invalid DartSIP.Socket url property');
       throw new Error();
     }
 
     if (!Utils.isString(socket.via_transport)) {
-      debugerror('missing or invalid JsSIP.Socket via_transport property');
+      debugerror('missing or invalid DartSIP.Socket via_transport property');
       throw new Error();
     }
 
     if (Grammar.parse(socket.sip_uri, 'SIP_URI') == -1) {
-      debugerror('missing or invalid JsSIP.Socket sip_uri property');
+      debugerror('missing or invalid DartSIP.Socket sip_uri property');
       throw new Error();
     }
   } catch (e) {

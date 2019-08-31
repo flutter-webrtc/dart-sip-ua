@@ -1,5 +1,5 @@
 import 'package:events2/events2.dart';
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 import 'SIPMessage.dart' as SIPMessage;
 import 'Timers.dart';
 import 'Utils.dart';
@@ -220,7 +220,7 @@ class InviteClientTransaction extends EventEmitter {
 
   sendACK(response) {
     var ack = new SIPMessage.OutgoingRequest(
-        JsSIP_C.ACK, this.request.ruri, this.ua, {
+        DartSIP_C.ACK, this.request.ruri, this.ua, {
       'route_set': this.request.getHeaders('route'),
       'call_id': this.request.getHeader('call-id'),
       'cseq': this.request.cseq
@@ -244,7 +244,7 @@ class InviteClientTransaction extends EventEmitter {
     }
 
     var cancel = new SIPMessage.OutgoingRequest(
-        JsSIP_C.CANCEL, this.request.ruri, this.ua, {
+        DartSIP_C.CANCEL, this.request.ruri, this.ua, {
       'route_set': this.request.getHeaders('route'),
       'call_id': this.request.getHeader('call-id'),
       'cseq': this.request.cseq
@@ -621,7 +621,7 @@ checkTransaction(_transactions, request) {
   var tr;
 
   switch (request.method) {
-    case JsSIP_C.INVITE:
+    case DartSIP_C.INVITE:
       tr = _transactions.ist[request.via_branch];
       if (tr != null) {
         switch (tr.state) {
@@ -638,7 +638,7 @@ checkTransaction(_transactions, request) {
         return true;
       }
       break;
-    case JsSIP_C.ACK:
+    case DartSIP_C.ACK:
       tr = _transactions.ist[request.via_branch];
 
       // RFC 6026 7.1.
@@ -659,7 +659,7 @@ checkTransaction(_transactions, request) {
         return false;
       }
       break;
-    case JsSIP_C.CANCEL:
+    case DartSIP_C.CANCEL:
       tr = _transactions.ist[request.via_branch];
       if (tr != null) {
         request.reply_sl(200);

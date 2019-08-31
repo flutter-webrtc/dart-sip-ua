@@ -7,7 +7,7 @@ import 'package:random_string/random_string.dart';
 
 import 'Grammar.dart';
 import 'URI.dart';
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 
 test100(status_code){
   return status_code.contains(new RegExp(r'^100$'));
@@ -25,6 +25,9 @@ class Math {
   static final _random = DartMath.Random();
   static floor(num){
     return num.floor();
+  }
+  static abs(num){
+    return num.abs();
   }
   static randomDouble() => _random.nextDouble();
   static random() => _random.nextInt(0x7FFFFFFF);
@@ -173,7 +176,7 @@ normalizeTarget(target, [domain]) {
     }
 
     // Build the complete SIP URI.
-    target = JsSIP_C.SIP + ':' + escapeUser(target_user) + '@' + target_domain;
+    target = DartSIP_C.SIP + ':' + escapeUser(target_user) + '@' + target_domain;
 
     // Finally parse the resulting URI.
     var uri = URI.parse(target);
@@ -209,8 +212,8 @@ headerize(String string) {
 }
 
 sipErrorCause(status_code) {
-  var reason = JsSIP_C.Causes.SIP_FAILURE_CODE;
-  JsSIP_C.SIP_ERROR_CAUSES.forEach((key, value) {
+  var reason = DartSIP_C.Causes.SIP_FAILURE_CODE;
+  DartSIP_C.SIP_ERROR_CAUSES.forEach((key, value) {
     if (value.contains(status_code)) {
       reason = key;
     }
@@ -231,10 +234,6 @@ getRandomTestNetIP() {
 
 calculateMD5(string) {
   return md5.convert(utf8.encode(string)).toString();
-}
-
-closeMediaStream(stream) {
-  //TODO:  for flutter-webrtc.
 }
 
 cloneArray(array) {

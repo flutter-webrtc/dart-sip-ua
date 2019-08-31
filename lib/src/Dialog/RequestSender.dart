@@ -1,4 +1,4 @@
-import '../Constants.dart' as JsSIP_C;
+import '../Constants.dart' as DartSIP_C;
 import '../Transactions.dart' as Transactions;
 import '../MediaSession.dart' as RTCSession;
 import '../RequestSender.dart';
@@ -57,8 +57,8 @@ class DialogRequestSender {
     request_sender.send();
 
     // RFC3261 14.2 Modifying an Existing Session -UAC BEHAVIOR-.
-    if ((this._request.method == JsSIP_C.INVITE ||
-            (this._request.method == JsSIP_C.UPDATE && this._request.body)) &&
+    if ((this._request.method == DartSIP_C.INVITE ||
+            (this._request.method == DartSIP_C.UPDATE && this._request.body)) &&
         request_sender.clientTransaction.state !=
             Transactions.C.STATUS_TERMINATED) {
       this._dialog.uac_pending_reply = true;
@@ -85,7 +85,7 @@ class DialogRequestSender {
     // RFC3261 12.2.1.2 408 or 481 is received for a request within a dialog.
     if (response.status_code == 408 || response.status_code == 481) {
       this._eventHandlers.onDialogError(response);
-    } else if (response.method == JsSIP_C.INVITE &&
+    } else if (response.method == DartSIP_C.INVITE &&
         response.status_code == 491) {
       if (this._reattempt != null) {
         if (response.status_code >= 200 && response.status_code < 300) {

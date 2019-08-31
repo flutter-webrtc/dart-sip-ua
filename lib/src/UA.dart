@@ -1,6 +1,6 @@
 import 'package:events2/events2.dart';
 
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 import 'Registrator.dart';
 import 'MediaSession.dart';
 import 'Message.dart';
@@ -62,9 +62,9 @@ class Contact {
 
 /**
  * The User-Agent class.
- * @class JsSIP.UA
+ * @class DartSIP.UA
  * @param {Object} configuration Configuration parameters.
- * @throws {JsSIP.Exceptions.ConfigurationError} If a configuration parameter is invalid.
+ * @throws {DartSIP.Exceptions.ConfigurationError} If a configuration parameter is invalid.
  * @throws {TypeError} If no configuration is given.
  */
 class UA extends EventEmitter {
@@ -324,7 +324,7 @@ class UA extends EventEmitter {
   /**
    * Normalice a string into a valid SIP request URI
    * -param {String} target
-   * -returns {JsSIP.URI|null}
+   * -returns {DartSIP.URI|null}
    */
   normalizeTarget(target) {
     return Utils.normalizeTarget(target, this._configuration.hostport_params);
@@ -488,7 +488,7 @@ class UA extends EventEmitter {
     if (request.ruri.user != this._configuration.uri.user &&
         request.ruri.user != this._contact.uri.user) {
       debug('Request-URI does not point to us');
-      if (request.method != JsSIP_C.ACK) {
+      if (request.method != DartSIP_C.ACK) {
         request.reply_sl(404);
       }
 
@@ -496,7 +496,7 @@ class UA extends EventEmitter {
     }
 
     // Check request URI scheme.
-    if (request.ruri.scheme == JsSIP_C.SIPS) {
+    if (request.ruri.scheme == DartSIP_C.SIPS) {
       request.reply_sl(416);
 
       return;
@@ -508,11 +508,11 @@ class UA extends EventEmitter {
     }
 
     // Create the server transaction.
-    if (method == JsSIP_C.INVITE) {
+    if (method == DartSIP_C.INVITE) {
       /* eslint-disable no-new */
       new Transactions.InviteServerTransaction(this, this._transport, request);
       /* eslint-enable no-new */
-    } else if (method != JsSIP_C.ACK && method != JsSIP_C.CANCEL) {
+    } else if (method != DartSIP_C.ACK && method != DartSIP_C.CANCEL) {
       /* eslint-disable no-new */
       new Transactions.NonInviteServerTransaction(
           this, this._transport, request);
@@ -524,16 +524,16 @@ class UA extends EventEmitter {
      * received within a dialog (for example, an OPTIONS request).
      * They are processed as if they had been received outside the dialog.
      */
-    if (method == JsSIP_C.OPTIONS) {
+    if (method == DartSIP_C.OPTIONS) {
       request.reply(200);
-    } else if (method == JsSIP_C.MESSAGE) {
+    } else if (method == DartSIP_C.MESSAGE) {
       if (this.listeners('newMessage') == null) {
         request.reply(405);
         return;
       }
       var message = new Message(this);
       message.init_incoming(request);
-    } else if (method == JsSIP_C.INVITE) {
+    } else if (method == DartSIP_C.INVITE) {
       // Initial INVITE.
       if (!request.to_tag && this.listeners('newRTCSession').length == 0) {
         request.reply(405);
@@ -548,7 +548,7 @@ class UA extends EventEmitter {
     // Initial Request.
     if (request.to_tag == null) {
       switch (method) {
-        case JsSIP_C.INVITE:
+        case DartSIP_C.INVITE:
           if (SessionFactory.supportWebRTC() &&
               this._configuration.session_factory != null) {
             if (request.hasHeader('replaces')) {
@@ -575,11 +575,11 @@ class UA extends EventEmitter {
             request.reply(488);
           }
           break;
-        case JsSIP_C.BYE:
+        case DartSIP_C.BYE:
           // Out of dialog BYE received.
           request.reply(481);
           break;
-        case JsSIP_C.CANCEL:
+        case DartSIP_C.CANCEL:
           session = this
               ._findSession(request.call_id, request.from_tag, request.to_tag);
           if (session != null) {
@@ -588,13 +588,13 @@ class UA extends EventEmitter {
             debug('received CANCEL request for a non existent session');
           }
           break;
-        case JsSIP_C.ACK:
+        case DartSIP_C.ACK:
           /* Absorb it.
            * ACK request without a corresponding Invite Transaction
            * and without To tag.
            */
           break;
-        case JsSIP_C.NOTIFY:
+        case DartSIP_C.NOTIFY:
           // Receive new sip event.
           this.emit('sipEvent', {'event': request.event, 'request': request});
           request.reply(200);
@@ -611,7 +611,7 @@ class UA extends EventEmitter {
 
       if (dialog != null) {
         dialog.receiveRequest(request);
-      } else if (method == JsSIP_C.NOTIFY) {
+      } else if (method == DartSIP_C.NOTIFY) {
         session = this
             ._findSession(request.call_id, request.from_tag, request.to_tag);
         if (session != null) {
@@ -627,7 +627,7 @@ class UA extends EventEmitter {
        * Exception: ACK for an Invite request for which a dialog has not
        * been created.
        */
-      else if (method != JsSIP_C.ACK) {
+      else if (method != DartSIP_C.ACK) {
         request.reply(481);
       }
     }
@@ -891,13 +891,13 @@ class UA extends EventEmitter {
       var transaction;
 
       switch (message.method) {
-        case JsSIP_C.INVITE:
+        case DartSIP_C.INVITE:
           transaction = this._transactions['ict'][message.via_branch];
           if (transaction != null) {
             transaction.receiveResponse(message);
           }
           break;
-        case JsSIP_C.ACK:
+        case DartSIP_C.ACK:
           // Just in case ;-).
           break;
         default:

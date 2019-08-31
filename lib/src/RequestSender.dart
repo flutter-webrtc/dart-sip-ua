@@ -1,4 +1,4 @@
-import 'Constants.dart' as JsSIP_C;
+import 'Constants.dart' as DartSIP_C;
 import 'DigestAuthentication.dart';
 import 'Transactions.dart' as Transactions;
 import 'UA.dart' as UA;
@@ -43,7 +43,7 @@ class RequestSender {
 
     // If ua is in closing process or even closed just allow sending Bye and ACK.
     if (ua.status == UA.C.STATUS_USER_CLOSED &&
-        (this._method != JsSIP_C.BYE || this._method != JsSIP_C.ACK)) {
+        (this._method != DartSIP_C.BYE || this._method != DartSIP_C.ACK)) {
       this._eventHandlers['onTransportError']();
     }
   }

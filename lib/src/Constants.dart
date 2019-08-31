@@ -155,7 +155,7 @@ class Causes {
     491 : 'Request Pending',
     493 : 'Undecipherable',
     494 : 'Security Agreement Required', // RFC 3329
-    500 : 'JsSIP Internal Error',
+    500 : 'DartSIP Internal Error',
     501 : 'Not Implemented',
     502 : 'Bad Gateway',
     503 : 'Service Unavailable',
