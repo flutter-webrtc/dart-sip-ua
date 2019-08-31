@@ -18,8 +18,8 @@ class ReferSubscriber extends EventEmitter {
   sendRefer(target, options) {
     debug('sendRefer()');
 
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
-    var eventHandlers = options.eventHandlers ?? {};
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var eventHandlers = options['eventHandlers'] ?? {};
 
     // Set event handlers.
     for (var event in eventHandlers) {
@@ -29,19 +29,18 @@ class ReferSubscriber extends EventEmitter {
     }
 
     // Replaces URI header field.
-    var replaces = null;
+    String replaces;
 
-    if (options.replaces != null) {
-      replaces = options.replaces._request.call_id;
-      replaces += ';to-tag=${options.replaces._to_tag}';
-      replaces += ';from-tag=${options.replaces._from_tag}';
-
+    if (options['replaces'] != null) {
+      replaces = options['replaces']._request.call_id;
+      replaces += ';to-tag=${options['replaces']._to_tag}';
+      replaces += ';from-tag=${options['replaces']._from_tag}';
       replaces = Utils.encodeURIComponent(replaces);
     }
 
     // Refer-To header field.
     var referTo =
-        'Refer-To: <${target}${replaces ? '?Replaces=${replaces}' : ''}>';
+        'Refer-To: <$target' + (replaces != null ? '?Replaces=$replaces' : '') + '>';
 
     extraHeaders.add(referTo);
 

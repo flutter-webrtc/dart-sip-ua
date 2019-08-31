@@ -234,17 +234,17 @@ class RTCSession extends EventEmitter implements Media.Session {
 
     options = options ?? {};
     var originalTarget = target;
-    var eventHandlers = options.eventHandlers ?? {};
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
+    var eventHandlers = options['eventHandlers'] ?? {};
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
     var mediaConstraints =
-        options.mediaConstraints ?? {'audio': true, 'video': true};
-    var mediaStream = options.mediaStream ?? null;
-    var pcConfig = options.pcConfig ?? {'iceServers': []};
-    var rtcConstraints = options.rtcConstraints ?? null;
-    var rtcOfferConstraints = options.rtcOfferConstraints ?? null;
+        options['mediaConstraints'] ?? {'audio': true, 'video': true};
+    var mediaStream = options['mediaStream'] ?? null;
+    var pcConfig = options['pcConfig'] ?? {'iceServers': []};
+    var rtcConstraints = options['rtcConstraints'] ?? null;
+    var rtcOfferConstraints = options['rtcOfferConstraints'] ?? null;
     this._rtcOfferConstraints = rtcOfferConstraints;
-    this._rtcAnswerConstraints = options.rtcAnswerConstraints ?? null;
-    this._data = options.data ?? this._data;
+    this._rtcAnswerConstraints = options['rtcAnswerConstraints'] ?? null;
+    this._data = options['data'] ?? this._data;
 
     // Check target.
     if (target == null) {
@@ -271,9 +271,9 @@ class RTCSession extends EventEmitter implements Media.Session {
 
     // Session Timers.
     if (this._sessionTimers.enabled != null) {
-      if (Utils.isDecimal(options.sessionTimersExpires)) {
-        if (options.sessionTimersExpires >= DartSIP_C.MIN_SESSION_EXPIRES) {
-          this._sessionTimers.defaultExpires = options.sessionTimersExpires;
+      if (Utils.isDecimal(options['sessionTimersExpires'])) {
+        if (options['sessionTimersExpires'] >= DartSIP_C.MIN_SESSION_EXPIRES) {
+          this._sessionTimers.defaultExpires = options['sessionTimersExpires'];
         } else {
           this._sessionTimers.defaultExpires = DartSIP_C.SESSION_EXPIRES;
         }
@@ -291,7 +291,7 @@ class RTCSession extends EventEmitter implements Media.Session {
     this._from_tag = Utils.newTag();
 
     // Set anonymous property.
-    var anonymous = options.anonymous ?? false;
+    var anonymous = options['anonymous'] ?? false;
     var requestParams = {'from_tag': this._from_tag};
     this._ua.contact.anonymous = anonymous;
     this._ua.contact.outbound = true;
@@ -429,12 +429,12 @@ class RTCSession extends EventEmitter implements Media.Session {
   answer(options) async {
     debug('answer()');
     var request = this._request;
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
-    var mediaConstraints = options.mediaConstraints ?? {};
-    var mediaStream = options.mediaStream ?? null;
-    var pcConfig = options.pcConfig ?? {'iceServers': []};
-    var rtcConstraints = options.rtcConstraints ?? null;
-    var rtcAnswerConstraints = options.rtcAnswerConstraints ?? null;
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var mediaConstraints = options['mediaConstraints'] ?? {};
+    var mediaStream = options['mediaStream'] ?? null;
+    var pcConfig = options['pcConfig'] ?? {'iceServers': []};
+    var rtcConstraints = options['rtcConstraints'] ?? null;
+    var rtcAnswerConstraints = options['rtcAnswerConstraints'] ?? null;
 
     var tracks;
     var peerHasAudioLine = false;
@@ -443,9 +443,9 @@ class RTCSession extends EventEmitter implements Media.Session {
     var peerOffersFullVideo = false;
 
     this._rtcAnswerConstraints = rtcAnswerConstraints;
-    this._rtcOfferConstraints = options.rtcOfferConstraints ?? null;
+    this._rtcOfferConstraints = options['rtcOfferConstraints'] ?? null;
 
-    this._data = options.data ?? this._data;
+    this._data = options['data'] ?? this._data;
 
     // Check Session Direction and Status.
     if (this._direction != 'incoming') {
@@ -460,9 +460,9 @@ class RTCSession extends EventEmitter implements Media.Session {
 
     // Session Timers.
     if (this._sessionTimers.enabled != null) {
-      if (Utils.isDecimal(options.sessionTimersExpires)) {
-        if (options.sessionTimersExpires >= DartSIP_C.MIN_SESSION_EXPIRES) {
-          this._sessionTimers.defaultExpires = options.sessionTimersExpires;
+      if (Utils.isDecimal(options['sessionTimersExpires'])) {
+        if (options['sessionTimersExpires'] >= DartSIP_C.MIN_SESSION_EXPIRES) {
+          this._sessionTimers.defaultExpires = options['sessionTimersExpires'];
         } else {
           this._sessionTimers.defaultExpires = DartSIP_C.SESSION_EXPIRES;
         }
@@ -652,13 +652,13 @@ class RTCSession extends EventEmitter implements Media.Session {
   terminate([options]) {
     debug('terminate()');
 
-    var cause = options.cause ?? DartSIP_C.causes.BYE;
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
-    var body = options.body;
+    var cause = options['cause'] ?? DartSIP_C.causes.BYE;
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var body = options['body'];
 
     var cancel_reason;
-    var status_code = options.status_code;
-    var reason_phrase = options.reason_phrase;
+    var status_code = options['status_code'];
+    var reason_phrase = options['reason_phrase'];
 
     // Check Session Status.
     if (this._status == Media.C.STATUS_TERMINATED) {
@@ -714,7 +714,7 @@ class RTCSession extends EventEmitter implements Media.Session {
         debug('terminating session');
 
         reason_phrase =
-            options.reason_phrase ?? DartSIP_C.REASON_PHRASE[status_code] ?? '';
+            options['reason_phrase'] ?? DartSIP_C.REASON_PHRASE[status_code] ?? '';
 
         if (status_code && (status_code < 200 || status_code >= 700)) {
           throw new Exceptions.InvalidStateError(
@@ -774,8 +774,8 @@ class RTCSession extends EventEmitter implements Media.Session {
     debug('sendDTMF() | tones: ${tones.toString()}');
 
     var position = 0;
-    var duration = options.duration ?? null;
-    var interToneGap = options.interToneGap ?? null;
+    var duration = options['duration'] ?? null;
+    var interToneGap = options['interToneGap'] ?? null;
 
     if (tones == null) {
       throw new Exceptions.TypeError('Not enough arguments');
@@ -816,7 +816,7 @@ class RTCSession extends EventEmitter implements Media.Session {
     } else {
       duration = Utils.Math.abs(duration);
     }
-    options.duration = duration;
+    options['duration'] = duration;
 
     // Check interToneGap.
     if (interToneGap && !Utils.isDecimal(interToneGap)) {
@@ -861,7 +861,7 @@ class RTCSession extends EventEmitter implements Media.Session {
       } else {
         var dtmf = new RTCSession_DTMF.DTMF(this);
 
-        options.eventHandlers = {
+        options['eventHandlers'] = {
           'onFailed': () {
             this._tones = null;
           }
@@ -985,16 +985,16 @@ class RTCSession extends EventEmitter implements Media.Session {
       }
     };
 
-    if (options.useUpdate != null) {
+    if (options['useUpdate'] != null) {
       this._sendUpdate({
         'sdpOffer': true,
         'eventHandlers': eventHandlers,
-        'extraHeaders': options.extraHeaders
+        'extraHeaders': options['extraHeaders']
       });
     } else {
       this._sendReinvite({
         'eventHandlers': eventHandlers,
-        'extraHeaders': options.extraHeaders
+        'extraHeaders': options['extraHeaders']
       });
     }
 
@@ -1035,16 +1035,16 @@ class RTCSession extends EventEmitter implements Media.Session {
       }
     };
 
-    if (options.useUpdate != null) {
+    if (options['useUpdate'] != null) {
       this._sendUpdate({
         'sdpOffer': true,
         'eventHandlers': eventHandlers,
-        'extraHeaders': options.extraHeaders
+        'extraHeaders': options['extraHeaders']
       });
     } else {
       this._sendReinvite({
         'eventHandlers': eventHandlers,
-        'extraHeaders': options.extraHeaders
+        'extraHeaders': options['extraHeaders']
       });
     }
 
@@ -1054,7 +1054,7 @@ class RTCSession extends EventEmitter implements Media.Session {
   renegotiate(options, done) {
     debug('renegotiate()');
 
-    var rtcOfferConstraints = options.rtcOfferConstraints ?? null;
+    var rtcOfferConstraints = options['rtcOfferConstraints'] ?? null;
 
     if (this._status != Media.C.STATUS_WAITING_FOR_ACK &&
         this._status != Media.C.STATUS_CONFIRMED) {
@@ -1082,18 +1082,18 @@ class RTCSession extends EventEmitter implements Media.Session {
 
     this._setLocalMediaStatus();
 
-    if (options.useUpdate != null) {
+    if (options['useUpdate'] != null) {
       this._sendUpdate({
         'sdpOffer': true,
         'eventHandlers': eventHandlers,
         'rtcOfferConstraints': rtcOfferConstraints,
-        'extraHeaders': options.extraHeaders
+        'extraHeaders': options['extraHeaders']
       });
     } else {
       this._sendReinvite({
         'eventHandlers': eventHandlers,
         'rtcOfferConstraints': rtcOfferConstraints,
-        'extraHeaders': options.extraHeaders
+        'extraHeaders': options['extraHeaders']
       });
     }
 
@@ -1622,9 +1622,9 @@ class RTCSession extends EventEmitter implements Media.Session {
     reject(options) {
       rejected = true;
 
-      var status_code = options.status_code ?? 403;
-      var reason_phrase = options.reason_phrase ?? '';
-      var extraHeaders = Utils.cloneArray(options.extraHeaders);
+      var status_code = options['status_code'] ?? 403;
+      var reason_phrase = options['reason_phrase'] ?? '';
+      var extraHeaders = Utils.cloneArray(options['extraHeaders']);
 
       if (this._status != Media.C.STATUS_CONFIRMED) {
         return false;
@@ -1713,9 +1713,9 @@ class RTCSession extends EventEmitter implements Media.Session {
     reject(options) {
       rejected = true;
 
-      var status_code = options.status_code ?? 403;
-      var reason_phrase = options.reason_phrase ?? '';
-      var extraHeaders = Utils.cloneArray(options.extraHeaders);
+      var status_code = options['status_code'] ?? 403;
+      var reason_phrase = options['reason_phrase'] ?? '';
+      var extraHeaders = Utils.cloneArray(options['extraHeaders']);
 
       if (this._status != Media.C.STATUS_CONFIRMED) {
         return false;
@@ -1899,8 +1899,8 @@ class RTCSession extends EventEmitter implements Media.Session {
         var replaces = Utils.decodeURIComponent(
             request.refer_to.uri.getHeader('replaces'));
 
-        options.extraHeaders = Utils.cloneArray(options.extraHeaders);
-        options.extraHeaders.add('Replaces: ${replaces}');
+        options['extraHeaders'] = Utils.cloneArray(options['extraHeaders']);
+        options['extraHeaders'].add('Replaces: ${replaces}');
       }
       session.connect(request.refer_to.uri.toAor(), options, initCallback);
     };
@@ -2239,10 +2239,10 @@ class RTCSession extends EventEmitter implements Media.Session {
   _sendReinvite([options]) async {
     debug('sendReinvite()');
 
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
-    var eventHandlers = options.eventHandlers ?? {};
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var eventHandlers = options['eventHandlers'] ?? {};
     var rtcOfferConstraints =
-        options.rtcOfferConstraints ?? this._rtcOfferConstraints || null;
+        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints || null;
 
     var succeeded = false;
 
@@ -2346,11 +2346,11 @@ class RTCSession extends EventEmitter implements Media.Session {
   _sendUpdate([options]) async {
     debug('sendUpdate()');
 
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
-    var eventHandlers = options.eventHandlers ?? {};
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var eventHandlers = options['eventHandlers'] ?? {};
     var rtcOfferConstraints =
-        options.rtcOfferConstraints ?? this._rtcOfferConstraints || null;
-    var sdpOffer = options.sdpOffer ?? false;
+        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints || null;
+    var sdpOffer = options['sdpOffer'] ?? false;
 
     var succeeded = false;
 

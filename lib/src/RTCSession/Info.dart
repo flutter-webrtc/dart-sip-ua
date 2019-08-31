@@ -44,7 +44,7 @@ class Info extends EventEmitter {
     this._contentType = contentType;
     this._body = body;
 
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
 
     extraHeaders.add('Content-Type: ${contentType}');
 

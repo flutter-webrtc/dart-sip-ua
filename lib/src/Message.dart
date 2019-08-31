@@ -58,9 +58,9 @@ class Message extends EventEmitter {
     }
 
     // Get call options.
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
-    var eventHandlers = options.eventHandlers ?? {};
-    var contentType = options.contentType ?? 'text/plain';
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var eventHandlers = options['eventHandlers'] ?? {};
+    var contentType = options['contentType'] ?? 'text/plain';
 
     // Set event handlers.
     for (var event in eventHandlers) {
@@ -69,7 +69,7 @@ class Message extends EventEmitter {
       }
     }
 
-    extraHeaders.add('Content-Type: ${contentType}');
+    extraHeaders.add('Content-Type: $contentType');
 
     this._request = new SIPMessage.OutgoingRequest(
         DartSIP_C.MESSAGE, target, this._ua, null, extraHeaders);
@@ -108,13 +108,13 @@ class Message extends EventEmitter {
     this._close();
   }
 
-  /**
+  /*
    * Accept the incoming Message
    * Only valid for incoming Messages
    */
   accept(options) {
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
-    var body = options.body;
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var body = options['body'];
 
     if (this._direction != 'incoming') {
       throw new Exceptions.NotSupportedError(
@@ -134,10 +134,10 @@ class Message extends EventEmitter {
    * Only valid for incoming Messages
    */
   reject(options) {
-    var status_code = options.status_code ?? 480;
-    var reason_phrase = options.reason_phrase;
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
-    var body = options.body;
+    var status_code = options['status_code'] ?? 480;
+    var reason_phrase = options['reason_phrase'];
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var body = options['body'];
 
     if (this._direction != 'incoming') {
       throw new Exceptions.NotSupportedError(
@@ -149,7 +149,7 @@ class Message extends EventEmitter {
     }
 
     if (status_code < 300 || status_code >= 700) {
-      throw new Exceptions.TypeError('Invalid status_code: ${status_code}');
+      throw new Exceptions.TypeError('Invalid status_code: $status_code');
     }
 
     this._is_replied = true;

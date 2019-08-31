@@ -9,16 +9,16 @@ import 'Grammar.dart';
 import 'URI.dart';
 import 'Constants.dart' as DartSIP_C;
 
-test100(status_code){
-  return status_code.contains(new RegExp(r'^100$'));
+test100(statusCode){
+  return statusCode.contains(new RegExp(r'^100$'));
 }
 
-test1XX(status_code){
-  return status_code.contains(new RegExp(r'^1[0-9]{2}$'));
+test1XX(statusCode){
+  return statusCode.contains(new RegExp(r'^1[0-9]{2}$'));
 }
 
-test2XX(status_code){
-  return status_code.contains(new RegExp(r'^2[0-9]{2}$'));
+test2XX(statusCode){
+  return statusCode.contains(new RegExp(r'^2[0-9]{2}$'));
 }
 
 class Math {
@@ -80,7 +80,7 @@ encodeURIComponent(str) {
 }
 
 unescape(str) {
-  //TODO:  ??
+  //TODO:  ???
   return str;
 }
 

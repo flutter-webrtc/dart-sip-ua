@@ -139,9 +139,9 @@ class Dialog {
 
   sendRequest(method, options) {
     options = options ?? {};
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
-    var eventHandlers = options.eventHandlers ?? {};
-    var body = options.body ?? null;
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var eventHandlers = options['eventHandlers'] ?? {};
+    var body = options['body'] ?? null;
     var request = this._createRequest(method, extraHeaders, body);
 
     // Increase the local CSeq on authentication.

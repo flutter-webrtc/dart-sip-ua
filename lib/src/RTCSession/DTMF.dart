@@ -51,9 +51,9 @@ class DTMF extends EventEmitter {
       throw new Exceptions.InvalidStateError(this._session.status);
     }
 
-    var extraHeaders = Utils.cloneArray(options.extraHeaders);
+    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
 
-    this.eventHandlers = options.eventHandlers ?? {};
+    this.eventHandlers = options['eventHandlers'] ?? {};
 
     // Check tone type.
     if (tone is String) {
@@ -72,7 +72,7 @@ class DTMF extends EventEmitter {
     }
 
     // Duration is checked/corrected in RTCSession.
-    this._duration = options.duration;
+    this._duration = options['duration'];
 
     extraHeaders.add('Content-Type: application/dtmf-relay');
 
