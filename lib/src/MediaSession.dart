@@ -12,21 +12,40 @@ class C {
   static const STATUS_CONFIRMED = 9;
 }
 
-abstract class MediaSession {
-  var _ua;
-  MediaSession(this._ua);
+abstract class Session {
+  get status;
 
   connect(target, options);
 
+  bool isEnded();
+
+  init_incoming(request, [initCallback]);
+
+  newDTMF(data);
+
+  newInfo(data);
+
+  /**
+   * Send a generic in-dialog Request
+   */
+  sendRequest(method, options);
+
+  /**
+   * In dialog Request Reception
+   */
+  receiveRequest(request);
+
+  onRequestTimeout();
+
+  onTransportError();
+
+  onDialogError();
 }
 
-class MediaSessionFactory {
+abstract class SessionFactory {
+  Session createSession(ua);
 
-  static MediaSession createRTCSession(ua){
-    return null;
-  }
   static supportWebRTC() {
     return true;
   }
-
 }
