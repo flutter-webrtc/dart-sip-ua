@@ -1,19 +1,19 @@
 import 'package:events2/events2.dart';
 
+import 'Config.dart' as config;
 import 'Constants.dart' as DartSIP_C;
+import 'Exceptions.dart' as Exceptions;
 import 'Registrator.dart';
-import 'MediaSession.dart';
+import 'RTCSession.dart';
 import 'Message.dart';
 import 'Transactions.dart' as Transactions;
 import 'Transport.dart';
 import 'Utils.dart' as Utils;
-import 'Exceptions.dart' as Exceptions;
 import 'URI.dart';
 import 'Parser.dart' as Parser;
-import 'Config.dart' as config;
+import 'SIPMessage.dart' as SIPMessage;
 import 'Timers.dart';
 import 'sanityCheck.dart';
-import 'SIPMessage.dart' as SIPMessage;
 import 'logger.dart';
 
 class C {
@@ -26,6 +26,10 @@ class C {
   // UA error codes.
   static const CONFIGURATION_ERROR = 1;
   static const NETWORK_ERROR = 2;
+}
+
+class window {
+  static var hasRTCPeerConnection = true;
 }
 
 class DynamicSettings {
@@ -224,13 +228,9 @@ class UA extends EventEmitter {
    */
   call(target, options) {
     debug('call()');
-    if (this._configuration.session_factory != null) {
-      var session = this._configuration.session_factory.createSession(this);
-      session.connect(target, options);
-      return session;
-    } else {
-      throw new Exceptions.NotSupportedError("SessionFactory [this._configuration.session_factory] doesn't exist!");
-    }
+    var session = new RTCSession(this);
+    session.connect(target, options);
+    return session;
   }
 
   /**
@@ -549,8 +549,7 @@ class UA extends EventEmitter {
     if (request.to_tag == null) {
       switch (method) {
         case DartSIP_C.INVITE:
-          if (SessionFactory.supportWebRTC() &&
-              this._configuration.session_factory != null) {
+          if (window.hasRTCPeerConnection) {
             if (request.hasHeader('replaces')) {
               var replaces = request.replaces;
 
@@ -567,7 +566,7 @@ class UA extends EventEmitter {
                 request.reply(481);
               }
             } else {
-              session = this._configuration.session_factory.createSession(this);
+              session = new RTCSession(this);
               session.init_incoming(request);
             }
           } else {

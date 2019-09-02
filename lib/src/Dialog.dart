@@ -6,7 +6,7 @@ import 'Dialog/RequestSender.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 
-class C {
+class Dialog_C {
   // Dialog states.
   static const STATUS_EARLY = 1;
   static const STATUS_CONFIRMED = 2;
@@ -48,7 +48,7 @@ class Dialog {
   debugerror(error) => logger.error(error);
 
   Dialog(owner, message, type, [state]) {
-    state = state ?? C.STATUS_CONFIRMED;
+    state = state ?? Dialog_C.STATUS_CONFIRMED;
     this._owner = owner;
     this._ua = owner._ua;
 
@@ -61,7 +61,7 @@ class Dialog {
     }
 
     if (message is SIPMessage.IncomingResponse) {
-      state = (message.status_code < 200) ? C.STATUS_EARLY : C.STATUS_CONFIRMED;
+      state = (message.status_code < 200) ? Dialog_C.STATUS_EARLY : Dialog_C.STATUS_CONFIRMED;
     }
 
     var contact = message.parseHeader('contact');
@@ -100,7 +100,7 @@ class Dialog {
 
     this._ua.newDialog(this);
     debug(
-        'new ${type} dialog created with status ${this._state == C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
+        'new ${type} dialog created with status ${this._state == Dialog_C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
   get id => this._id;
@@ -122,7 +122,7 @@ class Dialog {
   get uas_pending_reply => this._uas_pending_reply;
 
   update(message, type) {
-    this._state = C.STATUS_CONFIRMED;
+    this._state = Dialog_C.STATUS_CONFIRMED;
 
     debug('dialog ${this._id.toString()}  changed to CONFIRMED state');
 

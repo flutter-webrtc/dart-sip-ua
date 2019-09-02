@@ -1,7 +1,7 @@
 import 'package:events2/events2.dart';
 import '../Constants.dart' as DartSIP_C;
 import '../Exceptions.dart' as Exceptions;
-import '../MediaSession.dart' as MediaSession;
+import '../RTCSession.dart' as RTCSession;
 import '../Utils.dart' as Utils;
 import '../logger.dart';
 
@@ -36,8 +36,8 @@ class Info extends EventEmitter {
     }
 
     // Check RTCSession Status.
-    if (this._session.status != MediaSession.C.STATUS_CONFIRMED &&
-        this._session.status != MediaSession.C.STATUS_WAITING_FOR_ACK) {
+    if (this._session.status != RTCSession.C.STATUS_CONFIRMED &&
+        this._session.status != RTCSession.C.STATUS_WAITING_FOR_ACK) {
       throw new Exceptions.InvalidStateError(this._session.status);
     }
 

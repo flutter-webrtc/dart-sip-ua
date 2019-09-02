@@ -1,6 +1,6 @@
 import '../Constants.dart' as DartSIP_C;
 import '../Transactions.dart' as Transactions;
-import '../MediaSession.dart' as RTCSession;
+import '../RTCSession.dart' as RTCSession;
 import '../RequestSender.dart';
 import '../Timers.dart';
 
@@ -71,8 +71,7 @@ class DialogRequestSender {
                 Transactions.C.STATUS_COMPLETED ||
             request_sender.clientTransaction.state ==
                 Transactions.C.STATUS_TERMINATED) {
-          request_sender.clientTransaction
-              .remove('stateChanged', stateChanged);
+          request_sender.clientTransaction.remove('stateChanged', stateChanged);
           this._dialog.uac_pending_reply = false;
         }
       };

@@ -56,7 +56,6 @@ class Settings {
   var jssip_id = null;
 
   var hostport_params = null;
-  var session_factory = null;
 }
 
 var settings = new Settings();
