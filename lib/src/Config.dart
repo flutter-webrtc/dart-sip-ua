@@ -4,6 +4,12 @@ import 'Grammar.dart';
 import 'URI.dart';
 import 'Socket.dart' as Socket;
 import 'Exceptions.dart' as Exceptions;
+import 'logger.dart';
+
+  final logger = Logger('Config');
+  debug(msg) => logger.debug(msg);
+  info(msg) => logger.info(msg);
+  debugerror(error) => logger.error(error);
 
 // Default settings.
 class Settings {
@@ -242,16 +248,17 @@ load(dst, src) {
   try {
     // Check Mandatory parameters.
     checks.mandatory.forEach((parameter, fun) {
-      //print('Check mandatory parameter => ${parameter}');
+      info('Check mandatory parameter => ${parameter}.');
       fun(src, dst);
     });
 
     // Check Optional parameters.
     checks.optional.forEach((parameter, fun) {
-      //print('Check optional parameter => ${parameter}');
+      info('Check optional parameter => ${parameter}.');
       fun(src, dst);
     });
   } catch (e) {
+    debugerror(e.toString());
     throw e;
   }
 }

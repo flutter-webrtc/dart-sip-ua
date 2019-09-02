@@ -145,38 +145,38 @@ normalizeTarget(target, [domain]) {
     // - Last fragment is the desired domain.
     // - Otherwise append the given domain argument.
   } else if (target is String) {
-    var target_array = target.split('@');
-    var target_user;
-    var target_domain;
+    var targetArray = target.split('@');
+    var targetUser;
+    var targetDomain;
 
-    switch (target_array.length) {
+    switch (targetArray.length) {
       case 1:
         if (domain == null) {
           return null;
         }
-        target_user = target;
-        target_domain = domain;
+        targetUser = target;
+        targetDomain = domain;
         break;
       case 2:
-        target_user = target_array[0];
-        target_domain = target_array[1];
+        targetUser = targetArray[0];
+        targetDomain = targetArray[1];
         break;
       default:
-        target_user = target_array.sublist(0, target_array.length - 1).join('@');
-        target_domain = target_array[target_array.length - 1];
+        targetUser = targetArray.sublist(0, targetArray.length - 1).join('@');
+        targetDomain = targetArray[targetArray.length - 1];
     }
 
     // Remove the URI scheme (if present).
-    target_user = target_user.replaceAll(
+    targetUser = targetUser.replaceAll(
         new RegExp(r'^(sips?|tel):', caseSensitive: false), '');
 
     // Remove 'tel' visual separators if the user portion just contains 'tel' number symbols.
-    if (target_user.contains(new RegExp(r'^[-.()]*\+?[0-9\-.()]+$'))) {
-      target_user = target_user.replaceAll(new RegExp(r'[-.()]'), '');
+    if (targetUser.contains(new RegExp(r'^[-.()]*\+?[0-9\-.()]+$'))) {
+      targetUser = targetUser.replaceAll(new RegExp(r'[-.()]'), '');
     }
 
     // Build the complete SIP URI.
-    target = DartSIP_C.SIP + ':' + escapeUser(target_user) + '@' + target_domain;
+    target = DartSIP_C.SIP + ':' + escapeUser(targetUser) + '@' + targetDomain;
 
     // Finally parse the resulting URI.
     var uri = URI.parse(target);
@@ -211,10 +211,10 @@ headerize(String string) {
   return hname;
 }
 
-sipErrorCause(status_code) {
+sipErrorCause(statusCode) {
   var reason = DartSIP_C.Causes.SIP_FAILURE_CODE;
   DartSIP_C.SIP_ERROR_CAUSES.forEach((key, value) {
-    if (value.contains(status_code)) {
+    if (value.contains(statusCode)) {
       reason = key;
     }
   });
