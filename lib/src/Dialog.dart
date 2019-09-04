@@ -50,7 +50,7 @@ class Dialog {
   Dialog(owner, message, type, [state]) {
     state = state ?? Dialog_C.STATUS_CONFIRMED;
     this._owner = owner;
-    this._ua = owner._ua;
+    this._ua = owner.ua;
 
     this._uac_pending_reply = false;
     this._uas_pending_reply = false;

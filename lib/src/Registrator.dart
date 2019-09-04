@@ -101,7 +101,7 @@ class Registrator {
       return;
     }
 
-    var extraHeaders = this._extraHeaders;
+    var extraHeaders = [];
 
     extraHeaders.add(
         'Contact: ${this._contact};expires=${this._expires}${this._extraContactParams}');
@@ -204,7 +204,7 @@ class Registrator {
           }
           if (contact.hasParam('pub-gruu')) {
             this._ua.contact.pub_gruu =
-                contact.getParam('pub-gruu').replace('"', '');
+                contact.getParam('pub-gruu').replaceAll('"', '');
           }
 
           if (!this._registered) {
@@ -307,7 +307,7 @@ class Registrator {
   }
 
   close() {
-    if (this._registered != null) {
+    if (this._registered) {
       this.unregister(false);
     }
   }
@@ -319,7 +319,7 @@ class Registrator {
       this._registrationTimer = null;
     }
 
-    if (this._registered != null) {
+    if (this._registered) {
       this._registered = false;
       this._ua.unregistered({});
     }
@@ -329,7 +329,7 @@ class Registrator {
     this._registering = false;
     this._ua.registrationFailed({'response': response ?? null, 'cause': cause});
 
-    if (this._registered != null) {
+    if (this._registered) {
       this._registered = false;
       this._ua.unregistered({'response': response ?? null, 'cause': cause});
     }

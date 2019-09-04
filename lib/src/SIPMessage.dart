@@ -513,7 +513,7 @@ class IncomingRequest extends IncomingMessage {
   * -param {Function} [onSuccess] onSuccess callback
   * -param {Function} [onFailure] onFailure callback
   */
-  reply(code, reason, extraHeaders, body, onSuccess, onFailure) {
+  reply(code, [reason, extraHeaders, body, onSuccess, onFailure]) {
     var supported = [];
     var to = this.getHeader('To');
 
@@ -521,7 +521,7 @@ class IncomingRequest extends IncomingMessage {
     reason = reason ?? null;
 
     // Validate code and reason values.
-    if (!code || (code < 100 || code > 699)) {
+    if (code == null || (code < 100 || code > 699)) {
       throw new Exceptions.TypeError('Invalid status_code: ${code}');
     } else if (reason != null && reason is! String) {
       throw new Exceptions.TypeError('Invalid reason_phrase: ${reason}');
@@ -546,9 +546,9 @@ class IncomingRequest extends IncomingMessage {
       response += 'Via: ${via}\r\n';
     }
 
-    if (!this.to_tag && code > 100) {
+    if (this.to_tag == null && code > 100) {
       to += ';tag=${Utils.newTag()}';
-    } else if (this.to_tag && !this.s('to').hasParam('tag')) {
+    } else if (this.to_tag != null && !this.s('to').hasParam('tag')) {
       to += ';tag=${this.to_tag}';
     }
 
@@ -567,7 +567,7 @@ class IncomingRequest extends IncomingMessage {
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
-        if (this.ua.contact.pub_gruu || this.ua.contact.temp_gruu) {
+        if (this.ua.contact.pub_gruu != null || this.ua.contact.temp_gruu != null) {
           supported.add('gruu');
         }
         supported.add('ice');
@@ -617,13 +617,13 @@ class IncomingRequest extends IncomingMessage {
   * -param {Number} code status code
   * -param {String} reason reason phrase
   */
-  reply_sl(code, reason) {
+  reply_sl(code, [reason]) {
     var vias = this.getHeaders('via');
 
     // Validate code and reason values.
-    if (!code || (code < 100 || code > 699)) {
+    if (code == null || (code < 100 || code > 699)) {
       throw new Exceptions.TypeError('Invalid status_code: ${code}');
-    } else if (reason && reason is! String) {
+    } else if (reason != null && reason is! String) {
       throw new Exceptions.TypeError('Invalid reason_phrase: ${reason}');
     }
 
@@ -637,9 +637,9 @@ class IncomingRequest extends IncomingMessage {
 
     var to = this.getHeader('To');
 
-    if (!this.to_tag && code > 100) {
+    if (this.to_tag == null && code > 100) {
       to += ';tag=${Utils.newTag()}';
-    } else if (this.to_tag && !this.s('to').hasParam('tag')) {
+    } else if (this.to_tag != null && !this.s('to').hasParam('tag')) {
       to += ';tag=${this.to_tag}';
     }
 

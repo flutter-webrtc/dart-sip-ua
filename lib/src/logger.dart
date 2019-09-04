@@ -16,7 +16,7 @@ class Logger {
 
   Logger(tag) {
     this._tag = 'DartSIP:' + tag;
-    this.colors = true;
+    this.colors = false;
     this.printTime = true;
     if (_startTime == null) {
       _startTime = DateTime.now();

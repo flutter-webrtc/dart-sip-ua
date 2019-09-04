@@ -192,7 +192,7 @@
         "Call_ID": parse_Call_ID,
         "Contact": parse_Contact,
         "contact_param": _parse_contact_param, 
-        "name_addr": _parse_name_addr, 
+        "name_addr": _parse_name_addr,
         "display_name": _parse_display_name,
         "contact_params": _parse_contact_params, 
         "c_p_q": _parse_c_p_q, 
@@ -221,9 +221,9 @@
         "CSeq_value": _parse_CSeq_value, 
         "Expires": parse_Expires,
         "Event": parse_Event,
-        "event_type": _parse_event_type, 
+        "event_type": _parse_event_type,
         "From": parse_From,
-        "from_param": _parse_from_param, 
+        "from_param": _parse_from_param,
         "tag_param": _parse_tag_param, 
         "Max_Forwards": parse_Max_Forwards,
         "Min_Expires": parse_Min_Expires,
@@ -898,12 +898,12 @@ From        <- ( addr_spec / name_addr ) ( SEMI from_param )* {
                 var tag = data.tag;
                 try {
                   $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
-                  if (tag) {$$.setParam('tag',tag);}
+                  if (tag != null) {$$.setParam('tag',tag);}
                 } catch(e) {
                   $$ == -1;
                 }}
 
-from_param  <- tag_param / generic_param
+from_param  <- (tag_param / generic_param)
 
 tag_param   <- "tag"i EQUAL tag: token {data.tag = tag; }
 
@@ -993,7 +993,7 @@ Record_Route  <- rec_route (COMMA rec_route)* {
                   var idx, length;
                   length = data.multi_header.length;
                   for (idx = 0; idx < length; idx++) {
-                    if (data.multi_header[idx].parsed == null) {
+                    if (data.multi_header[idx]['parsed'] == null) {
                       $$ = null;
                       break;
                     }
@@ -1004,7 +1004,7 @@ Record_Route  <- rec_route (COMMA rec_route)* {
                     $$ == -1;
                   }}
 
-rec_route     <- name_addr ( SEMI rr_param )* {
+rec_route     <- (name_addr ( SEMI rr_param )*) {
                   var header;
                   if(data.multi_header == null) data.multi_header = [];
                   try {
@@ -1015,9 +1015,8 @@ rec_route     <- name_addr ( SEMI rr_param )* {
                   } catch(e) {
                     header = null;
                   }
-                  data.multi_header.add( { 'possition': pos,
-                                            'offset': offset,
-                                            'parsed': header
+                  data.multi_header.add( { 'raw': _text(),
+                                           'parsed': header
                                           });}
 
 rr_param      <- generic_param

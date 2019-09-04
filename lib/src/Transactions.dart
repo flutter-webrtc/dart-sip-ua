@@ -619,10 +619,9 @@ class InviteServerTransaction extends EventEmitter {
  */
 checkTransaction(_transactions, request) {
   var tr;
-
   switch (request.method) {
     case DartSIP_C.INVITE:
-      tr = _transactions.ist[request.via_branch];
+      tr = _transactions['ist'][request.via_branch];
       if (tr != null) {
         switch (tr.state) {
           case C.STATUS_PROCEEDING:
@@ -639,7 +638,7 @@ checkTransaction(_transactions, request) {
       }
       break;
     case DartSIP_C.ACK:
-      tr = _transactions.ist[request.via_branch];
+      tr = _transactions['ist'][request.via_branch];
 
       // RFC 6026 7.1.
       if (tr != null) {
@@ -660,7 +659,7 @@ checkTransaction(_transactions, request) {
       }
       break;
     case DartSIP_C.CANCEL:
-      tr = _transactions.ist[request.via_branch];
+      tr = _transactions['ist'][request.via_branch];
       if (tr != null) {
         request.reply_sl(200);
         if (tr.state == C.STATUS_PROCEEDING) {
@@ -675,7 +674,7 @@ checkTransaction(_transactions, request) {
       break;
     default:
       // Non-INVITE Server Transaction RFC 3261 17.2.2.
-      tr = _transactions.nist[request.via_branch];
+      tr = _transactions['nist'][request.via_branch];
       if (tr != null) {
         switch (tr.state) {
           case C.STATUS_TRYING:
@@ -690,4 +689,5 @@ checkTransaction(_transactions, request) {
       }
       break;
   }
+  return false;
 }

@@ -76,10 +76,10 @@ parseMessage(data, ua) {
   if (message.hasHeader('content-length')) {
     var contentLength = message.getHeader('content-length');
 
-    if(contentLength is String){
-      contentLength = int.tryParse(contentLength);
+    if (contentLength is String) {
+      contentLength = int.tryParse(contentLength) ?? 0;
     }
-    message.body = data.substring(bodyStart,  bodyStart + contentLength);
+    message.body = data.substring(bodyStart, bodyStart + contentLength);
   } else {
     message.body = data.substring(bodyStart);
   }
@@ -116,7 +116,8 @@ getHeader(data, headerStart) {
     if (!data
             .substring(partialEnd + 2, partialEnd + 4)
             .contains(new RegExp(r'(^\r\n)')) &&
-        (String.fromCharCode(data.codeUnitAt(partialEnd + 2))).contains(new RegExp(r'(^\s+)'))) {
+        (String.fromCharCode(data.codeUnitAt(partialEnd + 2)))
+            .contains(new RegExp(r'(^\s+)'))) {
       // Not the end of the message. Continue from the next position.
       start = partialEnd + 2;
     } else {
@@ -173,12 +174,9 @@ parseHeader(message, data, headerStart, headerEnd) {
         parsed = null;
       } else {
         for (var header in parsed) {
-          message.addHeader('record-route',
-              headerValue.substring(header.possition, header.offset));
-          message
-              .headers['Record-Route']
-                  [message.getHeaders('record-route').length - 1]
-              .parsed = header.parsed;
+          message.addHeader('record-route', header['raw']);
+          message.headers['Record-Route'][message.getHeaders('record-route').length - 1]
+              ['parsed'] = header['parsed'];
         }
       }
       break;

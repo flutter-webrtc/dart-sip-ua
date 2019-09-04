@@ -84,7 +84,7 @@ rfc3261_8_2_2_1() {
 
 rfc3261_16_3_4() {
   if (message.to_tag == null) {
-    if (message.call_id.substr(0, 5) == ua.configuration.jssip_id) {
+    if (message.call_id.substring(0, 5) == ua.configuration.jssip_id) {
       reply(482);
 
       return false;
@@ -95,6 +95,10 @@ rfc3261_16_3_4() {
 rfc3261_18_3_request() {
   var len = Utils.str_utf8_length(message.body);
   var contentLength = message.getHeader('content-length');
+
+  if (contentLength is String) {
+    contentLength = int.tryParse(contentLength) ?? 0;
+  }
 
   if (len < contentLength) {
     reply(400);
@@ -119,23 +123,20 @@ rfc3261_8_2_2_2() {
     // If the branch matches the key of any IST then assume it is a retransmission
     // and ignore the INVITE.
     // TODO: we should reply the last response.
-    if (ua._transactions.ist[message.via_branch]) {
+    if (ua.transactions['ist'][message.via_branch] != null) {
       return false;
     }
     // Otherwise check whether it is a merged request.
     else {
-      for (var transaction in ua._transactions.ist) {
-        if (ua._transactions.ist.containsKey(transaction)) {
-          tr = ua._transactions.ist[transaction];
-          if (tr.request.from_tag == fromTag &&
-              tr.request.call_id == call_id &&
-              tr.request.cseq == cseq) {
-            reply(482);
+      ua.transactions['ist'].forEach((transaction, tr) {
+        if (tr.request.from_tag == fromTag &&
+            tr.request.call_id == call_id &&
+            tr.request.cseq == cseq) {
+          reply(482);
 
-            return false;
-          }
+          return false;
         }
-      }
+      });
     }
   }
 
@@ -144,24 +145,20 @@ rfc3261_8_2_2_2() {
   // If the branch matches the key of any NIST then assume it is a retransmission
   // and ignore the request.
   // TODO: we should reply the last response.
-  else if (ua._transactions.nist[message.via_branch]) {
+  else if (ua.transactions['nist'][message.via_branch] != null) {
     return false;
   }
 
   // Otherwise check whether it is a merged request.
   else {
-    for (var transaction in ua._transactions.nist) {
-      if (ua._transactions.nist.containsKey(transaction)) {
-        tr = ua._transactions.nist[transaction];
-        if (tr.request.from_tag == fromTag &&
-            tr.request.call_id == call_id &&
-            tr.request.cseq == cseq) {
-          reply(482);
-
-          return false;
-        }
+    ua.transactions['nist'].forEach((transaction, tr) {
+      if (tr.request.from_tag == fromTag &&
+          tr.request.call_id == call_id &&
+          tr.request.cseq == cseq) {
+        reply(482);
+        return false;
       }
-    }
+    });
   }
 }
 
@@ -176,8 +173,12 @@ rfc3261_8_1_3_3() {
 }
 
 rfc3261_18_3_response() {
-  var len = Utils.str_utf8_length(message.body),
-      contentLength = int.parse(message.getHeader('content-length'));
+  var len = Utils.str_utf8_length(message.body);
+  var contentLength = message.getHeader('content-length');
+
+  if (contentLength is String) {
+    contentLength = int.tryParse(contentLength) ?? 0;
+  }
 
   if (len < contentLength) {
     debug(

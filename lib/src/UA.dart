@@ -140,6 +140,8 @@ class UA extends EventEmitter {
 
   get transport => this._transport;
 
+  get transactions => this._transactions;
+
   // ============
   //  High Level API
   // ============
@@ -189,11 +191,11 @@ class UA extends EventEmitter {
   /**
    * Unregister.
    */
-  unregister({unregister_all = false}) {
+  unregister({all = false}) {
     debug('unregister()');
 
     this._dynConfiguration.register = false;
-    this._registrator.unregister(unregister_all);
+    this._registrator.unregister(all);
   }
 
   /**
@@ -503,7 +505,7 @@ class UA extends EventEmitter {
     }
 
     // Check transaction.
-    if (Transactions.checkTransaction(this, request)) {
+    if (Transactions.checkTransaction(_transactions, request)) {
       return;
     }
 
@@ -535,7 +537,7 @@ class UA extends EventEmitter {
       message.init_incoming(request);
     } else if (method == DartSIP_C.INVITE) {
       // Initial INVITE.
-      if (!request.to_tag && this.listeners('newRTCSession').length == 0) {
+      if (request.to_tag != null && this.listeners('newRTCSession').length == 0) {
         request.reply(405);
 
         return;
@@ -640,9 +642,9 @@ class UA extends EventEmitter {
    * Get the session to which the request belongs to, if any.
    */
   _findSession(call_id, from_tag, to_tag) {
-    var sessionIDa = call_id + from_tag;
+    var sessionIDa = call_id + (from_tag ?? '');
     var sessionA = this._sessions[sessionIDa];
-    var sessionIDb = call_id + to_tag;
+    var sessionIDb = call_id + (to_tag ?? '');
     var sessionB = this._sessions[sessionIDb];
 
     if (sessionA != null) {
@@ -841,9 +843,11 @@ class UA extends EventEmitter {
     // Run _onTransportError_ callback on every client transaction using _transport_.
     var client_transactions = ['nict', 'ict', 'nist', 'ist'];
     client_transactions.forEach((type) {
-      this._transactions[type].forEach((id, transaction) {
-        transaction.onTransportError();
-      });
+      if (this._transactions[type] != null) {
+        this._transactions[type].forEach((id, transaction) {
+          transaction.onTransportError();
+        });
+      }
     });
 
     this.emit('disconnected', data);

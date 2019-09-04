@@ -8808,29 +8808,44 @@ class GrammarParser {
   
   dynamic _parse_from_param() {
     var $$;
-    switch (_getState(_transitions73)) {
+    switch (_getState(_transitions13)) {
       case 0:
+      case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        $$ = _parse_generic_param();
+        switch (_getState(_transitions73)) {
+          case 0:
+            var startPos1 = _startPos;
+            _startPos = _cursor;
+            $$ = _parse_generic_param();
+            _startPos = startPos1;
+            break;
+          case 1:
+          case 3:
+            while (true) {
+              var startPos2 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_tag_param();
+              _startPos = startPos2;
+              if (success) break;
+              var startPos3 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_generic_param();
+              _startPos = startPos3;
+              break;
+            }
+            break;
+          case 2:
+            $$ = null;
+            success = false;
+            break;
+        }
+        if (!success && _cursor > _testing) {
+          _failure(_expect96);
+        }
         _startPos = startPos0;
         break;
       case 1:
-      case 3:
-        while (true) {
-          var startPos1 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_tag_param();
-          _startPos = startPos1;
-          if (success) break;
-          var startPos2 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_generic_param();
-          _startPos = startPos2;
-          break;
-        }
-        break;
-      case 2:
         $$ = null;
         success = false;
         break;
@@ -12833,85 +12848,98 @@ class GrammarParser {
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
       case 2:
-        var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
+        var startPos0 = _startPos;
         _startPos = _cursor;
-        while (true) {  
-          $$ = _parse_name_addr();
-          if (!success) break;
-          var seq = new List(2)..[0] = $$;
-          var testing0 = _testing; 
-          for (var reps = []; ; ) {
-            _testing = _cursor;
-            switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
-              case 0:
-              case 2:
-                var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
-                _startPos = _cursor;
-                while (true) {  
-                  $$ = _parse_SEMI();
-                  if (!success) break;
-                  var seq = new List(2)..[0] = $$;
-                  $$ = _parse_rr_param();
-                  if (!success) break;
-                  seq[1] = $$;
-                  $$ = seq;
-                  break;
+        switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+          case 0:
+          case 2:
+            var ch0 = _ch, pos0 = _cursor, startPos1 = _startPos;
+            _startPos = _cursor;
+            while (true) {  
+              $$ = _parse_name_addr();
+              if (!success) break;
+              var seq = new List(2)..[0] = $$;
+              var testing0 = _testing; 
+              for (var reps = []; ; ) {
+                _testing = _cursor;
+                switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+                  case 0:
+                  case 2:
+                    var ch1 = _ch, pos1 = _cursor, startPos2 = _startPos;
+                    _startPos = _cursor;
+                    while (true) {  
+                      $$ = _parse_SEMI();
+                      if (!success) break;
+                      var seq = new List(2)..[0] = $$;
+                      $$ = _parse_rr_param();
+                      if (!success) break;
+                      seq[1] = $$;
+                      $$ = seq;
+                      break;
+                    }
+                    if (!success) {
+                      _ch = ch1;
+                      _cursor = pos1;
+                    }
+                    _startPos = startPos2;
+                    break;
+                  case 1:
+                    $$ = null;
+                    success = false;
+                    break;
                 }
-                if (!success) {
-                  _ch = ch1;
-                  _cursor = pos1;
+                if (!success && _cursor > _testing) {
+                  _failure(_expect30);
                 }
-                _startPos = startPos1;
-                break;
-              case 1:
-                $$ = null;
-                success = false;
-                break;
+                if (success) {  
+                  reps.add($$);
+                } else {
+                  success = true;
+                  _testing = testing0;
+                  $$ = reps;
+                  break; 
+                }
+              }
+              if (!success) break;
+              seq[1] = $$;
+              $$ = seq;
+              break;
             }
-            if (!success && _cursor > _testing) {
-              _failure(_expect30);
+            if (!success) {
+              _ch = ch0;
+              _cursor = pos0;
             }
-            if (success) {  
-              reps.add($$);
-            } else {
-              success = true;
-              _testing = testing0;
-              $$ = reps;
-              break; 
-            }
-          }
-          if (!success) break;
-          seq[1] = $$;
-          $$ = seq;
-          if (success) {    
-            final $1 = seq[0];
-            final $2 = seq[1];
-            final $start = startPos0;
-            var pos0 = _startPos, offset = $start;
-            {
-            ///CODE_START
-            var header;
-            if(data.multi_header == null) data.multi_header = [];
-            try {
-              header = new NameAddrHeader(data.uri, data.display_name, data.params);
-              data.uri = null;
-              data.display_name = null;
-              data.params = null;
-            } catch(e) {
-              header = null;
-            }
-            data.multi_header.add( { 'possition': pos,
-                                      'offset': offset,
-                                      'parsed': header
-                                    });
-            ///CODE_END
-            }
-          }
-          break;
+            _startPos = startPos1;
+            break;
+          case 1:
+            $$ = null;
+            success = false;
+            break;
         }
-        if (!success) {
-          _ch = ch0;
-          _cursor = pos0;
+        if (!success && _cursor > _testing) {
+          _failure(_expect28);
+        }
+        if (success) {    
+          final $1 = $$;
+          final $start = startPos0;
+          var pos0 = _startPos, offset = $start;
+          {
+          ///CODE_START
+          var header;
+          if(data.multi_header == null) data.multi_header = [];
+          try {
+            header = new NameAddrHeader(data.uri, data.display_name, data.params);
+            data.uri = null;
+            data.display_name = null;
+            data.params = null;
+          } catch(e) {
+            header = null;
+          }
+          data.multi_header.add( { 'raw': _text(),
+                                   'parsed': header
+                                  });
+          ///CODE_END
+          }
         }
         _startPos = startPos0;
         break;
@@ -18005,7 +18033,7 @@ class GrammarParser {
             var tag = data.tag;
             try {
               $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
-              if (tag) {$$.setParam('tag',tag);}
+              if (tag != null) {$$.setParam('tag',tag);}
             } catch(e) {
               $$ == -1;
             }
@@ -18549,7 +18577,7 @@ class GrammarParser {
             var idx, length;
             length = data.multi_header.length;
             for (idx = 0; idx < length; idx++) {
-              if (data.multi_header[idx].parsed == null) {
+              if (data.multi_header[idx]['parsed'] == null) {
                 $$ = null;
                 break;
               }
@@ -19879,7 +19907,7 @@ class GrammarParser {
   } 
    
   decodeURIComponent(str){ 
-    return Uri.decodeComponent(str); // To decode url; 
+    return Uri.decodeComponent(str); 
   } 
    
   parse(input, startRule) { 
@@ -20005,7 +20033,7 @@ class GrammarParser {
         "Call_ID": parse_Call_ID, 
         "Contact": parse_Contact, 
         "contact_param": _parse_contact_param,  
-        "name_addr": _parse_name_addr,  
+        "name_addr": _parse_name_addr, 
         "display_name": _parse_display_name, 
         "contact_params": _parse_contact_params,  
         "c_p_q": _parse_c_p_q,  
@@ -20034,9 +20062,9 @@ class GrammarParser {
         "CSeq_value": _parse_CSeq_value,  
         "Expires": parse_Expires, 
         "Event": parse_Event, 
-        "event_type": _parse_event_type,  
+        "event_type": _parse_event_type, 
         "From": parse_From, 
-        "from_param": _parse_from_param,  
+        "from_param": _parse_from_param, 
         "tag_param": _parse_tag_param,  
         "Max_Forwards": parse_Max_Forwards, 
         "Min_Expires": parse_Min_Expires, 

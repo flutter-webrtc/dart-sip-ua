@@ -18,7 +18,6 @@ import 'RequestSender.dart';
 import 'URI.dart';
 import 'logger.dart';
 
-
 class C {
   // RTCSession states.
   static const STATUS_NULL = 0;
@@ -37,6 +36,25 @@ class C {
  * Local variables.
  */
 const holdMediaTypes = ['audio', 'video'];
+
+class SIPTimers {
+  var ackTimer;
+  var expiresTimer;
+  var invite2xxTimer;
+  var userNoAnswerTimer;
+}
+
+class RFC4028Timers {
+  var enabled;
+  var refreshMethod;
+  var defaultExpires;
+  var currentExpires;
+  bool running;
+  bool refresher;
+  var timer;
+  RFC4028Timers(this.enabled, this.refreshMethod, this.defaultExpires,
+      this.currentExpires, this.running, this.refresher, this.timer);
+}
 
 class RTCSession extends EventEmitter {
   var _id;
@@ -122,12 +140,7 @@ class RTCSession extends EventEmitter {
     this._rtcReady = true;
 
     // SIP Timers.
-    this._timers = {
-      'ackTimer': null,
-      'expiresTimer': null,
-      'invite2xxTimer': null,
-      'userNoAnswerTimer': null
-    };
+    this._timers = new SIPTimers();
 
     // Session info.
     this._direction = null;
@@ -144,15 +157,14 @@ class RTCSession extends EventEmitter {
     this._remoteHold = false;
 
     // Session Timers (RFC 4028).
-    this._sessionTimers = {
-      'enabled': this._ua.configuration.session_timers,
-      'refreshMethod': this._ua.configuration.session_timers_refresh_method,
-      'defaultExpires': DartSIP_C.SESSION_EXPIRES,
-      'currentExpires': null,
-      'running': false,
-      'refresher': false,
-      'timer': null // A setTimeout.
-    };
+    this._sessionTimers = new RFC4028Timers(
+        this._ua.configuration.session_timers,
+        this._ua.configuration.session_timers_refresh_method,
+        DartSIP_C.SESSION_EXPIRES,
+        null,
+        false,
+        false,
+        null);
 
     // Map of ReferSubscriber instances indexed by the REFER's CSeq number.
     this._referSubscribers = {};
@@ -185,6 +197,8 @@ class RTCSession extends EventEmitter {
   get end_time => this._end_time;
 
   get data => this._data;
+
+  get ua => this._ua;
 
   set data(_data) {
     this._data = _data;
@@ -275,7 +289,7 @@ class RTCSession extends EventEmitter {
     }
 
     // Session Timers.
-    if (this._sessionTimers.enabled != null) {
+    if (this._sessionTimers.enabled) {
       if (Utils.isDecimal(options['sessionTimersExpires'])) {
         if (options['sessionTimersExpires'] >= DartSIP_C.MIN_SESSION_EXPIRES) {
           this._sessionTimers.defaultExpires = options['sessionTimersExpires'];
@@ -313,7 +327,7 @@ class RTCSession extends EventEmitter {
 
     extraHeaders.add('Contact: ${this._contact}');
     extraHeaders.add('Content-Type: application/sdp');
-    if (this._sessionTimers.enabled != null) {
+    if (this._sessionTimers.enabled) {
       extraHeaders
           .add('Session-Expires: ${this._sessionTimers.defaultExpires}');
     }
@@ -348,7 +362,7 @@ class RTCSession extends EventEmitter {
     var contentType = request.getHeader('Content-Type');
 
     // Check body and content type.
-    if (request.body && (contentType != 'application/sdp')) {
+    if (request.body != null && (contentType != 'application/sdp')) {
       request.reply(415);
       return;
     }
@@ -464,7 +478,7 @@ class RTCSession extends EventEmitter {
     }
 
     // Session Timers.
-    if (this._sessionTimers.enabled != null) {
+    if (this._sessionTimers.enabled) {
       if (Utils.isDecimal(options['sessionTimersExpires'])) {
         if (options['sessionTimersExpires'] >= DartSIP_C.MIN_SESSION_EXPIRES) {
           this._sessionTimers.defaultExpires = options['sessionTimersExpires'];
@@ -1404,9 +1418,10 @@ class RTCSession extends EventEmitter {
     // Terminate signaling.
 
     // Clear SIP timers.
-    this._timers.forEach((timer, _) {
-      clearTimeout(this._timers[timer]);
-    });
+    clearTimeout(this._timers.ackTimer);
+    clearTimeout(this._timers.expiresTimer);
+    clearTimeout(this._timers.invite2xxTimer);
+    clearTimeout(this._timers.userNoAnswerTimer);
 
     // Clear Session Timers.
     clearTimeout(this._sessionTimers.timer);
@@ -1420,13 +1435,11 @@ class RTCSession extends EventEmitter {
     // Terminate early dialogs.
     this._earlyDialogs.forEach((dialog, _) {
       this._earlyDialogs[dialog].terminate();
-      this._earlyDialogs.remove(dialog);
     });
+    this._earlyDialogs.clear();
 
     // Terminate REFER subscribers.
-    this._referSubscribers.forEach((subscriber, _) {
-      this._referSubscribers.remove(subscriber);
-    });
+    this._referSubscribers.clear();
 
     this._ua.destroyRTCSession(this);
   }
@@ -1489,6 +1502,11 @@ class RTCSession extends EventEmitter {
           'reason_phrase': DartSIP_C.causes.RTP_TIMEOUT
         });
       }
+    };
+
+    // Handle remote stream
+    this._connection.onAddStream = (stream) {
+
     };
 
     debug('emit "peerconnection"');
@@ -1585,16 +1603,16 @@ class RTCSession extends EventEmitter {
       if (early_dialog != null) {
         return true;
       } else {
-        early_dialog = new Dialog(this, message, type, Dialog_C.STATUS_EARLY);
-        // Dialog has been successfully created.
-        if (early_dialog.error != null) {
-          debug(early_dialog.error);
+        try {
+          early_dialog = new Dialog(this, message, type, Dialog_C.STATUS_EARLY);
+        } catch (error) {
+          debug(error);
           this._failed('remote', message, DartSIP_C.causes.INTERNAL_ERROR);
           return false;
-        } else {
-          this._earlyDialogs[id] = early_dialog;
-          return true;
         }
+        // Dialog has been successfully created.
+        this._earlyDialogs[id] = early_dialog;
+        return true;
       }
     } else // Confirmed Dialog.
     {
@@ -2261,7 +2279,7 @@ class RTCSession extends EventEmitter {
     extraHeaders.add('Content-Type: application/sdp');
 
     // Session Timers.
-    if (this._sessionTimers.running != null) {
+    if (this._sessionTimers.running) {
       extraHeaders.add(
           'Session-Expires: ${this._sessionTimers.currentExpires};refresher=${this._sessionTimers.refresher ? 'uac' : 'uas'}');
     }
@@ -2368,7 +2386,7 @@ class RTCSession extends EventEmitter {
     extraHeaders.add('Contact: ${this._contact}');
 
     // Session Timers.
-    if (this._sessionTimers.running != null) {
+    if (this._sessionTimers.running) {
       extraHeaders.add(
           'Session-Expires: ${this._sessionTimers.currentExpires};refresher=${this._sessionTimers.refresher ? 'uac' : 'uas'}');
     }
@@ -2651,7 +2669,7 @@ class RTCSession extends EventEmitter {
     clearTimeout(this._sessionTimers.timer);
 
     // I'm the refresher.
-    if (this._sessionTimers.refresher != null) {
+    if (this._sessionTimers.refresher) {
       this._sessionTimers.timer = setTimeout(() {
         if (this._status == C.STATUS_TERMINATED) {
           return;
