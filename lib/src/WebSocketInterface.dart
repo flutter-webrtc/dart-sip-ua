@@ -1,4 +1,8 @@
 import 'dart:io';
+import 'dart:math';
+import 'dart:convert';
+import 'dart:async';
+
 import 'Socket.dart';
 import 'logger.dart';
 import 'Grammar.dart';
@@ -7,10 +11,12 @@ class WebSocketInterface implements Socket {
   String _url;
   String _sip_uri;
   String _via_transport;
-  var _ws;
+  WebSocket _ws;
   var _closed = false;
   var _connected = false;
   var weight;
+  var _wsExtraHeaders;
+
   final logger = Logger('WebSocketInterface');
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
@@ -21,7 +27,7 @@ class WebSocketInterface implements Socket {
   @override
   dynamic ondata;
 
-  WebSocketInterface(url) {
+  WebSocketInterface(url, [wsExtraHeaders]) {
     debug('new() [url:' + url + ']');
     this._url = url;
     var parsed_url = Grammar.parse(url, 'absoluteURI');
@@ -37,6 +43,7 @@ class WebSocketInterface implements Socket {
       debug('SIP URI: ${this._sip_uri}');
       this._via_transport = parsed_url.scheme.toUpperCase();
     }
+    this._wsExtraHeaders = wsExtraHeaders ?? {};
   }
 
   @override
@@ -69,6 +76,7 @@ class WebSocketInterface implements Socket {
     try {
       this._ws = await WebSocket.connect(this._url, headers: {
         'Sec-WebSocket-Protocol': 'sip',
+        ...this._wsExtraHeaders
       });
       this._ws.listen((data) {
         this._onMessage(data);
