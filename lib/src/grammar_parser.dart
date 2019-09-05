@@ -12523,7 +12523,7 @@ class GrammarParser {
             var pos0 = _startPos, offset = $start;
             {
             ///CODE_START
-            var trimmed = _text() .trim();
+            var trimmed = _text().trim();
             $$ = trimmed
                 .substring(1, trimmed.length - 1) /// remove outer quotes
                 .replaceAll("\\([\x00-\x09\x0b-\x0c\x0e-\x7f])", '\$1');
@@ -19897,7 +19897,6 @@ class GrammarParser {
   }
   
   var startRule; 
-  var input; 
   var data = Data(); 
    
   parseInt(str){ 
@@ -20057,7 +20056,7 @@ class GrammarParser {
         "composite_type": _parse_composite_type,  
         "extension_token": _parse_extension_token,  
         "x_token": _parse_x_token,  
-        "m_subtype": _parse_m_subtype,  
+        "m_subtype": _parse_m_subtype, 
         "m_parameter": _parse_m_parameter,  
         "m_value": _parse_m_value,  
         "CSeq": parse_CSeq, 
@@ -20097,7 +20096,7 @@ class GrammarParser {
         "Route": parse_Route, 
         "route_param": _parse_route_param,  
         "Subscription_State": parse_Subscription_State, 
-        "substate_value": _parse_substate_value,  
+        "substate_value": _parse_substate_value, 
         "subexp_params": _parse_subexp_params,  
         "event_reason_value": _parse_event_reason_value,  
         "Subject": parse_Subject, 
@@ -20155,7 +20154,6 @@ class GrammarParser {
           startRule = "CRLF"; 
         } 
       this.startRule = startRule; 
-      this.input = input; 
       return parseFunctions[startRule](); 
     } 
 }
