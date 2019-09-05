@@ -10,7 +10,7 @@ var testFunctions = [
         expect(parsed.cseq, 1);
         expect(parsed.via_branch, 'z9hG4bK3625642');
         expect(
-            parsed.from.toString(), '"111" <sip:111_6ackea@tryit.jssip.net>');
+            parsed.from.toString(), '"111" <sip:111_6ackea@tryit.jssip.net>;tag=6mo6me6ask');
         expect(parsed.to.toString(), '<sip:111_6ackea@tryit.jssip.net>');
       }),
   () => test("SIP Message Parser: response.", () {
