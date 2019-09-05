@@ -50,6 +50,7 @@ class Data {
   var event;
   var transport;
   var text;
+  var uuid;
   Data();
 }
 class GrammarParser {
@@ -16140,8 +16141,8 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, uuid) {
             ///CODE_START
-            data = _text();
-            $$ = data;
+            data.uuid = _text();
+            $$ = data.uuid;
             ///CODE_END
             })($start, $1);
           }
@@ -20127,7 +20128,7 @@ class GrammarParser {
         "header_value": _parse_header_value,  
         "message_body": parse_message_body, 
         "uuid_URI": parse_uuid_URI, 
-        "uuid": _parse_uuid,  
+        "uuid": _parse_uuid, 
         "hex4": _parse_hex4,  
         "hex8": _parse_hex8,  
         "hex12": _parse_hex12,  

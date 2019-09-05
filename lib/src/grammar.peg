@@ -48,6 +48,7 @@
     var event;
     var transport;
     var text;
+    var uuid;
     Data();
   }
 }%
@@ -285,7 +286,7 @@
         "header_value": _parse_header_value, 
         "message_body": parse_message_body,
         "uuid_URI": parse_uuid_URI,
-        "uuid": _parse_uuid, 
+        "uuid": _parse_uuid,
         "hex4": _parse_hex4, 
         "hex8": _parse_hex8, 
         "hex12": _parse_hex12, 
@@ -1206,8 +1207,8 @@ message_body      <- OCTET*
 
 uuid_URI      <- "uuid:" uuid
 uuid          <- uuid: hex8 "-" hex4 "-" hex4 "-" hex4 "-" hex12 {
-                  data = _text();
-                  $$ = data; }
+                  data.uuid = _text();
+                  $$ = data.uuid; }
 hex4          <- HEXDIG HEXDIG HEXDIG HEXDIG
 hex8          <- hex4 hex4
 hex12         <- hex4 hex4 hex4
