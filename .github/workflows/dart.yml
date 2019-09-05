@@ -23,7 +23,7 @@ jobs:
         with:
           flutter-version: '1.7.8+hotfix.4'
           channel: 'stable'
-      - run: cd example
+      - run: cd example && ./scripts/project_tools.sh create
       - run: flutter packages get
       - run: flutter test
-      - run: flutter build apk
+      - run: flutter build apk --target-platform android-arm,android-arm64 --split-per-abi
