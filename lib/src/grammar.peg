@@ -1206,7 +1206,8 @@ message_body      <- OCTET*
 
 uuid_URI      <- "uuid:" uuid
 uuid          <- uuid: hex8 "-" hex4 "-" hex4 "-" hex4 "-" hex12 {
-                  data = input.substring(pos0+5, offset); }
+                  data = _text();
+                  $$ = data; }
 hex4          <- HEXDIG HEXDIG HEXDIG HEXDIG
 hex8          <- hex4 hex4
 hex12         <- hex4 hex4 hex4

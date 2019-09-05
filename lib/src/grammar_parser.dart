@@ -16140,7 +16140,8 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, uuid) {
             ///CODE_START
-            data = input.substring(pos0+5, offset);
+            data = _text();
+            $$ = data;
             ///CODE_END
             })($start, $1);
           }
