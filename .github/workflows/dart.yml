@@ -25,5 +25,5 @@ jobs:
           channel: 'stable'
       - run: cd example && ./scripts/project_tools.sh create
       - run: flutter packages get
-      - run: flutter test
+#      - run: flutter test
       - run: flutter build apk --target-platform android-arm,android-arm64 --split-per-abi
