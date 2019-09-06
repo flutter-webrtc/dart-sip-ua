@@ -47,6 +47,8 @@ class Dialog {
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
 
+  get ua => this._ua;
+
   Dialog(owner, message, type, [state]) {
     state = state ?? Dialog_C.STATUS_CONFIRMED;
     this._owner = owner;
@@ -70,8 +72,8 @@ class Dialog {
     if (type == 'UAS') {
       this._id = Id.fromMap({
         'call_id': message.call_id,
-        'local_tag': message.from_tag,
-        'remote_tag': message.to_tag,
+        'local_tag': message.to_tag,
+        'remote_tag': message.from_tag,
       });
 
       this._state = state;
@@ -94,7 +96,7 @@ class Dialog {
       this._local_uri = message.parseHeader('from').uri;
       this._remote_uri = message.parseHeader('to').uri;
       this._remote_target = contact.uri;
-      this._route_set = message.getHeaders('record-route').reverse();
+      this._route_set = message.getHeaders('record-route').reversed.toList();
       this._ack_seqnum = null;
     }
 
@@ -128,7 +130,7 @@ class Dialog {
 
     if (type == 'UAC') {
       // RFC 3261 13.2.2.4.
-      this._route_set = message.getHeaders('record-route').reverse();
+      this._route_set = message.getHeaders('record-route').reversed.toList();
     }
   }
 
@@ -180,11 +182,11 @@ class Dialog {
     extraHeaders = Utils.cloneArray(extraHeaders);
 
     if (this._local_seqnum == null) {
-      this._local_seqnum = Utils.Math.floor(Utils.Math.random() * 10000);
+      this._local_seqnum = Utils.Math.floor(Utils.Math.randomDouble() * 10000);
     }
 
     var cseq = (method == DartSIP_C.CANCEL || method == DartSIP_C.ACK)
-        ? 'this._local_seqnum'
+        ? this._local_seqnum
         : this._local_seqnum += 1;
 
     var request = new SIPMessage.OutgoingRequest(

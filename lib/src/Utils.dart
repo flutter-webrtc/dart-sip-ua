@@ -84,7 +84,7 @@ unescape(str) {
   return str;
 }
 
-isDecimal(num) => !isNaN(num) && (parseFloat(num) == parseInt(num, 10));
+isDecimal(num) =>  num != null && !isNaN(num) && (parseFloat(num) == parseInt(num, 10));
 
 isEmpty(value) {
   return (value == null ||

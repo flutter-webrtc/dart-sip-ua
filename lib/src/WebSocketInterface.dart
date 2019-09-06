@@ -1,7 +1,4 @@
 import 'dart:io';
-import 'dart:math';
-import 'dart:convert';
-import 'dart:async';
 
 import 'Socket.dart';
 import 'logger.dart';
@@ -81,9 +78,9 @@ class WebSocketInterface implements Socket {
       this._ws.listen((data) {
         this._onMessage(data);
       }, onDone: () {
-        logger.debug('Closed by server!');
+        logger.debug('Closed by server [${this._ws.closeCode}, ${this._ws.closeReason}]!');
         _connected = false;
-        this._onClose(true, 0, 'Closed by server!');
+        this._onClose(true, this._ws.closeCode, this._ws.closeReason);
       });
       _connected = true;
       this._onOpen();

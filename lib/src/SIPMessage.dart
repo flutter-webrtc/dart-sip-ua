@@ -96,7 +96,7 @@ class OutgoingRequest {
     this.setHeader('call-id', call_id);
 
     // CSeq.
-    var cseq = params['cseq'] ?? Utils.Math.floor(Utils.Math.random() * 10000);
+    var cseq = params['cseq'] ?? Utils.Math.floor(Utils.Math.randomDouble() * 10000);
 
     this.cseq = cseq;
     this.setHeader('cseq', '${cseq} ${method}');
@@ -129,7 +129,7 @@ class OutgoingRequest {
     var headers = this.headers[Utils.headerize(name)];
 
     if (headers != null) {
-      if (headers[0]) {
+      if (headers[0] != null) {
         return headers[0];
       }
     } else {
@@ -211,8 +211,11 @@ class OutgoingRequest {
 
   toString() {
     var msg = '${this.method} ${this.ruri} SIP/2.0\r\n';
-    this.headers.forEach((headerName, headerValue) {
-      msg += '${headerName}: ${headerValue[0]}\r\n';
+
+    this.headers.forEach((headerName, headerValues) {
+      headerValues.forEach((value){
+        msg += '$headerName: $value\r\n';
+      });
     });
 
     this.extraHeaders.forEach((header) {
@@ -231,7 +234,7 @@ class OutgoingRequest {
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
-        if (this.ua.contact.pub_gruu || this.ua.contact.temp_gruu) {
+        if (this.ua.contact.pub_gruu != null || this.ua.contact.temp_gruu != null) {
           supported.add('gruu');
         }
         supported.add('ice');
@@ -255,8 +258,7 @@ class OutgoingRequest {
     msg += 'User-Agent: ${userAgent}\r\n';
 
     if (this.body != null) {
-      var length = Utils.str_utf8_length(this.body);
-
+      var length = this.body.length;
       msg += 'Content-Length: ${length}\r\n\r\n';
       msg += this.body;
     } else {

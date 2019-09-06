@@ -42,18 +42,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   var _sipUA;
   var _password;
-  var _bodyText;
   var _wsUri = 'wss://tryit.jssip.net:10443';
   var _sipUri = 'hello_flutter@tryit.jssip.net';
   var _displayName = 'Flutter SIP UA';
-  var _dest;
+  var _dest = 'sip:111_6ackea@tryit.jssip.net';
+  var _session;
 
   bool _registered = false;
 
-  _MyHomePageState() {}
+  _MyHomePageState();
 
   void _handleLogin() {
     if (_sipUA == null) {
@@ -83,7 +82,9 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  _handleCall() {}
+  _handleCall() {
+    _session = this._sipUA.connect(_dest);
+  }
 
   Widget buildLoginView(context) {
     return new Align(

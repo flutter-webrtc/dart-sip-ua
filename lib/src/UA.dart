@@ -415,14 +415,14 @@ class UA extends EventEmitter {
    * new Dialog
    */
   newDialog(dialog) {
-    this._dialogs[dialog.id] = dialog;
+    this._dialogs[dialog.id.toString()] = dialog;
   }
 
   /**
    * Dialog destroyed.
    */
   destroyDialog(dialog) {
-    this._dialogs.remove(dialog.id);
+    this._dialogs.remove(dialog.id.toString());
   }
 
   /**
@@ -841,8 +841,7 @@ class UA extends EventEmitter {
 // Transport disconnected event.
   onTransportDisconnect(data) {
     // Run _onTransportError_ callback on every client transaction using _transport_.
-    var client_transactions = ['nict', 'ict', 'nist', 'ist'];
-    client_transactions.forEach((type) {
+    ['nict', 'ict', 'nist', 'ist'].forEach((type) {
       if (this._transactions[type] != null) {
         this._transactions[type].forEach((id, transaction) {
           transaction.onTransportError();

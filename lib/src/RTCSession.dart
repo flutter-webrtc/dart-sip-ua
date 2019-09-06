@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:events2/events2.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 import 'package:flutter_webrtc/webrtc.dart';
@@ -255,14 +257,15 @@ class RTCSession extends EventEmitter {
     var originalTarget = target;
     var eventHandlers = options['eventHandlers'] ?? {};
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    var mediaConstraints =
+    Map<String, dynamic> mediaConstraints =
         options['mediaConstraints'] ?? {'audio': true, 'video': true};
     var mediaStream = options['mediaStream'] ?? null;
-    var pcConfig = options['pcConfig'] ?? {'iceServers': []};
-    var rtcConstraints = options['rtcConstraints'] ?? null;
-    var rtcOfferConstraints = options['rtcOfferConstraints'] ?? null;
+    Map<String, dynamic> pcConfig = options['pcConfig'] ?? {'iceServers': []};
+    Map<String, dynamic> rtcConstraints = options['rtcConstraints'] ?? {};
+    Map<String, dynamic> rtcOfferConstraints =
+        options['rtcOfferConstraints'] ?? {};
     this._rtcOfferConstraints = rtcOfferConstraints;
-    this._rtcAnswerConstraints = options['rtcAnswerConstraints'] ?? null;
+    this._rtcAnswerConstraints = options['rtcAnswerConstraints'] ?? {};
     this._data = options['data'] ?? this._data;
 
     // Check target.
@@ -300,11 +303,9 @@ class RTCSession extends EventEmitter {
     }
 
     // Set event handlers.
-    for (var event in eventHandlers) {
-      if (eventHandlers.containsKey(event)) {
-        this.on(event, eventHandlers[event]);
-      }
-    }
+    eventHandlers.forEach((event, func) {
+      this.on(event, func);
+    });
 
     // Session parameter initialization.
     this._from_tag = Utils.newTag();
@@ -316,7 +317,7 @@ class RTCSession extends EventEmitter {
     this._ua.contact.outbound = true;
     this._contact = this._ua.contact.toString();
 
-    if (anonymous != null) {
+    if (anonymous) {
       requestParams['from_display_name'] = 'Anonymous';
       requestParams['from_uri'] =
           new URI('sip', 'anonymous', 'anonymous.invalid');
@@ -351,7 +352,7 @@ class RTCSession extends EventEmitter {
     }
 
     this._newRTCSession('local', this._request);
-    this._sendInitialRequest(
+    await this._sendInitialRequest(
         mediaConstraints, rtcOfferConstraints, mediaStream);
   }
 
@@ -691,7 +692,7 @@ class RTCSession extends EventEmitter {
       case C.STATUS_1XX_RECEIVED:
         debug('canceling session');
 
-        if (status_code && (status_code < 200 || status_code >= 700)) {
+        if (status_code != null && (status_code < 200 || status_code >= 700)) {
           throw new Exceptions.TypeError('Invalid status_code: ${status_code}');
         } else if (status_code != null) {
           reason_phrase =
@@ -736,7 +737,7 @@ class RTCSession extends EventEmitter {
             DartSIP_C.REASON_PHRASE[status_code] ??
             '';
 
-        if (status_code && (status_code < 200 || status_code >= 700)) {
+        if (status_code != null && (status_code < 200 || status_code >= 700)) {
           throw new Exceptions.InvalidStateError(
               'Invalid status_code: ${status_code}');
         } else if (status_code != null) {
@@ -1393,7 +1394,7 @@ class RTCSession extends EventEmitter {
     return true;
   }
 
-  _close() {
+  _close() async {
     debug('close()');
     if (this._status == C.STATUS_TERMINATED) {
       return;
@@ -1402,7 +1403,8 @@ class RTCSession extends EventEmitter {
     // Terminate RTC.
     if (this._connection != null) {
       try {
-        this._connection.close();
+        await this._connection.close();
+        this._connection = null;
       } catch (error) {
         debugerror(
             'close() | error closing the RTCPeerConnection: ${error.toString()}');
@@ -1412,7 +1414,8 @@ class RTCSession extends EventEmitter {
     if (this._localMediaStream != null &&
         this._localMediaStreamLocallyGenerated) {
       debug('close() | closing local MediaStream');
-      this._localMediaStream.dispose();
+      await this._localMediaStream.dispose();
+      this._localMediaStream = null;
     }
 
     // Terminate signaling.
@@ -1491,7 +1494,7 @@ class RTCSession extends EventEmitter {
     }, Timers.TIMER_H);
   }
 
-  _createRTCConnection(pcConfig, rtcConstraints) async {
+  Future<void> _createRTCConnection(pcConfig, rtcConstraints) async {
     this._connection = await createPeerConnection(pcConfig, rtcConstraints);
     this._connection.onIceConnectionState = (state) {
       // TODO: Do more with different states.
@@ -1504,55 +1507,45 @@ class RTCSession extends EventEmitter {
       }
     };
 
-    // Handle remote stream
-    this._connection.onAddStream = (stream) {
-
-    };
-
     debug('emit "peerconnection"');
     this.emit('peerconnection', {'peerconnection': this._connection});
+    return;
   }
 
-  _createLocalDescription(type, constraints) async {
+  Future<RTCSessionDescription> _createLocalDescription(
+      type, constraints) async {
     debug('createLocalDescription()');
 
-    if (type != 'offer' && type != 'answer')
-      throw new Exceptions.TypeError(
-          'createLocalDescription() | invalid type "${type}"');
+    Completer<RTCSessionDescription> completer =
+        new Completer<RTCSessionDescription>();
 
-    RTCPeerConnection connection = this._connection;
+    if (type != 'offer' && type != 'answer') {
+      completer.completeError(new Exceptions.TypeError(
+          'createLocalDescription() | invalid type "${type}"'));
+    }
 
     this._rtcReady = false;
     var desc;
     if (type == 'offer') {
       try {
-        desc = await connection.createOffer(constraints);
+        desc = await this._connection.createOffer(constraints);
       } catch (error) {
         debugerror(
             'emit "peerconnection:createofferfailed" [error:${error.toString()}]');
         this.emit('peerconnection:createofferfailed', error);
-        return false;
+        completer.completeError(error);
       }
     } else {
       try {
-        desc = await connection.createAnswer(constraints);
+        desc = await this._connection.createAnswer(constraints);
       } catch (error) {
         debugerror(
             'emit "peerconnection:createanswerfailed" [error:${error.toString()}]');
         this.emit('peerconnection:createanswerfailed', error);
-        return false;
+        completer.completeError(error);
       }
     }
 
-    try {
-      await connection.setLocalDescription(desc);
-    } catch (error) {
-      this._rtcReady = true;
-      debugerror(
-          'emit "peerconnection:setlocaldescriptionfailed" [error:${error.toString()}]');
-      this.emit('peerconnection:setlocaldescriptionfailed', error);
-      return false;
-    }
     // Resolve right away if 'pc.iceGatheringState' is 'complete'.
     /*
     if (connection.iceGatheringState == 'complete') {
@@ -1565,16 +1558,19 @@ class RTCSession extends EventEmitter {
     // Add 'pc.onicencandidate' event handler to resolve on last candidate.
     var finished = false;
     var ready = () async {
-      connection.onIceCandidate = null;
+      this._connection.onIceCandidate = null;
+      this._connection.onIceGatheringState = null;
+      this._connection.onIceConnectionState = null;
       finished = true;
       this._rtcReady = true;
-      var desc = await connection.getLocalDescription();
+      var desc = await this._connection.getLocalDescription();
       var e = {'originator': 'local', 'type': type, 'sdp': desc.sdp};
       debug('emit "sdp"');
       this.emit('sdp', e);
+      completer.complete(desc);
     };
 
-    connection.onIceGatheringState = (state) {
+    this._connection.onIceGatheringState = (state) {
       if (state == RTCIceGatheringState.RTCIceGatheringStateComplete) {
         if (!finished) {
           ready();
@@ -1582,11 +1578,26 @@ class RTCSession extends EventEmitter {
       }
     };
 
-    connection.onIceCandidate = (candidate) {
+    this._connection.onIceCandidate = (candidate) {
       if (candidate != null) {
         this.emit('icecandidate', {'candidate': candidate, 'ready': ready});
+        if (!finished) {
+          ready();
+        }
       }
     };
+
+    try {
+      await this._connection.setLocalDescription(desc);
+    } catch (error) {
+      this._rtcReady = true;
+      debugerror(
+          'emit "peerconnection:setlocaldescriptionfailed" [error:${error.toString()}]');
+      this.emit('peerconnection:setlocaldescriptionfailed', error);
+      completer.completeError(error);
+    }
+
+    return completer.future;
   }
 
   /**
@@ -2039,7 +2050,7 @@ class RTCSession extends EventEmitter {
   /**
    * Initial Request Sender
    */
-  _sendInitialRequest(
+  Future<Null> _sendInitialRequest(
       mediaConstraints, rtcOfferConstraints, mediaStream) async {
     var request_sender = new RequestSender(this._ua, this._request, {
       'onRequestTimeout': () {
@@ -2064,7 +2075,8 @@ class RTCSession extends EventEmitter {
     if (mediaStream != null) {
       stream = mediaStream;
     } // Request for user media access.
-    else if (mediaConstraints.audio || mediaConstraints.video) {
+    else if (mediaConstraints['audio'] != null ||
+        mediaConstraints['video'] != null) {
       this._localMediaStreamLocallyGenerated = true;
       try {
         stream = await navigator.getUserMedia(mediaConstraints);
@@ -2098,10 +2110,10 @@ class RTCSession extends EventEmitter {
         throw new Exceptions.InvalidStateError('terminated');
       }
 
-      this._request.body = desc;
+      this._request.body = desc.sdp;
       this._status = C.STATUS_INVITE_SENT;
 
-      debug('emit "sending" [request:${this._request.toString()}]');
+      debug('emit "sending" [request]');
 
       // Emit 'sending' so the app can mangle the body before the request is sent.
       this.emit('sending', {'request': this._request});
@@ -2122,7 +2134,7 @@ class RTCSession extends EventEmitter {
     debug('receiveInviteResponse()');
 
     /// Handle 2XX retransmissions and responses from forked requests.
-    if (this._dialog &&
+    if (this._dialog != null &&
         (response.status_code >= 200 && response.status_code <= 299)) {
       ///
       /// If it is a retransmission from the endpoint that established
@@ -2186,7 +2198,7 @@ class RTCSession extends EventEmitter {
       this._status = C.STATUS_1XX_RECEIVED;
       this._progress('remote', response);
 
-      if (response.body == null) {
+      if (response.body == null || response.body.length == 0) {
         return;
       }
 
@@ -2208,7 +2220,7 @@ class RTCSession extends EventEmitter {
       // 2XX
       this._status = C.STATUS_CONFIRMED;
 
-      if (response.body == null) {
+      if (response.body == null || response.body.length == 0) {
         this._acceptAndTerminate(response, 400, DartSIP_C.causes.MISSING_SDP);
         this._failed(
             'remote', response, DartSIP_C.causes.BAD_MEDIA_DESCRIPTION);
@@ -2230,7 +2242,7 @@ class RTCSession extends EventEmitter {
       // Be ready for 200 with SDP after a 180/183 with SDP.
       // We created a SDP 'answer' for it, so check the current signaling state.
       //if (this._connection.signalingState == 'stable') ///TODO:  ???
-      {
+      /*{
         try {
           var offer =
               await this._connection.createOffer(this._rtcOfferConstraints);
@@ -2239,7 +2251,7 @@ class RTCSession extends EventEmitter {
           this._acceptAndTerminate(response, 500, error.toString());
           this._failed('local', response, DartSIP_C.causes.WEBRTC_ERROR);
         }
-      }
+      }*/
 
       try {
         await this._connection.setRemoteDescription(answer);
@@ -2524,7 +2536,7 @@ class RTCSession extends EventEmitter {
     }
 
     // An error on dialog creation will fire 'failed' event.
-    if (this._dialog || this._createDialog(response, 'UAC')) {
+    if (this._dialog != null || this._createDialog(response, 'UAC')) {
       this.sendRequest(DartSIP_C.ACK);
       this.sendRequest(DartSIP_C.BYE, {'extraHeaders': extraHeaders});
     }
@@ -2648,7 +2660,7 @@ class RTCSession extends EventEmitter {
 
     var session_expires_refresher;
 
-    if (response.session_expires &&
+    if (response.session_expires != 0 &&
         response.session_expires >= DartSIP_C.MIN_SESSION_EXPIRES) {
       this._sessionTimers.currentExpires = response.session_expires;
       session_expires_refresher = response.session_expires_refresher ?? 'uac';

@@ -25,7 +25,7 @@ class DialogRequestSender {
 
   DialogRequestSender(dialog, request, eventHandlers) {
     this._dialog = dialog;
-    this._ua = dialog._ua;
+    this._ua = dialog.ua;
     this._request = request;
     this._eventHandlers = eventHandlers;
 

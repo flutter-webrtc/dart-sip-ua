@@ -6,7 +6,7 @@ class SIPUAHelper extends EventEmitter {
   UA _ua;
   Settings _settings;
   String _url;
-  final logger = new Logger('Helper');
+  final logger = new Logger('SIPUA::Helper');
   var _wsExtraHeaders;
 
   SIPUAHelper(this._url, [this._wsExtraHeaders]);
@@ -56,7 +56,7 @@ class SIPUAHelper extends EventEmitter {
       });
 
       this._ua.on('newRTCSession', (data) {
-        debug('newRTCSession => ' + data.toString());
+        //debug('newRTCSession => ' + data.toString());
         this.emit('newRTCSession', data);
       });
 
@@ -87,7 +87,7 @@ class SIPUAHelper extends EventEmitter {
     this._ua.unregister(all: all);
   }
 
-  call(uri, [options]) async {
+  connect(uri, [options]) async {
     // Register callbacks to desired call events
     var eventHandlers = {
       'progress': (e) {
@@ -95,11 +95,11 @@ class SIPUAHelper extends EventEmitter {
         this.emit('progress', e);
       },
       'failed': (e) {
-        debug('call failed with cause: ' + e.data.cause);
+        debug('call failed with cause: ' + e['cause']);
         this.emit('failed', e);
       },
       'ended': (e) {
-        debug('call ended with cause: ' + e.data.cause);
+        debug('call ended with cause: ' + e['cause']);
         this.emit('ended', e);
       },
       'confirmed': (e) {
@@ -110,7 +110,51 @@ class SIPUAHelper extends EventEmitter {
 
     var options = {
       'eventHandlers': eventHandlers,
-      'mediaConstraints': {'audio': true, 'video': true}
+      'pcConfig': {
+        'iceServers': [
+          {'url': 'stun:stun.l.google.com:19302'},
+          /*
+       * turn server configuration example.
+      {
+        'url': 'turn:123.45.67.89:3478',
+        'username': 'change_to_real_user',
+        'credential': 'change_to_real_secret'
+      },
+       */
+        ]
+      },
+      'mediaConstraints': {
+        "audio": true,
+        "video": {
+          "mandatory": {
+            "minWidth": '640',
+            "minHeight": '480',
+            "minFrameRate": '30',
+          },
+          "facingMode": "user",
+          "optional": [],
+        }
+      },
+      'rtcOfferConstraints': {
+        'mandatory': {
+          'OfferToReceiveAudio': true,
+          'OfferToReceiveVideo': true,
+        },
+        'optional': [],
+      },
+      'rtcAnswerConstraints': {
+        'mandatory': {
+          'OfferToReceiveAudio': true,
+          'OfferToReceiveVideo': true,
+        },
+        'optional': [],
+      },
+      'rtcConstraints': {
+        'mandatory': {},
+        'optional': [
+          {'DtlsSrtpKeyAgreement': true},
+        ],
+      }
     };
 
     var session = this._ua.call(uri, options);
