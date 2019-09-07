@@ -26,4 +26,4 @@ jobs:
       - run: cd example && ./scripts/project_tools.sh create
       - run: flutter packages get
 #      - run: flutter test
-      - run: cd example && flutter build apk --target-platform android-arm,android-arm64 --split-per-abi
+      - run: cd example && flutter build apk
