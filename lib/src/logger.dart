@@ -24,7 +24,7 @@ class Logger {
   }
 
   void error(error) {
-    this.log('[' + _tag + '] ERROR: ' + error, Level.error);
+    this.log('[' + _tag + '] ERROR: ' + error.toString(), Level.error);
   }
 
   void verbose(msg) {

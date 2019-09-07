@@ -230,7 +230,7 @@ class Dialog {
 
     // RFC3261 14.2 Modifying an Existing Session -UAS BEHAVIOR-.
     if (request.method == DartSIP_C.INVITE ||
-        (request.method == DartSIP_C.UPDATE && request.body)) {
+        (request.method == DartSIP_C.UPDATE && request.body != null)) {
       if (this._uac_pending_reply == true) {
         request.reply(491);
       } else if (this._uas_pending_reply == true) {
@@ -239,19 +239,17 @@ class Dialog {
         return false;
       } else {
         this._uas_pending_reply = true;
-        var stateChanged;
-        stateChanged = () {
+        var stateChanged = () {
           if (request.server_transaction.state ==
                   Transactions.C.STATUS_ACCEPTED ||
               request.server_transaction.state ==
                   Transactions.C.STATUS_COMPLETED ||
               request.server_transaction.state ==
                   Transactions.C.STATUS_TERMINATED) {
-            request.server_transaction.remove('stateChanged', stateChanged);
             this._uas_pending_reply = false;
           }
         };
-        request.server_transaction.on('stateChanged', stateChanged);
+        request.server_transaction.once('stateChanged', stateChanged);
       }
 
       // RFC3261 12.2.2 Replace the dialog's remote target URI if the request is accepted.

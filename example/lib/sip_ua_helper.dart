@@ -62,6 +62,12 @@ class SIPUAHelper extends EventEmitter {
         debug('newRTCSession => ' + data.toString());
         this.emit('newRTCSession', data);
         _session = data['session'];
+        if (_session.direction == 'incoming') {
+          // Set event handlers.
+          options()['eventHandlers'].forEach((event, func) {
+            _session.on(event, func);
+          });
+        }
       });
 
       this._ua.on('newMessage', (data) {

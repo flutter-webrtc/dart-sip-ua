@@ -78,6 +78,7 @@ class RTCSession extends EventEmitter {
   var _status;
   var _dialog;
   RTCPeerConnection _connection;
+  var _iceGatheringState;
   bool _localMediaStreamLocallyGenerated;
   bool _rtcReady;
   var _direction;
@@ -1511,7 +1512,7 @@ class RTCSession extends EventEmitter {
     return;
   }
 
-  Future<RTCSessionDescription> _createLocalDescription(
+  FutureOr<RTCSessionDescription> _createLocalDescription(
       type, constraints) async {
     debug('createLocalDescription()');
 
@@ -1545,21 +1546,13 @@ class RTCSession extends EventEmitter {
       }
     }
 
-    // Resolve right away if 'pc.iceGatheringState' is 'complete'.
-    /*
-    if (connection.iceGatheringState == 'complete') {
-          this._rtcReady = true;
-          var e = { 'originator': 'local', 'type': type, 'sdp': connection.getLocalDescription() };
-          debug('emit "sdp"');
-          this.emit('sdp', e);
-    }*/
-
     // Add 'pc.onicencandidate' event handler to resolve on last candidate.
     var finished = false;
     var ready = () async {
       this._connection.onIceCandidate = null;
       this._connection.onIceGatheringState = null;
       this._connection.onIceConnectionState = null;
+      this._iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateComplete;
       finished = true;
       this._rtcReady = true;
       var desc = await this._connection.getLocalDescription();
@@ -1570,6 +1563,7 @@ class RTCSession extends EventEmitter {
     };
 
     this._connection.onIceGatheringState = (state) {
+      this._iceGatheringState = state;
       if (state == RTCIceGatheringState.RTCIceGatheringStateComplete) {
         if (!finished) {
           ready();
@@ -1594,6 +1588,16 @@ class RTCSession extends EventEmitter {
           'emit "peerconnection:setlocaldescriptionfailed" [error:${error.toString()}]');
       this.emit('peerconnection:setlocaldescriptionfailed', error);
       completer.completeError(error);
+    }
+
+    // Resolve right away if 'pc.iceGatheringState' is 'complete'.
+    if (this._iceGatheringState == RTCIceGatheringState.RTCIceGatheringStateComplete) {
+      this._rtcReady = true;
+      var desc = await this._connection.getLocalDescription();
+      var e = {'originator': 'local', 'type': type, 'sdp': desc.sdp};
+      debug('emit "sdp"');
+      this.emit('sdp', e);
+      return desc;
     }
 
     return completer.future;
@@ -1685,18 +1689,18 @@ class RTCSession extends EventEmitter {
 
     this._late_sdp = false;
 
-    sendAnswer(desc) async {
+    sendAnswer(sdp) async {
       var extraHeaders = ['Contact: ${this._contact}'];
 
       this._handleSessionTimersInIncomingRequest(request, extraHeaders);
 
       if (this._late_sdp) {
-        desc = this._mangleOffer(desc);
+        sdp = this._mangleOffer(sdp);
       }
 
-      request.reply(200, null, extraHeaders, desc, () {
+      request.reply(200, null, extraHeaders, sdp, () {
         this._status = C.STATUS_WAITING_FOR_ACK;
-        this._setInvite2xxTimer(request, desc);
+        this._setInvite2xxTimer(request, sdp);
         this._setACKTimer();
       });
 
@@ -1711,9 +1715,9 @@ class RTCSession extends EventEmitter {
       this._late_sdp = true;
 
       try {
-        var sdp = await this
+        var desc = await this
             ._createLocalDescription('offer', this._rtcOfferConstraints);
-        sendAnswer(sdp);
+        sendAnswer(desc.sdp);
       } catch (_) {
         request.reply(500);
       }
@@ -1733,7 +1737,7 @@ class RTCSession extends EventEmitter {
       if (this._status == C.STATUS_TERMINATED) {
         return;
       }
-      sendAnswer(desc);
+      sendAnswer(desc.sdp);
     } catch (error) {
       debugerror(error);
     }
@@ -1768,10 +1772,10 @@ class RTCSession extends EventEmitter {
     var contentType = request.getHeader('Content-Type');
     var data = {'request': request, 'callback': null, 'reject': reject};
 
-    sendAnswer(desc) {
+    sendAnswer(sdp) {
       var extraHeaders = ['Contact: ${this._contact}'];
       this._handleSessionTimersInIncomingRequest(request, extraHeaders);
-      request.reply(200, null, extraHeaders, desc);
+      request.reply(200, null, extraHeaders, sdp);
       // If callback is given execute it.
       if (data['callback'] is Function) {
         data['callback']();
@@ -1781,7 +1785,7 @@ class RTCSession extends EventEmitter {
     // Emit 'update'.
     this.emit('update', data);
 
-    if (rejected != null) {
+    if (rejected) {
       return;
     }
 
@@ -1797,11 +1801,12 @@ class RTCSession extends EventEmitter {
 
       return;
     }
+
     try {
       var desc = await this._processInDialogSdpOffer(request);
       if (this._status == C.STATUS_TERMINATED) return;
       // Send answer.
-      sendAnswer(desc);
+      sendAnswer(desc.sdp);
     } catch (error) {
       debugerror(error);
     }
@@ -1815,7 +1820,7 @@ class RTCSession extends EventEmitter {
     var hold = false;
 
     for (var m in sdp['media']) {
-      if (holdMediaTypes.indexOf(m.type) == -1) {
+      if (holdMediaTypes.indexOf(m['type']) == -1) {
         continue;
       }
 

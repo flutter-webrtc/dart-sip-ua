@@ -58,7 +58,7 @@ class DialogRequestSender {
 
     // RFC3261 14.2 Modifying an Existing Session -UAC BEHAVIOR-.
     if ((this._request.method == DartSIP_C.INVITE ||
-            (this._request.method == DartSIP_C.UPDATE && this._request.body)) &&
+            (this._request.method == DartSIP_C.UPDATE && this._request.body != null)) &&
         request_sender.clientTransaction.state !=
             Transactions.C.STATUS_TERMINATED) {
       this._dialog.uac_pending_reply = true;
