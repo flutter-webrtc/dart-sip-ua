@@ -8,8 +8,8 @@ import '../Timers.dart';
 var EventHandlers = {
   'onRequestTimeout': () => {},
   'onTransportError': () => {},
-  'onSuccessResponse': () => {},
-  'onErrorResponse': () => {},
+  'onSuccessResponse': (response) => {},
+  'onErrorResponse': (response) => {},
   'onAuthenticated': () => {},
   'onDialogError': () => {}
 };

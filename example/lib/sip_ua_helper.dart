@@ -117,6 +117,9 @@ class SIPUAHelper extends EventEmitter {
       'confirmed': (e) {
         debug('call confirmed');
         this.emit('confirmed', e);
+      },
+      'stream': (e){
+        this.emit('stream', e);
       }
     };
 
@@ -179,6 +182,12 @@ class SIPUAHelper extends EventEmitter {
   answer() {
     if (_session != null) {
       _session.answer(this.options());
+    }
+  }
+
+  hangup() {
+    if (_session != null) {
+      _session.terminate();
     }
   }
 

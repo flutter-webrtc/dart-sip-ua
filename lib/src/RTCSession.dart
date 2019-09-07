@@ -581,6 +581,8 @@ class RTCSession extends EventEmitter {
       this._localMediaStreamLocallyGenerated = true;
       try {
         stream = await navigator.getUserMedia(mediaConstraints);
+        var e = {'originator': 'local', 'stream': stream};
+        this.emit('stream', e);
       } catch (error) {
         if (this._status == C.STATUS_TERMINATED) {
           throw new Exceptions.InvalidStateError('terminated');
@@ -675,6 +677,8 @@ class RTCSession extends EventEmitter {
    */
   terminate([options]) {
     debug('terminate()');
+
+    options = options?? {};
 
     var cause = options['cause'] ?? DartSIP_C.causes.BYE;
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
@@ -1407,6 +1411,7 @@ class RTCSession extends EventEmitter {
     if (this._connection != null) {
       try {
         await this._connection.close();
+        await this._connection.dispose();
         this._connection = null;
       } catch (error) {
         debugerror(
@@ -1510,6 +1515,11 @@ class RTCSession extends EventEmitter {
       }
     };
 
+    this._connection.onAddStream = (stream) {
+      var e = {'originator': 'remote', 'stream': stream};
+      this.emit('stream', e);
+    };
+
     debug('emit "peerconnection"');
     this.emit('peerconnection', {'peerconnection': this._connection});
     return;
@@ -1555,7 +1565,8 @@ class RTCSession extends EventEmitter {
       this._connection.onIceCandidate = null;
       this._connection.onIceGatheringState = null;
       this._connection.onIceConnectionState = null;
-      this._iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateComplete;
+      this._iceGatheringState =
+          RTCIceGatheringState.RTCIceGatheringStateComplete;
       finished = true;
       this._rtcReady = true;
       var desc = await this._connection.getLocalDescription();
@@ -1594,7 +1605,8 @@ class RTCSession extends EventEmitter {
     }
 
     // Resolve right away if 'pc.iceGatheringState' is 'complete'.
-    if (this._iceGatheringState == RTCIceGatheringState.RTCIceGatheringStateComplete) {
+    if (this._iceGatheringState ==
+        RTCIceGatheringState.RTCIceGatheringStateComplete) {
       this._rtcReady = true;
       var desc = await this._connection.getLocalDescription();
       var e = {'originator': 'local', 'type': type, 'sdp': desc.sdp};
@@ -2087,6 +2099,8 @@ class RTCSession extends EventEmitter {
       this._localMediaStreamLocallyGenerated = true;
       try {
         stream = await navigator.getUserMedia(mediaConstraints);
+        var e = {'originator': 'local', 'stream': stream};
+        this.emit('stream', e);
       } catch (error) {
         if (this._status == C.STATUS_TERMINATED) {
           throw new Exceptions.InvalidStateError('terminated');

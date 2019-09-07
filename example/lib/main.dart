@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/webrtc.dart';
 import 'sip_ua_helper.dart';
 
 bool isMobile() {
@@ -48,10 +49,26 @@ class _MyHomePageState extends State<MyHomePage> {
   var _sipUri = 'hello_flutter@tryit.jssip.net';
   var _displayName = 'Flutter SIP UA';
   var _dest = 'sip:111_6ackea@tryit.jssip.net';
-
+  double _localVideoHeight;
+  double _localVideoWidth;
+  EdgeInsetsGeometry _localVideoMargin;
+  RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
+  RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
   bool _registered = false;
+  bool _haveRemoteVideo = false;
 
   _MyHomePageState();
+
+  @override
+  initState() {
+    super.initState();
+    _initRenders();
+  }
+
+  _initRenders() async {
+    await _localRenderer.initialize();
+    await _remoteRenderer.initialize();
+  }
 
   void _handleLogin() {
     if (_sipUA == null) {
@@ -70,6 +87,36 @@ class _MyHomePageState extends State<MyHomePage> {
           _registered = false;
         });
       });
+
+      this._sipUA.on('failed', (data) {
+        this.setState(() {
+          _localRenderer.srcObject = null;
+          _remoteRenderer.srcObject = null;
+          _haveRemoteVideo = false;
+        });
+      });
+
+      this._sipUA.on('ended', (data) {
+        this.setState(() {
+          _localRenderer.srcObject = null;
+          _remoteRenderer.srcObject = null;
+          _haveRemoteVideo = false;
+        });
+      });
+
+      this._sipUA.on('stream', (data) {
+        var stream = data['stream'];
+        if (data['originator'] == 'local') {
+          _localRenderer.srcObject = stream;
+        }
+        if (data['originator'] == 'remote') {
+          _remoteRenderer.srcObject = stream;
+          _haveRemoteVideo = true;
+        }
+        this.setState(() {
+          _resizeLocalVideo();
+        });
+      });
     } else {
       this._sipUA.register();
     }
@@ -82,10 +129,31 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _handleCall() {
-    if (this._sipUA.session == null)
+    if (!inCalling)
       this._sipUA.connect(_dest);
     else
       this._sipUA.answer();
+  }
+
+  _handleHangup() {
+    if (inCalling) this._sipUA.hangup();
+    setState(() {
+      _resizeLocalVideo();
+    });
+  }
+
+  get inCalling => this._sipUA.session != null;
+
+  _resizeLocalVideo() {
+    _localVideoMargin = _haveRemoteVideo
+        ? EdgeInsets.only(bottom: 15, left: 15)
+        : EdgeInsets.all(0);
+    _localVideoWidth = _haveRemoteVideo
+        ? MediaQuery.of(context).size.width / 4
+        : MediaQuery.of(context).size.width;
+    _localVideoHeight = _haveRemoteVideo
+        ? MediaQuery.of(context).size.height / 4
+        : MediaQuery.of(context).size.height;
   }
 
   Widget buildLoginView(context) {
@@ -249,6 +317,35 @@ class _MyHomePageState extends State<MyHomePage> {
             ]));
   }
 
+  Widget buildCallingView() {
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          Center(
+            child: RTCVideoView(_remoteRenderer),
+          ),
+          Container(
+            child: AnimatedContainer(
+              child: RTCVideoView(_localRenderer),
+              height: _localVideoHeight,
+              width: _localVideoWidth,
+              alignment: Alignment.bottomLeft,
+              duration: Duration(milliseconds: 350),
+              margin: _localVideoMargin,
+            ),
+            alignment: Alignment.bottomLeft,
+          ),
+        ],
+      ),
+      floatingActionButton: new FloatingActionButton(
+        backgroundColor: Colors.red,
+        onPressed: _handleHangup,
+        tooltip: 'Hangup',
+        child: new Icon(Icons.call_end),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -281,7 +378,9 @@ class _MyHomePageState extends State<MyHomePage> {
             : null,
       ),
       body: Center(
-        child: _registered ? buildDialView() : buildLoginView(context),
+        child: !_registered
+            ? buildLoginView(context)
+            : inCalling ? buildCallingView() : buildDialView(),
       ),
     );
   }
