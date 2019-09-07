@@ -453,8 +453,8 @@ class RTCSession extends EventEmitter {
     var mediaConstraints = options['mediaConstraints'] ?? {};
     var mediaStream = options['mediaStream'] ?? null;
     var pcConfig = options['pcConfig'] ?? {'iceServers': []};
-    var rtcConstraints = options['rtcConstraints'] ?? null;
-    var rtcAnswerConstraints = options['rtcAnswerConstraints'] ?? null;
+    var rtcConstraints = options['rtcConstraints'] ?? {};
+    var rtcAnswerConstraints = options['rtcAnswerConstraints'] ?? {};
 
     var tracks;
     var peerHasAudioLine = false;
@@ -499,35 +499,34 @@ class RTCSession extends EventEmitter {
     }
 
     clearTimeout(this._timers.userNoAnswerTimer);
-
-    extraHeaders.unshift('Contact: ${this._contact}');
+    extraHeaders.insert(0, 'Contact: ${this._contact}');
 
     // Determine incoming media from incoming SDP offer (if any).
     var sdp = request.parseSDP();
 
-    // Make sure sdp.media is an array, not the case if there is only one media.
-    if (sdp.media is! List) {
-      sdp.media = [sdp.media];
+    // Make sure sdp['media'] is an array, not the case if there is only one media.
+    if (sdp['media'] is! List) {
+      sdp['media'] = [sdp['media']];
     }
 
     // Go through all medias in SDP to find offered capabilities to answer with.
-    for (var m in sdp.media) {
-      if (m.type == 'audio') {
+    for (var m in sdp['media']) {
+      if (m['type'] == 'audio') {
         peerHasAudioLine = true;
-        if (!m.direction || m.direction == 'sendrecv') {
+        if (m['direction'] == null || m['direction'] == 'sendrecv') {
           peerOffersFullAudio = true;
         }
       }
-      if (m.type == 'video') {
+      if (m['type'] == 'video') {
         peerHasVideoLine = true;
-        if (!m.direction || m.direction == 'sendrecv') {
+        if (m['direction'] == null || m['direction'] == 'sendrecv') {
           peerOffersFullVideo = true;
         }
       }
     }
 
     // Remove audio from mediaStream if suggested by mediaConstraints.
-    if (mediaStream && mediaConstraints.audio == false) {
+    if (mediaStream != null && mediaConstraints['audio'] == false) {
       tracks = mediaStream.getAudioTracks();
       for (var track in tracks) {
         mediaStream.removeTrack(track);
@@ -535,7 +534,7 @@ class RTCSession extends EventEmitter {
     }
 
     // Remove video from mediaStream if suggested by mediaConstraints.
-    if (mediaStream && mediaConstraints.video == false) {
+    if (mediaStream != null && mediaConstraints['video'] == false) {
       tracks = mediaStream.getVideoTracks();
       for (var track in tracks) {
         mediaStream.removeTrack(track);
@@ -543,22 +542,22 @@ class RTCSession extends EventEmitter {
     }
 
     // Set audio constraints based on incoming stream if not supplied.
-    if (!mediaStream && mediaConstraints.audio == null) {
-      mediaConstraints.audio = peerOffersFullAudio;
+    if (mediaStream == null && mediaConstraints['audio'] == null) {
+      mediaConstraints['audio'] = peerOffersFullAudio;
     }
 
     // Set video constraints based on incoming stream if not supplied.
-    if (!mediaStream && mediaConstraints.video == null) {
-      mediaConstraints.video = peerOffersFullVideo;
+    if (mediaStream == null && mediaConstraints['video'] == null) {
+      mediaConstraints['video'] = peerOffersFullVideo;
     }
 
     // Don't ask for audio if the incoming offer has no audio section.
-    if (!mediaStream && !peerHasAudioLine) {
-      mediaConstraints.audio = false;
+    if (mediaStream == null && !peerHasAudioLine) {
+      mediaConstraints['audio'] = false;
     }
 
     // Don't ask for video if the incoming offer has no video section.
-    if (!mediaStream && !peerHasVideoLine) {
+    if (mediaStream == null && !peerHasVideoLine) {
       mediaConstraints.video = false;
     }
 
@@ -572,7 +571,8 @@ class RTCSession extends EventEmitter {
       stream = mediaStream;
     }
     // Audio and/or video requested, prompt getUserMedia.
-    else if (mediaConstraints.audio || mediaConstraints.video) {
+    else if (mediaConstraints['audio'] != null ||
+        mediaConstraints['video'] != null) {
       this._localMediaStreamLocallyGenerated = true;
       try {
         stream = await navigator.getUserMedia(mediaConstraints);
@@ -608,7 +608,7 @@ class RTCSession extends EventEmitter {
     debug('emit "sdp"');
     this.emit('sdp', e);
 
-    var offer = new RTCSessionDescription(sdp, 'offer');
+    var offer = new RTCSessionDescription(request.body, 'offer');
     try {
       await this._connection.setRemoteDescription(offer);
     } catch (error) {
@@ -642,17 +642,16 @@ class RTCSession extends EventEmitter {
       throw new Exceptions.TypeError('_createLocalDescription() failed');
     }
 
+    if (this._status == C.STATUS_TERMINATED) {
+      throw new Exceptions.InvalidStateError('terminated');
+    }
+
     // Send reply.
     try {
-      if (this._status == C.STATUS_TERMINATED) {
-        throw new Exceptions.InvalidStateError('terminated');
-      }
-
       this._handleSessionTimersInIncomingRequest(request, extraHeaders);
-
-      request.reply(200, null, extraHeaders, desc, () {
+      request.reply(200, null, extraHeaders, desc.sdp, () {
         this._status = C.STATUS_WAITING_FOR_ACK;
-        this._setInvite2xxTimer(request, desc);
+        this._setInvite2xxTimer(request, desc.sdp);
         this._setACKTimer();
         this._accepted('local');
       }, () {
@@ -662,7 +661,7 @@ class RTCSession extends EventEmitter {
       if (this._status == C.STATUS_TERMINATED) {
         return;
       }
-      debugerror(error);
+      debugerror(error.toString());
     }
   }
 
@@ -1815,12 +1814,12 @@ class RTCSession extends EventEmitter {
 
     var hold = false;
 
-    for (var m in sdp.media) {
+    for (var m in sdp['media']) {
       if (holdMediaTypes.indexOf(m.type) == -1) {
         continue;
       }
 
-      var direction = m.direction ?? sdp.direction ?? 'sendrecv';
+      var direction = m['direction'] ?? sdp['direction'] ?? 'sendrecv';
 
       if (direction == 'sendonly' || direction == 'inactive') {
         hold = true;
@@ -2347,10 +2346,10 @@ class RTCSession extends EventEmitter {
     }
 
     try {
-      var sdp =
+      var desc =
           await this._createLocalDescription('offer', rtcOfferConstraints);
-      sdp = this._mangleOffer(sdp);
-      var e = {'originator': 'local', 'type': 'offer', 'sdp': sdp.sdp};
+      var sdp = this._mangleOffer(desc.sdp);
+      var e = {'originator': 'local', 'type': 'offer', 'sdp': sdp};
       debug('emit "sdp"');
       this.emit('sdp', e);
 
@@ -2387,10 +2386,12 @@ class RTCSession extends EventEmitter {
   _sendUpdate([options]) async {
     debug('sendUpdate()');
 
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    options = options ?? {};
+
+    var extraHeaders = Utils.cloneArray(options['extraHeaders'] ?? []);
     var eventHandlers = options['eventHandlers'] ?? {};
     var rtcOfferConstraints =
-        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints || null;
+        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints ?? {};
     var sdpOffer = options['sdpOffer'] ?? false;
 
     var succeeded = false;
@@ -2461,7 +2462,7 @@ class RTCSession extends EventEmitter {
       }
     }
 
-    if (sdpOffer != null) {
+    if (sdpOffer) {
       extraHeaders.add('Content-Type: application/sdp');
       try {
         var sdp =
@@ -2562,12 +2563,12 @@ class RTCSession extends EventEmitter {
         if (holdMediaTypes.indexOf(m.type) == -1) {
           continue;
         }
-        if (m.direction == null) {
-          m.direction = 'sendonly';
-        } else if (m.direction == 'sendrecv') {
-          m.direction = 'sendonly';
-        } else if (m.direction == 'recvonly') {
-          m.direction = 'inactive';
+        if (m['direction'] == null) {
+          m['direction'] = 'sendonly';
+        } else if (m['direction'] == 'sendrecv') {
+          m['direction'] = 'sendonly';
+        } else if (m['direction'] == 'recvonly') {
+          m['direction'] = 'inactive';
         }
       }
     }
@@ -2578,7 +2579,7 @@ class RTCSession extends EventEmitter {
         if (holdMediaTypes.indexOf(m.type) == -1) {
           continue;
         }
-        m.direction = 'inactive';
+        m['direction'] = 'inactive';
       }
     }
     // Remote hold.
@@ -2588,12 +2589,12 @@ class RTCSession extends EventEmitter {
         if (holdMediaTypes.indexOf(m.type) == -1) {
           continue;
         }
-        if (m.direction == null) {
-          m.direction = 'recvonly';
-        } else if (m.direction == 'sendrecv') {
-          m.direction = 'recvonly';
-        } else if (m.direction == 'recvonly') {
-          m.direction = 'inactive';
+        if (m['direction'] == null) {
+          m['direction'] = 'recvonly';
+        } else if (m['direction'] == 'sendrecv') {
+          m['direction'] = 'recvonly';
+        } else if (m['direction'] == 'recvonly') {
+          m['direction'] = 'inactive';
         }
       }
     }
@@ -2633,7 +2634,7 @@ class RTCSession extends EventEmitter {
 
     var session_expires_refresher;
 
-    if (request.session_expires &&
+    if (request.session_expires > 0 &&
         request.session_expires >= DartSIP_C.MIN_SESSION_EXPIRES) {
       this._sessionTimers.currentExpires = request.session_expires;
       session_expires_refresher = request.session_expires_refresher ?? 'uas';

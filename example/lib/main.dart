@@ -48,7 +48,6 @@ class _MyHomePageState extends State<MyHomePage> {
   var _sipUri = 'hello_flutter@tryit.jssip.net';
   var _displayName = 'Flutter SIP UA';
   var _dest = 'sip:111_6ackea@tryit.jssip.net';
-  var _session;
 
   bool _registered = false;
 
@@ -83,7 +82,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _handleCall() {
-    _session = this._sipUA.connect(_dest);
+    if (this._sipUA.session == null)
+      this._sipUA.connect(_dest);
+    else
+      this._sipUA.answer();
   }
 
   Widget buildLoginView(context) {
@@ -252,28 +254,31 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions:  _registered ? <Widget>[
-          new PopupMenuButton<String>(
-              onSelected: (String value) {
-                setState(() {
-                  if (value == 'logout') {
-                    _handleLogout();
-                  }
-                });
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                    PopupMenuItem(
-                      child: new Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          new Text('Logout'),
-                          new Icon(Icons.remove_circle)
-                        ],
-                      ),
-                      value: 'logout',
-                    )
-                  ])
-        ] : null,
+        actions: _registered
+            ? <Widget>[
+                new PopupMenuButton<String>(
+                    onSelected: (String value) {
+                      setState(() {
+                        if (value == 'logout') {
+                          _handleLogout();
+                        }
+                      });
+                    },
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                          PopupMenuItem(
+                            child: new Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                new Text('Logout'),
+                                new Icon(Icons.remove_circle)
+                              ],
+                            ),
+                            value: 'logout',
+                          )
+                        ])
+              ]
+            : null,
       ),
       body: Center(
         child: _registered ? buildDialView() : buildLoginView(context),

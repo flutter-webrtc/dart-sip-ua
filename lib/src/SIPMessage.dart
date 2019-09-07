@@ -600,10 +600,10 @@ class IncomingRequest extends IncomingMessage {
     response += 'Supported: ${supported.join(',')}\r\n';
 
     if (body != null) {
-      var length = Utils.str_utf8_length(body);
+      var length = body.length;
 
       response += 'Content-Type: application/sdp\r\n';
-      response += 'Content-Length: ${length}\r\n\r\n';
+      response += 'Content-Length: $length\r\n\r\n';
       response += body;
     } else {
       response += 'Content-Length: ${0}\r\n\r\n';

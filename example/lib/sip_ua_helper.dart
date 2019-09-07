@@ -8,12 +8,15 @@ class SIPUAHelper extends EventEmitter {
   String _url;
   final logger = new Logger('SIPUA::Helper');
   var _wsExtraHeaders;
+  var _session;
 
   SIPUAHelper(this._url, [this._wsExtraHeaders]);
 
   debug(msg) => logger.debug(msg);
 
   debugerror(error) => logger.error(error);
+
+  get session => _session;
 
   start(uri, [password, displayName]) async {
     _settings = new Settings();
@@ -56,8 +59,9 @@ class SIPUAHelper extends EventEmitter {
       });
 
       this._ua.on('newRTCSession', (data) {
-        //debug('newRTCSession => ' + data.toString());
+        debug('newRTCSession => ' + data.toString());
         this.emit('newRTCSession', data);
+        _session = data['session'];
       });
 
       this._ua.on('newMessage', (data) {
@@ -87,7 +91,7 @@ class SIPUAHelper extends EventEmitter {
     this._ua.unregister(all: all);
   }
 
-  connect(uri, [options]) async {
+  options() {
     // Register callbacks to desired call events
     var eventHandlers = {
       'progress': (e) {
@@ -97,10 +101,12 @@ class SIPUAHelper extends EventEmitter {
       'failed': (e) {
         debug('call failed with cause: ' + e['cause']);
         this.emit('failed', e);
+        _session = null;
       },
       'ended': (e) {
         debug('call ended with cause: ' + e['cause']);
         this.emit('ended', e);
+        _session = null;
       },
       'confirmed': (e) {
         debug('call confirmed');
@@ -108,19 +114,19 @@ class SIPUAHelper extends EventEmitter {
       }
     };
 
-    var options = {
+    var defaultOptions = {
       'eventHandlers': eventHandlers,
       'pcConfig': {
         'iceServers': [
           {'url': 'stun:stun.l.google.com:19302'},
           /*
-       * turn server configuration example.
-      {
-        'url': 'turn:123.45.67.89:3478',
-        'username': 'change_to_real_user',
-        'credential': 'change_to_real_secret'
-      },
-       */
+          * turn server configuration example.
+          {
+            'url': 'turn:123.45.67.89:3478',
+            'username': 'change_to_real_user',
+            'credential': 'change_to_real_secret'
+          },
+          */
         ]
       },
       'mediaConstraints': {
@@ -156,9 +162,18 @@ class SIPUAHelper extends EventEmitter {
         ],
       }
     };
+    return defaultOptions;
+  }
 
-    var session = this._ua.call(uri, options);
-    return session;
+  connect(uri) async {
+    _session = this._ua.call(uri, this.options());
+    return _session;
+  }
+
+  answer() {
+    if (_session != null) {
+      _session.answer(this.options());
+    }
   }
 
   sendMessage(target, body, [options]) {

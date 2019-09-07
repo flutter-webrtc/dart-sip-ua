@@ -543,33 +543,29 @@ class InviteServerTransaction extends EventEmitter {
         }, Timers.PROVISIONAL_RESPONSE_INTERVAL);
       }
     } else if (status_code >= 200 && status_code <= 299) {
-      switch (this.state) {
-        case C.STATUS_PROCEEDING:
-          {
-            this.stateChanged(C.STATUS_ACCEPTED);
-            this.last_response = response;
-            this.L = setTimeout(() {
-              this.timer_L();
-            }, Timers.TIMER_L);
+      if (this.state == C.STATUS_PROCEEDING) {
+        this.stateChanged(C.STATUS_ACCEPTED);
+        this.last_response = response;
+        this.L = setTimeout(() {
+          this.timer_L();
+        }, Timers.TIMER_L);
 
-            if (this.resendProvisionalTimer != null) {
-              clearInterval(this.resendProvisionalTimer);
-              this.resendProvisionalTimer = null;
-            }
-            break;
+        if (this.resendProvisionalTimer != null) {
+          clearInterval(this.resendProvisionalTimer);
+          this.resendProvisionalTimer = null;
+        }
+      }
+      /* falls through */
+      if (this.state == C.STATUS_ACCEPTED) {
+        // Note that this point will be reached for proceeding this.state also.
+        if (!this.transport.send(response)) {
+          this.onTransportError();
+          if (onFailure != null) {
+            onFailure();
           }
-        /* falls through */
-        case C.STATUS_ACCEPTED:
-          // Note that this point will be reached for proceeding this.state also.
-          if (!this.transport.send(response)) {
-            this.onTransportError();
-            if (onFailure != null) {
-              onFailure();
-            }
-          } else if (onSuccess != null) {
-            onSuccess();
-          }
-          break;
+        } else if (onSuccess != null) {
+          onSuccess();
+        }
       }
     } else if (status_code >= 300 && status_code <= 699) {
       switch (this.state) {
