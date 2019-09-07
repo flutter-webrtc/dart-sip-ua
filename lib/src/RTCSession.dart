@@ -103,6 +103,8 @@ class RTCSession extends EventEmitter {
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
 
+  dynamic receiveRequest;
+
   RTCSession(ua) {
     debug('new');
 
@@ -174,6 +176,8 @@ class RTCSession extends EventEmitter {
 
     // Custom session empty object for high level use.
     this._data = {};
+
+    this.receiveRequest = _receiveRequest;
   }
 
   /**
@@ -759,8 +763,7 @@ class RTCSession extends EventEmitter {
           var dialog = this._dialog;
 
           // Send the BYE as soon as the ACK is received...
-          /// TODO:  changet to this.receiveRequest = Function
-          var receiveRequest = (method) {
+          this.receiveRequest = (method) {
             if (method == DartSIP_C.ACK) {
               this.sendRequest(
                   DartSIP_C.BYE, {'extraHeaders': extraHeaders, 'body': body});
@@ -1178,7 +1181,7 @@ class RTCSession extends EventEmitter {
   /**
    * In dialog Request Reception
    */
-  receiveRequest(request) async {
+  _receiveRequest(request) async {
     debug('receiveRequest()');
 
     if (request.method == DartSIP_C.CANCEL) {
