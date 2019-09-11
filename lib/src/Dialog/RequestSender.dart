@@ -10,7 +10,7 @@ var EventHandlers = {
   'onTransportError': () => {},
   'onSuccessResponse': (response) => {},
   'onErrorResponse': (response) => {},
-  'onAuthenticated': () => {},
+  'onAuthenticated': (request) => {},
   'onDialogError': () => {}
 };
 
@@ -76,7 +76,7 @@ class DialogRequestSender {
         }
       };
 
-      request_sender.clientTransaction.on('stateChanged', stateChanged);
+      request_sender.clientTransaction.once('stateChanged', stateChanged);
     }
   }
 

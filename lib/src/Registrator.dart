@@ -1,5 +1,4 @@
 import 'Utils.dart' as Utils;
-import 'UA.dart' as UA;
 import 'Timers.dart';
 import 'Constants.dart' as DartSIP_C;
 import 'SIPMessage.dart' as SIPMessage;

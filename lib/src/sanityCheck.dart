@@ -111,7 +111,6 @@ rfc3261_8_2_2_2() {
   var fromTag = message.from_tag;
   var call_id = message.call_id;
   var cseq = message.cseq;
-  var tr;
 
   // Accept any in-dialog request.
   if (message.to_tag != null) {
