@@ -1,16 +1,22 @@
 import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/logger.dart';
 import 'package:events2/events2.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_webrtc/webrtc.dart';
 
-class SIPUAHelper extends EventEmitter {
+class SIPUAHelper extends EventEmitter with ChangeNotifier {
   UA _ua;
   Settings _settings;
-  String _url;
   final logger = new Logger('SIPUA::Helper');
-  var _wsExtraHeaders;
   var _session;
+  var _registered = false;
+  var _direction;
+  var _connected = false;
+  var _sessionState = 'new';
+  var _registerState = 'new';
+  var _localStream;
+  var _remoteStream;
 
-  SIPUAHelper(this._url, [this._wsExtraHeaders]);
+  SIPUAHelper();
 
   debug(msg) => logger.debug(msg);
 
@@ -18,9 +24,29 @@ class SIPUAHelper extends EventEmitter {
 
   get session => _session;
 
-  start(uri, [password, displayName]) async {
+  get registered => _registered;
+
+  get direction => _direction;
+
+  get connected => _connected;
+
+  get registerState => _registerState;
+
+  get sessionState => _sessionState;
+
+  get localStream => _localStream;
+
+  get remoteStream => _remoteStream;
+
+  notify() => notifyListeners();
+
+  start(wsUrl, uri, [password, displayName, wsExtraHeaders]) async {
+    if (this._ua != null) {
+      debugerror('UA instance already exist!');
+      return;
+    }
     _settings = new Settings();
-    var socket = new WebSocketInterface(this._url, this._wsExtraHeaders);
+    var socket = new WebSocketInterface(wsUrl, wsExtraHeaders);
     _settings.sockets = [socket];
     _settings.uri = uri;
     _settings.password = password;
@@ -36,48 +62,62 @@ class SIPUAHelper extends EventEmitter {
       this._ua.on('connected', (data) {
         debug('connected => ' + data.toString());
         this.emit('connected', data);
+        _connected = true;
+        notify();
       });
 
       this._ua.on('disconnected', (data) {
         debug('disconnected => ' + data.toString());
         this.emit('disconnected', data);
+        _connected = false;
+        notify();
       });
 
       this._ua.on('registered', (data) {
         debug('registered => ' + data.toString());
-        this.emit('registered', data);
+        _registered = true;
+        _registerState = 'registered';
+        notify();
       });
 
       this._ua.on('unregistered', (data) {
         debug('unregistered => ' + data.toString());
-        this.emit('unregistered', data);
+        _registerState = 'unregistered';
+        _registered = false;
+        notify();
       });
 
       this._ua.on('registrationFailed', (data) {
         debug('registrationFailed => ' + data['cause']);
-        this.emit('registrationFailed', data);
+        _registerState = 'registrationFailed[${data['cause']}]';
+        _registered = false;
+        notify();
       });
 
       this._ua.on('newRTCSession', (data) {
         debug('newRTCSession => ' + data.toString());
-        this.emit('newRTCSession', data);
         _session = data['session'];
+        _direction = _session.direction;
         if (_session.direction == 'incoming') {
           // Set event handlers.
           options()['eventHandlers'].forEach((event, func) {
             _session.on(event, func);
           });
         }
+        notify();
+        this.emit('newRTCSession', data);
       });
 
       this._ua.on('newMessage', (data) {
         debug('newMessage => ' + data.toString());
         this.emit('newMessage', data);
+        notify();
       });
 
       this._ua.on('sipEvent', (data) {
         debug('sipEvent => ' + data.toString());
         this.emit('sipEvent', data);
+        notify();
       });
       this._ua.start();
     } catch (e) {
@@ -103,22 +143,34 @@ class SIPUAHelper extends EventEmitter {
       'progress': (e) {
         debug('call is in progress');
         this.emit('progress', e);
+        _sessionState = 'progress';
+        notify();
       },
       'failed': (e) {
         debug('call failed with cause: ' + e['cause']);
         this.emit('failed', e);
         _session = null;
+        _sessionState = 'failed';
+        _localStream = null;
+        _remoteStream = null;
+        notify();
       },
       'ended': (e) {
         debug('call ended with cause: ' + e['cause']);
         this.emit('ended', e);
         _session = null;
+        _sessionState = 'ended';
+        _localStream = null;
+        _remoteStream = null;
+        notify();
       },
       'confirmed': (e) {
         debug('call confirmed');
         this.emit('confirmed', e);
+        _sessionState = 'confirmed';
+        notify();
       },
-      'stream': (e){
+      'stream': (e) async {
         this.emit('stream', e);
       }
     };
@@ -197,13 +249,5 @@ class SIPUAHelper extends EventEmitter {
 
   terminateSessions(options) {
     return this._ua.terminateSessions(options);
-  }
-
-  isRegistered() {
-    return this._ua.isRegistered();
-  }
-
-  isConnected() {
-    return this._ua.isConnected();
   }
 }
