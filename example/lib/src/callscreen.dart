@@ -106,6 +106,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     _bindEventListeners();
     return Scaffold(
       appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text(
               "Calling [${Provider.of<SIPUAHelper>(context).sessionState}]")),
       body: Stack(

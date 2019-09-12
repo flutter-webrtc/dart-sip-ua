@@ -104,6 +104,7 @@ class SIPUAHelper extends EventEmitter with ChangeNotifier {
             _session.on(event, func);
           });
         }
+        _sessionState = 'new';
         notify();
         this.emit('newRTCSession', data);
       });
@@ -228,6 +229,8 @@ class SIPUAHelper extends EventEmitter with ChangeNotifier {
 
   connect(uri) async {
     _session = this._ua.call(uri, this.options());
+    _sessionState = 'new';
+    notify();
     return _session;
   }
 
