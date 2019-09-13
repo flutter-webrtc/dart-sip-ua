@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
 import 'sip_ua_helper.dart';
 
 class RegisterWidget extends StatefulWidget {
-  RegisterWidget({Key key, this.title}) : super(key: key);
-  final String title;
-
+  SIPUAHelper _helper;
+  RegisterWidget(this._helper, {Key key}) : super(key: key);
   @override
   _MyRegisterWidget createState() => _MyRegisterWidget();
 }
@@ -18,10 +16,35 @@ class _MyRegisterWidget extends State<RegisterWidget> {
   var _displayName = 'Flutter SIP UA';
   var _dest = 'sip:111_6ackea@tryit.jssip.net';
   SharedPreferences prefs;
+  var _registerState;
+
+  get helper => widget._helper;
 
   @override
   initState() {
     super.initState();
+    _registerState = helper.registerState;
+    helper.on('registerState', _handleRegisterState);
+    helper.on('socketState', _handleSocketState);
+  }
+
+  @override
+  deactivate() {
+    super.deactivate();
+    helper.remove('registerState', _handleRegisterState);
+    helper.remove('socketState', _handleSocketState);
+  }
+
+  _handleRegisterState(state, data) {
+    this.setState(() {
+      _registerState = state;
+    });
+  }
+
+  _handleSocketState(state, data) {
+    this.setState(() {
+      _registerState = state;
+    });
   }
 
   _alert(context, alertFieldName) {
@@ -51,7 +74,6 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     } else if (_sipUri == null) {
       return _alert(context, "SIP URI");
     }
-    SIPUAHelper helper = Provider.of<SIPUAHelper>(context);
     helper.start(_wsUri, _sipUri, _password, _displayName, {
       'Origin': ' https://tryit.jssip.net',
       'Host': 'tryit.jssip.net:10443'
@@ -73,10 +95,11 @@ class _MyRegisterWidget extends State<RegisterWidget> {
                   Column(
                     children: <Widget>[
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(48.0, 18.0, 48.0, 18.0),
+                        padding:
+                            const EdgeInsets.fromLTRB(48.0, 18.0, 48.0, 18.0),
                         child: Center(
                             child: Text(
-                          'Register Status: ${Provider.of<SIPUAHelper>(context).registerState}',
+                          'Register Status: $_registerState',
                           style: TextStyle(fontSize: 18, color: Colors.black54),
                         )),
                       ),

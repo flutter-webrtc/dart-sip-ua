@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
 import 'src/sip_ua_helper.dart';
 import 'src/register.dart';
 import 'src/dialpad.dart';
@@ -21,13 +19,11 @@ bool isDesktop() {
 
 void main() {
   if (isDesktop()) debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  runApp(ChangeNotifierProvider<SIPUAHelper>.value(
-    value: SIPUAHelper(),
-    child: MyApp(),
-  ));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  var _helper = new SIPUAHelper();
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -38,9 +34,9 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/dialpad',
       routes: {
-        '/dialpad': (context) => DialPadWidget(),
-        '/register': (context) => RegisterWidget(),
-        '/callscreen': (context) => CallScreenWidget(),
+        '/dialpad': (context) => DialPadWidget(_helper),
+        '/register': (context) => RegisterWidget(_helper),
+        '/callscreen': (context) => CallScreenWidget(_helper),
         '/about': (context) => AboutWidget(),
       },
     );

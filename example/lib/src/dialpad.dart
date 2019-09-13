@@ -1,18 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'sip_ua_helper.dart';
 
 class DialPadWidget extends StatefulWidget {
-  DialPadWidget({Key key}) : super(key: key);
+  SIPUAHelper _helper;
+  DialPadWidget(this._helper, {Key key}) : super(key: key);
   @override
   _MyDialPadWidget createState() => _MyDialPadWidget();
 }
 
 class _MyDialPadWidget extends State<DialPadWidget> {
   var _dest = 'sip:111_6ackea@tryit.jssip.net';
+  get helper => widget._helper;
+  
+  @override
+  initState() {
+    super.initState();
+    _bindEventListeners();
+  }
+
+  _handleRegisterState(state, data) {
+    this.setState(() {});
+  }
+
+  _bindEventListeners() {
+    helper.on('registerState', _handleRegisterState);
+    helper.on('uaState', (state, data) {
+      if (state == 'newRTCSession') Navigator.pushNamed(context, '/callscreen');
+    });
+  }
+
   _handleCall(context) {
-    Provider.of<SIPUAHelper>(context).connect(_dest);
-    Navigator.pushNamed(context, '/callscreen');
+    helper.connect(_dest);
   }
 
   @override
@@ -84,7 +102,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                     padding: const EdgeInsets.all(48.0),
                     child: Center(
                         child: Text(
-                      'Register Status: ${Provider.of<SIPUAHelper>(context).registerState}',
+                      'Register Status: ${helper.registerState}',
                       style: TextStyle(fontSize: 18, color: Colors.black54),
                     )),
                   ),

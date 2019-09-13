@@ -1,15 +1,13 @@
+import 'dart:async';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:events2/events2.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_webrtc/webrtc.dart';
 
-class SIPUAHelper extends EventEmitter with ChangeNotifier {
+class SIPUAHelper extends EventEmitter {
   UA _ua;
   Settings _settings;
   final logger = new Logger('SIPUA::Helper');
   var _session;
   var _registered = false;
-  var _direction;
   var _connected = false;
   var _sessionState = 'new';
   var _registerState = 'new';
@@ -26,8 +24,6 @@ class SIPUAHelper extends EventEmitter with ChangeNotifier {
 
   get registered => _registered;
 
-  get direction => _direction;
-
   get connected => _connected;
 
   get registerState => _registerState;
@@ -38,7 +34,21 @@ class SIPUAHelper extends EventEmitter with ChangeNotifier {
 
   get remoteStream => _remoteStream;
 
-  notify() => notifyListeners();
+  _handleSocketState(state, data) {
+    this.emit('socketState', state, data);
+  }
+
+  _handleRegisterState(state, data) {
+    this.emit('registerState', state, data);
+  }
+
+  _handleUAState(state, data) {
+    this.emit('uaState', state, data);
+  }
+
+  _handleCallState(state, data) {
+    this.emit('callState', state, data);
+  }
 
   start(wsUrl, uri, [password, displayName, wsExtraHeaders]) async {
     if (this._ua != null) {
@@ -56,48 +66,45 @@ class SIPUAHelper extends EventEmitter with ChangeNotifier {
       this._ua = new UA(_settings);
       this._ua.on('onnecting', (data) {
         debug('onnecting => ' + data.toString());
-        this.emit('onnecting', data);
+        _handleSocketState('onnecting', data);
       });
 
       this._ua.on('connected', (data) {
         debug('connected => ' + data.toString());
-        this.emit('connected', data);
+        _handleSocketState('connected', data);
         _connected = true;
-        notify();
       });
 
       this._ua.on('disconnected', (data) {
         debug('disconnected => ' + data.toString());
-        this.emit('disconnected', data);
+        _handleSocketState('disconnected', data);
         _connected = false;
-        notify();
       });
 
       this._ua.on('registered', (data) {
         debug('registered => ' + data.toString());
         _registered = true;
         _registerState = 'registered';
-        notify();
+        _handleRegisterState('registered', data);
       });
 
       this._ua.on('unregistered', (data) {
         debug('unregistered => ' + data.toString());
         _registerState = 'unregistered';
         _registered = false;
-        notify();
+        _handleRegisterState('unregistered', data);
       });
 
       this._ua.on('registrationFailed', (data) {
         debug('registrationFailed => ' + data['cause']);
         _registerState = 'registrationFailed[${data['cause']}]';
         _registered = false;
-        notify();
+        _handleRegisterState('registrationFailed', data);
       });
 
       this._ua.on('newRTCSession', (data) {
         debug('newRTCSession => ' + data.toString());
         _session = data['session'];
-        _direction = _session.direction;
         if (_session.direction == 'incoming') {
           // Set event handlers.
           options()['eventHandlers'].forEach((event, func) {
@@ -105,20 +112,17 @@ class SIPUAHelper extends EventEmitter with ChangeNotifier {
           });
         }
         _sessionState = 'new';
-        notify();
-        this.emit('newRTCSession', data);
+        _handleUAState('newRTCSession', data);
       });
 
       this._ua.on('newMessage', (data) {
         debug('newMessage => ' + data.toString());
-        this.emit('newMessage', data);
-        notify();
+        _handleUAState('newMessage', data);
       });
 
       this._ua.on('sipEvent', (data) {
         debug('sipEvent => ' + data.toString());
-        this.emit('sipEvent', data);
-        notify();
+        _handleUAState('sipEvent', data);
       });
       this._ua.start();
     } catch (e) {
@@ -143,36 +147,40 @@ class SIPUAHelper extends EventEmitter with ChangeNotifier {
     var eventHandlers = {
       'progress': (e) {
         debug('call is in progress');
-        this.emit('progress', e);
+        _handleCallState('progress', e);
         _sessionState = 'progress';
-        notify();
       },
       'failed': (e) {
         debug('call failed with cause: ' + e['cause']);
-        this.emit('failed', e);
+        _handleCallState('failed', e);
         _session = null;
-        _sessionState = 'failed';
+        _sessionState = 'failed (${e['cause']})';
         _localStream = null;
         _remoteStream = null;
-        notify();
       },
       'ended': (e) {
         debug('call ended with cause: ' + e['cause']);
-        this.emit('ended', e);
+        _handleCallState('ended', e);
         _session = null;
         _sessionState = 'ended';
         _localStream = null;
         _remoteStream = null;
-        notify();
+      },
+      'accepted': (e) {
+        debug('call accepted');
+        _handleCallState('accepted', e);
+        _sessionState = 'accepted';
       },
       'confirmed': (e) {
         debug('call confirmed');
-        this.emit('confirmed', e);
+        _handleCallState('confirmed', e);
         _sessionState = 'confirmed';
-        notify();
       },
       'stream': (e) async {
-        this.emit('stream', e);
+        // Wating for callscreen ready.
+        new Timer(Duration(milliseconds: 100), () {
+          _handleCallState('stream', e);
+        });
       }
     };
 
@@ -228,10 +236,12 @@ class SIPUAHelper extends EventEmitter with ChangeNotifier {
   }
 
   connect(uri) async {
-    _session = this._ua.call(uri, this.options());
-    _sessionState = 'new';
-    notify();
-    return _session;
+    if (_ua != null) {
+      _session = _ua.call(uri, this.options());
+      _sessionState = 'new';
+      return _session;
+    }
+    return null;
   }
 
   answer() {

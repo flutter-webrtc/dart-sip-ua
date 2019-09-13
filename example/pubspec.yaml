@@ -26,7 +26,6 @@ dependencies:
   sip_ua:
     path: ../
   shared_preferences: ^0.5.3+4
-  provider: ^3.1.0
 
 dev_dependencies:
   flutter_test:
