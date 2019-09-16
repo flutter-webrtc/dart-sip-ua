@@ -11,10 +11,13 @@ class DialPadWidget extends StatefulWidget {
 class _MyDialPadWidget extends State<DialPadWidget> {
   var _dest = 'sip:111_6ackea@tryit.jssip.net';
   get helper => widget._helper;
-  
+  TextEditingController _textController;
+
   @override
   initState() {
     super.initState();
+    _textController = new TextEditingController(text: _dest);
+    _textController.text = _dest;
     _bindEventListeners();
   }
 
@@ -30,7 +33,147 @@ class _MyDialPadWidget extends State<DialPadWidget> {
   }
 
   _handleCall(context) {
-    helper.connect(_dest);
+    var dest = _textController.text;
+    if (dest == null || dest.length == 0) {
+      showDialog<Null>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: new Text('Target is empty.'),
+            content: new Text('Please enter a SIP URI or username!'),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+    helper.connect(dest);
+  }
+
+  _handleBackSpace() {
+    var text = _textController.text;
+    if (text.length > 0) {
+      this.setState(() {
+        text = text.substring(0, text.length - 1);
+        _textController.text = text;
+      });
+    }
+  }
+
+  _handleNum(number) {
+    this.setState(() {
+      _textController.text += number;
+    });
+  }
+
+  _buildDialPad() {
+    var lables = [
+      [
+        {'1': ''},
+        {'2': 'abc'},
+        {'3': 'def'}
+      ],
+      [
+        {'4': 'ghi'},
+        {'5': 'jkl'},
+        {'6': 'mno'}
+      ],
+      [
+        {'7': 'pqrs'},
+        {'8': 'tuv'},
+        {'9': 'wxyz'}
+      ],
+      [
+        {'*': ''},
+        {'0': '+'},
+        {'#': ''}
+      ],
+    ];
+
+    return [
+      Container(
+          child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                        width: 280,
+                        child: TextField(
+                          keyboardType: TextInputType.text,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 28, color: Colors.black54),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                          ),
+                          controller: _textController,
+                        )),
+                  ]))),
+      new Container(
+          child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: lables
+                  .map((row) => new Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: new Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: row
+                              .map((label) => new Container(
+                                  height: 64,
+                                  width: 64,
+                                  child: new FlatButton(
+                                    //heroTag: "num_$label",
+                                    shape: CircleBorder(),
+                                    child: new Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text('${label.keys.first}',
+                                              style: TextStyle(
+                                                  fontSize: 28,
+                                                  color: Theme.of(context)
+                                                      .accentColor)),
+                                          Text('${label.values.first}'.toUpperCase(),
+                                              style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Theme.of(context)
+                                                      .disabledColor))
+                                        ]),
+                                    onPressed: () => _handleNum(label.keys.first),
+                                  )))
+                              .toList())))
+                  .toList())),
+      Container(
+          child: new Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          IconButton(
+            icon: Icon(Icons.videocam, color: Colors.grey),
+            onPressed: () => _handleCall(context),
+          ),
+          FloatingActionButton(
+            heroTag: "audio_call",
+            child: Icon(Icons.dialer_sip),
+            backgroundColor: Colors.green,
+            onPressed: () => _handleCall(context),
+          ),
+          IconButton(
+            icon: Icon(Icons.backspace, color: Colors.grey),
+            onPressed: () => _handleBackSpace(),
+          ),
+        ],
+      ))
+    ];
   }
 
   @override
@@ -99,69 +242,20 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(48.0),
+                    padding: const EdgeInsets.all(24.0),
                     child: Center(
                         child: Text(
-                      'Register Status: ${helper.registerState}',
-                      style: TextStyle(fontSize: 18, color: Colors.black54),
+                      'Status: ${helper.registerState}',
+                      style: TextStyle(fontSize: 14, color: Colors.black54),
                     )),
                   ),
-                  Padding(
-                      padding: const EdgeInsets.fromLTRB(48.0, 0, 48.0, 18.0),
-                      child: TextField(
-                        keyboardType: TextInputType.text,
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(10.0),
-                          border: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black12)),
-                          hintText: _dest ?? 'Enter SIP URL or username',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            _dest = value;
-                          });
-                        },
+                  new Container(
+                      width: 300,
+                      child: new Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: _buildDialPad(),
                       )),
-                  Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: Container(
-                          height: 48.0,
-                          width: 160.0,
-                          child: MaterialButton(
-                            child: Text(
-                              'CALL',
-                              style: TextStyle(
-                                  fontSize: 16.0, color: Colors.white),
-                            ),
-                            color: Colors.blue,
-                            textColor: Colors.white,
-                            onPressed: () {
-                              if (_dest != null) {
-                                _handleCall(context);
-                                return;
-                              }
-                              showDialog<Null>(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (BuildContext context) {
-                                  return new AlertDialog(
-                                    title: new Text('Target is empty.'),
-                                    content: new Text(
-                                        'Please enter a SIP URI or username!'),
-                                    actions: <Widget>[
-                                      new FlatButton(
-                                        child: new Text('Ok'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          )))
                 ])));
   }
 }
