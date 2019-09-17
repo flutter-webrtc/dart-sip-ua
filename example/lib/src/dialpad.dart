@@ -53,6 +53,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
           );
         },
       );
+      return;
     }
     helper.connect(dest);
   }
@@ -99,25 +100,25 @@ class _MyDialPadWidget extends State<DialPadWidget> {
 
     return [
       Container(
-          child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                        width: 280,
-                        child: TextField(
-                          keyboardType: TextInputType.text,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 28, color: Colors.black54),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                          ),
-                          controller: _textController,
-                        )),
-                  ]))),
+          width: 360,
+          child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                    width: 360,
+                    child: TextField(
+                      keyboardType: TextInputType.text,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 24, color: Colors.black54),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                      controller: _textController,
+                    )),
+              ])),
       new Container(
+          width: 300,
           child: new Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -128,8 +129,8 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: row
                               .map((label) => new Container(
-                                  height: 64,
-                                  width: 64,
+                                  height: 72,
+                                  width: 72,
                                   child: new FlatButton(
                                     //heroTag: "num_$label",
                                     shape: CircleBorder(),
@@ -139,40 +140,44 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                                         children: <Widget>[
                                           Text('${label.keys.first}',
                                               style: TextStyle(
-                                                  fontSize: 28,
+                                                  fontSize: 32,
                                                   color: Theme.of(context)
                                                       .accentColor)),
-                                          Text('${label.values.first}'.toUpperCase(),
+                                          Text(
+                                              '${label.values.first}'
+                                                  .toUpperCase(),
                                               style: TextStyle(
-                                                  fontSize: 11,
+                                                  fontSize: 12,
                                                   color: Theme.of(context)
                                                       .disabledColor))
                                         ]),
-                                    onPressed: () => _handleNum(label.keys.first),
+                                    onPressed: () =>
+                                        _handleNum(label.keys.first),
                                   )))
                               .toList())))
                   .toList())),
       Container(
+          width: 300,
           child: new Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          IconButton(
-            icon: Icon(Icons.videocam, color: Colors.grey),
-            onPressed: () => _handleCall(context),
-          ),
-          FloatingActionButton(
-            heroTag: "audio_call",
-            child: Icon(Icons.dialer_sip),
-            backgroundColor: Colors.green,
-            onPressed: () => _handleCall(context),
-          ),
-          IconButton(
-            icon: Icon(Icons.backspace, color: Colors.grey),
-            onPressed: () => _handleBackSpace(),
-          ),
-        ],
-      ))
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(Icons.videocam, color: Colors.grey),
+                onPressed: () => _handleCall(context),
+              ),
+              FloatingActionButton(
+                heroTag: "audio_call",
+                child: Icon(Icons.dialer_sip),
+                backgroundColor: Colors.green,
+                onPressed: () => _handleCall(context),
+              ),
+              IconButton(
+                icon: Icon(Icons.backspace, color: Colors.grey),
+                onPressed: () => _handleBackSpace(),
+              ),
+            ],
+          ))
     ];
   }
 
@@ -242,7 +247,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.all(6.0),
                     child: Center(
                         child: Text(
                       'Status: ${helper.registerState}',
@@ -250,12 +255,11 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                     )),
                   ),
                   new Container(
-                      width: 300,
                       child: new Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: _buildDialPad(),
-                      )),
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: _buildDialPad(),
+                  )),
                 ])));
   }
 }
