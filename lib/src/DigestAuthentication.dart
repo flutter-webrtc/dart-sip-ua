@@ -1,3 +1,4 @@
+import 'Constants.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 
@@ -38,7 +39,7 @@ class DigestAuthentication {
   var _opaque;
   var _stale;
   var _qop;
-  var _method;
+  SipMethod _method;
   var _uri;
   var _ha1;
   var _response;
@@ -71,7 +72,7 @@ class DigestAuthentication {
 * received in a response to that request.
 * Returns true if auth was successfully generated, false otherwise.
 */
-  authenticate(method, Challenge challenge, [ruri, cnonce, body]) {
+  authenticate(SipMethod method, Challenge challenge, [ruri, cnonce, body]) {
     this._algorithm = challenge.algorithm;
     this._realm = challenge.realm;
     this._nonce = challenge.nonce;

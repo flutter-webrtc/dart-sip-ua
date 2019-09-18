@@ -1,3 +1,6 @@
+import '../sip_ua.dart';
+import 'Constants.dart';
+import 'RTCSession.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'Constants.dart' as DartSIP_C;
 import 'Transactions.dart' as Transactions;
@@ -30,8 +33,8 @@ class Id {
 
 // RFC 3261 12.1.
 class Dialog {
-  var _owner;
-  var _ua;
+  RTCSession _owner;
+  UA _ua;
   var _uac_pending_reply;
   var _uas_pending_reply;
   var _state;
@@ -113,7 +116,7 @@ class Dialog {
     this._local_seqnum = num;
   }
 
-  get owner => this._owner;
+  RTCSession get owner => this._owner;
 
   get uac_pending_reply => this._uac_pending_reply;
 
@@ -139,12 +142,12 @@ class Dialog {
     this._ua.destroyDialog(this);
   }
 
-  sendRequest(method, options) {
+  SIPMessage.OutgoingRequest sendRequest(SipMethod method, options) {
     options = options ?? {};
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
     var eventHandlers = options['eventHandlers'] ?? {};
     var body = options['body'] ?? null;
-    var request = this._createRequest(method, extraHeaders, body);
+    SIPMessage.OutgoingRequest request = this._createRequest(method, extraHeaders, body);
 
     // Increase the local CSeq on authentication.
     eventHandlers['onAuthenticated'] = (request) {
@@ -166,11 +169,11 @@ class Dialog {
     }
 
     // ACK received. Cleanup this._ack_seqnum.
-    if (request.method == DartSIP_C.ACK && this._ack_seqnum != null) {
+    if (request.method == SipMethod.ACK && this._ack_seqnum != null) {
       this._ack_seqnum = null;
     }
     // INVITE received. Set this._ack_seqnum.
-    else if (request.method == DartSIP_C.INVITE) {
+    else if (request.method == SipMethod.INVITE) {
       this._ack_seqnum = request.cseq;
     }
 
@@ -178,14 +181,14 @@ class Dialog {
   }
 
   // RFC 3261 12.2.1.1.
-  _createRequest(method, extraHeaders, body) {
+ SIPMessage.OutgoingRequest _createRequest(SipMethod method, extraHeaders, body) {
     extraHeaders = Utils.cloneArray(extraHeaders);
 
     if (this._local_seqnum == null) {
       this._local_seqnum = Utils.Math.floor(Utils.Math.randomDouble() * 10000);
     }
 
-    var cseq = (method == DartSIP_C.CANCEL || method == DartSIP_C.ACK)
+    var cseq = (method == SipMethod.CANCEL || method == SipMethod.ACK)
         ? this._local_seqnum
         : this._local_seqnum += 1;
 
@@ -213,7 +216,7 @@ class Dialog {
     if (this._remote_seqnum == null) {
       this._remote_seqnum = request.cseq;
     } else if (request.cseq < this._remote_seqnum) {
-      if (request.method == DartSIP_C.ACK) {
+      if (request.method == SipMethod.ACK) {
         // We are not expecting any ACK with lower seqnum than the current one.
         // Or this is not the ACK we are waiting for.
         if (this._ack_seqnum == null || request.cseq != this._ack_seqnum) {
@@ -229,8 +232,8 @@ class Dialog {
     }
 
     // RFC3261 14.2 Modifying an Existing Session -UAS BEHAVIOR-.
-    if (request.method == DartSIP_C.INVITE ||
-        (request.method == DartSIP_C.UPDATE && request.body != null)) {
+    if (request.method == SipMethod.INVITE ||
+        (request.method == SipMethod.UPDATE && request.body != null)) {
       if (this._uac_pending_reply == true) {
         request.reply(491);
       } else if (this._uas_pending_reply == true) {
@@ -261,7 +264,7 @@ class Dialog {
           }
         });
       }
-    } else if (request.method == DartSIP_C.NOTIFY) {
+    } else if (request.method == SipMethod.NOTIFY) {
       // RFC6665 3.2 Replace the dialog's remote target URI if the request is accepted.
       if (request.hasHeader('contact')) {
         request.server_transaction.on('stateChanged', () {

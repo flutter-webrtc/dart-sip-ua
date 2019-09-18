@@ -1,3 +1,4 @@
+import 'Constants.dart';
 import 'Utils.dart' as Utils;
 import 'Timers.dart';
 import 'Constants.dart' as DartSIP_C;
@@ -109,7 +110,7 @@ class Registrator {
     print(this._contact);
 
     var request = new SIPMessage.OutgoingRequest(
-        DartSIP_C.REGISTER,
+        SipMethod.REGISTER,
         this._registrar,
         this._ua,
         {
@@ -268,7 +269,7 @@ class Registrator {
     extraHeaders.add('Expires: 0');
 
     var request = new SIPMessage.OutgoingRequest(
-        DartSIP_C.REGISTER,
+        SipMethod.REGISTER,
         this._registrar,
         this._ua,
         {

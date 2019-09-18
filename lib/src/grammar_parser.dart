@@ -2,6 +2,7 @@
 // Processing tool available at https://github.com/mezoni/peg
 
 import 'dart:core';
+import 'Constants.dart';
 import 'URI.dart';
 import 'NameAddrHeader.dart';
 
@@ -10,7 +11,7 @@ class Data {
   var port;
   var host_type;
   var value;
-  var method;
+  String _method;
   var reason_phrase;
   URI uri;
   var uri_headers;
@@ -52,6 +53,8 @@ class Data {
   var text;
   var uuid;
   Data();
+
+  SipMethod get method=>SipMethodHelper.fromString(_method);
 }
 class GrammarParser {
   static final List<String> _ascii = new List<String>.generate(128, (c) => new String.fromCharCode(c));
@@ -4696,8 +4699,8 @@ class GrammarParser {
           var pos0 = _startPos, offset = $start;
           {
           ///CODE_START
-          data.method = _text();
-          $$ =  data.method;
+          data._method = _text();
+          $$ =  data._method;
           ///CODE_END
           }
         }

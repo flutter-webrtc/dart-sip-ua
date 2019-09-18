@@ -4,6 +4,8 @@ import 'package:events2/events2.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 import 'package:flutter_webrtc/webrtc.dart';
 
+import '../sip_ua.dart';
+import 'Constants.dart';
 import 'RTCSession/DTMF.dart' as RTCSession_DTMF;
 import 'RTCSession/Info.dart' as RTCSession_Info;
 import 'RTCSession/ReferNotifier.dart' as RTCSession_ReferNotifier;
@@ -11,6 +13,7 @@ import 'RTCSession/ReferSubscriber.dart' as RTCSession_ReferSubscriber;
 
 import 'Constants.dart' as DartSIP_C;
 import 'Exceptions.dart' as Exceptions;
+import 'SIPMessage.dart';
 import 'Transactions.dart' as Transactions;
 import 'Utils.dart' as Utils;
 import 'Timers.dart';
@@ -60,13 +63,13 @@ class RFC4028Timers {
 
 class RTCSession extends EventEmitter {
   var _id;
-  var _ua;
+  UA _ua;
   var _request;
   bool _late_sdp;
   var _rtcOfferConstraints;
   MediaStream _localMediaStream;
   var _data;
-  var _earlyDialogs;
+  Map<String,Dialog> _earlyDialogs;
   var _from_tag;
   var _to_tag;
   var _rtcAnswerConstraints;
@@ -76,7 +79,7 @@ class RTCSession extends EventEmitter {
   var _sessionTimers;
   var _cancel_reason;
   var _status;
-  var _dialog;
+  Dialog _dialog;
   RTCPeerConnection _connection;
   var _iceGatheringState;
   bool _localMediaStreamLocallyGenerated;
@@ -103,9 +106,9 @@ class RTCSession extends EventEmitter {
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
 
-  dynamic receiveRequest;
+  Function(SipMethod  ) receiveRequest;
 
-  RTCSession(ua) {
+  RTCSession(UA ua) {
     debug('new');
 
     this._id = null;
@@ -764,13 +767,13 @@ class RTCSession extends EventEmitter {
             this._request.server_transaction.state !=
                 Transactions.C.STATUS_TERMINATED) {
           /// Save the dialog for later restoration.
-          var dialog = this._dialog;
+          Dialog dialog = this._dialog;
 
           // Send the BYE as soon as the ACK is received...
-          this.receiveRequest = (method) {
-            if (method == DartSIP_C.ACK) {
+          this.receiveRequest = (SipMethod method) {
+            if (method == SipMethod.ACK) {
               this.sendRequest(
-                  DartSIP_C.BYE, {'extraHeaders': extraHeaders, 'body': body});
+                  SipMethod.BYE, {'extraHeaders': extraHeaders, 'body': body});
               dialog.terminate();
             }
           };
@@ -780,7 +783,7 @@ class RTCSession extends EventEmitter {
             if (this._request.server_transaction.state ==
                 Transactions.C.STATUS_TERMINATED) {
               this.sendRequest(
-                  DartSIP_C.BYE, {'extraHeaders': extraHeaders, 'body': body});
+                  SipMethod.BYE, {'extraHeaders': extraHeaders, 'body': body});
               dialog.terminate();
             }
           });
@@ -794,7 +797,7 @@ class RTCSession extends EventEmitter {
           this._ua.newDialog(dialog);
         } else {
           this.sendRequest(
-              DartSIP_C.BYE, {'extraHeaders': extraHeaders, 'body': body});
+              SipMethod.BYE, {'extraHeaders': extraHeaders, 'body': body});
 
           this._ended('local', null, cause);
         }
@@ -1176,7 +1179,7 @@ class RTCSession extends EventEmitter {
   /**
    * Send a generic in-dialog Request
    */
-  sendRequest(method, [options]) {
+  sendRequest(SipMethod method, [options]) {
     debug('sendRequest()');
 
     return this._dialog.sendRequest(method, options);
@@ -1188,7 +1191,7 @@ class RTCSession extends EventEmitter {
   _receiveRequest(request) async {
     debug('receiveRequest()');
 
-    if (request.method == DartSIP_C.CANCEL) {
+    if (request.method == SipMethod.CANCEL) {
       /* RFC3261 15 States that a UAS may have accepted an invitation while a CANCEL
       * was in progress and that the UAC MAY continue with the session established by
       * any 2xx response, or MAY terminate with BYE. DartSIP does continue with the
@@ -1209,7 +1212,7 @@ class RTCSession extends EventEmitter {
     } else {
       // Requests arriving here are in-dialog requests.
       switch (request.method) {
-        case DartSIP_C.ACK:
+        case SipMethod.ACK:
           if (this._status != C.STATUS_WAITING_FOR_ACK) {
             return;
           }
@@ -1250,7 +1253,7 @@ class RTCSession extends EventEmitter {
             this._confirmed('remote', request);
           }
           break;
-        case DartSIP_C.BYE:
+        case SipMethod.BYE:
           if (this._status == C.STATUS_CONFIRMED) {
             request.reply(200);
             this._ended('remote', request, DartSIP_C.causes.BYE);
@@ -1262,7 +1265,7 @@ class RTCSession extends EventEmitter {
             request.reply(403, 'Wrong Status');
           }
           break;
-        case DartSIP_C.INVITE:
+        case SipMethod.INVITE:
           if (this._status == C.STATUS_CONFIRMED) {
             if (request.hasHeader('replaces')) {
               this._receiveReplaces(request);
@@ -1273,7 +1276,7 @@ class RTCSession extends EventEmitter {
             request.reply(403, 'Wrong Status');
           }
           break;
-        case DartSIP_C.INFO:
+        case SipMethod.INFO:
           if (this._status == C.STATUS_1XX_RECEIVED ||
               this._status == C.STATUS_WAITING_FOR_ANSWER ||
               this._status == C.STATUS_ANSWERED ||
@@ -1293,21 +1296,21 @@ class RTCSession extends EventEmitter {
             request.reply(403, 'Wrong Status');
           }
           break;
-        case DartSIP_C.UPDATE:
+        case SipMethod.UPDATE:
           if (this._status == C.STATUS_CONFIRMED) {
             this._receiveUpdate(request);
           } else {
             request.reply(403, 'Wrong Status');
           }
           break;
-        case DartSIP_C.REFER:
+        case SipMethod.REFER:
           if (this._status == C.STATUS_CONFIRMED) {
             this._receiveRefer(request);
           } else {
             request.reply(403, 'Wrong Status');
           }
           break;
-        case DartSIP_C.NOTIFY:
+        case SipMethod.NOTIFY:
           if (this._status == C.STATUS_CONFIRMED) {
             this._receiveNotify(request);
           } else {
@@ -1383,7 +1386,7 @@ class RTCSession extends EventEmitter {
     }
 
     // No established yet.
-    if (!this._dialog) {
+    if (this._dialog==null) {
       debug('_isReadyToReOffer() | session not established yet');
 
       return false;
@@ -1444,7 +1447,7 @@ class RTCSession extends EventEmitter {
     }
 
     // Terminate early dialogs.
-    this._earlyDialogs.forEach((dialog, _) {
+     this._earlyDialogs.forEach((dialog, _) {
       this._earlyDialogs[dialog].terminate();
     });
     this._earlyDialogs.clear();
@@ -1496,7 +1499,7 @@ class RTCSession extends EventEmitter {
         debug('no ACK received, terminating the session');
 
         clearTimeout(this._timers.invite2xxTimer);
-        this.sendRequest(DartSIP_C.BYE);
+        this.sendRequest(SipMethod.BYE);
         this._ended('remote', null, DartSIP_C.causes.NO_ACK);
       }
     }, Timers.TIMER_H);
@@ -1625,7 +1628,7 @@ class RTCSession extends EventEmitter {
     var local_tag = (type == 'UAS') ? message.to_tag : message.from_tag;
     var remote_tag = (type == 'UAS') ? message.from_tag : message.to_tag;
     var id = message.call_id + local_tag + remote_tag;
-    var early_dialog = this._earlyDialogs[id];
+    Dialog early_dialog = this._earlyDialogs[id];
 
     // Early Dialog.
     if (early != null) {
@@ -1934,7 +1937,7 @@ class RTCSession extends EventEmitter {
         return false;
       }
 
-      var session = new RTCSession(this._ua);
+      RTCSession session = new RTCSession(this._ua);
 
       session.on('progress', ({response}) {
         notifier.notify(response.status_code, response.reason_phrase);
@@ -2039,7 +2042,7 @@ class RTCSession extends EventEmitter {
         return false;
       }
 
-      var session = new RTCSession(this._ua);
+      RTCSession session = new RTCSession(this._ua);
 
       // Terminate the current session when the new one is confirmed.
       session.on('confirmed', () {
@@ -2164,18 +2167,18 @@ class RTCSession extends EventEmitter {
       if (this._dialog.id.call_id == response.call_id &&
           this._dialog.id.local_tag == response.from_tag &&
           this._dialog.id.remote_tag == response.to_tag) {
-        this.sendRequest(DartSIP_C.ACK);
+        this.sendRequest(SipMethod.ACK);
         return;
       } else {
         // If not, send an ACK  and terminate.
         try {
-          var dialog = new Dialog(this, response, 'UAC');
+          Dialog dialog = new Dialog(this, response, 'UAC');
         } catch (error) {
           debug(error);
           return;
         }
-        this.sendRequest(DartSIP_C.ACK);
-        this.sendRequest(DartSIP_C.BYE);
+        this.sendRequest(SipMethod.ACK);
+        this.sendRequest(SipMethod.BYE);
         return;
       }
     }
@@ -2279,7 +2282,7 @@ class RTCSession extends EventEmitter {
         // Handle Session Timers.
         this._handleSessionTimersInIncomingResponse(response);
         this._accepted('remote', response);
-        this.sendRequest(DartSIP_C.ACK);
+        this.sendRequest(SipMethod.ACK);
         this._confirmed('local', null);
       } catch (error) {
         this._acceptAndTerminate(response, 488, 'Not Acceptable Here');
@@ -2328,7 +2331,7 @@ class RTCSession extends EventEmitter {
         return;
       }
 
-      this.sendRequest(DartSIP_C.ACK);
+      this.sendRequest(SipMethod.ACK);
 
       // If it is a 2XX retransmission exit now.
       if (succeeded != null) {
@@ -2375,7 +2378,7 @@ class RTCSession extends EventEmitter {
       debug('emit "sdp"');
       this.emit('sdp', e);
 
-      this.sendRequest(DartSIP_C.INVITE, {
+      this.sendRequest(SipMethod.INVITE, {
         'extraHeaders': extraHeaders,
         'body': sdp,
         'eventHandlers': {
@@ -2496,7 +2499,7 @@ class RTCSession extends EventEmitter {
         debug('emit "sdp"');
         this.emit('sdp', e);
 
-        this.sendRequest(DartSIP_C.UPDATE, {
+        this.sendRequest(SipMethod.UPDATE, {
           'extraHeaders': extraHeaders,
           'body': sdp,
           'eventHandlers': {
@@ -2523,7 +2526,7 @@ class RTCSession extends EventEmitter {
       }
     } else {
       // No SDP.
-      this.sendRequest(DartSIP_C.UPDATE, {
+      this.sendRequest(SipMethod.UPDATE, {
         'extraHeaders': extraHeaders,
         'eventHandlers': {
           'onSuccessResponse': (response) {
@@ -2560,8 +2563,8 @@ class RTCSession extends EventEmitter {
 
     // An error on dialog creation will fire 'failed' event.
     if (this._dialog != null || this._createDialog(response, 'UAC')) {
-      this.sendRequest(DartSIP_C.ACK);
-      this.sendRequest(DartSIP_C.BYE, {'extraHeaders': extraHeaders});
+      this.sendRequest(SipMethod.ACK);
+      this.sendRequest(SipMethod.BYE, {'extraHeaders': extraHeaders});
     }
 
     // Update session status.
@@ -2712,7 +2715,7 @@ class RTCSession extends EventEmitter {
 
         debug('runSessionTimer() | sending session refresh request');
 
-        if (this._sessionTimers.refreshMethod == DartSIP_C.UPDATE) {
+        if (this._sessionTimers.refreshMethod == SipMethod.UPDATE) {
           this._sendUpdate();
         } else {
           this._sendReinvite();

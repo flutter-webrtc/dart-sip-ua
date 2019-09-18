@@ -1,0 +1,27 @@
+include: package:pedantic/analysis_options.yaml
+
+analyzer:
+  errors:
+    unused_local_variable: ignore
+    unnecessary_new: ignore
+    slash_for_doc_comments: ignore
+    library_prefixes: ignore
+    unused_field: ignore
+    top_level_function_literal_block: ignore
+    avoid_init_to_null: ignore
+    prefer_is_empty: ignore
+    unused_element: ignore
+    curly_braces_in_flow_control_structures: ignore
+    unnecessary_null_in_if_null_operators: ignore
+    prefer_contains: ignore
+    missing_return: ignore
+    override_on_non_overriding_getter: ignore
+    override_on_non_overriding_field: ignore
+    override_on_non_overriding_method: ignore
+    avoid_types_as_parameter_names: ignore
+    empty_catches: ignore
+    unawaited_futures: ignore
+    use_rethrow_when_possible: ignore
+    unused_import: ignore
+    must_be_immutable: ignore
+

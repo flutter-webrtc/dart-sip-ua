@@ -1,5 +1,7 @@
 import 'package:events2/events2.dart';
+import '../sip_ua.dart';
 import 'Constants.dart' as DartSIP_C;
+import 'Constants.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'Utils.dart' as Utils;
 import 'RequestSender.dart';
@@ -7,7 +9,7 @@ import 'Exceptions.dart' as Exceptions;
 import 'logger.dart';
 
 class Message extends EventEmitter {
-  var _ua;
+  UA _ua;
   var _request;
   var _closed;
   var _direction;
@@ -19,7 +21,7 @@ class Message extends EventEmitter {
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
 
-  Message(ua) {
+  Message(UA ua) {
     this._ua = ua;
     this._request = null;
     this._closed = false;
@@ -72,7 +74,7 @@ class Message extends EventEmitter {
     extraHeaders.add('Content-Type: $contentType');
 
     this._request = new SIPMessage.OutgoingRequest(
-        DartSIP_C.MESSAGE, target, this._ua, null, extraHeaders);
+        SipMethod.MESSAGE, target, this._ua, null, extraHeaders);
     if (body != null) {
       this._request.body = body;
     }
