@@ -140,7 +140,7 @@ class SIPUAHelper extends EventEmitter {
   }
 
   options([voiceonly]) {
-    voiceonly  = voiceonly ?? false;
+    voiceonly = voiceonly ?? false;
     // Register callbacks to desired call events
     var eventHandlers = {
       'connecting': (e) {
@@ -215,15 +215,17 @@ class SIPUAHelper extends EventEmitter {
       },
       'mediaConstraints': {
         "audio": true,
-        "video": voiceonly? false : {
-          "mandatory": {
-            "minWidth": '640',
-            "minHeight": '480',
-            "minFrameRate": '30',
-          },
-          "facingMode": "user",
-          "optional": [],
-        }
+        "video": voiceonly
+            ? false
+            : {
+                "mandatory": {
+                  "minWidth": '640',
+                  "minHeight": '480',
+                  "minFrameRate": '30',
+                },
+                "facingMode": "user",
+                "optional": [],
+              }
       },
       'rtcOfferConstraints': {
         'mandatory': {

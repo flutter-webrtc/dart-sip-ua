@@ -10,8 +10,6 @@ class CallScreenWidget extends StatefulWidget {
   _MyCallScreenWidget createState() => _MyCallScreenWidget();
 }
 
-enum CallType { kCallTypeVoice, kCallTypeVideo }
-
 class _MyCallScreenWidget extends State<CallScreenWidget> {
   RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
@@ -23,14 +21,13 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   var _direction;
   var _local_identity;
   var _remote_identity;
-  bool _showDialPad = false;
+  bool _showNumPad = false;
   var _label;
   var _timeLabel = '00:00';
   Timer _timer;
 
   bool _muted = false;
   bool _hold = false;
-  CallType _type = CallType.kCallTypeVideo;
   var _state = 'new';
 
   get session => helper.session;
@@ -57,7 +54,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     super.deactivate();
     _removeEventListeners();
     _disposeRenderers();
-    _timer.cancel();
   }
 
   _startTimer() {
@@ -118,6 +114,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   }
 
   _backToDialPad() {
+    _timer.cancel();
     new Timer(Duration(seconds: 2), () {
       Navigator.of(context).popUntil(ModalRoute.withName('/dialpad'));
     });
