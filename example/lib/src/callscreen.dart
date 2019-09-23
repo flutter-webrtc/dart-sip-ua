@@ -25,7 +25,8 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   var _remote_identity;
   bool _showDialPad = false;
   var _label;
-  var _timeLabel;
+  var _timeLabel = '00:00';
+  Timer _timer;
 
   bool _muted = false;
   bool _hold = false;
@@ -45,6 +46,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     super.initState();
     _initRenderers();
     _bindEventListeners();
+    _startTimer();
     _direction = session.direction.toUpperCase();
     _local_identity = session.local_identity;
     _remote_identity = session.remote_identity;
@@ -55,6 +57,19 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     super.deactivate();
     _removeEventListeners();
     _disposeRenderers();
+    _timer.cancel();
+  }
+
+  _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
+      //print('tick => ${timer.tick}');
+      Duration duration = Duration(seconds: timer.tick);
+      this.setState(() {
+        _timeLabel = [duration.inMinutes, duration.inSeconds]
+            .map((seg) => seg.remainder(60).toString().padLeft(2, '0'))
+            .join(':');
+      });
+    });
   }
 
   _initRenderers() async {
@@ -204,18 +219,18 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
             onPressed: () => _muteMic(),
           ));
 
-          if(voiceonly) {
-              advanceActions.add(FloatingActionButton(
-                heroTag: "keypad",
-                child: new Icon(Icons.dialpad),
-                onPressed: () => _handleHold(),
-              ));
+          if (voiceonly) {
+            advanceActions.add(FloatingActionButton(
+              heroTag: "keypad",
+              child: new Icon(Icons.dialpad),
+              onPressed: () => _handleHold(),
+            ));
           } else {
-              advanceActions.add(FloatingActionButton(
-                heroTag: "switch_camera",
-                child: const Icon(Icons.switch_camera),
-                onPressed: () => _switchCamera(),
-              ));
+            advanceActions.add(FloatingActionButton(
+              heroTag: "switch_camera",
+              child: const Icon(Icons.switch_camera),
+              onPressed: () => _switchCamera(),
+            ));
           }
 
           advanceActions.add(FloatingActionButton(
@@ -298,7 +313,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
       children: <Widget>[
         ...stackWidgets,
         Positioned(
-          top: voiceonly? 180 : 6,
+          top: voiceonly ? 180 : 6,
           left: 0,
           right: 0,
           child: Center(
@@ -310,7 +325,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
                   child: Padding(
                       padding: const EdgeInsets.all(6),
                       child: Text(
-                        voiceonly? 'VOICE CALL' : 'VIDEO CALL',
+                        voiceonly ? 'VOICE CALL' : 'VIDEO CALL',
                         style: TextStyle(fontSize: 24, color: Colors.black54),
                       ))),
               Center(
@@ -323,7 +338,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
               Center(
                   child: Padding(
                       padding: const EdgeInsets.all(6),
-                      child: Text('00:00',
+                      child: Text(_timeLabel,
                           style:
                               TextStyle(fontSize: 14, color: Colors.black54)))),
             ],
