@@ -50,6 +50,7 @@ class SIPUAHelper extends EventEmitter {
   start(wsUrl, uri, [password, displayName, wsExtraHeaders]) async {
     if (this._ua != null) {
       debugerror('UA instance already exist!');
+      this._ua.start();
       return;
     }
     _settings = new Settings();
@@ -138,7 +139,8 @@ class SIPUAHelper extends EventEmitter {
     this._ua.unregister(all: all);
   }
 
-  options() {
+  options([voiceonly]) {
+    voiceonly  = voiceonly ?? false;
     // Register callbacks to desired call events
     var eventHandlers = {
       'connecting': (e) {
@@ -213,7 +215,7 @@ class SIPUAHelper extends EventEmitter {
       },
       'mediaConstraints': {
         "audio": true,
-        "video": {
+        "video": voiceonly? false : {
           "mandatory": {
             "minWidth": '640',
             "minHeight": '480',
@@ -247,9 +249,9 @@ class SIPUAHelper extends EventEmitter {
     return defaultOptions;
   }
 
-  connect(uri) async {
+  connect(uri, [voiceonly]) async {
     if (_ua != null) {
-      _session = _ua.call(uri, this.options());
+      _session = _ua.call(uri, this.options(voiceonly));
       return _session;
     }
     return null;

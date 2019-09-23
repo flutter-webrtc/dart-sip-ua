@@ -23,9 +23,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   var _direction;
   var _local_identity;
   var _remote_identity;
-
   bool _showDialPad = false;
-
   var _label;
   var _timeLabel;
 
@@ -37,6 +35,10 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   get session => helper.session;
 
   get helper => widget._helper;
+
+  get voiceonly =>
+      (_localStream == null || _localStream.getVideoTracks().length == 0) &&
+      (_remoteStream == null || _remoteStream.getVideoTracks().length == 0);
 
   @override
   initState() {
@@ -202,21 +204,18 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
             onPressed: () => _muteMic(),
           ));
 
-          switch (_type) {
-            case CallType.kCallTypeVoice:
+          if(voiceonly) {
               advanceActions.add(FloatingActionButton(
                 heroTag: "keypad",
                 child: new Icon(Icons.dialpad),
                 onPressed: () => _handleHold(),
               ));
-              break;
-            case CallType.kCallTypeVideo:
+          } else {
               advanceActions.add(FloatingActionButton(
                 heroTag: "switch_camera",
                 child: const Icon(Icons.switch_camera),
                 onPressed: () => _switchCamera(),
               ));
-              break;
           }
 
           advanceActions.add(FloatingActionButton(
@@ -250,17 +249,17 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
         break;
     }
 
-    var actionWigets = <Widget>[];
+    var actionWidgets = <Widget>[];
 
     if (advanceActions.length > 0) {
-      actionWigets.add(Padding(
+      actionWidgets.add(Padding(
           padding: const EdgeInsets.all(3),
           child: new Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: advanceActions)));
     }
 
-    actionWigets.add(Padding(
+    actionWidgets.add(Padding(
         padding: const EdgeInsets.all(3),
         child: new Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -269,7 +268,69 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     return new Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: actionWigets);
+        children: actionWidgets);
+  }
+
+  _buildContent() {
+    var stackWidgets = <Widget>[];
+
+    if (!voiceonly && _remoteStream != null) {
+      stackWidgets.add(Center(
+        child: RTCVideoView(_remoteRenderer),
+      ));
+    }
+
+    if (!voiceonly && _localStream != null) {
+      stackWidgets.add(Container(
+        child: AnimatedContainer(
+          child: RTCVideoView(_localRenderer),
+          height: _localVideoHeight,
+          width: _localVideoWidth,
+          alignment: Alignment.topRight,
+          duration: Duration(milliseconds: 300),
+          margin: _localVideoMargin,
+        ),
+        alignment: Alignment.topRight,
+      ));
+    }
+
+    return Stack(
+      children: <Widget>[
+        ...stackWidgets,
+        Positioned(
+          top: voiceonly? 180 : 6,
+          left: 0,
+          right: 0,
+          child: Center(
+              child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Center(
+                  child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Text(
+                        voiceonly? 'VOICE CALL' : 'VIDEO CALL',
+                        style: TextStyle(fontSize: 24, color: Colors.black54),
+                      ))),
+              Center(
+                  child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Text(
+                        '${_remote_identity.toString()}',
+                        style: TextStyle(fontSize: 18, color: Colors.black54),
+                      ))),
+              Center(
+                  child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Text('00:00',
+                          style:
+                              TextStyle(fontSize: 14, color: Colors.black54)))),
+            ],
+          )),
+        ),
+      ],
+    );
   }
 
   @override
@@ -279,44 +340,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
             automaticallyImplyLeading: false,
             title: Text('[$_direction] ${_state}')),
         body: Container(
-          child: Stack(
-            children: <Widget>[
-              Center(
-                child: RTCVideoView(_remoteRenderer),
-              ),
-              Container(
-                child: AnimatedContainer(
-                  child: RTCVideoView(_localRenderer),
-                  height: _localVideoHeight,
-                  width: _localVideoWidth,
-                  alignment: Alignment.topRight,
-                  duration: Duration(milliseconds: 300),
-                  margin: _localVideoMargin,
-                ),
-                alignment: Alignment.topRight,
-              ),
-              Positioned(
-                top: 6,
-                left: 0,
-                right: 0,
-                child: Center(
-                    child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Center(
-                        child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Text('${_remote_identity.toString()}', style: TextStyle(fontSize: 18, color: Colors.black54),))),
-                    Center(
-                        child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Text('00:00',  style: TextStyle(fontSize: 14, color: Colors.black54)))),
-                  ],
-                )),
-              ),
-            ],
-          ),
+          child: _buildContent(),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: Padding(

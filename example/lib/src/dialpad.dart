@@ -32,7 +32,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
     });
   }
 
-  _handleCall(context) {
+  _handleCall(context, [voiceonly]) {
     var dest = _textController.text;
     if (dest == null || dest.length == 0) {
       showDialog<Null>(
@@ -55,7 +55,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
       );
       return;
     }
-    helper.connect(dest);
+    helper.connect(dest, voiceonly);
   }
 
   _handleBackSpace() {
@@ -170,7 +170,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                 heroTag: "audio_call",
                 child: Icon(Icons.dialer_sip),
                 backgroundColor: Colors.green,
-                onPressed: () => _handleCall(context),
+                onPressed: () => _handleCall(context, true),
               ),
               IconButton(
                 icon: Icon(Icons.backspace, color: Colors.grey),
