@@ -174,7 +174,7 @@ class DigestAuthentication {
 
     if (this._qop == 'auth') {
       // HA2 = MD5(A2) = MD5(method:digestURI).
-      a2 = '${this._method}:${this._uri}';
+      a2 = '${SipMethodHelper.getName(this._method)}:${this._uri}';
       ha2 = Utils.calculateMD5(a2);
 
       debug('authenticate() | using qop=auth [a2:${a2}]');
@@ -185,7 +185,7 @@ class DigestAuthentication {
     } else if (this._qop == 'auth-int') {
       // HA2 = MD5(A2) = MD5(method:digestURI:MD5(entityBody)).
       a2 =
-          '${this._method}:${this._uri}:${Utils.calculateMD5(body != null ? body : '')}';
+          '${SipMethodHelper.getName(this._method)}:${this._uri}:${Utils.calculateMD5(body != null ? body : '')}';
       ha2 = Utils.calculateMD5(a2);
 
       debug('authenticate() | using qop=auth-int [a2:${a2}]');
@@ -195,7 +195,7 @@ class DigestAuthentication {
           '${this._ha1}:${this._nonce}:${this._ncHex}:${this._cnonce}:auth-int:${ha2}');
     } else if (this._qop == null) {
       // HA2 = MD5(A2) = MD5(method:digestURI).
-      a2 = '${this._method}:${this._uri}';
+      a2 = '${SipMethodHelper.getName(this._method)}:${this._uri}';
       ha2 = Utils.calculateMD5(a2);
 
       debug('authenticate() | using qop=null [a2:${a2}]');

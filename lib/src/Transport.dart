@@ -159,7 +159,7 @@ class Transport {
     debug('send()');
 
     if (!this.isConnected()) {
-      debugerror('unable to send message, transport is not connected');
+      debugerror('unable to send message, transport is not connected. Current state is ${this.status}');
       return false;
     }
 

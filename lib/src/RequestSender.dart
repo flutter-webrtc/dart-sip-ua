@@ -153,7 +153,7 @@ class RequestSender {
         this._request.cseq += 1;
         this
             ._request
-            .setHeader('cseq', '${this._request.cseq} ${this._method}');
+            .setHeader('cseq', '${this._request.cseq} ${SipMethodHelper.getName(this._method)}');
         this
             ._request
             .setHeader(authorization_header_name, this._auth.toString());

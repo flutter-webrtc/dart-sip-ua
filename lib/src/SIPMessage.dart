@@ -101,7 +101,7 @@ class OutgoingRequest {
     var cseq = params['cseq'] ?? Utils.Math.floor(Utils.Math.randomDouble() * 10000);
 
     this.cseq = cseq;
-    this.setHeader('cseq', '${cseq} ${method}');
+    this.setHeader('cseq', '${cseq} ${SipMethodHelper.getName(method)}');
   }
 
   /**
@@ -212,7 +212,7 @@ class OutgoingRequest {
   }
 
   toString() {
-    var msg = '${this.method} ${this.ruri} SIP/2.0\r\n';
+    var msg = '${SipMethodHelper.getName(this.method)} ${this.ruri} SIP/2.0\r\n';
 
     this.headers.forEach((headerName, headerValues) {
       headerValues.forEach((value){
@@ -306,7 +306,7 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
     var request = new InitialOutgoingInviteRequest(this.ruri, this.ua);
 
     this.headers.forEach((name, value) {
-      request.headers[name] = this.headers[name].slice();
+      request.headers[name] = new List.from(this.headers[name]);
     });
 
     request.body = this.body;
@@ -562,7 +562,7 @@ class IncomingRequest extends IncomingMessage {
     response += 'To: ${to}\r\n';
     response += 'From: ${this.getHeader('From')}\r\n';
     response += 'Call-ID: ${this.call_id}\r\n';
-    response += 'CSeq: ${this.cseq} ${this.method}\r\n';
+    response += 'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
 
     for (var header in extraHeaders) {
       response += '${header.trim()}\r\n';
@@ -656,7 +656,7 @@ class IncomingRequest extends IncomingMessage {
     response += 'To: ${to}\r\n';
     response += 'From: ${this.getHeader('From')}\r\n';
     response += 'Call-ID: ${this.call_id}\r\n';
-    response += 'CSeq: ${this.cseq} ${this.method}\r\n';
+    response += 'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
     response += 'Content-Length: ${0}\r\n\r\n';
 
     this.transport.send(response);

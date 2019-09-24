@@ -100,7 +100,7 @@ class NonInviteClientTransaction extends EventEmitter {
     this.ua.destroyTransaction(this);
   }
 
-  receiveResponse(response) {
+  receiveResponse(SIPMessage.IncomingResponse response) {
     var status_code = response.status_code;
 
     if (status_code < 200) {
@@ -264,7 +264,7 @@ class InviteClientTransaction extends EventEmitter {
     this.transport.send(cancel);
   }
 
-  receiveResponse(response) {
+  receiveResponse(SIPMessage.IncomingResponse response) {
     var status_code = response.status_code;
 
     if (status_code >= 100 && status_code <= 199) {

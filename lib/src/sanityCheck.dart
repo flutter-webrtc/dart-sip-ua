@@ -223,7 +223,7 @@ reply(status_code) {
   response += 'To: ${to}\r\n';
   response += 'From: ${message.getHeader('From')}\r\n';
   response += 'Call-ID: ${message.call_id}\r\n';
-  response += 'CSeq: ${message.cseq} ${message.method}\r\n';
+  response += 'CSeq: ${message.cseq} ${SipMethodHelper.getName(message.method)}\r\n';
   response += '\r\n';
 
   transport.send(response);

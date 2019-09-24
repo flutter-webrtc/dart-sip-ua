@@ -106,7 +106,7 @@ class RTCSession extends EventEmitter {
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
 
-  Function(SipMethod  ) receiveRequest;
+  Function(IncomingRequest  ) receiveRequest;
 
   RTCSession(UA ua) {
     debug('new');
@@ -770,8 +770,8 @@ class RTCSession extends EventEmitter {
           Dialog dialog = this._dialog;
 
           // Send the BYE as soon as the ACK is received...
-          this.receiveRequest = (SipMethod method) {
-            if (method == SipMethod.ACK) {
+          this.receiveRequest = (IncomingMessage request) {
+            if (request.method == SipMethod.ACK) {
               this.sendRequest(
                   SipMethod.BYE, {'extraHeaders': extraHeaders, 'body': body});
               dialog.terminate();
@@ -2143,7 +2143,8 @@ class RTCSession extends EventEmitter {
       this.emit('sending', {'request': this._request});
 
       request_sender.send();
-    } catch (error) {
+    } catch (error,s) {
+      print("$error $s");
       this._failed('local', null, DartSIP_C.causes.WEBRTC_ERROR);
       if (this._status == C.STATUS_TERMINATED) {
         return;
@@ -2263,9 +2264,11 @@ class RTCSession extends EventEmitter {
 
       var answer = new RTCSessionDescription(response.body, 'answer');
 
+
+      debugerror('current state is ${this._connection.signalingState}');
       // Be ready for 200 with SDP after a 180/183 with SDP.
       // We created a SDP 'answer' for it, so check the current signaling state.
-      //if (this._connection.signalingState == 'stable') ///TODO:  ???
+      //if (this._connection.signalingState == RTCSignalingState.RTCSignalingStateStable)
       /*{
         try {
           var offer =
@@ -2278,7 +2281,10 @@ class RTCSession extends EventEmitter {
       }*/
 
       try {
-        await this._connection.setRemoteDescription(answer);
+        //TODO: Commented out because this seems to cause errors with Asterisk
+        
+        //await this._connection.setRemoteDescription(answer);
+     
         // Handle Session Timers.
         this._handleSessionTimersInIncomingResponse(response);
         this._accepted('remote', response);

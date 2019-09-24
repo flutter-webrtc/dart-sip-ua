@@ -21,7 +21,14 @@ parseMessage(data, ua) {
 
   // Parse first line. Check if it is a Request or a Reply.
   var firstLine = data.substring(0, headerEnd);
-  var parsed = Grammar.parse(firstLine, 'Request_Response');
+  var parsed;
+  try{
+    parsed = Grammar.parse(firstLine, 'Request_Response');
+  }catch (FormatException )
+  {
+    // Catch exception and fake the expected -1 result
+    parsed = -1;
+  }
 
   if (parsed == -1) {
     debugerror(

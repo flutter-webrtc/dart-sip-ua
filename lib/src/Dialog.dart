@@ -212,7 +212,7 @@ class Dialog {
   }
 
   // RFC 3261 12.2.2.
-  _checkInDialogRequest(request) {
+  _checkInDialogRequest(SIPMessage.IncomingRequest request) {
     if (this._remote_seqnum == null) {
       this._remote_seqnum = request.cseq;
     } else if (request.cseq < this._remote_seqnum) {
