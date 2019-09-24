@@ -2264,8 +2264,6 @@ class RTCSession extends EventEmitter {
 
       var answer = new RTCSessionDescription(response.body, 'answer');
 
-
-      debugerror('current state is ${this._connection.signalingState}');
       // Be ready for 200 with SDP after a 180/183 with SDP.
       // We created a SDP 'answer' for it, so check the current signaling state.
       //if (this._connection.signalingState == RTCSignalingState.RTCSignalingStateStable)
