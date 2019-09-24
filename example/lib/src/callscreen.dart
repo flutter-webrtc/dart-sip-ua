@@ -110,7 +110,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   }
 
   _removeEventListeners() {
-    helper.off('callState');
+    helper.remove('callState', _handleCalllState);
   }
 
   _backToDialPad() {
