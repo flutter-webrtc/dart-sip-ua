@@ -9,7 +9,6 @@ class SIPUAHelper extends EventEmitter {
   var _session;
   var _registered = false;
   var _connected = false;
-  var _sessionState = 'new';
   var _registerState = 'new';
   var _localStream;
   var _remoteStream;
@@ -27,8 +26,6 @@ class SIPUAHelper extends EventEmitter {
   get connected => _connected;
 
   get registerState => _registerState;
-
-  get sessionState => _sessionState;
 
   get localStream => _localStream;
 
@@ -53,6 +50,7 @@ class SIPUAHelper extends EventEmitter {
   start(wsUrl, uri, [password, displayName, wsExtraHeaders]) async {
     if (this._ua != null) {
       debugerror('UA instance already exist!');
+      this._ua.start();
       return;
     }
     _settings = new Settings();
@@ -111,7 +109,6 @@ class SIPUAHelper extends EventEmitter {
             _session.on(event, func);
           });
         }
-        _sessionState = 'new';
         _handleUAState('newRTCSession', data);
       });
 
@@ -142,19 +139,23 @@ class SIPUAHelper extends EventEmitter {
     this._ua.unregister(all: all);
   }
 
-  options() {
+  options([voiceonly]) {
+    voiceonly = voiceonly ?? false;
     // Register callbacks to desired call events
     var eventHandlers = {
+      'connecting': (e) {
+        debug('call connecting');
+        _handleCallState('connecting', e);
+      },
       'progress': (e) {
         debug('call is in progress');
         _handleCallState('progress', e);
-        _sessionState = 'progress';
       },
       'failed': (e) {
         debug('call failed with cause: ' + e['cause']);
         _handleCallState('failed', e);
         _session = null;
-        _sessionState = 'failed (${e['cause']})';
+        var cause = 'failed (${e['cause']})';
         _localStream = null;
         _remoteStream = null;
       },
@@ -162,19 +163,32 @@ class SIPUAHelper extends EventEmitter {
         debug('call ended with cause: ' + e['cause']);
         _handleCallState('ended', e);
         _session = null;
-        _sessionState = 'ended';
         _localStream = null;
         _remoteStream = null;
       },
       'accepted': (e) {
         debug('call accepted');
         _handleCallState('accepted', e);
-        _sessionState = 'accepted';
       },
       'confirmed': (e) {
         debug('call confirmed');
         _handleCallState('confirmed', e);
-        _sessionState = 'confirmed';
+      },
+      'hold': (e) {
+        debug('call hold');
+        _handleCallState('hold', e);
+      },
+      'unhold': (e) {
+        debug('call unhold');
+        _handleCallState('unhold', e);
+      },
+      'muted': (e) {
+        debug('call muted');
+        _handleCallState('muted', e);
+      },
+      'unmuted': (e) {
+        debug('call unmuted');
+        _handleCallState('unmuted', e);
       },
       'stream': (e) async {
         // Wating for callscreen ready.
@@ -201,15 +215,17 @@ class SIPUAHelper extends EventEmitter {
       },
       'mediaConstraints': {
         "audio": true,
-        "video": {
-          "mandatory": {
-            "minWidth": '640',
-            "minHeight": '480',
-            "minFrameRate": '30',
-          },
-          "facingMode": "user",
-          "optional": [],
-        }
+        "video": voiceonly
+            ? false
+            : {
+                "mandatory": {
+                  "minWidth": '640',
+                  "minHeight": '480',
+                  "minFrameRate": '30',
+                },
+                "facingMode": "user",
+                "optional": [],
+              }
       },
       'rtcOfferConstraints': {
         'mandatory': {
@@ -235,10 +251,9 @@ class SIPUAHelper extends EventEmitter {
     return defaultOptions;
   }
 
-  connect(uri) async {
+  connect(uri, [voiceonly]) async {
     if (_ua != null) {
-      _session = _ua.call(uri, this.options());
-      _sessionState = 'new';
+      _session = _ua.call(uri, this.options(voiceonly));
       return _session;
     }
     return null;
