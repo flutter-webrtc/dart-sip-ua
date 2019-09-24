@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/dialpad',
       routes: {
+        '/':(context)=>DialPadWidget(_helper),
         '/dialpad': (context) => DialPadWidget(_helper),
         '/register': (context) => RegisterWidget(_helper),
         '/callscreen': (context) => CallScreenWidget(_helper),
