@@ -43,20 +43,20 @@ class C {
 const holdMediaTypes = ['audio', 'video'];
 
 class SIPTimers {
-  var ackTimer;
-  var expiresTimer;
-  var invite2xxTimer;
-  var userNoAnswerTimer;
+  Timer ackTimer;
+  Timer expiresTimer;
+  Timer invite2xxTimer;
+  Timer userNoAnswerTimer;
 }
 
 class RFC4028Timers {
-  var enabled;
-  var refreshMethod;
-  var defaultExpires;
-  var currentExpires;
+  bool enabled;
+  SipMethod refreshMethod;
+  int defaultExpires;
+  int currentExpires;
   bool running;
   bool refresher;
-  var timer;
+  Timer timer;
   RFC4028Timers(this.enabled, this.refreshMethod, this.defaultExpires,
       this.currentExpires, this.running, this.refresher, this.timer);
 }
@@ -70,13 +70,13 @@ class RTCSession extends EventEmitter {
   MediaStream _localMediaStream;
   var _data;
   Map<String,Dialog> _earlyDialogs;
-  var _from_tag;
+  String _from_tag;
   var _to_tag;
   var _rtcAnswerConstraints;
-  var _timers;
+  SIPTimers _timers;
   bool _is_confirmed;
   bool _is_canceled;
-  var _sessionTimers;
+  RFC4028Timers _sessionTimers;
   var _cancel_reason;
   var _status;
   Dialog _dialog;
@@ -98,7 +98,7 @@ class RTCSession extends EventEmitter {
   var _local_identity;
   var _remote_identity;
 
-  var _contact;
+  String _contact;
   var _tones;
   var _sendDTMF;
   final logger = new Logger('RTCSession');
@@ -319,8 +319,8 @@ class RTCSession extends EventEmitter {
     this._from_tag = Utils.newTag();
 
     // Set anonymous property.
-    var anonymous = options['anonymous'] ?? false;
-    var requestParams = {'from_tag': this._from_tag};
+    bool anonymous = options['anonymous'] ?? false;
+    Map<String,dynamic> requestParams = {'from_tag': this._from_tag};
     this._ua.contact.anonymous = anonymous;
     this._ua.contact.outbound = true;
     this._contact = this._ua.contact.toString();
@@ -2439,18 +2439,19 @@ class RTCSession extends EventEmitter {
       }
     }
 
-    onSucceeded(response) async {
+    onSucceeded(IncomingResponse response) async {
       if (this._status == C.STATUS_TERMINATED) {
         return;
       }
+
+      // Handle Session Timers.
+      this._handleSessionTimersInIncomingResponse(response);
 
       // If it is a 2XX retransmission exit now.
       if (succeeded != null) {
         return;
       }
 
-      // Handle Session Timers.
-      this._handleSessionTimersInIncomingResponse(response);
 
       // Must have SDP answer.
       if (sdpOffer != null) {
