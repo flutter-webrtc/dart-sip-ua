@@ -54,7 +54,7 @@ class Data {
   var uuid;
   Data();
 
-  SipMethod get method=>SipMethodHelper.fromString(_method);
+  SipMethod get method => SipMethodHelper.fromString(_method);
 }
 class GrammarParser {
   static final List<String> _ascii = new List<String>.generate(128, (c) => new String.fromCharCode(c));
