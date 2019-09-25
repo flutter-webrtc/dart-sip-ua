@@ -1,5 +1,6 @@
 %{
   import 'dart:core';
+  import 'Constants.dart';
   import 'URI.dart';
   import 'NameAddrHeader.dart';
 
@@ -8,7 +9,7 @@
     var port;
     var host_type;
     var value;
-    var method;
+    String _method;
     var reason_phrase;
     URI uri;
     var uri_headers;
@@ -50,6 +51,8 @@
     var text;
     var uuid;
     Data();
+
+    SipMethod get method => SipMethodHelper.fromString(_method);
   }
 }%
 
@@ -686,8 +689,8 @@ REFERm            <- "\x52\x45\x46\x45\x52" ## REFER in caps
 
 Method            <- ( INVITEm / ACKm / OPTIONSm / BYEm / CANCELm / REGISTERm
                     / SUBSCRIBEm / NOTIFYm / REFERm / extension_method ){
-                    data.method = _text();
-                    $$ =  data.method; }
+                    data._method = _text();
+                    $$ =  data._method; }
 
 extension_method  <- token
 

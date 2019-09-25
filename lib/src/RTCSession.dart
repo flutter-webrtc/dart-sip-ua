@@ -2281,7 +2281,7 @@ class RTCSession extends EventEmitter {
       try {
         //TODO: Commented out because this seems to cause errors with Asterisk
         
-        //await this._connection.setRemoteDescription(answer);
+        await this._connection.setRemoteDescription(answer);
      
         // Handle Session Timers.
         this._handleSessionTimersInIncomingResponse(response);
