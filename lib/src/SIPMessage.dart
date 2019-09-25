@@ -1,4 +1,6 @@
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
+import '../sip_ua.dart';
+import 'Constants.dart';
 import 'NameAddrHeader.dart';
 import 'Exceptions.dart' as Exceptions;
 import 'Grammar.dart';
@@ -20,9 +22,9 @@ debug(msg) => logger.debug(msg);
  * -param {String} [body]
  */
 class OutgoingRequest {
-  var ua;
+  UA ua;
   var headers;
-  var method;
+  SipMethod method;
   var ruri;
   var body;
   var extraHeaders = [];
@@ -32,7 +34,7 @@ class OutgoingRequest {
   var cseq;
   var sdp;
 
-  OutgoingRequest(method, ruri, ua, [params, extraHeaders, body]) {
+  OutgoingRequest(SipMethod method, ruri, UA ua, [params, extraHeaders, body]) {
     // Mandatory parameters check.
     if (method == null || ruri == null || ua == null) {
       throw new Exceptions.TypeError(
@@ -99,7 +101,7 @@ class OutgoingRequest {
     var cseq = params['cseq'] ?? Utils.Math.floor(Utils.Math.randomDouble() * 10000);
 
     this.cseq = cseq;
-    this.setHeader('cseq', '${cseq} ${method}');
+    this.setHeader('cseq', '${cseq} ${SipMethodHelper.getName(method)}');
   }
 
   /**
@@ -210,7 +212,7 @@ class OutgoingRequest {
   }
 
   toString() {
-    var msg = '${this.method} ${this.ruri} SIP/2.0\r\n';
+    var msg = '${SipMethodHelper.getName(this.method)} ${this.ruri} SIP/2.0\r\n';
 
     this.headers.forEach((headerName, headerValues) {
       headerValues.forEach((value){
@@ -226,11 +228,11 @@ class OutgoingRequest {
     var supported = [];
 
     switch (this.method) {
-      case DartSIP_C.REGISTER:
+      case SipMethod.REGISTER:
         supported.add('path');
         supported.add('gruu');
         break;
-      case DartSIP_C.INVITE:
+      case SipMethod.INVITE:
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
@@ -240,12 +242,15 @@ class OutgoingRequest {
         supported.add('ice');
         supported.add('replaces');
         break;
-      case DartSIP_C.UPDATE:
+      case SipMethod.UPDATE:
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
         supported.add('ice');
         break;
+        default:
+        break;
+
     }
 
     supported.add('outbound');
@@ -289,7 +294,7 @@ class OutgoingRequest {
 class InitialOutgoingInviteRequest extends OutgoingRequest {
   var transaction;
   InitialOutgoingInviteRequest(ruri, ua, [params, extraHeaders, body])
-      : super(DartSIP_C.INVITE, ruri, ua, params, extraHeaders, body) {
+      : super(SipMethod.INVITE, ruri, ua, params, extraHeaders, body) {
     this.transaction = null;
   }
 
@@ -301,7 +306,7 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
     var request = new InitialOutgoingInviteRequest(this.ruri, this.ua);
 
     this.headers.forEach((name, value) {
-      request.headers[name] = this.headers[name].slice();
+      request.headers[name] = new List.from(this.headers[name]);
     });
 
     request.body = this.body;
@@ -320,7 +325,7 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
 class IncomingMessage {
   var data;
   var headers;
-  var method;
+  SipMethod method;
   var via;
   var via_branch;
   var call_id;
@@ -493,12 +498,12 @@ class IncomingMessage {
 }
 
 class IncomingRequest extends IncomingMessage {
-  var ua;
+  UA ua;
   var ruri;
   var transport;
   var server_transaction;
 
-  IncomingRequest(ua) : super() {
+  IncomingRequest(UA ua) : super() {
     this.ua = ua;
     this.headers = {};
     this.ruri = null;
@@ -534,7 +539,7 @@ class IncomingRequest extends IncomingMessage {
 
     var response = 'SIP/2.0 ${code} ${reason}\r\n';
 
-    if (this.method == DartSIP_C.INVITE && code > 100 && code <= 200) {
+    if (this.method == SipMethod.INVITE && code > 100 && code <= 200) {
       var headers = this.getHeaders('record-route');
 
       for (var header in headers) {
@@ -557,7 +562,7 @@ class IncomingRequest extends IncomingMessage {
     response += 'To: ${to}\r\n';
     response += 'From: ${this.getHeader('From')}\r\n';
     response += 'Call-ID: ${this.call_id}\r\n';
-    response += 'CSeq: ${this.cseq} ${this.method}\r\n';
+    response += 'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
 
     for (var header in extraHeaders) {
       response += '${header.trim()}\r\n';
@@ -565,7 +570,7 @@ class IncomingRequest extends IncomingMessage {
 
     // Supported.
     switch (this.method) {
-      case DartSIP_C.INVITE:
+      case SipMethod.INVITE:
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
@@ -575,7 +580,7 @@ class IncomingRequest extends IncomingMessage {
         supported.add('ice');
         supported.add('replaces');
         break;
-      case DartSIP_C.UPDATE:
+      case SipMethod.UPDATE:
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
@@ -583,12 +588,15 @@ class IncomingRequest extends IncomingMessage {
           supported.add('ice');
         }
         supported.add('replaces');
+        break;
+        default:
+        break;
     }
 
     supported.add('outbound');
 
     // Allow and Accept.
-    if (this.method == DartSIP_C.OPTIONS) {
+    if (this.method == SipMethod.OPTIONS) {
       response += 'Allow: ${DartSIP_C.ALLOWED_METHODS}\r\n';
       response += 'Accept: ${DartSIP_C.ACCEPTED_BODY_TYPES}\r\n';
     } else if (code == 405) {
@@ -648,7 +656,7 @@ class IncomingRequest extends IncomingMessage {
     response += 'To: ${to}\r\n';
     response += 'From: ${this.getHeader('From')}\r\n';
     response += 'Call-ID: ${this.call_id}\r\n';
-    response += 'CSeq: ${this.cseq} ${this.method}\r\n';
+    response += 'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
     response += 'Content-Length: ${0}\r\n\r\n';
 
     this.transport.send(response);

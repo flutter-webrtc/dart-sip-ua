@@ -1,5 +1,6 @@
 import 'package:events2/events2.dart';
 import '../Constants.dart' as DartSIP_C;
+import '../Constants.dart';
 import '../Exceptions.dart' as Exceptions;
 import '../RTCSession.dart' as RTCSession;
 import '../Utils.dart' as Utils;
@@ -83,7 +84,7 @@ class DTMF extends EventEmitter {
     this._session.newDTMF(
         {'originator': 'local', 'dtmf': this, 'request': this._request});
 
-    this._session.sendRequest(DartSIP_C.INFO, {
+    this._session.sendRequest(SipMethod.INFO, {
       'extraHeaders': extraHeaders,
       'eventHandlers': {
         'onSuccessResponse': (response) {

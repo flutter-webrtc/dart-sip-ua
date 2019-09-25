@@ -1,4 +1,8 @@
+import '../../sip_ua.dart';
 import '../Constants.dart' as DartSIP_C;
+import '../Constants.dart';
+import '../Dialog.dart';
+import '../SIPMessage.dart';
 import '../Transactions.dart' as Transactions;
 import '../RTCSession.dart' as RTCSession;
 import '../RequestSender.dart';
@@ -15,15 +19,15 @@ var EventHandlers = {
 };
 
 class DialogRequestSender {
-  var _dialog;
-  var _ua;
-  var _request;
+  Dialog _dialog;
+  UA _ua;
+  OutgoingRequest _request;
   var _eventHandlers;
   var _reattempt;
   var _reattemptTimer;
   var _request_sender;
 
-  DialogRequestSender(dialog, request, eventHandlers) {
+  DialogRequestSender(Dialog dialog, OutgoingRequest request, eventHandlers) {
     this._dialog = dialog;
     this._ua = dialog.ua;
     this._request = request;
@@ -43,7 +47,7 @@ class DialogRequestSender {
     });
   }
 
-  get request => this._request;
+  OutgoingRequest get request => this._request;
 
   send() {
     var request_sender = new RequestSender(this._ua, this._request, {
@@ -57,8 +61,8 @@ class DialogRequestSender {
     request_sender.send();
 
     // RFC3261 14.2 Modifying an Existing Session -UAC BEHAVIOR-.
-    if ((this._request.method == DartSIP_C.INVITE ||
-            (this._request.method == DartSIP_C.UPDATE && this._request.body != null)) &&
+    if ((this._request.method == SipMethod.INVITE ||
+            (this._request.method == SipMethod.UPDATE && this._request.body != null)) &&
         request_sender.clientTransaction.state !=
             Transactions.C.STATUS_TERMINATED) {
       this._dialog.uac_pending_reply = true;
@@ -84,7 +88,7 @@ class DialogRequestSender {
     // RFC3261 12.2.1.2 408 or 481 is received for a request within a dialog.
     if (response.status_code == 408 || response.status_code == 481) {
       this._eventHandlers['onDialogError'](response);
-    } else if (response.method == DartSIP_C.INVITE &&
+    } else if (response.method == SipMethod.INVITE &&
         response.status_code == 491) {
       if (this._reattempt != null) {
         if (response.status_code >= 200 && response.status_code < 300) {

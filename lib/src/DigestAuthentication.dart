@@ -1,3 +1,4 @@
+import 'Constants.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 
@@ -38,7 +39,7 @@ class DigestAuthentication {
   var _opaque;
   var _stale;
   var _qop;
-  var _method;
+  SipMethod _method;
   var _uri;
   var _ha1;
   var _response;
@@ -71,7 +72,7 @@ class DigestAuthentication {
 * received in a response to that request.
 * Returns true if auth was successfully generated, false otherwise.
 */
-  authenticate(method, Challenge challenge, [ruri, cnonce, body]) {
+  authenticate(SipMethod method, Challenge challenge, [ruri, cnonce, body]) {
     this._algorithm = challenge.algorithm;
     this._realm = challenge.realm;
     this._nonce = challenge.nonce;
@@ -173,7 +174,7 @@ class DigestAuthentication {
 
     if (this._qop == 'auth') {
       // HA2 = MD5(A2) = MD5(method:digestURI).
-      a2 = '${this._method}:${this._uri}';
+      a2 = '${SipMethodHelper.getName(this._method)}:${this._uri}';
       ha2 = Utils.calculateMD5(a2);
 
       debug('authenticate() | using qop=auth [a2:${a2}]');
@@ -184,7 +185,7 @@ class DigestAuthentication {
     } else if (this._qop == 'auth-int') {
       // HA2 = MD5(A2) = MD5(method:digestURI:MD5(entityBody)).
       a2 =
-          '${this._method}:${this._uri}:${Utils.calculateMD5(body != null ? body : '')}';
+          '${SipMethodHelper.getName(this._method)}:${this._uri}:${Utils.calculateMD5(body != null ? body : '')}';
       ha2 = Utils.calculateMD5(a2);
 
       debug('authenticate() | using qop=auth-int [a2:${a2}]');
@@ -194,7 +195,7 @@ class DigestAuthentication {
           '${this._ha1}:${this._nonce}:${this._ncHex}:${this._cnonce}:auth-int:${ha2}');
     } else if (this._qop == null) {
       // HA2 = MD5(A2) = MD5(method:digestURI).
-      a2 = '${this._method}:${this._uri}';
+      a2 = '${SipMethodHelper.getName(this._method)}:${this._uri}';
       ha2 = Utils.calculateMD5(a2);
 
       debug('authenticate() | using qop=null [a2:${a2}]');

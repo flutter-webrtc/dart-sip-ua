@@ -1,4 +1,5 @@
 import 'Constants.dart' as DartSIP_C;
+import 'Constants.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'Utils.dart' as Utils;
 import 'logger.dart';
@@ -118,7 +119,7 @@ rfc3261_8_2_2_2() {
   }
 
   // INVITE request.
-  if (message.method == DartSIP_C.INVITE) {
+  if (message.method == SipMethod.INVITE) {
     // If the branch matches the key of any IST then assume it is a retransmission
     // and ignore the INVITE.
     // TODO: we should reply the last response.
@@ -222,7 +223,7 @@ reply(status_code) {
   response += 'To: ${to}\r\n';
   response += 'From: ${message.getHeader('From')}\r\n';
   response += 'Call-ID: ${message.call_id}\r\n';
-  response += 'CSeq: ${message.cseq} ${message.method}\r\n';
+  response += 'CSeq: ${message.cseq} ${SipMethodHelper.getName(message.method)}\r\n';
   response += '\r\n';
 
   transport.send(response);

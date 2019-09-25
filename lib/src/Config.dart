@@ -1,3 +1,4 @@
+import 'Constants.dart';
 import 'Utils.dart' as Utils;
 import 'Constants.dart' as DartSIP_C;
 import 'Grammar.dart';
@@ -33,7 +34,7 @@ class Settings {
 
   // Session parameters.
   var session_timers = true;
-  var session_timers_refresh_method = DartSIP_C.UPDATE;
+  SipMethod session_timers_refresh_method = SipMethod.UPDATE;
   var no_answer_timeout = 60;
 
   // Registration parameters.
@@ -178,15 +179,14 @@ class Checks {
         dst.session_timers = session_timers;
       }
     },
-    'session_timers_refresh_method': (src, dst) {
-      var method = src.session_timers_refresh_method;
-      if (method == null) return;
-      if (method is String) {
-        method = method.toUpperCase();
-        if (method == DartSIP_C.INVITE || method == DartSIP_C.UPDATE) {
-          dst.session_timers_refresh_method = method;
+    'session_timers_refresh_method': ( src,  dst) {
+      Settings srcSettings = src as Settings;
+      Settings dstSettings = dst as Settings;
+      SipMethod method = srcSettings.session_timers_refresh_method;
+        if (method == SipMethod.INVITE || method == SipMethod.UPDATE) {
+          dstSettings.session_timers_refresh_method = method;
         }
-      }
+      
     },
     'password': (src, dst) {
       var password = src.password;

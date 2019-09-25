@@ -1,5 +1,6 @@
 import 'package:events2/events2.dart';
 import '../Constants.dart' as DartSIP_C;
+import '../Constants.dart';
 import '../Grammar.dart';
 import '../Utils.dart' as Utils;
 import '../logger.dart';
@@ -52,7 +53,7 @@ class ReferSubscriber extends EventEmitter {
 
     extraHeaders.add('Contact: ${this._session.contact}');
 
-    var request = this._session.sendRequest(DartSIP_C.REFER, {
+    var request = this._session.sendRequest(SipMethod.REFER, {
       'extraHeaders': extraHeaders,
       'eventHandlers': {
         'onSuccessResponse': (response) {

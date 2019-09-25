@@ -1,4 +1,5 @@
 import '../Constants.dart' as DartSIP_C;
+import '../Constants.dart';
 import '../logger.dart';
 
 class C {
@@ -44,7 +45,7 @@ class ReferNotifier {
     }
 
     // Put this in a try/catch block.
-    this._session.sendRequest(DartSIP_C.NOTIFY, {
+    this._session.sendRequest(SipMethod.NOTIFY, {
       'extraHeaders': [
         'Event: ${C.event_type};id=${this._id}',
         'Subscription-State: ${state}',

@@ -1,7 +1,10 @@
 import 'package:events2/events2.dart';
 
 import 'Config.dart' as config;
+import 'Config.dart';
 import 'Constants.dart' as DartSIP_C;
+import 'Constants.dart';
+import 'Dialog.dart';
 import 'Exceptions.dart' as Exceptions;
 import 'Registrator.dart';
 import 'RTCSession.dart';
@@ -73,12 +76,12 @@ class Contact {
  */
 class UA extends EventEmitter {
   var _cache;
-  var _configuration;
+  Settings _configuration;
   var _dynConfiguration;
-  var _dialogs;
+  Map<String,Dialog> _dialogs;
   var _applicants;
-  var _sessions = {};
-  var _transport;
+  Map<String,RTCSession> _sessions = {};
+  Transport _transport;
   var _contact;
   var _status;
   var _error;
@@ -90,7 +93,7 @@ class UA extends EventEmitter {
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
 
-  UA(configuration) {
+  UA(Settings configuration) {
     debug('new() [configuration:${configuration.toString()}]');
 
     this._cache = {'credentials': {}};
@@ -136,9 +139,9 @@ class UA extends EventEmitter {
 
   get contact => this._contact;
 
-  get configuration => this._configuration;
+  Settings get configuration => this._configuration;
 
-  get transport => this._transport;
+  Transport get transport => this._transport;
 
   get transactions => this._transactions;
 
@@ -414,7 +417,7 @@ class UA extends EventEmitter {
   /**
    * new Dialog
    */
-  newDialog(dialog) {
+  newDialog(Dialog dialog) {
     this._dialogs[dialog.id.toString()] = dialog;
   }
 
@@ -484,13 +487,13 @@ class UA extends EventEmitter {
    * Request reception
    */
   receiveRequest(request) {
-    var method = request.method;
+    SipMethod method = request.method;
 
     // Check that request URI points to us.
     if (request.ruri.user != this._configuration.uri.user &&
         request.ruri.user != this._contact.uri.user) {
       debug('Request-URI does not point to us');
-      if (request.method != DartSIP_C.ACK) {
+      if (request.method != SipMethod.ACK) {
         request.reply_sl(404);
       }
 
@@ -510,11 +513,11 @@ class UA extends EventEmitter {
     }
 
     // Create the server transaction.
-    if (method == DartSIP_C.INVITE) {
+    if (method == SipMethod.INVITE) {
       /* eslint-disable no-new */
       new Transactions.InviteServerTransaction(this, this._transport, request);
       /* eslint-enable no-new */
-    } else if (method != DartSIP_C.ACK && method != DartSIP_C.CANCEL) {
+    } else if (method != SipMethod.ACK && method != SipMethod.CANCEL) {
       /* eslint-disable no-new */
       new Transactions.NonInviteServerTransaction(
           this, this._transport, request);
@@ -526,16 +529,16 @@ class UA extends EventEmitter {
      * received within a dialog (for example, an OPTIONS request).
      * They are processed as if they had been received outside the dialog.
      */
-    if (method == DartSIP_C.OPTIONS) {
+    if (method == SipMethod.OPTIONS) {
       request.reply(200);
-    } else if (method == DartSIP_C.MESSAGE) {
+    } else if (method == SipMethod.MESSAGE) {
       if (this.listeners('newMessage') == null) {
         request.reply(405);
         return;
       }
       var message = new Message(this);
       message.init_incoming(request);
-    } else if (method == DartSIP_C.INVITE) {
+    } else if (method == SipMethod.INVITE) {
       // Initial INVITE.
       if (request.to_tag != null &&
           this.listeners('newRTCSession').length == 0) {
@@ -545,13 +548,13 @@ class UA extends EventEmitter {
       }
     }
 
-    var dialog;
-    var session;
+    Dialog dialog;
+    RTCSession session;
 
     // Initial Request.
     if (request.to_tag == null) {
       switch (method) {
-        case DartSIP_C.INVITE:
+        case SipMethod.INVITE:
           if (window.hasRTCPeerConnection) {
             if (request.hasHeader('replaces')) {
               var replaces = request.replaces;
@@ -577,11 +580,11 @@ class UA extends EventEmitter {
             request.reply(488);
           }
           break;
-        case DartSIP_C.BYE:
+        case SipMethod.BYE:
           // Out of dialog BYE received.
           request.reply(481);
           break;
-        case DartSIP_C.CANCEL:
+        case SipMethod.CANCEL:
           session = this
               ._findSession(request.call_id, request.from_tag, request.to_tag);
           if (session != null) {
@@ -590,13 +593,13 @@ class UA extends EventEmitter {
             debug('received CANCEL request for a non existent session');
           }
           break;
-        case DartSIP_C.ACK:
+        case SipMethod.ACK:
           /* Absorb it.
            * ACK request without a corresponding Invite Transaction
            * and without To tag.
            */
           break;
-        case DartSIP_C.NOTIFY:
+        case SipMethod.NOTIFY:
           // Receive new sip event.
           this.emit('sipEvent', {'event': request.event, 'request': request});
           request.reply(200);
@@ -613,7 +616,7 @@ class UA extends EventEmitter {
 
       if (dialog != null) {
         dialog.receiveRequest(request);
-      } else if (method == DartSIP_C.NOTIFY) {
+      } else if (method == SipMethod.NOTIFY) {
         session = this
             ._findSession(request.call_id, request.from_tag, request.to_tag);
         if (session != null) {
@@ -629,7 +632,7 @@ class UA extends EventEmitter {
        * Exception: ACK for an Invite request for which a dialog has not
        * been created.
        */
-      else if (method != DartSIP_C.ACK) {
+      else if (method != SipMethod.ACK) {
         request.reply(481);
       }
     }
@@ -642,7 +645,7 @@ class UA extends EventEmitter {
   /**
    * Get the session to which the request belongs to, if any.
    */
-  _findSession(call_id, from_tag, to_tag) {
+  RTCSession _findSession(String call_id, String from_tag, String to_tag) {
     var sessionIDa = call_id + (from_tag ?? '');
     var sessionA = this._sessions[sessionIDa];
     var sessionIDb = call_id + (to_tag ?? '');
@@ -660,9 +663,9 @@ class UA extends EventEmitter {
   /**
    * Get the dialog to which the request belongs to, if any.
    */
-  _findDialog(call_id, from_tag, to_tag) {
+  Dialog _findDialog(String call_id, String from_tag, String to_tag) {
     var id = call_id + from_tag + to_tag;
-    var dialog = this._dialogs[id];
+    Dialog dialog = this._dialogs[id];
 
     if (dialog != null) {
       return dialog;
@@ -892,15 +895,15 @@ class UA extends EventEmitter {
     */
 
       var transaction;
-
+    
       switch (message.method) {
-        case DartSIP_C.INVITE:
+        case SipMethod.INVITE:
           transaction = this._transactions['ict'][message.via_branch];
           if (transaction != null) {
             transaction.receiveResponse(message);
           }
           break;
-        case DartSIP_C.ACK:
+        case SipMethod.ACK:
           // Just in case ;-).
           break;
         default:

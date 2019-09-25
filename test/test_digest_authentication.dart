@@ -1,6 +1,8 @@
 import 'package:test/test.dart';
 import 'package:sip_ua/src/DigestAuthentication.dart';
 
+import 'package:sip_ua/src/Constants.dart';
+
 // Results of this tests originally obtained from RFC 2617 and:
 // 'https://pernau.at/kd/sipdigest.php'
 
@@ -8,7 +10,7 @@ var testFunctions = [
   () =>
       test("DigestAuthentication: parse no auth testrealm@host.com -RFC 2617-",
           () {
-        var method = 'GET';
+        SipMethod method = SipMethod.GET;
         var ruri = '/dir/index.html';
         var cnonce = '0a4f113b';
         var credentials = Credentials.fromMap({
@@ -33,7 +35,7 @@ var testFunctions = [
         expect(digest.response, '6629fae49393a05397450978507c4ef1');
       }),
   () => test('DigestAuthentication: digest authenticate qop = null', () {
-        var method = 'REGISTER';
+        SipMethod method = SipMethod.REGISTER;
         var ruri = 'sip:testrealm@host.com';
         var credentials = Credentials.fromMap({
           'username': 'testuser',
@@ -57,7 +59,7 @@ var testFunctions = [
         expect(digest.response, 'f99e05f591f147facbc94ff23b4b1dee');
       }),
   () => test('DigestAuthentication: digest authenticate qop = auth', () {
-        var method = 'REGISTER';
+        SipMethod method = SipMethod.REGISTER;
         var ruri = 'sip:testrealm@host.com';
         var cnonce = '0a4f113b';
         var credentials = Credentials.fromMap({
@@ -84,7 +86,7 @@ var testFunctions = [
   () => test(
           'DigestAuthentication: digest authenticate qop = auth-int and empty body',
           () {
-        var method = 'REGISTER';
+        SipMethod method = SipMethod.REGISTER;
         var ruri = 'sip:testrealm@host.com';
         var cnonce = '0a4f113b';
         var credentials = Credentials.fromMap({
@@ -111,7 +113,7 @@ var testFunctions = [
   () => test(
           'DigestAuthentication: digest authenticate qop = auth-int and non-empty body',
           () {
-        var method = 'REGISTER';
+        SipMethod method = SipMethod.REGISTER;
         var ruri = 'sip:testrealm@host.com';
         var body = 'TEST BODY';
         var cnonce = '0a4f113b';

@@ -1,7 +1,10 @@
 import 'package:events2/events2.dart';
+import '../sip_ua.dart';
 import 'Constants.dart' as DartSIP_C;
+import 'Constants.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'Timers.dart';
+import 'Transport.dart';
 import 'Utils.dart';
 import 'logger.dart';
 
@@ -36,14 +39,14 @@ class C {
 class NonInviteClientTransaction extends EventEmitter {
   var type;
   var id;
-  var ua;
-  var transport;
+  UA ua;
+  Transport transport;
   var request;
   var eventHandlers;
   var F, K;
   var state;
 
-  NonInviteClientTransaction(ua, transport, request, eventHandlers) {
+  NonInviteClientTransaction(UA ua, Transport transport, request, eventHandlers) {
     this.type = C.NON_INVITE_CLIENT;
     this.id = 'z9hG4bK${Math.floor(Math.random())}';
     this.ua = ua;
@@ -97,7 +100,7 @@ class NonInviteClientTransaction extends EventEmitter {
     this.ua.destroyTransaction(this);
   }
 
-  receiveResponse(response) {
+  receiveResponse(SIPMessage.IncomingResponse response) {
     var status_code = response.status_code;
 
     if (status_code < 200) {
@@ -135,14 +138,14 @@ class NonInviteClientTransaction extends EventEmitter {
 class InviteClientTransaction extends EventEmitter {
   var type;
   var id;
-  var ua;
-  var transport;
+  UA ua;
+  Transport transport;
   var request;
   var eventHandlers;
   var state;
   var B, D, M;
 
-  InviteClientTransaction(ua, transport, request, eventHandlers) {
+  InviteClientTransaction(UA ua, Transport transport, request, eventHandlers) {
     this.type = C.INVITE_CLIENT;
     this.id = 'z9hG4bK${Math.floor(Math.random() * 10000000)}';
     this.ua = ua;
@@ -220,7 +223,7 @@ class InviteClientTransaction extends EventEmitter {
 
   sendACK(response) {
     var ack = new SIPMessage.OutgoingRequest(
-        DartSIP_C.ACK, this.request.ruri, this.ua, {
+        SipMethod.ACK, this.request.ruri, this.ua, {
       'route_set': this.request.getHeaders('route'),
       'call_id': this.request.getHeader('call-id'),
       'cseq': this.request.cseq
@@ -244,7 +247,7 @@ class InviteClientTransaction extends EventEmitter {
     }
 
     var cancel = new SIPMessage.OutgoingRequest(
-        DartSIP_C.CANCEL, this.request.ruri, this.ua, {
+        SipMethod.CANCEL, this.request.ruri, this.ua, {
       'route_set': this.request.getHeaders('route'),
       'call_id': this.request.getHeader('call-id'),
       'cseq': this.request.cseq
@@ -261,7 +264,7 @@ class InviteClientTransaction extends EventEmitter {
     this.transport.send(cancel);
   }
 
-  receiveResponse(response) {
+  receiveResponse(SIPMessage.IncomingResponse response) {
     var status_code = response.status_code;
 
     if (status_code >= 100 && status_code <= 199) {
@@ -306,11 +309,11 @@ class InviteClientTransaction extends EventEmitter {
 
 class AckClientTransaction extends EventEmitter {
   var id;
-  var transport;
+  Transport transport;
   var request;
   var eventHandlers;
 
-  AckClientTransaction(ua, transport, request, eventHandlers) {
+  AckClientTransaction(UA ua, Transport transport, request, eventHandlers) {
     this.id = 'z9hG4bK${Math.floor(Math.random() * 10000000)}';
     this.transport = transport;
     this.request = request;
@@ -338,15 +341,15 @@ class AckClientTransaction extends EventEmitter {
 class NonInviteServerTransaction extends EventEmitter {
   var type;
   var id;
-  var ua;
-  var transport;
+  UA ua;
+  Transport transport;
   var request;
   var last_response;
   var state;
   var transportError;
   var J;
 
-  NonInviteServerTransaction(ua, transport, request) {
+  NonInviteServerTransaction(UA ua, Transport transport, request) {
     this.type = C.NON_INVITE_SERVER;
     this.id = request.via_branch;
     this.ua = ua;
@@ -437,8 +440,8 @@ class NonInviteServerTransaction extends EventEmitter {
 class InviteServerTransaction extends EventEmitter {
   var type;
   var id;
-  var ua;
-  var transport;
+  UA ua;
+  Transport transport;
   var request;
   var last_response;
   var state;
@@ -446,7 +449,7 @@ class InviteServerTransaction extends EventEmitter {
   var transportError;
   var L, H, I;
 
-  InviteServerTransaction(ua, transport, request) {
+  InviteServerTransaction(UA ua, Transport transport, request) {
     this.type = C.INVITE_SERVER;
     this.id = request.via_branch;
     this.ua = ua;
@@ -616,7 +619,7 @@ class InviteServerTransaction extends EventEmitter {
 checkTransaction(_transactions, request) {
   var tr;
   switch (request.method) {
-    case DartSIP_C.INVITE:
+    case SipMethod.INVITE:
       tr = _transactions['ist'][request.via_branch];
       if (tr != null) {
         switch (tr.state) {
@@ -633,7 +636,7 @@ checkTransaction(_transactions, request) {
         return true;
       }
       break;
-    case DartSIP_C.ACK:
+    case SipMethod.ACK:
       tr = _transactions['ist'][request.via_branch];
 
       // RFC 6026 7.1.
@@ -654,7 +657,7 @@ checkTransaction(_transactions, request) {
         return false;
       }
       break;
-    case DartSIP_C.CANCEL:
+    case SipMethod.CANCEL:
       tr = _transactions['ist'][request.via_branch];
       if (tr != null) {
         request.reply_sl(200);

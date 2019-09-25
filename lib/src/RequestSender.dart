@@ -1,7 +1,11 @@
+
+
+import '../sip_ua.dart';
 import 'Constants.dart' as DartSIP_C;
+import 'Constants.dart';
 import 'DigestAuthentication.dart';
 import 'Transactions.dart' as Transactions;
-import 'UA.dart' as UA;
+import 'UA.dart' as UAC;
 import 'logger.dart';
 
 // Default event handlers.
@@ -13,9 +17,9 @@ var EventHandlers = {
 };
 
 class RequestSender {
-  var _ua;
+  UA _ua;
   var _eventHandlers;
-  var _method;
+  SipMethod _method;
   var _request;
   var _auth;
   var _challenged;
@@ -25,7 +29,7 @@ class RequestSender {
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
 
-  RequestSender(ua, request, eventHandlers) {
+  RequestSender(UA ua, request, eventHandlers) {
     this._ua = ua;
     this._eventHandlers = eventHandlers;
     this._method = request.method;
@@ -42,8 +46,8 @@ class RequestSender {
     });
 
     // If ua is in closing process or even closed just allow sending Bye and ACK.
-    if (ua.status == UA.C.STATUS_USER_CLOSED &&
-        (this._method != DartSIP_C.BYE || this._method != DartSIP_C.ACK)) {
+    if (ua.status == UAC.C.STATUS_USER_CLOSED &&
+        (this._method != SipMethod.BYE || this._method != SipMethod.ACK)) {
       this._eventHandlers['onTransportError']();
     }
   }
@@ -61,11 +65,11 @@ class RequestSender {
     };
 
     switch (this._method) {
-      case 'INVITE':
+      case SipMethod.INVITE:
         this.clientTransaction = new Transactions.InviteClientTransaction(
             this._ua, this._ua.transport, this._request, eventHandlers);
         break;
-      case 'ACK':
+      case SipMethod.ACK:
         this.clientTransaction = new Transactions.AckClientTransaction(
             this._ua, this._ua.transport, this._request, eventHandlers);
         break;
@@ -149,7 +153,7 @@ class RequestSender {
         this._request.cseq += 1;
         this
             ._request
-            .setHeader('cseq', '${this._request.cseq} ${this._method}');
+            .setHeader('cseq', '${this._request.cseq} ${SipMethodHelper.getName(this._method)}');
         this
             ._request
             .setHeader(authorization_header_name, this._auth.toString());
