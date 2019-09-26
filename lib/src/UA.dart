@@ -82,7 +82,7 @@ class UA extends EventEmitter {
   var _applicants;
   Map<String,RTCSession> _sessions = {};
   Transport _transport;
-  var _contact;
+  Contact _contact;
   var _status;
   var _error;
   var _transactions;
@@ -137,7 +137,7 @@ class UA extends EventEmitter {
 
   get status => this._status;
 
-  get contact => this._contact;
+  Contact get contact => this._contact;
 
   Settings get configuration => this._configuration;
 

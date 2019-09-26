@@ -17,7 +17,7 @@ class Timers {
       60000; // See RFC 3261 Section 13.3.1.1
 }
 
-setTimeout(fn, duration) {
+Timer setTimeout(fn, duration) {
   return new Timer(new Duration(milliseconds: duration), fn);
 }
 
@@ -26,7 +26,7 @@ clearTimeout(Timer timer) {
     timer.cancel();
 }
 
-setInterval(fn, interval) {
+Timer setInterval(fn, interval) {
   return new Timer.periodic(new Duration(milliseconds: interval), (Timer timer) {
     fn();
   });

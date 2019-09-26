@@ -10,7 +10,7 @@ class DialPadWidget extends StatefulWidget {
 
 class _MyDialPadWidget extends State<DialPadWidget> {
   var _dest = 'sip:111_6ackea@tryit.jssip.net';
-  get helper => widget._helper;
+  SIPUAHelper get helper => widget._helper;
   TextEditingController _textController;
 
   @override

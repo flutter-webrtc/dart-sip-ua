@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:events2/events2.dart';
+import 'package:sip_ua/src/RTCSession.dart';
 
 class SIPUAHelper extends EventEmitter {
   UA _ua;
   Settings _settings;
   final logger = new Logger('SIPUA::Helper');
-  var _session;
-  var _registered = false;
-  var _connected = false;
+  RTCSession _session;
+  bool _registered = false;
+  bool _connected = false;
   var _registerState = 'new';
   var _localStream;
   var _remoteStream;
@@ -19,11 +20,11 @@ class SIPUAHelper extends EventEmitter {
 
   debugerror(error) => logger.error(error);
 
-  get session => _session;
+  RTCSession get session => _session;
 
-  get registered => _registered;
+  bool get registered => _registered;
 
-  get connected => _connected;
+  bool get connected => _connected;
 
   get registerState => _registerState;
 
@@ -230,7 +231,7 @@ class SIPUAHelper extends EventEmitter {
       'rtcOfferConstraints': {
         'mandatory': {
           'OfferToReceiveAudio': true,
-          'OfferToReceiveVideo': true,
+          'OfferToReceiveVideo': !voiceonly,
         },
         'optional': [],
       },
@@ -246,7 +247,8 @@ class SIPUAHelper extends EventEmitter {
         'optional': [
           {'DtlsSrtpKeyAgreement': true},
         ],
-      }
+      },
+      'sessionTimersExpires': 120
     };
     return defaultOptions;
   }

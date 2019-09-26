@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 import 'sip_ua_helper.dart';
+import 'package:sip_ua/src/RTCSession.dart';
 
 class CallScreenWidget extends StatefulWidget {
   SIPUAHelper _helper;
@@ -28,11 +29,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
 
   bool _muted = false;
   bool _hold = false;
-  var _state = 'new';
+  String _state = 'new';
 
-  get session => helper.session;
+  RTCSession get session => helper.session;
 
-  get helper => widget._helper;
+  SIPUAHelper get helper => widget._helper;
 
   get voiceonly =>
       (_localStream == null || _localStream.getVideoTracks().length == 0) &&
@@ -60,17 +61,25 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
       //print('tick => ${timer.tick}');
       Duration duration = Duration(seconds: timer.tick);
-      this.setState(() {
-        _timeLabel = [duration.inMinutes, duration.inSeconds]
-            .map((seg) => seg.remainder(60).toString().padLeft(2, '0'))
-            .join(':');
-      });
+      if (mounted) {
+        this.setState(() {
+          _timeLabel = [duration.inMinutes, duration.inSeconds]
+              .map((seg) => seg.remainder(60).toString().padLeft(2, '0'))
+              .join(':');
+        });
+      } else {
+        _timer.cancel();
+      }
     });
   }
 
   _initRenderers() async {
-    await _localRenderer.initialize();
-    await _remoteRenderer.initialize();
+    if (_localRenderer != null) {
+      await _localRenderer.initialize();
+    }
+    if (_remoteRenderer != null) {
+      await _remoteRenderer.initialize();
+    }
   }
 
   _disposeRenderers() {
@@ -89,7 +98,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   }
 
   _handleCalllState(state, data) {
-    if (state != 'stream') {
+       if (state != 'stream') {
       _state = state;
     }
 
@@ -106,7 +115,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
         _backToDialPad();
         break;
     }
-    this.setState(() {});
+     this.setState(() {});
   }
 
   _removeEventListeners() {
@@ -123,11 +132,15 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   _handelStreams(event) async {
     var stream = event['stream'];
     if (event['originator'] == 'local') {
-      _localRenderer.srcObject = stream;
+      if (_localRenderer != null) {
+        _localRenderer.srcObject = stream;
+      }
       _localStream = stream;
     }
     if (event['originator'] == 'remote') {
-      _remoteRenderer.srcObject = stream;
+      if (_remoteRenderer != null) {
+        _remoteRenderer.srcObject = stream;
+      }
       _remoteStream = stream;
     }
 
@@ -150,6 +163,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
 
   _handleHangup() {
     helper.hangup();
+    _timer.cancel();
   }
 
   _handleAccept() {
