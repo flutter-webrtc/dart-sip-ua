@@ -1,4 +1,5 @@
 import 'package:events2/events2.dart';
+import 'package:sip_ua/src/SIPMessage.dart';
 
 import 'Config.dart' as config;
 import 'Config.dart';
@@ -867,9 +868,9 @@ class UA extends EventEmitter {
 // Transport data event.
   onTransportData(data) {
     var transport = data['transport'];
-    var message = data['message'];
+    String messageData = data['message'];
 
-    message = Parser.parseMessage(message, this);
+    IncomingMessage message = Parser.parseMessage(messageData, this);
 
     if (message == null) {
       return;

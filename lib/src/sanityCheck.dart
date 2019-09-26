@@ -1,3 +1,7 @@
+import 'package:sip_ua/sip_ua.dart';
+import 'package:sip_ua/src/SIPMessage.dart';
+import 'package:sip_ua/src/Transport.dart';
+
 import 'Constants.dart' as DartSIP_C;
 import 'Constants.dart';
 import 'SIPMessage.dart' as SIPMessage;
@@ -22,11 +26,11 @@ const requests = [
 const responses = [rfc3261_8_1_3_3, rfc3261_18_3_response];
 
 // local variables.
-var message;
-var ua;
-var transport;
+IncomingMessage message;
+UA ua;
+Transport transport;
 
-sanityCheck(m, u, t) {
+sanityCheck(IncomingMessage m, UA u, Transport t) {
   message = m;
   ua = u;
   transport = t;

@@ -1,3 +1,6 @@
+import 'package:sip_ua/sip_ua.dart';
+import 'package:sip_ua/src/SIPMessage.dart';
+
 import 'Grammar.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'logger.dart';
@@ -9,10 +12,10 @@ debugerror(error) => logger.error(error);
 /**
  * Parse SIP Message
  */
-parseMessage(data, ua) {
-  var message;
-  var bodyStart;
-  var headerEnd = data.indexOf('\r\n');
+IncomingMessage parseMessage(String data, UA ua) {
+  IncomingMessage message;
+  int bodyStart;
+  int headerEnd = data.indexOf('\r\n');
 
   if (headerEnd == -1) {
     debugerror('parseMessage() | no CRLF found, not a SIP message');
@@ -20,7 +23,7 @@ parseMessage(data, ua) {
   }
 
   // Parse first line. Check if it is a Request or a Reply.
-  var firstLine = data.substring(0, headerEnd);
+  String firstLine = data.substring(0, headerEnd);
   var parsed;
   try{
     parsed = Grammar.parse(firstLine, 'Request_Response');
@@ -36,9 +39,10 @@ parseMessage(data, ua) {
 
     return null;
   } else if (parsed.status_code == null) {
-    message = new SIPMessage.IncomingRequest(ua);
-    message.method = parsed.method;
-    message.ruri = parsed.uri;
+    IncomingRequest incomingRequest = new SIPMessage.IncomingRequest(ua);
+    incomingRequest.method = parsed.method;
+    incomingRequest.ruri = parsed.uri;
+    message = incomingRequest;
   } else {
     message = new SIPMessage.IncomingResponse();
     message.status_code = parsed.status_code;
@@ -97,13 +101,13 @@ parseMessage(data, ua) {
 /**
  * Extract and parse every header of a SIP message.
  */
-getHeader(data, headerStart) {
+getHeader(String data, int headerStart) {
   // 'start' position of the header.
-  var start = headerStart;
+  int start = headerStart;
   // 'end' position of the header.
-  var end = 0;
+  int end = 0;
   // 'partial end' position of the header.
-  var partialEnd = 0;
+  int partialEnd = 0;
 
   // End of message.
   if (data.substring(start, start + 2).contains(new RegExp(r'(^\r\n)'))) {
