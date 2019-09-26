@@ -95,11 +95,11 @@ isEmpty(value) {
 }
 
 // Used by 'newTag'.
-createRandomToken(size, {base = 32}) {
+String createRandomToken(size, {base = 32}) {
   return randomAlphaNumeric(size).toLowerCase();
 }
 
-newTag() => createRandomToken(10);
+String newTag() => createRandomToken(10);
 
 newUUID() => new Uuid().v4();
 

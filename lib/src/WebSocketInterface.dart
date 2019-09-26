@@ -71,14 +71,13 @@ class WebSocketInterface implements Socket {
     }
     debug('connecting to WebSocket ${this._url}');
     try {
-      this._ws = await WebSocket.connect(this._url, headers: {
-        'Sec-WebSocket-Protocol': 'sip',
-        ...this._wsExtraHeaders
-      });
+      this._ws = await WebSocket.connect(this._url,
+          headers: {'Sec-WebSocket-Protocol': 'sip', ...this._wsExtraHeaders});
       this._ws.listen((data) {
         this._onMessage(data);
       }, onDone: () {
-        logger.debug('Closed by server [${this._ws.closeCode}, ${this._ws.closeReason}]!');
+        logger.debug(
+            'Closed by server [${this._ws.closeCode}, ${this._ws.closeReason}]!');
         _connected = false;
         this._onClose(true, this._ws.closeCode, this._ws.closeReason);
       });
@@ -152,7 +151,13 @@ class WebSocketInterface implements Socket {
 
   _onMessage(data) {
     debug('Received WebSocket message');
-    this.ondata(data);
+    if (data != null) {
+      if (data.toString().trim().length > 0) {
+        this.ondata(data);
+      } else {
+        debug("Received and ignored empty packet");
+      }
+    }
   }
 
   _onError(e) {
