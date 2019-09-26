@@ -59,7 +59,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
 
   _startTimer() {
     _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
-      //print('tick => ${timer.tick}');
       Duration duration = Duration(seconds: timer.tick);
       if (mounted) {
         this.setState(() {
@@ -98,7 +97,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   }
 
   _handleCalllState(state, data) {
-       if (state != 'stream') {
+    if (state != 'stream') {
       _state = state;
     }
 
@@ -115,7 +114,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
         _backToDialPad();
         break;
     }
-     this.setState(() {});
+    this.setState(() {});
   }
 
   _removeEventListeners() {
@@ -125,7 +124,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   _backToDialPad() {
     _timer.cancel();
     new Timer(Duration(seconds: 2), () {
-      Navigator.of(context).popUntil(ModalRoute.withName('/dialpad'));
+      Navigator.of(context).pop();
     });
   }
 
