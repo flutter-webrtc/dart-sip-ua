@@ -231,7 +231,7 @@ class SIPUAHelper extends EventEmitter {
       'rtcOfferConstraints': {
         'mandatory': {
           'OfferToReceiveAudio': true,
-          'OfferToReceiveVideo': true,
+          'OfferToReceiveVideo': !voiceonly,
         },
         'optional': [],
       },
