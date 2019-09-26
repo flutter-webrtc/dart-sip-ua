@@ -12,8 +12,8 @@ class CallScreenWidget extends StatefulWidget {
 }
 
 class _MyCallScreenWidget extends State<CallScreenWidget> {
-  RTCVideoRenderer _localRenderer; // = new RTCVideoRenderer();
-  RTCVideoRenderer _remoteRenderer; // = new RTCVideoRenderer();
+  RTCVideoRenderer _localRenderer = new RTCVideoRenderer();
+  RTCVideoRenderer _remoteRenderer = new RTCVideoRenderer();
   double _localVideoHeight;
   double _localVideoWidth;
   EdgeInsetsGeometry _localVideoMargin;
