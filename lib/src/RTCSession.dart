@@ -566,7 +566,7 @@ class RTCSession extends EventEmitter {
 
     // Don't ask for video if the incoming offer has no video section.
     if (mediaStream == null && !peerHasVideoLine) {
-      mediaConstraints.video = false;
+      mediaConstraints['video'] = false;
     }
 
     // Create a new RTCPeerConnection instance.
@@ -2455,7 +2455,7 @@ class RTCSession extends EventEmitter {
 
       // Must have SDP answer.
       if (sdpOffer != null) {
-        if (!response.body) {
+        if (response.body !=null && response.body.trim().isNotEmpty) {
           onFailed();
           return;
         } else if (response.getHeader('Content-Type') != 'application/sdp') {

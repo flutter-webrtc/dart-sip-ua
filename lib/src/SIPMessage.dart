@@ -334,7 +334,7 @@ class IncomingMessage {
   var from_tag;
   var to;
   var to_tag;
-  var body;
+  String body;
   var sdp;
   var status_code;
   var reason_phrase;
