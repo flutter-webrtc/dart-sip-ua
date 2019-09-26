@@ -247,7 +247,8 @@ class SIPUAHelper extends EventEmitter {
         'optional': [
           {'DtlsSrtpKeyAgreement': true},
         ],
-      }
+      },
+      'sessionTimersExpires': 120
     };
     return defaultOptions;
   }
