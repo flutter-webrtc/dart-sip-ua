@@ -1,6 +1,8 @@
 import 'package:sip_ua/sip_ua.dart';
 import 'package:sip_ua/src/SIPMessage.dart';
 import 'package:sip_ua/src/Transport.dart';
+import 'package:sip_ua/src/transactions/invite_server.dart';
+import 'package:sip_ua/src/transactions/non_invite_server.dart';
 
 import 'Constants.dart' as DartSIP_C;
 import 'Constants.dart';
@@ -127,12 +129,12 @@ rfc3261_8_2_2_2() {
     // If the branch matches the key of any IST then assume it is a retransmission
     // and ignore the INVITE.
     // TODO: we should reply the last response.
-    if (ua.transactions['ist'][message.via_branch] != null) {
+    if (ua.transactions.getTransaction(InviteServerTransaction,message.via_branch) != null) {
       return false;
     }
     // Otherwise check whether it is a merged request.
     else {
-      ua.transactions['ist'].forEach((transaction, tr) {
+      ua.transactions.getAll(InviteServerTransaction).forEach(( tr) {
         if (tr.request.from_tag == fromTag &&
             tr.request.call_id == call_id &&
             tr.request.cseq == cseq) {
@@ -149,13 +151,13 @@ rfc3261_8_2_2_2() {
   // If the branch matches the key of any NIST then assume it is a retransmission
   // and ignore the request.
   // TODO: we should reply the last response.
-  else if (ua.transactions['nist'][message.via_branch] != null) {
+  else if (ua.transactions.getTransaction(NonInviteServerTransaction,message.via_branch) != null) {
     return false;
   }
 
   // Otherwise check whether it is a merged request.
   else {
-    ua.transactions['nist'].forEach((transaction, tr) {
+    ua.transactions.getAll(NonInviteServerTransaction).forEach(( tr) {
       if (tr.request.from_tag == fromTag &&
           tr.request.call_id == call_id &&
           tr.request.cseq == cseq) {

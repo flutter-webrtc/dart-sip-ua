@@ -76,11 +76,12 @@ class WebSocketInterface implements Socket {
       this._ws.listen((data) {
         this._onMessage(data);
       }, onDone: () {
-        logger.debug(
-            'Closed by server [${this._ws.closeCode}, ${this._ws.closeReason}]!');
-        _connected = false;
-        this._onClose(true, this._ws.closeCode, this._ws.closeReason);
+          logger.debug(
+              'Closed by server [${this._ws.closeCode}, ${this._ws.closeReason}]!');
+          _connected = false;
+          this._onClose(true, this._ws.closeCode, this._ws.closeReason);
       });
+      _closed = false;
       _connected = true;
       this._onOpen();
     } catch (e) {
@@ -124,7 +125,7 @@ class WebSocketInterface implements Socket {
   }
 
   isConnecting() {
-    return false; // TODO: this._ws && this._ws.readyState == this._ws.CONNECTING;
+    return this._ws != null && this._ws.readyState == WebSocket.connecting;
   }
 
   /**
