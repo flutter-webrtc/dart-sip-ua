@@ -32,10 +32,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',
       ),
-      initialRoute: '/dialpad',
+      initialRoute: '/',
       routes: {
         '/': (context) => DialPadWidget(_helper),
-        '/dialpad': (context) => DialPadWidget(_helper),
         '/register': (context) => RegisterWidget(_helper),
         '/callscreen': (context) => CallScreenWidget(_helper),
         '/about': (context) => AboutWidget(),
