@@ -55,16 +55,16 @@ isString(str) {
   }
 }
 
-isNaN(num) {
-  return num.isNaN;
+isNaN(input) {
+  return input.isNaN;
 }
 
-parseInt(str, radix) {
-  return int.tryParse(str, radix: radix)?? null;
+parseInt(input, radix) {
+  return int.tryParse(input, radix: radix) ?? null;
 }
 
-parseFloat(str) {
-  return double.parse(str);
+parseFloat(input) {
+  return double.tryParse(input) ?? null;
 }
 
 decodeURIComponent(str) {
@@ -84,7 +84,11 @@ unescape(str) {
   return str;
 }
 
-isDecimal(num) =>  num != null && !isNaN(num) && (parseFloat(num) == parseInt(num, 10));
+isDecimal(input) =>
+    input != null &&
+    ((input is num && !isNaN(input)) ||
+        (input is! num &&
+            (parseFloat(input) != null || parseInt(input, 10) != null)));
 
 isEmpty(value) {
   return (value == null ||

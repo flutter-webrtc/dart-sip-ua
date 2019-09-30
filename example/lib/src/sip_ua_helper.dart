@@ -231,7 +231,7 @@ class SIPUAHelper extends EventEmitter {
       'rtcOfferConstraints': {
         'mandatory': {
           'OfferToReceiveAudio': true,
-          'OfferToReceiveVideo': true,
+          'OfferToReceiveVideo': !voiceonly,
         },
         'optional': [],
       },
@@ -247,7 +247,8 @@ class SIPUAHelper extends EventEmitter {
         'optional': [
           {'DtlsSrtpKeyAgreement': true},
         ],
-      }
+      },
+      'sessionTimersExpires': 120
     };
     return defaultOptions;
   }
