@@ -1,11 +1,8 @@
-import 'dart:io';
-
-import 'package:sip_ua/src/WebSocketInterface.dart';
-
-import 'Socket.dart' as Socket;
 import 'Exceptions.dart' as Exceptions;
-import 'Utils.dart';
+import 'Socket.dart' as Socket;
 import 'Timers.dart';
+import 'Utils.dart';
+import 'WebSocketInterface.dart';
 import 'logger.dart';
 
 /**

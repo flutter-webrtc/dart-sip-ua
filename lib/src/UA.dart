@@ -1,11 +1,4 @@
 import 'package:events2/events2.dart';
-import 'package:sip_ua/src/SIPMessage.dart';
-import 'package:sip_ua/src/transactions/Transactions.dart';
-import 'package:sip_ua/src/transactions/invite_client.dart';
-import 'package:sip_ua/src/transactions/invite_server.dart';
-import 'package:sip_ua/src/transactions/non_invite_client.dart';
-import 'package:sip_ua/src/transactions/non_invite_server.dart';
-import 'package:sip_ua/src/transactions/transaction_base.dart';
 
 import 'Config.dart' as config;
 import 'Config.dart';
@@ -17,6 +10,7 @@ import 'Message.dart';
 import 'Parser.dart' as Parser;
 import 'RTCSession.dart';
 import 'Registrator.dart';
+import 'SIPMessage.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'Timers.dart';
 import 'Transport.dart';
@@ -24,6 +18,12 @@ import 'URI.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 import 'sanityCheck.dart';
+import 'transactions/Transactions.dart';
+import 'transactions/invite_client.dart';
+import 'transactions/invite_server.dart';
+import 'transactions/non_invite_client.dart';
+import 'transactions/non_invite_server.dart';
+import 'transactions/transaction_base.dart';
 
 class C {
   // UA status codes.

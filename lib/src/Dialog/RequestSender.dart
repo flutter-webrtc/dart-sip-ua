@@ -1,5 +1,3 @@
-import 'package:sip_ua/src/transactions/transaction_base.dart';
-
 import '../../sip_ua.dart';
 import '../Constants.dart';
 import '../Dialog.dart';
@@ -7,6 +5,7 @@ import '../RTCSession.dart' as RTCSession;
 import '../RequestSender.dart';
 import '../SIPMessage.dart';
 import '../Timers.dart';
+import '../transactions/transaction_base.dart';
 
 // Default event handlers.
 var EventHandlers = {

@@ -1,8 +1,7 @@
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/Transport.dart';
-import 'package:sip_ua/src/Utils.dart';
-import 'package:sip_ua/src/transactions/Transactions.dart';
-import 'package:sip_ua/src/transactions/transaction_base.dart';
+import '../../sip_ua.dart';
+import '../Transport.dart';
+import '../Utils.dart';
+import 'transaction_base.dart';
 
 final act_logger = new Logger('AckClientTransaction');
 debugact(msg) => act_logger.debug(msg);

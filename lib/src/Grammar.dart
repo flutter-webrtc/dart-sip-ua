@@ -1,5 +1,6 @@
-import 'package:sip_ua/src/grammar_parser.dart';
 import "package:parser_error/parser_error.dart";
+
+import 'grammar_parser.dart';
 
 class Grammar {
   static parse(String input,String startRule) {

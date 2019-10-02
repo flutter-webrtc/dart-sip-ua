@@ -1,5 +1,3 @@
-import 'package:sip_ua/src/transactions/transaction_base.dart';
-
 import '../sip_ua.dart';
 import 'Constants.dart';
 import 'Dialog/RequestSender.dart';
@@ -8,6 +6,7 @@ import 'RTCSession.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'Utils.dart' as Utils;
 import 'logger.dart';
+import 'transactions/transaction_base.dart';
 
 class Dialog_C {
   // Dialog states.

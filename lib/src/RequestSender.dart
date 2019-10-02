@@ -1,15 +1,14 @@
 
 
-import 'package:sip_ua/src/transactions/ack_client.dart';
-import 'package:sip_ua/src/transactions/invite_client.dart';
-import 'package:sip_ua/src/transactions/non_invite_client.dart';
-import 'package:sip_ua/src/transactions/transaction_base.dart';
-
 import '../sip_ua.dart';
 import 'Constants.dart';
 import 'DigestAuthentication.dart';
 import 'UA.dart' as UAC;
 import 'logger.dart';
+import 'transactions/ack_client.dart';
+import 'transactions/invite_client.dart';
+import 'transactions/non_invite_client.dart';
+import 'transactions/transaction_base.dart';
 
 // Default event handlers.
 var EventHandlers = {

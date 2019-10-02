@@ -3,11 +3,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:sip_ua/src/Timers.dart';
-
-import 'Socket.dart';
-import 'logger.dart';
 import 'Grammar.dart';
+import 'Socket.dart';
+import 'Timers.dart';
+import 'logger.dart';
 
 class WebSocketInterface implements Socket {
   String _url;

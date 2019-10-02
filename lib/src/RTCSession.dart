@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
-import 'package:sip_ua/src/transactions/transaction_base.dart';
 
 import '../sip_ua.dart';
 import 'Constants.dart';
@@ -21,6 +20,7 @@ import 'Timers.dart';
 import 'URI.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
+import 'transactions/transaction_base.dart';
 
 class C {
   // RTCSession states.

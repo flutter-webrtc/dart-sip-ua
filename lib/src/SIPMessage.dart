@@ -1,11 +1,12 @@
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
+
 import '../sip_ua.dart';
 import 'Constants.dart';
-import 'NameAddrHeader.dart';
+import 'Constants.dart' as DartSIP_C;
 import 'Exceptions.dart' as Exceptions;
 import 'Grammar.dart';
+import 'NameAddrHeader.dart';
 import 'Utils.dart' as Utils;
-import 'Constants.dart' as DartSIP_C;
 import 'logger.dart';
 
 final logger = Logger('SIPMessage');

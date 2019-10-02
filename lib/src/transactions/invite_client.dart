@@ -1,12 +1,10 @@
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/Constants.dart';
-import 'package:sip_ua/src/Timers.dart';
-
-import 'package:sip_ua/src/Transport.dart';
-import 'package:sip_ua/src/Utils.dart';
-import 'package:sip_ua/src/transactions/Transactions.dart';
-import 'package:sip_ua/src/transactions/transaction_base.dart';
+import '../../sip_ua.dart';
+import '../Constants.dart';
 import '../SIPMessage.dart' as SIPMessage;
+import '../Timers.dart';
+import '../Transport.dart';
+import '../Utils.dart';
+import 'transaction_base.dart';
 
 
 final ict_logger = new Logger('InviteClientTransaction');
