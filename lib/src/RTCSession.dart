@@ -9,6 +9,7 @@ import 'Constants.dart';
 import 'Constants.dart' as DartSIP_C;
 import 'Dialog.dart';
 import 'Exceptions.dart' as Exceptions;
+import 'NameAddrHeader.dart';
 import 'RTCSession/DTMF.dart' as RTCSession_DTMF;
 import 'RTCSession/Info.dart' as RTCSession_Info;
 import 'RTCSession/ReferNotifier.dart' as RTCSession_ReferNotifier;
@@ -94,8 +95,8 @@ class RTCSession extends EventEmitter {
   bool _localHold;
   bool _remoteHold;
 
-  String _local_identity;
-  String _remote_identity;
+  NameAddrHeader _local_identity;
+  NameAddrHeader _remote_identity;
 
   String _contact;
   var _tones;
@@ -197,9 +198,9 @@ class RTCSession extends EventEmitter {
 
   String get direction => this._direction;
 
-  String get local_identity => this._local_identity;
+  NameAddrHeader get local_identity => this._local_identity;
 
-  String get remote_identity => this._remote_identity;
+  NameAddrHeader get remote_identity => this._remote_identity;
 
   get start_time => this._start_time;
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 import 'sip_ua_helper.dart';
 import 'package:sip_ua/src/RTCSession.dart';
+import 'package:sip_ua/src/NameAddrHeader.dart';
 
 class CallScreenWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -20,8 +21,8 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   MediaStream _localStream;
   MediaStream _remoteStream;
   String _direction;
-  String _local_identity;
-  String _remote_identity;
+  NameAddrHeader _local_identity;
+  NameAddrHeader _remote_identity;
 
   var _timeLabel = '00:00';
   Timer _timer;
