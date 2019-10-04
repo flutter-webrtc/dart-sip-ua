@@ -4,9 +4,8 @@ import 'dart:io';
 void main() async {
   TestWebsocket2 tester = TestWebsocket2();
   tester.connect("wss://echo.websocket.org/");
-   
-    await tester.finished.future;
-  
+
+  await tester.finished.future;
 }
 
 class TestWebsocket2 {
@@ -15,14 +14,14 @@ class TestWebsocket2 {
   Completer completer;
   int ctr = 1;
 
-  Completer finished = Completer();
+  Completer finished = Completer<String>();
 
-  send() {
+  void send() {
     String message = "A" * ctr;
     ws.add(message);
-    completer = Completer();
-    completer.future.then((t) {
-      ctr+=7;
+    completer = Completer<String>();
+    completer.future.then((dynamic t) {
+      ctr += 7;
       if (ctr > 5000 || finished.isCompleted) {
         finished.complete();
       } else {
@@ -31,11 +30,11 @@ class TestWebsocket2 {
     });
   }
 
-  connect(String url) async {
+  void connect(String url) async {
     ws = await WebSocket.connect(url);
     connected = true;
-    ws.listen((data) {
-      this._onMessage(data);
+    ws.listen((dynamic data) {
+      this._onMessage(data as String);
     }, onDone: () {
       print('Closed by server [${ws.closeCode}, ${ws.closeReason}]!');
       connected = false;

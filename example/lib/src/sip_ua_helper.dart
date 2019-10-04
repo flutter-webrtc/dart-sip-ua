@@ -2,23 +2,22 @@ import 'dart:async';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:events2/events2.dart';
 import 'package:sip_ua/src/RTCSession.dart';
+import 'package:sip_ua/src/Message.dart';
 
 class SIPUAHelper extends EventEmitter {
   UA _ua;
   Settings _settings;
-  final logger = new Logger('SIPUA::Helper');
+  final logger = Logger('SIPUA::Helper');
   RTCSession _session;
   bool _registered = false;
   bool _connected = false;
   var _registerState = 'new';
-  var _localStream;
-  var _remoteStream;
 
   SIPUAHelper();
 
-  debug(msg) => logger.debug(msg);
+  void debug(dynamic msg) => logger.debug(msg);
 
-  debugerror(error) => logger.error(error);
+  void debugerror(dynamic error) => logger.error(error);
 
   RTCSession get session => _session;
 
@@ -26,99 +25,99 @@ class SIPUAHelper extends EventEmitter {
 
   bool get connected => _connected;
 
-  get registerState => _registerState;
+  String get registerState => _registerState;
 
-  get localStream => _localStream;
-
-  get remoteStream => _remoteStream;
-
-  _handleSocketState(state, data) {
+  void _handleSocketState(String state, Map<String, dynamic> data) {
     this.emit('socketState', state, data);
   }
 
-  _handleRegisterState(state, data) {
+  void _handleRegisterState(String state, Map<String, dynamic> data) {
     this.emit('registerState', state, data);
   }
 
-  _handleUAState(state, data) {
+  void _handleUAState(String state, Map<String, dynamic> data) {
     this.emit('uaState', state, data);
   }
 
-  _handleCallState(state, data) {
+  void _handleCallState(String state, Map<String, dynamic> data) {
     this.emit('callState', state, data);
   }
 
-  start(wsUrl, uri, [password, displayName, wsExtraHeaders]) async {
+  void start(String wsUrl, String uri,
+      [String password,
+      String displayName,
+      Map<String, dynamic> wsExtraHeaders]) async {
     if (this._ua != null) {
       debugerror(
           'UA instance already exist!, stopping UA and creating a new one...');
       this._ua.stop();
     }
-    _settings = new Settings();
-    var socket = new WebSocketInterface(wsUrl, wsExtraHeaders);
+    _settings = Settings();
+    var socket = WebSocketInterface(wsUrl, wsExtraHeaders);
     _settings.sockets = [socket];
     _settings.uri = uri;
     _settings.password = password;
     _settings.display_name = displayName;
 
     try {
-      this._ua = new UA(_settings);
-      this._ua.on('onnecting', (data) {
+      this._ua = UA(_settings);
+      this._ua.on('onnecting', (Map<String, dynamic> data) {
         debug('onnecting => ' + data.toString());
         _handleSocketState('onnecting', data);
       });
 
-      this._ua.on('connected', (data) {
+      this._ua.on('connected', (Map<String, dynamic> data) {
         debug('connected => ' + data.toString());
         _handleSocketState('connected', data);
         _connected = true;
       });
 
-      this._ua.on('disconnected', (data) {
+      this._ua.on('disconnected', (Map<String, dynamic> data) {
         debug('disconnected => ' + data.toString());
         _handleSocketState('disconnected', data);
         _connected = false;
       });
 
-      this._ua.on('registered', (data) {
+      this._ua.on('registered', (Map<String, dynamic> data) {
         debug('registered => ' + data.toString());
         _registered = true;
         _registerState = 'registered';
         _handleRegisterState('registered', data);
       });
 
-      this._ua.on('unregistered', (data) {
+      this._ua.on('unregistered', (Map<String, dynamic> data) {
         debug('unregistered => ' + data.toString());
         _registerState = 'unregistered';
         _registered = false;
         _handleRegisterState('unregistered', data);
       });
 
-      this._ua.on('registrationFailed', (data) {
-        debug('registrationFailed => ' + data['cause']);
+      this._ua.on('registrationFailed', (Map<String, dynamic> data) {
+        debug('registrationFailed => ' + (data['cause'] as String));
         _registerState = 'registrationFailed[${data['cause']}]';
         _registered = false;
         _handleRegisterState('registrationFailed', data);
       });
 
-      this._ua.on('newRTCSession', (data) {
+      this._ua.on('newRTCSession', (Map<String, dynamic> data) {
         debug('newRTCSession => ' + data.toString());
-        _session = data['session'];
+        _session = data['session'] as RTCSession;
         if (_session.direction == 'incoming') {
           // Set event handlers.
-          options()['eventHandlers'].forEach((event, func) {
+          (options()['eventHandlers'] as Map<String, Function>)
+              .forEach((String event, Function func) {
             _session.on(event, func);
           });
         }
         _handleUAState('newRTCSession', data);
       });
 
-      this._ua.on('newMessage', (data) {
+      this._ua.on('newMessage', (Map<String, dynamic> data) {
         debug('newMessage => ' + data.toString());
         _handleUAState('newMessage', data);
       });
 
-      this._ua.on('sipEvent', (data) {
+      this._ua.on('sipEvent', (Map<String, dynamic> data) {
         debug('sipEvent => ' + data.toString());
         _handleUAState('sipEvent', data);
       });
@@ -128,72 +127,68 @@ class SIPUAHelper extends EventEmitter {
     }
   }
 
-  stop() async {
+  void stop() async {
     await this._ua.stop();
   }
 
-  register() {
+  void register() {
     this._ua.register();
   }
 
-  unregister([all = true]) {
+  void unregister([bool all = true]) {
     this._ua.unregister(all: all);
   }
 
-  options([voiceonly]) {
+  Map<String, Object> options([bool voiceonly]) {
     voiceonly = voiceonly ?? false;
     // Register callbacks to desired call events
     var eventHandlers = {
-      'connecting': (e) {
+      'connecting': (Map<String, dynamic> e) {
         debug('call connecting');
         _handleCallState('connecting', e);
       },
-      'progress': (e) {
+      'progress': (Map<String, dynamic> e) {
         debug('call is in progress');
         _handleCallState('progress', e);
       },
-      'failed': (e) {
-        debug('call failed with cause: ' + e['cause']);
+      'failed': (Map<String, dynamic> e) {
+        debug('call failed with cause: ' + (e['cause'] as String));
         _handleCallState('failed', e);
         _session = null;
         var cause = 'failed (${e['cause']})';
-        _localStream = null;
-        _remoteStream = null;
       },
-      'ended': (e) {
-        debug('call ended with cause: ' + e['cause']);
+      'ended': (Map<String, dynamic> e) {
+        debug('call ended with cause: ' + (e['cause'] as String));
         _handleCallState('ended', e);
         _session = null;
-        _localStream = null;
-        _remoteStream = null;
       },
-      'accepted': (e) {
+      'accepted': (Map<String, dynamic> e) {
         debug('call accepted');
         _handleCallState('accepted', e);
       },
-      'confirmed': (e) {
+      'confirmed': (Map<String, dynamic> e) {
         debug('call confirmed');
         _handleCallState('confirmed', e);
       },
-      'hold': (e) {
+      'hold': (Map<String, dynamic> e) {
         debug('call hold');
         _handleCallState('hold', e);
       },
-      'unhold': (e) {
+      'unhold': (Map<String, dynamic> e) {
         debug('call unhold');
         _handleCallState('unhold', e);
       },
-      'muted': (e) {
+      'muted': (Map<String, dynamic> e) {
         debug('call muted');
         _handleCallState('muted', e);
       },
-      'unmuted': (e) {
+      'unmuted': (Map<String, dynamic> e) {
         debug('call unmuted');
         _handleCallState('unmuted', e);
       },
-      'stream': (e) async {
+      'stream': (Map<String, dynamic> e) async {
         // Wating for callscreen ready.
-        new Timer(Duration(milliseconds: 100), () {
+        Timer(Duration(milliseconds: 100), () {
           _handleCallState('stream', e);
         });
       }
@@ -225,7 +220,7 @@ class SIPUAHelper extends EventEmitter {
                   "minFrameRate": '30',
                 },
                 "facingMode": "user",
-                "optional": [],
+                "optional": List<dynamic>(),
               }
       },
       'rtcOfferConstraints': {
@@ -233,17 +228,17 @@ class SIPUAHelper extends EventEmitter {
           'OfferToReceiveAudio': true,
           'OfferToReceiveVideo': !voiceonly,
         },
-        'optional': [],
+        'optional': List<dynamic>(),
       },
       'rtcAnswerConstraints': {
         'mandatory': {
           'OfferToReceiveAudio': true,
           'OfferToReceiveVideo': true,
         },
-        'optional': [],
+        'optional': List<dynamic>(),
       },
       'rtcConstraints': {
-        'mandatory': {},
+        'mandatory': Map<dynamic, dynamic>(),
         'optional': [
           {'DtlsSrtpKeyAgreement': true},
         ],
@@ -253,7 +248,7 @@ class SIPUAHelper extends EventEmitter {
     return defaultOptions;
   }
 
-  connect(uri, [voiceonly]) async {
+  Future<RTCSession> connect(String uri, [bool voiceonly]) async {
     if (_ua != null && _ua.isConnected()) {
       _session = _ua.call(uri, this.options(voiceonly));
       return _session;
@@ -263,47 +258,48 @@ class SIPUAHelper extends EventEmitter {
     return null;
   }
 
-  answer() {
+  void answer() {
     if (_session != null) {
       _session.answer(this.options());
     }
   }
 
-  hangup() {
+  void hangup() {
     if (_session != null) {
       _session.terminate();
     }
   }
 
-  hold() {
+  void hold() {
     if (_session != null) {
       _session.hold();
     }
   }
 
-  unhold() {
+  void unhold() {
     if (_session != null) {
       _session.unhold();
     }
   }
 
-  mute([audio = true, video = true]) {
+  void mute([bool audio = true, bool video = true]) {
     if (_session != null) {
       _session.mute(audio, video);
     }
   }
 
-  unmute([audio = true, video = true]) {
+  void unmute([bool audio = true, bool video = true]) {
     if (_session != null) {
       _session.unmute(audio, video);
     }
   }
 
-  sendMessage(target, body, [options]) {
+  Message sendMessage(String target, String body,
+      [Map<String, dynamic> options]) {
     return this._ua.sendMessage(target, body, options);
   }
 
-  terminateSessions(options) {
-    return this._ua.terminateSessions(options);
+  void terminateSessions(Map<String, Object> options) {
+    this._ua.terminateSessions(options);
   }
 }

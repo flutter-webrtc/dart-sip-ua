@@ -156,11 +156,12 @@ class Transport {
     this.ondisconnect({'socket': this.socket, 'error': false});
   }
 
-  send(data) {
+  bool send(data) {
     debug('send()');
 
     if (!this.isConnected()) {
-      debugerror('unable to send message, transport is not connected. Current state is ${this.status}');
+      debugerror(
+          'unable to send message, transport is not connected. Current state is ${this.status}');
       return false;
     }
 
@@ -169,11 +170,11 @@ class Transport {
     return this.socket.send(message);
   }
 
-  isConnected() {
+  bool isConnected() {
     return this.status == C.STATUS_CONNECTED;
   }
 
-  isConnecting() {
+  bool isConnecting() {
     return this.status == C.STATUS_CONNECTING;
   }
 

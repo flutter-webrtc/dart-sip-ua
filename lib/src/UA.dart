@@ -217,14 +217,14 @@ class UA extends EventEmitter {
   /**
    * Registration state.
    */
-  isRegistered() {
+  bool isRegistered() {
     return this._registrator.registered;
   }
 
   /**
    * Connection state.
    */
-  isConnected() {
+  bool isConnected() {
     return this._transport.isConnected();
   }
 
@@ -237,9 +237,9 @@ class UA extends EventEmitter {
    * -throws {TypeError}
    *
    */
-  call(target, options) {
+  RTCSession call(target, options) {
     debug('call()');
-    var session = new RTCSession(this);
+    RTCSession session = new RTCSession(this);
     session.connect(target, options);
     return session;
   }
@@ -254,7 +254,8 @@ class UA extends EventEmitter {
    * -throws {TypeError}
    *
    */
-  sendMessage(target, body, options) {
+  Message sendMessage(
+      String target, String body, Map<String, dynamic> options) {
     debug('sendMessage()');
     var message = new Message(this);
     message.send(target, body, options);
@@ -264,7 +265,7 @@ class UA extends EventEmitter {
   /**
    * Terminate ongoing sessions.
    */
-  terminateSessions(options) {
+  terminateSessions(Map<String, Object> options) {
     debug('terminateSessions()');
     this._sessions.forEach((idx, value) {
       if (!this._sessions[idx].isEnded()) {
@@ -821,13 +822,13 @@ class UA extends EventEmitter {
  */
 
 // Transport connecting event.
-  onTransportConnecting(data) {
+  onTransportConnecting(Map<String, dynamic> data) {
     debug('Transport connecting');
     this.emit('connecting', data);
   }
 
 // Transport connected event.
-  onTransportConnect(data) {
+  onTransportConnect(Map<String, dynamic> data) {
     debug('Transport connected');
     if (this._status == C.STATUS_USER_CLOSED) {
       return;
@@ -843,7 +844,7 @@ class UA extends EventEmitter {
   }
 
 // Transport disconnected event.
-  onTransportDisconnect(data) {
+  onTransportDisconnect(Map<String, dynamic> data) {
     // Run _onTransportError_ callback on every client transaction using _transport_.
     this._transactions.removeAll().forEach((transaction) {
       transaction.onTransportError();
@@ -861,7 +862,7 @@ class UA extends EventEmitter {
   }
 
 // Transport data event.
-  onTransportData(data) {
+  onTransportData(Map<String, dynamic> data) {
     var transport = data['transport'];
     String messageData = data['message'];
 

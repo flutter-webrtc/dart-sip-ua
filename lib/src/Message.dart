@@ -46,7 +46,7 @@ class Message extends EventEmitter {
 
   get data => this._data;
 
-  send(target, body, [options]) {
+  send(String target, String body, [Map<String, dynamic> options]) {
     var originalTarget = target;
     options = options ?? {};
 

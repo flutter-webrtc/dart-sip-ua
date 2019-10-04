@@ -83,7 +83,7 @@ class RTCSession extends EventEmitter {
   var _iceGatheringState;
   bool _localMediaStreamLocallyGenerated;
   bool _rtcReady;
-  var _direction;
+  String _direction;
 
   Map _referSubscribers;
   var _start_time;
@@ -94,8 +94,8 @@ class RTCSession extends EventEmitter {
   bool _localHold;
   bool _remoteHold;
 
-  var _local_identity;
-  var _remote_identity;
+  String _local_identity;
+  String _remote_identity;
 
   String _contact;
   var _tones;
@@ -195,11 +195,11 @@ class RTCSession extends EventEmitter {
 
   get contact => this._contact;
 
-  get direction => this._direction;
+  String get direction => this._direction;
 
-  get local_identity => this._local_identity;
+  String get local_identity => this._local_identity;
 
-  get remote_identity => this._remote_identity;
+  String get remote_identity => this._remote_identity;
 
   get start_time => this._start_time;
 
@@ -677,7 +677,7 @@ class RTCSession extends EventEmitter {
   /**
    * Terminate the call.
    */
-  terminate([options]) {
+  terminate([Map<String, Object> options]) {
     debug('terminate()');
 
     options = options ?? {};
@@ -687,7 +687,7 @@ class RTCSession extends EventEmitter {
     var body = options['body'];
 
     var cancel_reason;
-    var status_code = options['status_code'];
+    int status_code = options['status_code'];
     var reason_phrase = options['reason_phrase'];
 
     // Check Session Status.
@@ -1814,7 +1814,7 @@ class RTCSession extends EventEmitter {
       return;
     }
 
-    if (request.body == null || request.body.length  == 0) {
+    if (request.body == null || request.body.length == 0) {
       sendAnswer(null);
       return;
     }
