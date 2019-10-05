@@ -2,7 +2,7 @@ import 'package:sip_ua/src/grammar_parser.dart';
 import "package:parser_error/parser_error.dart";
 
 class Grammar {
-  static parse(input, startRule) {
+  static parse(String input,String startRule) {
     var parser = new GrammarParser('');
     var result = parser.parse(input, startRule);
     if (!parser.success) {

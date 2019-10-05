@@ -1,26 +1,25 @@
 import 'dart:async';
 
 import 'package:events2/events2.dart';
-import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 import 'package:flutter_webrtc/webrtc.dart';
+import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
+import 'package:sip_ua/src/transactions/transaction_base.dart';
 
 import '../sip_ua.dart';
 import 'Constants.dart';
+import 'Constants.dart' as DartSIP_C;
+import 'Dialog.dart';
+import 'Exceptions.dart' as Exceptions;
 import 'RTCSession/DTMF.dart' as RTCSession_DTMF;
 import 'RTCSession/Info.dart' as RTCSession_Info;
 import 'RTCSession/ReferNotifier.dart' as RTCSession_ReferNotifier;
 import 'RTCSession/ReferSubscriber.dart' as RTCSession_ReferSubscriber;
-
-import 'Constants.dart' as DartSIP_C;
-import 'Exceptions.dart' as Exceptions;
-import 'SIPMessage.dart';
-import 'Transactions.dart' as Transactions;
-import 'Utils.dart' as Utils;
-import 'Timers.dart';
-import 'SIPMessage.dart' as SIPMessage;
-import 'Dialog.dart';
 import 'RequestSender.dart';
+import 'SIPMessage.dart';
+import 'SIPMessage.dart' as SIPMessage;
+import 'Timers.dart';
 import 'URI.dart';
+import 'Utils.dart' as Utils;
 import 'logger.dart';
 
 class C {
@@ -566,7 +565,7 @@ class RTCSession extends EventEmitter {
 
     // Don't ask for video if the incoming offer has no video section.
     if (mediaStream == null && !peerHasVideoLine) {
-      mediaConstraints.video = false;
+      mediaConstraints['video'] = false;
     }
 
     // Create a new RTCPeerConnection instance.
@@ -765,7 +764,7 @@ class RTCSession extends EventEmitter {
         if (this._status == C.STATUS_WAITING_FOR_ACK &&
             this._direction == 'incoming' &&
             this._request.server_transaction.state !=
-                Transactions.C.STATUS_TERMINATED) {
+                TransactionState.TERMINATED) {
           /// Save the dialog for later restoration.
           Dialog dialog = this._dialog;
 
@@ -781,7 +780,7 @@ class RTCSession extends EventEmitter {
           // .., or when the INVITE transaction times out
           this._request.server_transaction.on('stateChanged', () {
             if (this._request.server_transaction.state ==
-                Transactions.C.STATUS_TERMINATED) {
+                TransactionState.TERMINATED) {
               this.sendRequest(
                   SipMethod.BYE, {'extraHeaders': extraHeaders, 'body': body});
               dialog.terminate();
@@ -2267,7 +2266,9 @@ class RTCSession extends EventEmitter {
       // Be ready for 200 with SDP after a 180/183 with SDP.
       // We created a SDP 'answer' for it, so check the current signaling state.
       if (this._connection.signalingState ==
-          RTCSignalingState.RTCSignalingStateStable) {
+              RTCSignalingState.RTCSignalingStateStable ||
+          this._connection.signalingState ==
+              RTCSignalingState.RTCSignalingStateHaveLocalOffer) {
         try {
           var offer =
               await this._connection.createOffer(this._rtcOfferConstraints);
@@ -2453,7 +2454,7 @@ class RTCSession extends EventEmitter {
 
       // Must have SDP answer.
       if (sdpOffer != null) {
-        if (!response.body) {
+        if (response.body !=null && response.body.trim().isNotEmpty) {
           onFailed();
           return;
         } else if (response.getHeader('Content-Type') != 'application/sdp') {

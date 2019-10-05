@@ -1,4 +1,11 @@
 import 'package:events2/events2.dart';
+import 'package:sip_ua/src/SIPMessage.dart';
+import 'package:sip_ua/src/transactions/Transactions.dart';
+import 'package:sip_ua/src/transactions/invite_client.dart';
+import 'package:sip_ua/src/transactions/invite_server.dart';
+import 'package:sip_ua/src/transactions/non_invite_client.dart';
+import 'package:sip_ua/src/transactions/non_invite_server.dart';
+import 'package:sip_ua/src/transactions/transaction_base.dart';
 
 import 'Config.dart' as config;
 import 'Config.dart';
@@ -6,18 +13,17 @@ import 'Constants.dart' as DartSIP_C;
 import 'Constants.dart';
 import 'Dialog.dart';
 import 'Exceptions.dart' as Exceptions;
-import 'Registrator.dart';
-import 'RTCSession.dart';
 import 'Message.dart';
-import 'Transactions.dart' as Transactions;
-import 'Transport.dart';
-import 'Utils.dart' as Utils;
-import 'URI.dart';
 import 'Parser.dart' as Parser;
+import 'RTCSession.dart';
+import 'Registrator.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'Timers.dart';
-import 'sanityCheck.dart';
+import 'Transport.dart';
+import 'URI.dart';
+import 'Utils.dart' as Utils;
 import 'logger.dart';
+import 'sanityCheck.dart';
 
 class C {
   // UA status codes.
@@ -78,14 +84,14 @@ class UA extends EventEmitter {
   var _cache;
   Settings _configuration;
   var _dynConfiguration;
-  Map<String,Dialog> _dialogs;
-  var _applicants;
-  Map<String,RTCSession> _sessions = {};
+  Map<String, Dialog> _dialogs;
+  Set<Message> _applicants;
+  Map<String, RTCSession> _sessions = {};
   Transport _transport;
   Contact _contact;
   var _status;
   var _error;
-  var _transactions;
+  TransactionBag _transactions = TransactionBag();
   var _data;
   var _closeTimer;
   var _registrator;
@@ -110,7 +116,7 @@ class UA extends EventEmitter {
     this._contact = null;
     this._status = C.STATUS_INIT;
     this._error = null;
-    this._transactions = {'nist': {}, 'nict': {}, 'ist': {}, 'ict': {}};
+    this._transactions = TransactionBag();
 
     // Custom UA empty object for high level use.
     this._data = {};
@@ -143,7 +149,7 @@ class UA extends EventEmitter {
 
   Transport get transport => this._transport;
 
-  get transactions => this._transactions;
+  TransactionBag get transactions => this._transactions;
 
   // ============
   //  High Level API
@@ -300,20 +306,15 @@ class UA extends EventEmitter {
     });
 
     // Run  _close_ on every applicant.
-    for (var applicant in this._applicants) {
-      if (this._applicants.containsKey(applicant))
-        try {
-          this._applicants[applicant].close();
-        } catch (error) {}
+    for (Message message in this._applicants) {
+      try {
+        message.close();
+      } catch (error) {}
     }
 
     this._status = C.STATUS_USER_CLOSED;
 
-    var num_transactions = this._transactions['nict'].length +
-        this._transactions['nist'].length +
-        this._transactions['ict'].length +
-        this._transactions['ist'].length;
-
+    var num_transactions = this._transactions.countTransactions();
     if (num_transactions == 0 && num_sessions == 0) {
       this._transport.disconnect();
     } else {
@@ -401,16 +402,16 @@ class UA extends EventEmitter {
   /**
    * new Transaction
    */
-  newTransaction(transaction) {
-    this._transactions[transaction.type][transaction.id] = transaction;
+  newTransaction(TransactionBase transaction) {
+    this._transactions.addTransaction(transaction);
     this.emit('newTransaction', {'transaction': transaction});
   }
 
   /**
    * Transaction destroyed.
    */
-  destroyTransaction(transaction) {
-    this._transactions[transaction.type].remove(transaction.id);
+  destroyTransaction(TransactionBase transaction) {
+    this._transactions.removeTransaction(transaction);
     this.emit('transactionDestroyed', {'transaction': transaction});
   }
 
@@ -424,29 +425,29 @@ class UA extends EventEmitter {
   /**
    * Dialog destroyed.
    */
-  destroyDialog(dialog) {
+  destroyDialog(Dialog dialog) {
     this._dialogs.remove(dialog.id.toString());
   }
 
   /**
    *  new Message
    */
-  newMessage(message, data) {
-    this._applicants[message] = message;
+  newMessage(Message message, data) {
+    this._applicants.add(message);
     this.emit('newMessage', data);
   }
 
   /**
    *  Message destroyed.
    */
-  destroyMessage(message) {
+  destroyMessage(Message message) {
     this._applicants.remove(message);
   }
 
   /**
    * new RTCSession
    */
-  newRTCSession(session, data) {
+  newRTCSession(RTCSession session, data) {
     this._sessions[session.id] = session;
     this.emit('newRTCSession', data);
   }
@@ -454,7 +455,7 @@ class UA extends EventEmitter {
   /**
    * RTCSession destroyed.
    */
-  destroyRTCSession(session) {
+  destroyRTCSession(RTCSession session) {
     this._sessions.remove([session.id]);
   }
 
@@ -508,19 +509,18 @@ class UA extends EventEmitter {
     }
 
     // Check transaction.
-    if (Transactions.checkTransaction(_transactions, request)) {
+    if (checkTransaction(_transactions, request)) {
       return;
     }
 
     // Create the server transaction.
     if (method == SipMethod.INVITE) {
       /* eslint-disable no-new */
-      new Transactions.InviteServerTransaction(this, this._transport, request);
+      new InviteServerTransaction(this, this._transport, request);
       /* eslint-enable no-new */
     } else if (method != SipMethod.ACK && method != SipMethod.CANCEL) {
       /* eslint-disable no-new */
-      new Transactions.NonInviteServerTransaction(
-          this, this._transport, request);
+      new NonInviteServerTransaction(this, this._transport, request);
       /* eslint-enable no-new */
     }
 
@@ -845,12 +845,8 @@ class UA extends EventEmitter {
 // Transport disconnected event.
   onTransportDisconnect(data) {
     // Run _onTransportError_ callback on every client transaction using _transport_.
-    ['nict', 'ict', 'nist', 'ist'].forEach((type) {
-      if (this._transactions[type] != null) {
-        this._transactions[type].forEach((id, transaction) {
-          transaction.onTransportError();
-        });
-      }
+    this._transactions.removeAll().forEach((transaction) {
+      transaction.onTransportError();
     });
 
     this.emit('disconnected', data);
@@ -867,9 +863,9 @@ class UA extends EventEmitter {
 // Transport data event.
   onTransportData(data) {
     var transport = data['transport'];
-    var message = data['message'];
+    String messageData = data['message'];
 
-    message = Parser.parseMessage(message, this);
+    IncomingMessage message = Parser.parseMessage(messageData, this);
 
     if (message == null) {
       return;
@@ -894,11 +890,11 @@ class UA extends EventEmitter {
     * in order to be discarded there.
     */
 
-      var transaction;
-    
       switch (message.method) {
         case SipMethod.INVITE:
-          transaction = this._transactions['ict'][message.via_branch];
+          InviteClientTransaction transaction = this
+              ._transactions
+              .getTransaction(InviteClientTransaction, message.via_branch);
           if (transaction != null) {
             transaction.receiveResponse(message);
           }
@@ -907,7 +903,9 @@ class UA extends EventEmitter {
           // Just in case ;-).
           break;
         default:
-          transaction = this._transactions['nict'][message.via_branch];
+          NonInviteClientTransaction transaction = this
+              ._transactions
+              .getTransaction(NonInviteClientTransaction, message.via_branch);
           if (transaction != null) {
             transaction.receiveResponse(message);
           }

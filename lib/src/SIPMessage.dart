@@ -323,7 +323,7 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
 }
 
 class IncomingMessage {
-  var data;
+  String data;
   var headers;
   SipMethod method;
   var via;
@@ -334,7 +334,7 @@ class IncomingMessage {
   var from_tag;
   var to;
   var to_tag;
-  var body;
+  String body;
   var sdp;
   var status_code;
   var reason_phrase;
@@ -409,7 +409,7 @@ class IncomingMessage {
   /**
    * Verify the existence of the given header.
    */
-  hasHeader(name) {
+  bool hasHeader(name) {
     return this.headers.containsKey(Utils.headerize(name));
   }
 

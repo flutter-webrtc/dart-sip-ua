@@ -1,3 +1,5 @@
+import 'package:sip_ua/sip_ua.dart';
+
 import 'Constants.dart';
 import 'Utils.dart' as Utils;
 import 'Constants.dart' as DartSIP_C;
@@ -43,7 +45,7 @@ class Settings {
   var registrar_server = null;
 
   // Connection options.
-  var sockets = null;
+  List<WebSocketInterface> sockets = null;
   var connection_recovery_max_interval = 30;
   var connection_recovery_min_interval = 2;
 
@@ -64,18 +66,16 @@ var settings = new Settings();
 // Configuration checks.
 class Checks {
   var mandatory = {
-    'sockets': (src, dst) {
-      var sockets = src.sockets;
+    'sockets': (Settings src, Settings dst) {
+      List<WebSocketInterface> sockets = src.sockets;
       /* Allow defining sockets parameter as:
        *  Socket: socket
        *  List of Socket: [socket1, socket2]
        *  List of Objects: [{socket: socket1, weight:1}, {socket: Socket2, weight:0}]
        *  List of Objects and Socket: [{socket: socket1}, socket2]
        */
-      var _sockets = [];
-      if (sockets != null && Socket.isSocket(sockets)) {
-        _sockets.add({'socket': sockets});
-      } else if (sockets is List && sockets.length > 0) {
+      List<WebSocketInterface> _sockets = [];
+      if (sockets is List && sockets.length > 0) {
         for (var socket in sockets) {
           if (Socket.isSocket(socket)) {
             _sockets.add(socket);
