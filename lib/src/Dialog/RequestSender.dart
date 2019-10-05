@@ -80,7 +80,7 @@ class DialogRequestSender {
         }
       };
 
-      request_sender.clientTransaction.once('stateChanged', stateChanged);
+      request_sender.clientTransaction.on('stateChanged', stateChanged);
     }
   }
 

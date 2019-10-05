@@ -33,6 +33,7 @@ class OutgoingRequest {
   var call_id;
   var cseq;
   var sdp;
+  var transaction;
 
   OutgoingRequest(SipMethod method, ruri, UA ua, [params, extraHeaders, body]) {
     // Mandatory parameters check.
@@ -292,7 +293,7 @@ class OutgoingRequest {
 }
 
 class InitialOutgoingInviteRequest extends OutgoingRequest {
-  var transaction;
+
   InitialOutgoingInviteRequest(ruri, ua, [params, extraHeaders, body])
       : super(SipMethod.INVITE, ruri, ua, params, extraHeaders, body) {
     this.transaction = null;

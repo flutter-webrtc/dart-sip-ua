@@ -276,6 +276,18 @@ class SIPUAHelper extends EventEmitter {
     }
   }
 
+  hold() {
+    if (_session != null) {
+      _session.hold();
+    }
+  }
+
+  unhold(){
+    if (_session != null) {
+      _session.unhold();
+    }
+  }
+
   sendMessage(target, body, [options]) {
     return this._ua.sendMessage(target, body, options);
   }

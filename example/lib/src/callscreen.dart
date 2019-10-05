@@ -97,7 +97,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   }
 
   _handleCalllState(state, data) {
-
     if (state == 'hold' || state == 'unhold') {
       _hold = state == 'hold';
       return;
@@ -190,7 +189,13 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     }
   }
 
-  _handleHold() {}
+  _handleHold() {
+    if (_hold) {
+      helper.unhold();
+    } else {
+      helper.hold();
+    }
+  }
 
   _buildActionButtons() {
     var hangupBtn = FloatingActionButton(
@@ -341,7 +346,8 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
                   child: Padding(
                       padding: const EdgeInsets.all(6),
                       child: Text(
-                        (voiceonly ? 'VOICE CALL' : 'VIDEO CALL') + (_hold? ' PAUSED' : ''),
+                        (voiceonly ? 'VOICE CALL' : 'VIDEO CALL') +
+                            (_hold ? ' PAUSED' : ''),
                         style: TextStyle(fontSize: 24, color: Colors.black54),
                       ))),
               Center(

@@ -984,8 +984,10 @@ class RTCSession extends EventEmitter {
   /**
    * Hold
    */
-  hold(options, done) {
+  hold([options, done]) {
     debug('hold()');
+
+    options = options ?? {};
 
     if (this._status != C.STATUS_WAITING_FOR_ACK &&
         this._status != C.STATUS_CONFIRMED) {
@@ -1004,12 +1006,12 @@ class RTCSession extends EventEmitter {
     this._onhold('local');
 
     var eventHandlers = {
-      'succeeded': () {
+      'succeeded': (response) {
         if (done != null) {
           done();
         }
       },
-      'failed': () {
+      'failed': (response) {
         this.terminate({
           'cause': DartSIP_C.causes.WEBRTC_ERROR,
           'status_code': 500,
@@ -1034,8 +1036,10 @@ class RTCSession extends EventEmitter {
     return true;
   }
 
-  unhold(options, done) {
+  unhold([options, done]) {
     debug('unhold()');
+
+    options = options ?? {};
 
     if (this._status != C.STATUS_WAITING_FOR_ACK &&
         this._status != C.STATUS_CONFIRMED) {
@@ -1054,12 +1058,12 @@ class RTCSession extends EventEmitter {
     this._onunhold('local');
 
     var eventHandlers = {
-      'succeeded': () {
+      'succeeded': (response) {
         if (done != null) {
           done();
         }
       },
-      'failed': () {
+      'failed': (response) {
         this.terminate({
           'cause': DartSIP_C.causes.WEBRTC_ERROR,
           'status_code': 500,
@@ -2310,7 +2314,7 @@ class RTCSession extends EventEmitter {
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
     var eventHandlers = options['eventHandlers'] ?? {};
     var rtcOfferConstraints =
-        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints || null;
+        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints;
 
     var succeeded = false;
 
@@ -2493,9 +2497,9 @@ class RTCSession extends EventEmitter {
     if (sdpOffer) {
       extraHeaders.add('Content-Type: application/sdp');
       try {
-        var sdp =
+        var desc =
             await this._createLocalDescription('offer', rtcOfferConstraints);
-        sdp = await this._mangleOffer(sdp);
+        var sdp = this._mangleOffer(desc.sdp);
 
         var e = {'originator': 'local', 'type': 'offer', 'sdp': sdp};
 
@@ -2577,7 +2581,7 @@ class RTCSession extends EventEmitter {
   /**
    * Correctly set the SDP direction attributes if the call is on local hold
    */
-  _mangleOffer(sdp) async {
+  _mangleOffer(sdp) {
     if (!this._localHold && !this._remoteHold) {
       return sdp;
     }
@@ -2588,7 +2592,7 @@ class RTCSession extends EventEmitter {
     if (this._localHold && !this._remoteHold) {
       debug('mangleOffer() | me on hold, mangling offer');
       for (var m in sdp['media']) {
-        if (holdMediaTypes.indexOf(m.type) == -1) {
+        if (holdMediaTypes.indexOf(m['type']) == -1) {
           continue;
         }
         if (m['direction'] == null) {
@@ -2604,17 +2608,17 @@ class RTCSession extends EventEmitter {
     else if (this._localHold && this._remoteHold) {
       debug('mangleOffer() | both on hold, mangling offer');
       for (var m in sdp['media']) {
-        if (holdMediaTypes.indexOf(m.type) == -1) {
+        if (holdMediaTypes.indexOf(m['type']) == -1) {
           continue;
         }
         m['direction'] = 'inactive';
       }
     }
     // Remote hold.
-    else if (this._remoteHold != null) {
+    else if (this._remoteHold) {
       debug('mangleOffer() | remote on hold, mangling offer');
       for (var m in sdp['media']) {
-        if (holdMediaTypes.indexOf(m.type) == -1) {
+        if (holdMediaTypes.indexOf(m['type']) == -1) {
           continue;
         }
         if (m['direction'] == null) {
@@ -2646,8 +2650,8 @@ class RTCSession extends EventEmitter {
       enableVideo = false;
     }
 
-    this._toggleMuteAudio(enableAudio == null);
-    this._toggleMuteVideo(enableVideo == null);
+    this._toggleMuteAudio(!enableAudio);
+    this._toggleMuteVideo(!enableVideo);
   }
 
   /**
