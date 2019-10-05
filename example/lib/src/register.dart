@@ -46,7 +46,7 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     _sipUri = prefs.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
     _displayName = prefs.getString('display_name') ?? 'Flutter SIP UA';
     _password = prefs.getString('password');
-    prefs.commit();
+    await prefs.commit();
     this.setState(() {});
   }
 
