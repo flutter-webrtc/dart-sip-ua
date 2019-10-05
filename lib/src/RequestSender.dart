@@ -1,10 +1,13 @@
 
 
+import 'package:sip_ua/src/transactions/ack_client.dart';
+import 'package:sip_ua/src/transactions/invite_client.dart';
+import 'package:sip_ua/src/transactions/non_invite_client.dart';
+import 'package:sip_ua/src/transactions/transaction_base.dart';
+
 import '../sip_ua.dart';
-import 'Constants.dart' as DartSIP_C;
 import 'Constants.dart';
 import 'DigestAuthentication.dart';
-import 'Transactions.dart' as Transactions;
 import 'UA.dart' as UAC;
 import 'logger.dart';
 
@@ -24,7 +27,7 @@ class RequestSender {
   var _auth;
   var _challenged;
   var _staled;
-  var clientTransaction;
+  TransactionBase clientTransaction;
   final logger = new Logger('RequestSender');
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
@@ -66,15 +69,15 @@ class RequestSender {
 
     switch (this._method) {
       case SipMethod.INVITE:
-        this.clientTransaction = new Transactions.InviteClientTransaction(
+        this.clientTransaction = new InviteClientTransaction(
             this._ua, this._ua.transport, this._request, eventHandlers);
         break;
       case SipMethod.ACK:
-        this.clientTransaction = new Transactions.AckClientTransaction(
+        this.clientTransaction = new AckClientTransaction(
             this._ua, this._ua.transport, this._request, eventHandlers);
         break;
       default:
-        this.clientTransaction = new Transactions.NonInviteClientTransaction(
+        this.clientTransaction =  new NonInviteClientTransaction(
             this._ua, this._ua.transport, this._request, eventHandlers);
     }
 

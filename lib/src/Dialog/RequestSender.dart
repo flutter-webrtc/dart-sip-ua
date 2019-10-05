@@ -1,11 +1,11 @@
+import 'package:sip_ua/src/transactions/transaction_base.dart';
+
 import '../../sip_ua.dart';
-import '../Constants.dart' as DartSIP_C;
 import '../Constants.dart';
 import '../Dialog.dart';
-import '../SIPMessage.dart';
-import '../Transactions.dart' as Transactions;
 import '../RTCSession.dart' as RTCSession;
 import '../RequestSender.dart';
+import '../SIPMessage.dart';
 import '../Timers.dart';
 
 // Default event handlers.
@@ -64,17 +64,17 @@ class DialogRequestSender {
     if ((this._request.method == SipMethod.INVITE ||
             (this._request.method == SipMethod.UPDATE && this._request.body != null)) &&
         request_sender.clientTransaction.state !=
-            Transactions.C.STATUS_TERMINATED) {
+            TransactionState.TERMINATED) {
       this._dialog.uac_pending_reply = true;
 
       var stateChanged;
       stateChanged = () {
         if (request_sender.clientTransaction.state ==
-                Transactions.C.STATUS_ACCEPTED ||
+                TransactionState.ACCEPTED ||
             request_sender.clientTransaction.state ==
-                Transactions.C.STATUS_COMPLETED ||
+                TransactionState.COMPLETED ||
             request_sender.clientTransaction.state ==
-                Transactions.C.STATUS_TERMINATED) {
+                TransactionState.TERMINATED) {
           request_sender.clientTransaction.remove('stateChanged', stateChanged);
           this._dialog.uac_pending_reply = false;
         }
