@@ -97,6 +97,12 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   }
 
   _handleCalllState(state, data) {
+
+    if (state == 'hold' || state == 'unhold') {
+      _hold = state == 'hold';
+      return;
+    }
+
     if (state != 'stream') {
       _state = state;
     }
@@ -251,7 +257,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
 
           basicActions.add(FloatingActionButton(
             heroTag: "hold",
-            child: new Icon(_hold ? Icons.pause : Icons.pause),
+            child: new Icon(_hold ? Icons.play_arrow : Icons.pause),
             onPressed: () => _handleHold(),
           ));
 
@@ -335,7 +341,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
                   child: Padding(
                       padding: const EdgeInsets.all(6),
                       child: Text(
-                        voiceonly ? 'VOICE CALL' : 'VIDEO CALL',
+                        (voiceonly ? 'VOICE CALL' : 'VIDEO CALL') + (_hold? ' PAUSED' : ''),
                         style: TextStyle(fontSize: 24, color: Colors.black54),
                       ))),
               Center(
