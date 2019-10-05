@@ -928,7 +928,7 @@ class RTCSession extends EventEmitter {
   /**
    * Mute
    */
-  mute([audio = true, video = false]) {
+  mute([audio = true, video = true]) {
     debug('mute()');
 
     var audioMuted = false, videoMuted = false;
@@ -1088,8 +1088,10 @@ class RTCSession extends EventEmitter {
     return true;
   }
 
-  renegotiate(options, done) {
+  renegotiate([options, done]) {
     debug('renegotiate()');
+
+    options = options ?? {};
 
     var rtcOfferConstraints = options['rtcOfferConstraints'] ?? null;
 
@@ -1103,12 +1105,12 @@ class RTCSession extends EventEmitter {
     }
 
     var eventHandlers = {
-      'succeeded': () {
+      'succeeded': (response) {
         if (done != null) {
           done();
         }
       },
-      'failed': () {
+      'failed': (response) {
         this.terminate({
           'cause': DartSIP_C.causes.WEBRTC_ERROR,
           'status_code': 500,
@@ -1140,8 +1142,10 @@ class RTCSession extends EventEmitter {
   /**
    * Refer
    */
-  refer(target, options) {
+  refer(target, [options]) {
     debug('refer()');
+
+    options = options ?? {};
 
     var originalTarget = target;
 
