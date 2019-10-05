@@ -11,10 +11,13 @@ class RegisterWidget extends StatefulWidget {
 
 class _MyRegisterWidget extends State<RegisterWidget> {
   var _password;
-  var _wsUri = 'wss://tryit.jssip.net:10443';
-  var _sipUri = 'hello_flutter@tryit.jssip.net';
-  var _displayName = 'Flutter SIP UA';
-  var _dest = 'sip:111_6ackea@tryit.jssip.net';
+  var _wsUri;
+  var _sipUri;
+  var _displayName;
+  var _wsExtraHeaders = {
+    'Origin': ' https://tryit.jssip.net',
+    'Host': 'tryit.jssip.net:10443'
+  };
   SharedPreferences prefs;
   var _registerState;
 
@@ -26,6 +29,7 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     _registerState = helper.registerState;
     helper.on('registerState', _handleRegisterState);
     helper.on('socketState', _handleSocketState);
+    _loadSettings();
   }
 
   @override
@@ -33,6 +37,24 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     super.deactivate();
     helper.remove('registerState', _handleRegisterState);
     helper.remove('socketState', _handleSocketState);
+    _saveSettings();
+  }
+
+  _loadSettings() async {
+    prefs = await SharedPreferences.getInstance();
+    _wsUri = prefs.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
+    _sipUri = prefs.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
+    _displayName = prefs.getString('display_name') ?? 'Flutter SIP UA';
+    _password = prefs.getString('password');
+    prefs.commit();
+    this.setState(() {});
+  }
+
+  _saveSettings() {
+    prefs.setString('ws_uri', _wsUri);
+    prefs.setString('sip_uri', _sipUri);
+    prefs.setString('display_name', _displayName);
+    prefs.setString('password', _password);
   }
 
   _handleRegisterState(state, data) {
@@ -74,10 +96,9 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     } else if (_sipUri == null) {
       return _alert(context, "SIP URI");
     }
-    helper.start(_wsUri, _sipUri, _password, _displayName, {
-      'Origin': ' https://tryit.jssip.net',
-      'Host': 'tryit.jssip.net:10443'
-    });
+    bool addExtraHeaders = (_wsUri == 'wss://tryit.jssip.net:10443');
+    helper.start(_wsUri, _sipUri, _password, _displayName,
+        addExtraHeaders ? _wsExtraHeaders : null);
   }
 
   @override
@@ -177,7 +198,7 @@ class _MyRegisterWidget extends State<RegisterWidget> {
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText: '[Empty]',
+                            hintText: _password ?? '[Empty]',
                           ),
                           onChanged: (value) {
                             setState(() {

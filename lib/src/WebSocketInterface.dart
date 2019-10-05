@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:sip_ua/src/Timers.dart';
 
@@ -11,6 +13,7 @@ class WebSocketInterface implements Socket {
   String _url;
   String _sip_uri;
   String _via_transport;
+  String _websocket_protocol = 'sip';
   WebSocket _ws;
   var _closed = false;
   var _connected = false;
@@ -59,6 +62,45 @@ class WebSocketInterface implements Socket {
   @override
   get url => this._url;
 
+  /// For test only.
+  Future<WebSocket> _connectForBadCertificate(
+      String scheme, String host, int port) async {
+    try {
+      Random r = new Random();
+      String key = base64.encode(List<int>.generate(8, (_) => r.nextInt(255)));
+      SecurityContext securityContext = new SecurityContext();
+      HttpClient client = HttpClient(context: securityContext);
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) {
+        print('Allow self-signed certificate => $host:$port. ');
+        return true;
+      };
+
+      HttpClientRequest request = await client.getUrl(Uri.parse(
+          (scheme == 'wss' ? 'https' : 'http') +
+              '://$host:$port/ws')); // form the correct url here
+
+      request.headers.add('Connection', 'Upgrade');
+      request.headers.add('Upgrade', 'websocket');
+      request.headers.add('Sec-WebSocket-Protocol', _websocket_protocol);
+      request.headers.add(
+          'Sec-WebSocket-Version', '13'); // insert the correct version here
+      request.headers.add('Sec-WebSocket-Key', key.toLowerCase());
+
+      HttpClientResponse response = await request.close();
+      var socket = await response.detachSocket();
+      var webSocket = WebSocket.fromUpgradedSocket(
+        socket,
+        protocol: _websocket_protocol,
+        serverSide: false,
+      );
+
+      return webSocket;
+    } catch (e) {
+      throw e;
+    }
+  }
+
   @override
   connect() async {
     debug('connect()');
@@ -74,12 +116,19 @@ class WebSocketInterface implements Socket {
     }
     debug('connecting to WebSocket ${this._url}');
     try {
-      this._ws = await WebSocket.connect(this._url,
-          headers: {'Sec-WebSocket-Protocol': 'sip', ...this._wsExtraHeaders});
+      this._ws = await WebSocket.connect(this._url, headers: {
+        'Sec-WebSocket-Protocol': _websocket_protocol,
+        ...this._wsExtraHeaders
+      });
+
+      /// Allow self-signed certificate, for test only.
+      /// var parsed_url = Grammar.parse(this._url, 'absoluteURI');
+      /// this._ws = await _connectForBadCertificate(parsed_url.scheme, parsed_url.host, parsed_url.port);
+
       this._ws.listen((data) {
         this._onMessage(data);
       }, onDone: () {
-        logger.debug(
+        debug(
             'Closed by server [${this._ws.closeCode}, ${this._ws.closeReason}]!');
         _connected = false;
         this._onClose(true, this._ws.closeCode, this._ws.closeReason);

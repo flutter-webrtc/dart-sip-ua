@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'sip_ua_helper.dart';
 
 class DialPadWidget extends StatefulWidget {
@@ -9,16 +10,24 @@ class DialPadWidget extends StatefulWidget {
 }
 
 class _MyDialPadWidget extends State<DialPadWidget> {
-  var _dest = 'sip:111_6ackea@tryit.jssip.net';
+  var _dest;
   SIPUAHelper get helper => widget._helper;
   TextEditingController _textController;
+  SharedPreferences prefs;
 
   @override
   initState() {
     super.initState();
+    _bindEventListeners();
+    _loadSettings();
+  }
+
+  _loadSettings() async {
+    prefs = await SharedPreferences.getInstance();
+    _dest = prefs.getString('dest') ?? 'sip:111_6ackea@tryit.jssip.net';
     _textController = new TextEditingController(text: _dest);
     _textController.text = _dest;
-    _bindEventListeners();
+    this.setState((){});
   }
 
   _handleRegisterState(state, data) {
@@ -56,6 +65,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
       return;
     }
     helper.connect(dest, voiceonly);
+    prefs.setString('dest', dest);
   }
 
   _handleBackSpace() {
