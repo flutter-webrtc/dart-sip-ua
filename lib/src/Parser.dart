@@ -1,6 +1,3 @@
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/SIPMessage.dart';
-
 import 'Grammar.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'logger.dart';
@@ -12,10 +9,10 @@ debugerror(error) => logger.error(error);
 /**
  * Parse SIP Message
  */
-IncomingMessage parseMessage(String data, UA ua) {
-  IncomingMessage message;
-  int bodyStart;
-  int headerEnd = data.indexOf('\r\n');
+parseMessage(data, ua) {
+  var message;
+  var bodyStart;
+  var headerEnd = data.indexOf('\r\n');
 
   if (headerEnd == -1) {
     debugerror('parseMessage() | no CRLF found, not a SIP message');
@@ -23,7 +20,7 @@ IncomingMessage parseMessage(String data, UA ua) {
   }
 
   // Parse first line. Check if it is a Request or a Reply.
-  String firstLine = data.substring(0, headerEnd);
+  var firstLine = data.substring(0, headerEnd);
   var parsed;
   try{
     parsed = Grammar.parse(firstLine, 'Request_Response');
@@ -39,10 +36,9 @@ IncomingMessage parseMessage(String data, UA ua) {
 
     return null;
   } else if (parsed.status_code == null) {
-    IncomingRequest incomingRequest = new SIPMessage.IncomingRequest(ua);
-    incomingRequest.method = parsed.method;
-    incomingRequest.ruri = parsed.uri;
-    message = incomingRequest;
+    message = new SIPMessage.IncomingRequest(ua);
+    message.method = parsed.method;
+    message.ruri = parsed.uri;
   } else {
     message = new SIPMessage.IncomingResponse();
     message.status_code = parsed.status_code;
@@ -101,13 +97,13 @@ IncomingMessage parseMessage(String data, UA ua) {
 /**
  * Extract and parse every header of a SIP message.
  */
-getHeader(String data, int headerStart) {
+getHeader(data, headerStart) {
   // 'start' position of the header.
-  int start = headerStart;
+  var start = headerStart;
   // 'end' position of the header.
-  int end = 0;
+  var end = 0;
   // 'partial end' position of the header.
-  int partialEnd = 0;
+  var partialEnd = 0;
 
   // End of message.
   if (data.substring(start, start + 2).contains(new RegExp(r'(^\r\n)'))) {
