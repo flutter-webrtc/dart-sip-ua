@@ -1,11 +1,11 @@
-import 'package:sip_ua/src/transactions/transaction_base.dart';
-
 import '../sip_ua.dart';
 import 'Constants.dart';
-import 'Dialog/RequestSender.dart';
-import 'Exceptions.dart' as Exceptions;
 import 'RTCSession.dart';
 import 'SIPMessage.dart' as SIPMessage;
+import 'Constants.dart' as DartSIP_C;
+import 'Transactions.dart' as Transactions;
+import 'Exceptions.dart' as Exceptions;
+import 'Dialog/RequestSender.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 
@@ -244,11 +244,11 @@ class Dialog {
         this._uas_pending_reply = true;
         var stateChanged = () {
           if (request.server_transaction.state ==
-                  TransactionState.ACCEPTED ||
+                  Transactions.C.STATUS_ACCEPTED ||
               request.server_transaction.state ==
-                  TransactionState.COMPLETED ||
+                  Transactions.C.STATUS_COMPLETED ||
               request.server_transaction.state ==
-                  TransactionState.TERMINATED) {
+                  Transactions.C.STATUS_TERMINATED) {
             this._uas_pending_reply = false;
           }
         };
@@ -259,7 +259,7 @@ class Dialog {
       if (request.hasHeader('contact')) {
         request.server_transaction.on('stateChanged', () {
           if (request.server_transaction.state ==
-              TransactionState.ACCEPTED) {
+              Transactions.C.STATUS_ACCEPTED) {
             this._remote_target = request.parseHeader('contact').uri;
           }
         });
@@ -269,7 +269,7 @@ class Dialog {
       if (request.hasHeader('contact')) {
         request.server_transaction.on('stateChanged', () {
           if (request.server_transaction.state ==
-              TransactionState.COMPLETED) {
+              Transactions.C.STATUS_COMPLETED) {
             this._remote_target = request.parseHeader('contact').uri;
           }
         });

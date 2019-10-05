@@ -1,7 +1,3 @@
-import 'dart:io';
-
-import 'package:sip_ua/src/WebSocketInterface.dart';
-
 import 'Socket.dart' as Socket;
 import 'Exceptions.dart' as Exceptions;
 import 'Utils.dart';
@@ -36,7 +32,7 @@ class C {
  */
 class Transport {
   var status;
-  WebSocketInterface socket;
+  var socket;
   var sockets;
   var recovery_options;
   var recover_attempts;

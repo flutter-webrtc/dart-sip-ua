@@ -50,13 +50,13 @@ class SIPUAHelper extends EventEmitter {
 
   start(wsUrl, uri, [password, displayName, wsExtraHeaders]) async {
     if (this._ua != null) {
-      debugerror('UA instance already exist!, stopping UA and creating a new one...');
-      this._ua.stop();
-     
+      debugerror('UA instance already exist!');
+      this._ua.start();
+      return;
     }
     _settings = new Settings();
     var socket = new WebSocketInterface(wsUrl, wsExtraHeaders);
-    _settings.sockets = [socket] ;
+    _settings.sockets = [socket];
     _settings.uri = uri;
     _settings.password = password;
     _settings.display_name = displayName;
@@ -254,12 +254,9 @@ class SIPUAHelper extends EventEmitter {
   }
 
   connect(uri, [voiceonly]) async {
-    if (_ua != null && _ua.isConnected()) {
+    if (_ua != null) {
       _session = _ua.call(uri, this.options(voiceonly));
       return _session;
-    }else
-    {
-      logger.error("Not connected, you will need to register.");
     }
     return null;
   }
