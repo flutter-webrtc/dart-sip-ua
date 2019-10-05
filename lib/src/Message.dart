@@ -107,7 +107,7 @@ class Message extends EventEmitter {
       request.reply(200);
     }
 
-    this._close();
+    this.close();
   }
 
   /*
@@ -187,7 +187,7 @@ class Message extends EventEmitter {
     this._failed('system', null, DartSIP_C.causes.CONNECTION_ERROR);
   }
 
-  _close() {
+  close() {
     this._closed = true;
     this._ua.destroyMessage(this);
   }
@@ -214,7 +214,7 @@ class Message extends EventEmitter {
   _failed(originator, response, cause) {
     debug('MESSAGE failed');
 
-    this._close();
+    this.close();
 
     debug('emit "failed"');
 
@@ -228,7 +228,7 @@ class Message extends EventEmitter {
   _succeeded(originator, response) {
     debug('MESSAGE succeeded');
 
-    this._close();
+    this.close();
 
     debug('emit "succeeded"');
 

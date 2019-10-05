@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
+
+import 'package:sip_ua/src/Timers.dart';
 
 import 'Socket.dart';
 import 'logger.dart';
@@ -81,6 +84,7 @@ class WebSocketInterface implements Socket {
         _connected = false;
         this._onClose(true, this._ws.closeCode, this._ws.closeReason);
       });
+      _closed = false;
       _connected = true;
       this._onOpen();
     } catch (e) {
@@ -98,7 +102,9 @@ class WebSocketInterface implements Socket {
     this._connected = false;
     this._onClose(true, 0, "Client send disconnect");
     try {
-      this._ws.close();
+      if (this._ws != null) {
+        this._ws.close();
+      }
     } catch (error) {
       debugerror('close() | error closing the WebSocket: ' + error);
     }
@@ -111,7 +117,17 @@ class WebSocketInterface implements Socket {
       throw 'transport closed';
     }
     try {
-      this._ws.add(message);
+      // temporary diagnostic message add to the end of every SIP message sent
+      var now = new DateTime.now();
+      String tmp = message +
+          "\nSIP message generated and sent at: ${now}\n"; // + ("A" * 4096);
+
+      this._ws.add(tmp);
+      setTimeout(() {
+        // extra message to wake asterisk up
+        this._ws.add("");
+      }, 100);
+
       return true;
     } catch (error) {
       logger.failure('send() | error sending message: ' + error.toString());
@@ -124,7 +140,7 @@ class WebSocketInterface implements Socket {
   }
 
   isConnecting() {
-    return false; // TODO: this._ws && this._ws.readyState == this._ws.CONNECTING;
+    return this._ws != null && this._ws.readyState == WebSocket.connecting;
   }
 
   /**
