@@ -69,7 +69,7 @@ class RTCSession extends EventEmitter {
   var _rtcOfferConstraints;
   MediaStream _localMediaStream;
   var _data;
-  Map<String,Dialog> _earlyDialogs;
+  Map<String, Dialog> _earlyDialogs;
   String _from_tag;
   var _to_tag;
   var _rtcAnswerConstraints;
@@ -106,7 +106,7 @@ class RTCSession extends EventEmitter {
   debug(msg) => logger.debug(msg);
   debugerror(error) => logger.error(error);
 
-  Function(IncomingRequest  ) receiveRequest;
+  Function(IncomingRequest) receiveRequest;
 
   RTCSession(UA ua) {
     debug('new');
@@ -681,7 +681,7 @@ class RTCSession extends EventEmitter {
   terminate([options]) {
     debug('terminate()');
 
-    options = options?? {};
+    options = options ?? {};
 
     var cause = options['cause'] ?? DartSIP_C.causes.BYE;
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
@@ -1386,7 +1386,7 @@ class RTCSession extends EventEmitter {
     }
 
     // No established yet.
-    if (this._dialog==null) {
+    if (this._dialog == null) {
       debug('_isReadyToReOffer() | session not established yet');
 
       return false;
@@ -1447,7 +1447,7 @@ class RTCSession extends EventEmitter {
     }
 
     // Terminate early dialogs.
-     this._earlyDialogs.forEach((dialog, _) {
+    this._earlyDialogs.forEach((dialog, _) {
       this._earlyDialogs[dialog].terminate();
     });
     this._earlyDialogs.clear();
@@ -2143,7 +2143,7 @@ class RTCSession extends EventEmitter {
       this.emit('sending', {'request': this._request});
 
       request_sender.send();
-    } catch (error,s) {
+    } catch (error, s) {
       print("$error $s");
       this._failed('local', null, DartSIP_C.causes.WEBRTC_ERROR);
       if (this._status == C.STATUS_TERMINATED) {
@@ -2266,8 +2266,8 @@ class RTCSession extends EventEmitter {
 
       // Be ready for 200 with SDP after a 180/183 with SDP.
       // We created a SDP 'answer' for it, so check the current signaling state.
-      //if (this._connection.signalingState == RTCSignalingState.RTCSignalingStateStable)
-      /*{
+      if (this._connection.signalingState ==
+          RTCSignalingState.RTCSignalingStateStable) {
         try {
           var offer =
               await this._connection.createOffer(this._rtcOfferConstraints);
@@ -2276,13 +2276,11 @@ class RTCSession extends EventEmitter {
           this._acceptAndTerminate(response, 500, error.toString());
           this._failed('local', response, DartSIP_C.causes.WEBRTC_ERROR);
         }
-      }*/
+      }
 
       try {
-        //TODO: Commented out because this seems to cause errors with Asterisk
-        
         await this._connection.setRemoteDescription(answer);
-     
+
         // Handle Session Timers.
         this._handleSessionTimersInIncomingResponse(response);
         this._accepted('remote', response);
