@@ -118,15 +118,15 @@ class WebSocketInterface implements Socket {
     }
     try {
       // temporary diagnostic message add to the end of every SIP message sent
-      var now = new DateTime.now();
-      String tmp = message +
-          "\nSIP message generated and sent at: ${now}\n"; // + ("A" * 4096);
+      // var now = new DateTime.now();
+      // String tmp = message +
+      //    "\nSIP message generated and sent at: ${now}\n"; // + ("A" * 4096);
 
-      this._ws.add(tmp);
-      setTimeout(() {
-        // extra message to wake asterisk up
-        this._ws.add("");
-      }, 100);
+      this._ws.add(message);
+      //setTimeout(() {
+      //  // extra message to wake asterisk up
+      //  this._ws.add("");
+      //}, 100);
 
       return true;
     } catch (error) {
