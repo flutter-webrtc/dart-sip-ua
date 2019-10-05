@@ -319,7 +319,7 @@ class RTCSession extends EventEmitter {
 
     // Set anonymous property.
     bool anonymous = options['anonymous'] ?? false;
-    Map<String,dynamic> requestParams = {'from_tag': this._from_tag};
+    Map<String, dynamic> requestParams = {'from_tag': this._from_tag};
     this._ua.contact.anonymous = anonymous;
     this._ua.contact.outbound = true;
     this._contact = this._ua.contact.toString();
@@ -2451,10 +2451,9 @@ class RTCSession extends EventEmitter {
         return;
       }
 
-
       // Must have SDP answer.
       if (sdpOffer != null) {
-        if (response.body !=null && response.body.trim().isNotEmpty) {
+        if (response.body != null && response.body.trim().isNotEmpty) {
           onFailed();
           return;
         } else if (response.getHeader('Content-Type') != 'application/sdp') {
@@ -2748,16 +2747,20 @@ class RTCSession extends EventEmitter {
   _toggleMuteAudio(mute) {
     List<MediaStream> streams = this._connection.getLocalStreams();
     streams.forEach((stream) {
-      var track = stream.getAudioTracks()[0];
-      track.enabled = !mute;
+      if (stream.getAudioTracks().length > 0) {
+        var track = stream.getAudioTracks()[0];
+        track.enabled = !mute;
+      }
     });
   }
 
   _toggleMuteVideo(mute) {
     List<MediaStream> streams = this._connection.getLocalStreams();
     streams.forEach((stream) {
-      var track = stream.getVideoTracks()[0];
-      track.enabled = !mute;
+      if (stream.getVideoTracks().length > 0) {
+        var track = stream.getVideoTracks()[0];
+        track.enabled = !mute;
+      }
     });
   }
 
