@@ -1708,7 +1708,7 @@ class RTCSession extends EventEmitter {
     // Emit 'reinvite'.
     this.emit('reinvite', data);
 
-    if (rejected != null) {
+    if (rejected) {
       return;
     }
 
@@ -1814,7 +1814,7 @@ class RTCSession extends EventEmitter {
       return;
     }
 
-    if (request.body == null) {
+    if (request.body == null || request.body.length  == 0) {
       sendAnswer(null);
       return;
     }
