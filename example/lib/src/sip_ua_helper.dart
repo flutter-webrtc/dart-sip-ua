@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:events2/events2.dart';
 import 'package:sip_ua/src/RTCSession.dart';
-import 'package:sip_ua/src/Message.dart';
 
 class SIPUAHelper extends EventEmitter {
   UA _ua;
@@ -12,8 +11,6 @@ class SIPUAHelper extends EventEmitter {
   bool _registered = false;
   bool _connected = false;
   var _registerState = 'new';
-
-  SIPUAHelper();
 
   void debug(dynamic msg) => logger.debug(msg);
 
@@ -27,20 +24,38 @@ class SIPUAHelper extends EventEmitter {
 
   String get registerState => _registerState;
 
-  void _handleSocketState(String state, Map<String, dynamic> data) {
-    this.emit('socketState', state, data);
+  void stop() async {
+    await this._ua.stop();
   }
 
-  void _handleRegisterState(String state, Map<String, dynamic> data) {
-    this.emit('registerState', state, data);
+  void register() {
+    this._ua.register();
   }
 
-  void _handleUAState(String state, Map<String, dynamic> data) {
-    this.emit('uaState', state, data);
+  void unregister([bool all = true]) {
+    this._ua.unregister(all: all);
   }
 
-  void _handleCallState(String state, Map<String, dynamic> data) {
-    this.emit('callState', state, data);
+  Future<RTCSession> call(String uri, [bool voiceonly = false]) async {
+    if (_ua != null && _ua.isConnected()) {
+      _session = _ua.call(uri, this._options(voiceonly));
+      return _session;
+    } else {
+      logger.error("Not connected, you will need to register.");
+    }
+    return null;
+  }
+
+  void answer() {
+    if (_session != null) {
+      _session.answer(this._options());
+    }
+  }
+
+  void hangup() {
+    if (_session != null) {
+      _session.terminate();
+    }
   }
 
   void start(String wsUrl, String uri,
@@ -104,7 +119,7 @@ class SIPUAHelper extends EventEmitter {
         _session = data['session'] as RTCSession;
         if (_session.direction == 'incoming') {
           // Set event handlers.
-          (options()['eventHandlers'] as Map<String, Function>)
+          (_options()['eventHandlers'] as Map<String, Function>)
               .forEach((String event, Function func) {
             _session.on(event, func);
           });
@@ -127,20 +142,7 @@ class SIPUAHelper extends EventEmitter {
     }
   }
 
-  void stop() async {
-    await this._ua.stop();
-  }
-
-  void register() {
-    this._ua.register();
-  }
-
-  void unregister([bool all = true]) {
-    this._ua.unregister(all: all);
-  }
-
-  Map<String, Object> options([bool voiceonly]) {
-    voiceonly = voiceonly ?? false;
+  Map<String, Object> _options([bool voiceonly = false]) {
     // Register callbacks to desired call events
     var eventHandlers = {
       'connecting': (Map<String, dynamic> e) {
@@ -194,19 +196,19 @@ class SIPUAHelper extends EventEmitter {
       }
     };
 
-    var defaultOptions = {
+    var _defaultOptions = {
       'eventHandlers': eventHandlers,
       'pcConfig': {
         'iceServers': [
           {'url': 'stun:stun.l.google.com:19302'},
           /*
-          * turn server configuration example.
-          {
-            'url': 'turn:123.45.67.89:3478',
-            'username': 'change_to_real_user',
-            'credential': 'change_to_real_secret'
-          },
-          */
+                  * turn server configuration example.
+                  {
+                    'url': 'turn:123.45.67.89:3478',
+                    'username': 'change_to_real_user',
+                    'credential': 'change_to_real_secret'
+                  },
+                  */
         ]
       },
       'mediaConstraints': {
@@ -245,29 +247,15 @@ class SIPUAHelper extends EventEmitter {
       },
       'sessionTimersExpires': 120
     };
-    return defaultOptions;
+    return _defaultOptions;
   }
 
-  Future<RTCSession> connect(String uri, [bool voiceonly]) async {
-    if (_ua != null && _ua.isConnected()) {
-      _session = _ua.call(uri, this.options(voiceonly));
-      return _session;
-    } else {
-      logger.error("Not connected, you will need to register.");
-    }
-    return null;
+  void _handleSocketState(String state, Map<String, dynamic> data) {
+    this.emit('socketState', state, data);
   }
 
-  void answer() {
-    if (_session != null) {
-      _session.answer(this.options());
-    }
-  }
-
-  void hangup() {
-    if (_session != null) {
-      _session.terminate();
-    }
+  void _handleRegisterState(String state, Map<String, dynamic> data) {
+    this.emit('registerState', state, data);
   }
 
   void hold() {
@@ -294,12 +282,11 @@ class SIPUAHelper extends EventEmitter {
     }
   }
 
-  Message sendMessage(String target, String body,
-      [Map<String, dynamic> options]) {
-    return this._ua.sendMessage(target, body, options);
+  void _handleCallState(String state, Map<String, dynamic> data) {
+    this.emit('callState', state, data);
   }
 
-  void terminateSessions(Map<String, Object> options) {
-    this._ua.terminateSessions(options);
+  void _handleUAState(String state, Map<String, dynamic> data) {
+    this.emit('uaState', state, data);
   }
 }
