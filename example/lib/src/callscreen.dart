@@ -30,7 +30,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   bool _audioMuted = false;
   bool _videoMuted = false;
   bool _hold = false;
-  bool _muted = false;
   String _holdOriginator;
   String _state = 'new';
 
