@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:events2/events2.dart';
 import 'package:sip_ua/src/RTCSession.dart';
+import 'package:sip_ua/src/Message.dart';
 
 class SIPUAHelper extends EventEmitter {
   UA _ua;
@@ -288,5 +289,14 @@ class SIPUAHelper extends EventEmitter {
 
   void _handleUAState(String state, Map<String, dynamic> data) {
     this.emit('uaState', state, data);
+  }
+
+  Message sendMessage(String target, String body,
+      [Map<String, dynamic> options]) {
+    return this._ua.sendMessage(target, body, options);
+  }
+
+  void terminateSessions(Map<String, dynamic> options) {
+    this._ua.terminateSessions(options);
   }
 }

@@ -265,7 +265,7 @@ class UA extends EventEmitter {
   /**
    * Terminate ongoing sessions.
    */
-  terminateSessions(Map<String, Object> options) {
+  void terminateSessions(Map<String, Object> options) {
     debug('terminateSessions()');
     this._sessions.forEach((idx, value) {
       if (!this._sessions[idx].isEnded()) {

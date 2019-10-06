@@ -222,15 +222,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     }
   }
 
-  void _muteMic() {
-    if (_localStream != null) {
-      this.setState(() {
-        _muted = !_muted;
-      });
-      _localStream.getAudioTracks()[0].setMicrophoneMute(_muted);
-    }
-  }
-
   Widget _buildActionButtons() {
     var hangupBtn = FloatingActionButton(
       heroTag: "hangup",
