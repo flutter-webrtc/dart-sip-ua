@@ -1632,7 +1632,7 @@ class RTCSession extends EventEmitter {
   /**
    * Dialog Management
    */
-  _createDialog(message, type, [early]) {
+  bool _createDialog(message, type, [early]) {
     var local_tag = (type == 'UAS') ? message.to_tag : message.from_tag;
     var remote_tag = (type == 'UAS') ? message.from_tag : message.to_tag;
     var id = message.call_id + local_tag + remote_tag;
@@ -1680,7 +1680,7 @@ class RTCSession extends EventEmitter {
   }
 
   /// In dialog INVITE Reception
-  _receiveReinvite(request) async {
+  void _receiveReinvite(request) async {
     debug('receiveReinvite()');
 
     var contentType = request.getHeader('Content-Type');
@@ -1715,7 +1715,7 @@ class RTCSession extends EventEmitter {
 
     this._late_sdp = false;
 
-    sendAnswer(sdp) async {
+    void sendAnswer(String sdp) async {
       var extraHeaders = ['Contact: ${this._contact}'];
 
       this._handleSessionTimersInIncomingRequest(request, extraHeaders);
@@ -1772,7 +1772,7 @@ class RTCSession extends EventEmitter {
   /**
    * In dialog UPDATE Reception
    */
-  _receiveUpdate(request) async {
+  void _receiveUpdate(request) async {
     debug('receiveUpdate()');
 
     var rejected = false;
@@ -2319,7 +2319,7 @@ class RTCSession extends EventEmitter {
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
     var eventHandlers = options['eventHandlers'] ?? {};
     var rtcOfferConstraints =
-        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints;
+        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints || null;
 
     var succeeded = false;
 
@@ -2502,11 +2502,15 @@ class RTCSession extends EventEmitter {
     if (sdpOffer) {
       extraHeaders.add('Content-Type: application/sdp');
       try {
-        var desc =
+        RTCSessionDescription desc =
             await this._createLocalDescription('offer', rtcOfferConstraints);
-        var sdp = this._mangleOffer(desc.sdp);
+        String sdp = this._mangleOffer(desc.sdp);
 
-        var e = {'originator': 'local', 'type': 'offer', 'sdp': sdp};
+        Map<String, String> e = {
+          'originator': 'local',
+          'type': 'offer',
+          'sdp': sdp
+        };
 
         debug('emit "sdp"');
         this.emit('sdp', e);
@@ -2586,12 +2590,12 @@ class RTCSession extends EventEmitter {
   /**
    * Correctly set the SDP direction attributes if the call is on local hold
    */
-  _mangleOffer(sdp) {
+  String _mangleOffer(String sdpInput) {
     if (!this._localHold && !this._remoteHold) {
-      return sdp;
+      return sdpInput;
     }
 
-    sdp = sdp_transform.parse(sdp);
+    Map<String, dynamic> sdp = sdp_transform.parse(sdpInput);
 
     // Local hold.
     if (this._localHold && !this._remoteHold) {
