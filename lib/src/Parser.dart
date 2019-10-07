@@ -1,7 +1,6 @@
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/SIPMessage.dart';
-
+import '../sip_ua.dart';
 import 'Grammar.dart';
+import 'SIPMessage.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'logger.dart';
 

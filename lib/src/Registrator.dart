@@ -321,7 +321,7 @@ class Registrator {
 
     if (this._registered) {
       this._registered = false;
-      this._ua.unregistered({});
+      this._ua.unregistered(Map<String, dynamic>());
     }
   }
 

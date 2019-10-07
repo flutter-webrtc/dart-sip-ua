@@ -1,11 +1,12 @@
 import 'package:events2/events2.dart';
+
 import '../sip_ua.dart';
 import 'Constants.dart' as DartSIP_C;
 import 'Constants.dart';
+import 'Exceptions.dart' as Exceptions;
+import 'RequestSender.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'Utils.dart' as Utils;
-import 'RequestSender.dart';
-import 'Exceptions.dart' as Exceptions;
 import 'logger.dart';
 
 class Message extends EventEmitter {
@@ -45,7 +46,7 @@ class Message extends EventEmitter {
 
   get data => this._data;
 
-  send(target, body, [options]) {
+  send(String target, String body, [Map<String, dynamic> options]) {
     var originalTarget = target;
     options = options ?? {};
 

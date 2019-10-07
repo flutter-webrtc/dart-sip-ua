@@ -16,5 +16,10 @@ Thanks to the original authors of [JsSIP](https://github.com/versatica/JsSIP) fo
 ## Sponsors
 The first version was sponsored by Suretec Systems Ltd. T/A [SureVoIP](http://www.surevoip.co.uk).
 
+## Contributing
+The project is inseparable from the contributors of the community.
+- [CloudWebRTC](https://github.com/cloudwebrtc) - Original Author
+- [Robert Sutton](https://github.com/rlsutton1) - Contributor
+
 ## License
 dart-sip-ua is released under the [MIT license](https://github.com/cloudwebrtc/dart-sip-ua/blob/master/LICENSE).

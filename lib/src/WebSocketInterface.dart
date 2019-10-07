@@ -3,11 +3,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:sip_ua/src/Timers.dart';
-
-import 'Socket.dart';
-import 'logger.dart';
 import 'Grammar.dart';
+import 'Socket.dart';
+import 'Timers.dart';
+import 'logger.dart';
 
 class WebSocketInterface implements Socket {
   String _url;
@@ -18,7 +17,7 @@ class WebSocketInterface implements Socket {
   var _closed = false;
   var _connected = false;
   var weight;
-  var _wsExtraHeaders;
+  Map<String, dynamic> _wsExtraHeaders;
 
   final logger = Logger('WebSocketInterface');
   debug(msg) => logger.debug(msg);
@@ -30,7 +29,7 @@ class WebSocketInterface implements Socket {
   @override
   dynamic ondata;
 
-  WebSocketInterface(url, [wsExtraHeaders]) {
+  WebSocketInterface(String url, [Map<String, dynamic> wsExtraHeaders]) {
     debug('new() [url:' + url + ']');
     this._url = url;
     var parsed_url = Grammar.parse(url, 'absoluteURI');
@@ -160,7 +159,7 @@ class WebSocketInterface implements Socket {
   }
 
   @override
-  send(message) {
+  bool send(message) {
     debug('send()');
     if (this._closed) {
       throw 'transport closed';

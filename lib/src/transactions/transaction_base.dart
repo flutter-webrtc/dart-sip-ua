@@ -1,6 +1,7 @@
 import 'package:events2/events2.dart';
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/Transport.dart';
+
+import '../../sip_ua.dart';
+import '../Transport.dart';
 
 enum TransactionState {
   // Transaction states.

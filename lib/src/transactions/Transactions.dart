@@ -1,10 +1,8 @@
-import 'package:events2/events2.dart';
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/Constants.dart';
-import 'package:sip_ua/src/Timers.dart';
-import 'package:sip_ua/src/transactions/invite_server.dart';
-import 'package:sip_ua/src/transactions/non_invite_server.dart';
-import 'package:sip_ua/src/transactions/transaction_base.dart';
+import '../Constants.dart';
+import '../Timers.dart';
+import 'invite_server.dart';
+import 'non_invite_server.dart';
+import 'transaction_base.dart';
 
 class TransactionBag {
   Map<String, TransactionBase> transactions = {};

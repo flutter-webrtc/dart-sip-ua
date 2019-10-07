@@ -1,9 +1,7 @@
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/Timers.dart';
-
-import 'package:sip_ua/src/Transport.dart';
-import 'package:sip_ua/src/transactions/Transactions.dart';
-import 'package:sip_ua/src/transactions/transaction_base.dart';
+import '../../sip_ua.dart';
+import '../Timers.dart';
+import '../Transport.dart';
+import 'transaction_base.dart';
 
 final nist_logger = new Logger('NonInviteServerTransaction');
 debugnist(msg) => nist_logger.debug(msg);

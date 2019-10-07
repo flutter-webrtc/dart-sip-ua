@@ -23,7 +23,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  var _helper = new SIPUAHelper();
+  final SIPUAHelper _helper = SIPUAHelper();
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

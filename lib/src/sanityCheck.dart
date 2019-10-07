@@ -1,14 +1,13 @@
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/SIPMessage.dart';
-import 'package:sip_ua/src/Transport.dart';
-import 'package:sip_ua/src/transactions/invite_server.dart';
-import 'package:sip_ua/src/transactions/non_invite_server.dart';
-
+import '../sip_ua.dart';
 import 'Constants.dart' as DartSIP_C;
 import 'Constants.dart';
+import 'SIPMessage.dart';
 import 'SIPMessage.dart' as SIPMessage;
+import 'Transport.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
+import 'transactions/invite_server.dart';
+import 'transactions/non_invite_server.dart';
 
 final logger = Logger('sanityCheck');
 debug(msg) => logger.debug(msg);
