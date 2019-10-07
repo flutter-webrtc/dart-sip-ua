@@ -55,6 +55,7 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     prefs.setString('sip_uri', _sipUri);
     prefs.setString('display_name', _displayName);
     prefs.setString('password', _password);
+    prefs.commit();
   }
 
   void _handleRegisterState(String state, Map<String, dynamic> data) {
