@@ -2319,7 +2319,7 @@ class RTCSession extends EventEmitter {
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
     var eventHandlers = options['eventHandlers'] ?? {};
     var rtcOfferConstraints =
-        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints || null;
+        options['rtcOfferConstraints'] ?? this._rtcOfferConstraints;
 
     var succeeded = false;
 

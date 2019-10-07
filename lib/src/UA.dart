@@ -470,7 +470,7 @@ class UA extends EventEmitter {
   /**
    * Unregistered
    */
-  unregistered(data) {
+  unregistered(Map<String, dynamic> data) {
     this.emit('unregistered', data);
   }
 

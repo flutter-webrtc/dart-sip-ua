@@ -42,12 +42,12 @@ class _MyRegisterWidget extends State<RegisterWidget> {
 
   void _loadSettings() async {
     prefs = await SharedPreferences.getInstance();
-    _wsUri = prefs.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
-    _sipUri = prefs.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
-    _displayName = prefs.getString('display_name') ?? 'Flutter SIP UA';
-    _password = prefs.getString('password');
-    await prefs.commit();
-    this.setState(() {});
+    this.setState(() {
+      _wsUri = prefs.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
+      _sipUri = prefs.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
+      _displayName = prefs.getString('display_name') ?? 'Flutter SIP UA';
+      _password = prefs.getString('password');
+    });
   }
 
   void _saveSettings() {
@@ -96,7 +96,6 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     } else if (_sipUri == null) {
       _alert(context, "SIP URI");
     }
-
     bool addExtraHeaders = _wsExtraHeaders.isNotEmpty;
     helper.start(_wsUri, _sipUri, _password, _displayName,
         addExtraHeaders ? _wsExtraHeaders : null);
