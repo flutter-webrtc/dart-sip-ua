@@ -217,7 +217,7 @@ class Transport {
     this.sockets.forEach((socket) {
       if (socket['status'] == C.SOCKET_STATUS_ERROR) {
         return; // continue the array iteration
-      } else if (candidates.length == 0) {
+      } else if (candidates.isEmpty) {
         candidates.add(socket);
       } else if (socket['weight'] > candidates[0]['weight']) {
         candidates = [socket];
@@ -226,7 +226,7 @@ class Transport {
       }
     });
 
-    if (candidates.length == 0) {
+    if (candidates.isEmpty) {
       // All sockets have failed. reset sockets status.
       this.sockets.forEach((socket) {
         socket['status'] = C.SOCKET_STATUS_READY;

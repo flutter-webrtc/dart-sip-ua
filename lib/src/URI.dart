@@ -61,27 +61,27 @@ class URI {
     }
   }
 
-  get scheme => this._scheme;
+  String get scheme => this._scheme;
 
-  set scheme(value) {
+  set scheme(String value) {
     this._scheme = value.toLowerCase();
   }
 
-  get user => this._user;
+  String get user => this._user;
 
-  set user(value) {
+  set user(String value) {
     this._user = value;
   }
 
-  get host => this._host;
+  String get host => this._host;
 
-  set host(value) {
+  set host(String value) {
     this._host = value.toLowerCase();
   }
 
-  get port => this._port;
+  int get port => this._port;
 
-  set port(value) {
+  set port(int value) {
     this._port =
         value == 0 ? value : (value != null) ? Utils.parseInt(value, 10) : null;
   }

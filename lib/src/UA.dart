@@ -541,8 +541,7 @@ class UA extends EventEmitter {
       message.init_incoming(request);
     } else if (method == SipMethod.INVITE) {
       // Initial INVITE.
-      if (request.to_tag != null &&
-          this.listeners('newRTCSession').length == 0) {
+      if (request.to_tag != null && this.listeners('newRTCSession').isEmpty) {
         request.reply(405);
 
         return;

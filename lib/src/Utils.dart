@@ -94,7 +94,7 @@ isEmpty(value) {
   return (value == null ||
       value == '' ||
       value == null ||
-      (value is List && value.length == 0) ||
+      (value is List && value.isEmpty) ||
       (value is num && isNaN(value)));
 }
 

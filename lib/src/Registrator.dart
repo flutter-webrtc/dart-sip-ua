@@ -190,7 +190,7 @@ class Registrator {
             this._registrationTimer = null;
             // If there are no listeners for registrationExpiring, renew registration.
             // If there are listeners, var the listening do the register call.
-            if (this._ua.listeners('registrationExpiring').length == 0) {
+            if (this._ua.listeners('registrationExpiring').isEmpty) {
               this.register();
             } else {
               this._ua.emit('registrationExpiring');

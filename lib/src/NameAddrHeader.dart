@@ -7,7 +7,7 @@ class NameAddrHeader {
   final JsonEncoder encoder = new JsonEncoder();
   URI _uri;
   Map<String, dynamic> _parameters;
-  var _display_name;
+  String _display_name;
   /**
    * Parse the given string and returns a NameAddrHeader instance or null if
    * it is an invalid NameAddrHeader.
@@ -40,11 +40,11 @@ class NameAddrHeader {
     }
   }
 
-  get uri => _uri;
+  URI get uri => _uri;
 
-  get display_name => _display_name;
+  String get display_name => _display_name;
 
-  set display_name(value) {
+  set display_name(dynamic value) {
     this._display_name = (value == 0) ? '0' : value;
   }
 
