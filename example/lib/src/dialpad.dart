@@ -41,7 +41,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
     });
   }
 
-  Widget _handleCall(BuildContext context, [bool voiceonly]) {
+  Widget _handleCall(BuildContext context, [bool voiceonly = false]) {
     var dest = _textController.text;
     if (dest == null || dest.isEmpty) {
       showDialog<Null>(
