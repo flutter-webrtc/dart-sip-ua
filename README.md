@@ -18,8 +18,10 @@ The first version was sponsored by Suretec Systems Ltd. T/A [SureVoIP](http://ww
 
 ## Contributing
 The project is inseparable from the contributors of the community.
+- [SureVoIP](https://github.com/SureVoIP) - Sponsor
 - [CloudWebRTC](https://github.com/cloudwebrtc) - Original Author
 - [Robert Sutton](https://github.com/rlsutton1) - Contributor
+- [Gavin Henry](https://github.com/ghenry) - Contributor
 
 ## License
 dart-sip-ua is released under the [MIT license](https://github.com/cloudwebrtc/dart-sip-ua/blob/master/LICENSE).
