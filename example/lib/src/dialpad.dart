@@ -3,14 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'sip_ua_helper.dart';
 
 class DialPadWidget extends StatefulWidget {
-  SIPUAHelper _helper;
+  final SIPUAHelper _helper;
   DialPadWidget(this._helper, {Key key}) : super(key: key);
   @override
   _MyDialPadWidget createState() => _MyDialPadWidget();
 }
 
 class _MyDialPadWidget extends State<DialPadWidget> {
-  var _dest;
+  String _dest;
   SIPUAHelper get helper => widget._helper;
   TextEditingController _textController;
   SharedPreferences prefs;
@@ -22,38 +22,38 @@ class _MyDialPadWidget extends State<DialPadWidget> {
     _loadSettings();
   }
 
-  _loadSettings() async {
+  void _loadSettings() async {
     prefs = await SharedPreferences.getInstance();
     _dest = prefs.getString('dest') ?? 'sip:111_6ackea@tryit.jssip.net';
-    _textController = new TextEditingController(text: _dest);
+    _textController = TextEditingController(text: _dest);
     _textController.text = _dest;
-    this.setState((){});
-  }
-
-  _handleRegisterState(state, data) {
     this.setState(() {});
   }
 
-  _bindEventListeners() {
+  void _handleRegisterState(String state, Map<String, dynamic> data) {
+    this.setState(() {});
+  }
+
+  void _bindEventListeners() {
     helper.on('registerState', _handleRegisterState);
-    helper.on('uaState', (state, data) {
+    helper.on('uaState', (String state, Map<String, dynamic> data) {
       if (state == 'newRTCSession') Navigator.pushNamed(context, '/callscreen');
     });
   }
 
-  _handleCall(context, [voiceonly]) {
+  Widget _handleCall(BuildContext context, [bool voiceonly]) {
     var dest = _textController.text;
-    if (dest == null || dest.length == 0) {
+    if (dest == null || dest.isEmpty) {
       showDialog<Null>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return new AlertDialog(
-            title: new Text('Target is empty.'),
-            content: new Text('Please enter a SIP URI or username!'),
+          return AlertDialog(
+            title: Text('Target is empty.'),
+            content: Text('Please enter a SIP URI or username!'),
             actions: <Widget>[
-              new FlatButton(
-                child: new Text('Ok'),
+              FlatButton(
+                child: Text('Ok'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -62,15 +62,16 @@ class _MyDialPadWidget extends State<DialPadWidget> {
           );
         },
       );
-      return;
+      return null;
     }
-    helper.connect(dest, voiceonly);
+    helper.call(dest, voiceonly);
     prefs.setString('dest', dest);
+    return null;
   }
 
-  _handleBackSpace() {
+  void _handleBackSpace() {
     var text = _textController.text;
-    if (text.length > 0) {
+    if (text.isNotEmpty) {
       this.setState(() {
         text = text.substring(0, text.length - 1);
         _textController.text = text;
@@ -78,13 +79,13 @@ class _MyDialPadWidget extends State<DialPadWidget> {
     }
   }
 
-  _handleNum(number) {
+  void _handleNum(String number) {
     this.setState(() {
       _textController.text += number;
     });
   }
 
-  _buildDialPad() {
+  List<Widget> _buildDialPad() {
     var lables = [
       [
         {'1': ''},
@@ -127,24 +128,24 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                       controller: _textController,
                     )),
               ])),
-      new Container(
+      Container(
           width: 300,
-          child: new Column(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: lables
-                  .map((row) => new Padding(
+                  .map((row) => Padding(
                       padding: const EdgeInsets.all(3),
-                      child: new Row(
+                      child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: row
-                              .map((label) => new Container(
+                              .map((label) => Container(
                                   height: 72,
                                   width: 72,
-                                  child: new FlatButton(
+                                  child: FlatButton(
                                     //heroTag: "num_$label",
                                     shape: CircleBorder(),
-                                    child: new Column(
+                                    child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: <Widget>[
@@ -168,7 +169,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                   .toList())),
       Container(
           width: 300,
-          child: new Row(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -197,7 +198,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
         appBar: AppBar(
           title: Text("Dart SIP UA Demo"),
           actions: <Widget>[
-            new PopupMenuButton<String>(
+            PopupMenuButton<String>(
                 onSelected: (String value) {
                   switch (value) {
                     case 'account':
@@ -213,18 +214,18 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                 icon: Icon(Icons.menu),
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                       PopupMenuItem(
-                        child: new Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              child: new Icon(
+                              child: Icon(
                                 Icons.account_circle,
                                 color: Colors.black38,
                               ),
                             ),
                             SizedBox(
-                              child: new Text('Account'),
+                              child: Text('Account'),
                               width: 64,
                             )
                           ],
@@ -232,15 +233,15 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                         value: 'account',
                       ),
                       PopupMenuItem(
-                        child: new Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
-                            new Icon(
+                            Icon(
                               Icons.info,
                               color: Colors.black38,
                             ),
                             SizedBox(
-                              child: new Text('About'),
+                              child: Text('About'),
                               width: 64,
                             )
                           ],
@@ -264,8 +265,8 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                       style: TextStyle(fontSize: 14, color: Colors.black54),
                     )),
                   ),
-                  new Container(
-                      child: new Column(
+                  Container(
+                      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: _buildDialPad(),

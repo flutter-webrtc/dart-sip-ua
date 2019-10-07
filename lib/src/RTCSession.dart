@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
-import 'package:sip_ua/src/transactions/transaction_base.dart';
 
 import '../sip_ua.dart';
 import 'Constants.dart';
 import 'Constants.dart' as DartSIP_C;
 import 'Dialog.dart';
 import 'Exceptions.dart' as Exceptions;
+import 'NameAddrHeader.dart';
 import 'RTCSession/DTMF.dart' as RTCSession_DTMF;
 import 'RTCSession/Info.dart' as RTCSession_Info;
 import 'RTCSession/ReferNotifier.dart' as RTCSession_ReferNotifier;
@@ -21,6 +21,7 @@ import 'Timers.dart';
 import 'URI.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
+import 'transactions/transaction_base.dart';
 
 class C {
   // RTCSession states.
@@ -83,7 +84,7 @@ class RTCSession extends EventEmitter {
   var _iceGatheringState;
   bool _localMediaStreamLocallyGenerated;
   bool _rtcReady;
-  var _direction;
+  String _direction;
 
   Map _referSubscribers;
   var _start_time;
@@ -94,8 +95,8 @@ class RTCSession extends EventEmitter {
   bool _localHold;
   bool _remoteHold;
 
-  var _local_identity;
-  var _remote_identity;
+  NameAddrHeader _local_identity;
+  NameAddrHeader _remote_identity;
 
   String _contact;
   var _tones;
@@ -195,11 +196,11 @@ class RTCSession extends EventEmitter {
 
   get contact => this._contact;
 
-  get direction => this._direction;
+  String get direction => this._direction;
 
-  get local_identity => this._local_identity;
+  NameAddrHeader get local_identity => this._local_identity;
 
-  get remote_identity => this._remote_identity;
+  NameAddrHeader get remote_identity => this._remote_identity;
 
   get start_time => this._start_time;
 
@@ -677,7 +678,7 @@ class RTCSession extends EventEmitter {
   /**
    * Terminate the call.
    */
-  terminate([options]) {
+  terminate([Map<String, Object> options]) {
     debug('terminate()');
 
     options = options ?? {};
@@ -687,7 +688,7 @@ class RTCSession extends EventEmitter {
     var body = options['body'];
 
     var cancel_reason;
-    var status_code = options['status_code'];
+    int status_code = options['status_code'];
     var reason_phrase = options['reason_phrase'];
 
     // Check Session Status.
@@ -1631,7 +1632,7 @@ class RTCSession extends EventEmitter {
   /**
    * Dialog Management
    */
-  _createDialog(message, type, [early]) {
+  bool _createDialog(message, type, [early]) {
     var local_tag = (type == 'UAS') ? message.to_tag : message.from_tag;
     var remote_tag = (type == 'UAS') ? message.from_tag : message.to_tag;
     var id = message.call_id + local_tag + remote_tag;
@@ -1679,7 +1680,7 @@ class RTCSession extends EventEmitter {
   }
 
   /// In dialog INVITE Reception
-  _receiveReinvite(request) async {
+  void _receiveReinvite(request) async {
     debug('receiveReinvite()');
 
     var contentType = request.getHeader('Content-Type');
@@ -1714,7 +1715,7 @@ class RTCSession extends EventEmitter {
 
     this._late_sdp = false;
 
-    sendAnswer(sdp) async {
+    void sendAnswer(String sdp) async {
       var extraHeaders = ['Contact: ${this._contact}'];
 
       this._handleSessionTimersInIncomingRequest(request, extraHeaders);
@@ -1771,7 +1772,7 @@ class RTCSession extends EventEmitter {
   /**
    * In dialog UPDATE Reception
    */
-  _receiveUpdate(request) async {
+  void _receiveUpdate(request) async {
     debug('receiveUpdate()');
 
     var rejected = false;
@@ -1814,7 +1815,7 @@ class RTCSession extends EventEmitter {
       return;
     }
 
-    if (request.body == null || request.body.length  == 0) {
+    if (request.body == null || request.body.length == 0) {
       sendAnswer(null);
       return;
     }
@@ -2501,11 +2502,15 @@ class RTCSession extends EventEmitter {
     if (sdpOffer) {
       extraHeaders.add('Content-Type: application/sdp');
       try {
-        var desc =
+        RTCSessionDescription desc =
             await this._createLocalDescription('offer', rtcOfferConstraints);
-        var sdp = this._mangleOffer(desc.sdp);
+        String sdp = this._mangleOffer(desc.sdp);
 
-        var e = {'originator': 'local', 'type': 'offer', 'sdp': sdp};
+        Map<String, String> e = {
+          'originator': 'local',
+          'type': 'offer',
+          'sdp': sdp
+        };
 
         debug('emit "sdp"');
         this.emit('sdp', e);
@@ -2585,12 +2590,12 @@ class RTCSession extends EventEmitter {
   /**
    * Correctly set the SDP direction attributes if the call is on local hold
    */
-  _mangleOffer(sdp) {
+  String _mangleOffer(String sdpInput) {
     if (!this._localHold && !this._remoteHold) {
-      return sdp;
+      return sdpInput;
     }
 
-    sdp = sdp_transform.parse(sdp);
+    Map<String, dynamic> sdp = sdp_transform.parse(sdpInput);
 
     // Local hold.
     if (this._localHold && !this._remoteHold) {

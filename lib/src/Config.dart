@@ -1,12 +1,11 @@
-import 'package:sip_ua/sip_ua.dart';
-
+import '../sip_ua.dart';
 import 'Constants.dart';
-import 'Utils.dart' as Utils;
 import 'Constants.dart' as DartSIP_C;
-import 'Grammar.dart';
-import 'URI.dart';
-import 'Socket.dart' as Socket;
 import 'Exceptions.dart' as Exceptions;
+import 'Grammar.dart';
+import 'Socket.dart' as Socket;
+import 'URI.dart';
+import 'Utils.dart' as Utils;
 import 'logger.dart';
 
   final logger = Logger('Config');
