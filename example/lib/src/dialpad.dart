@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'sip_ua_helper.dart';
+import 'widgets/numpad.dart';
 
 class DialPadWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -86,29 +87,6 @@ class _MyDialPadWidget extends State<DialPadWidget> {
   }
 
   List<Widget> _buildDialPad() {
-    var lables = [
-      [
-        {'1': ''},
-        {'2': 'abc'},
-        {'3': 'def'}
-      ],
-      [
-        {'4': 'ghi'},
-        {'5': 'jkl'},
-        {'6': 'mno'}
-      ],
-      [
-        {'7': 'pqrs'},
-        {'8': 'tuv'},
-        {'9': 'wxyz'}
-      ],
-      [
-        {'*': ''},
-        {'0': '+'},
-        {'#': ''}
-      ],
-    ];
-
     return [
       Container(
           width: 360,
@@ -128,45 +106,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                       controller: _textController,
                     )),
               ])),
-      Container(
-          width: 300,
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: lables
-                  .map((row) => Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: row
-                              .map((label) => Container(
-                                  height: 72,
-                                  width: 72,
-                                  child: FlatButton(
-                                    //heroTag: "num_$label",
-                                    shape: CircleBorder(),
-                                    child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Text('${label.keys.first}',
-                                              style: TextStyle(
-                                                  fontSize: 32,
-                                                  color: Theme.of(context)
-                                                      .accentColor)),
-                                          Text(
-                                              '${label.values.first}'
-                                                  .toUpperCase(),
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Theme.of(context)
-                                                      .disabledColor))
-                                        ]),
-                                    onPressed: () =>
-                                        _handleNum(label.keys.first),
-                                  )))
-                              .toList())))
-                  .toList())),
+      NumPad(onPressed: (number) => _handleNum(number)),
       Container(
           width: 300,
           child: Row(

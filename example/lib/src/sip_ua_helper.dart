@@ -283,6 +283,12 @@ class SIPUAHelper extends EventEmitter {
     }
   }
 
+  void sendDTMF(String tones){
+     if (_session != null) {
+      _session.sendDTMF(tones);
+    }
+  }
+
   void _handleCallState(String state, Map<String, dynamic> data) {
     this.emit('callState', state, data);
   }

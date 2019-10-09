@@ -5,6 +5,7 @@ import 'package:sip_ua/src/RTCSession.dart';
 import 'package:sip_ua/src/NameAddrHeader.dart';
 
 import 'widgets/action_button.dart';
+import 'widgets/numpad.dart';
 import 'sip_ua_helper.dart';
 
 class CallScreenWidget extends StatefulWidget {
@@ -231,7 +232,12 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
 
   void _handleTransfer() {}
 
-  void _handleKeyPad() {}
+  void _handleKeyPad() {
+    this.setState(() {
+      //_showNumPad = !_showNumPad;
+    });
+    helper.sendDTMF('1');
+  }
 
   void _toggleSpeaker() {
     if (_localStream != null) {
@@ -239,6 +245,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
       _localStream.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
     }
   }
+
 
   Widget _buildActionButtons() {
     var hangupBtn = ActionButton(
@@ -343,14 +350,18 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
 
     var actionWidgets = <Widget>[];
 
-    if (advanceActions.isNotEmpty) {
-      actionWidgets.add(Padding(
-          padding: const EdgeInsets.all(3),
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: advanceActions)));
-    }
+    if (_showNumPad) {
 
+    } else {
+      if (advanceActions.isNotEmpty) {
+        actionWidgets.add(Padding(
+            padding: const EdgeInsets.all(3),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: advanceActions)));
+      }
+    }
+  
     actionWidgets.add(Padding(
         padding: const EdgeInsets.all(3),
         child: Row(
@@ -359,7 +370,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
 
     return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: actionWidgets);
   }
 
@@ -390,7 +401,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
       children: <Widget>[
         ...stackWidgets,
         Positioned(
-          top: voiceonly ? 120 : 6,
+          top: voiceonly ? 48 : 6,
           left: 0,
           right: 0,
           child: Center(
@@ -420,7 +431,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
                       padding: const EdgeInsets.all(6),
                       child: Text(_timeLabel,
                           style:
-                              TextStyle(fontSize: 14, color: Colors.black54)))),
+                              TextStyle(fontSize: 14, color: Colors.black54))))
             ],
           )),
         ),
@@ -439,9 +450,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: Padding(
-          padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 16.0),
-          child:
-              Container(height: 210, width: 300, child: _buildActionButtons()),
-        ));
+            padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 24.0),
+            child: Container(width: 320, child: _buildActionButtons())));
   }
 }

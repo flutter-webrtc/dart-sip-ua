@@ -804,8 +804,10 @@ class RTCSession extends EventEmitter {
     }
   }
 
-  sendDTMF(tones, options) {
+  sendDTMF(tones, [options]) {
     debug('sendDTMF() | tones: ${tones.toString()}');
+
+    options = options ?? {};
 
     var position = 0;
     var duration = options['duration'] ?? null;
@@ -834,7 +836,7 @@ class RTCSession extends EventEmitter {
     }
 
     // Check duration.
-    if (duration && !Utils.isDecimal(duration)) {
+    if (duration != null && !Utils.isDecimal(duration)) {
       throw new Exceptions.TypeError(
           'Invalid tone duration: ${duration.toString()}');
     } else if (duration == null) {
@@ -853,7 +855,7 @@ class RTCSession extends EventEmitter {
     options['duration'] = duration;
 
     // Check interToneGap.
-    if (interToneGap && !Utils.isDecimal(interToneGap)) {
+    if (interToneGap != null && !Utils.isDecimal(interToneGap)) {
       throw new Exceptions.TypeError(
           'Invalid interToneGap: ${interToneGap.toString()}');
     } else if (interToneGap == null) {
@@ -878,7 +880,7 @@ class RTCSession extends EventEmitter {
       var timeout;
 
       if (this._status == C.STATUS_TERMINATED ||
-          !this._tones ||
+          this._tones == null ||
           position >= this._tones.length) {
         // Stop sending DTMF.
         this._tones = null;
