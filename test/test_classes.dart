@@ -35,7 +35,8 @@ var testFunctions = [
 
         expect(() => uri.host = null, throwsNoSuchMethodError);
 
-        expect(() => uri.host = {'bar': 'foo'}, throwsNoSuchMethodError);
+// causes compile error with strict
+        // expect(() => uri.host = {'bar': 'foo'}, throwsNoSuchMethodError);
 
         expect(uri.host, 'jssip.net');
 
@@ -49,11 +50,13 @@ var testFunctions = [
         uri.port = null;
         expect(uri.port, null);
 
-        uri.port = 'ABCD'; // Should become null.
-        expect(uri.toString(), 'sip:alice@jssip.net');
+// causes compile error with strict
+        //uri.port = 'ABCD'; // Should become null.
+        //expect(uri.toString(), 'sip:alice@jssip.net');
 
-        uri.port = '123'; // Should become 123.
-        expect(uri.toString(), 'sip:alice@jssip.net:123');
+// causes compile error with strict
+        //uri.port = '123'; // Should become 123.
+        //expect(uri.toString(), 'sip:alice@jssip.net:123');
 
         uri.port = 0;
         expect(uri.port, 0);
