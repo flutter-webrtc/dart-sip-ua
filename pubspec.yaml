@@ -1,5 +1,5 @@
 name: sip_ua
-version: 0.0.1
+version: 0.0.2
 author: cloudwebrtc <duanweiwei1982@gmail.com>
 description: A dart-lang version of the SIP UA stack.
 homepage: https://github.com/cloudwebrtc/dart-sip-ua
@@ -8,9 +8,6 @@ environment:
 
 dependencies:
   crypto: ^2.1.2
-  events2:
-    git:
-      url: https://github.com/cloudwebrtc/dart-events.git
   flutter_webrtc:
     git:
       url: https://github.com/cloudwebrtc/flutter-webrtc.git
@@ -20,6 +17,8 @@ dependencies:
       url: https://github.com/cloudwebrtc/dart-sdp-transform.git
   uuid: ^2.0.2
   random_string: ^1.1.0
-
+  logger: ^0.7.0+2
+  intl: ^0.16.0
+  
 dev_dependencies:
   test: ^1.6.7

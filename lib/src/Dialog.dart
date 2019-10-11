@@ -5,6 +5,7 @@ import 'Exceptions.dart' as Exceptions;
 import 'RTCSession.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'Utils.dart' as Utils;
+import 'event_manager/event_manager.dart';
 import 'logger.dart';
 import 'transactions/transaction_base.dart';
 
@@ -45,9 +46,7 @@ class Dialog {
   var _ack_seqnum;
   var _id;
   var _local_seqnum;
-  final logger = new Logger('Dialog');
-  debug(msg) => logger.debug(msg);
-  debugerror(error) => logger.error(error);
+  final logger = new Log();
 
   get ua => this._ua;
 
@@ -65,7 +64,9 @@ class Dialog {
     }
 
     if (message is SIPMessage.IncomingResponse) {
-      state = (message.status_code < 200) ? Dialog_C.STATUS_EARLY : Dialog_C.STATUS_CONFIRMED;
+      state = (message.status_code < 200)
+          ? Dialog_C.STATUS_EARLY
+          : Dialog_C.STATUS_CONFIRMED;
     }
 
     var contact = message.parseHeader('contact');
@@ -103,7 +104,7 @@ class Dialog {
     }
 
     this._ua.newDialog(this);
-    debug(
+    logger.debug(
         'new ${type} dialog created with status ${this._state == Dialog_C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
@@ -128,7 +129,7 @@ class Dialog {
   update(message, type) {
     this._state = Dialog_C.STATUS_CONFIRMED;
 
-    debug('dialog ${this._id.toString()}  changed to CONFIRMED state');
+    logger.debug('dialog ${this._id.toString()}  changed to CONFIRMED state');
 
     if (type == 'UAC') {
       // RFC 3261 13.2.2.4.
@@ -137,21 +138,23 @@ class Dialog {
   }
 
   terminate() {
-    debug('dialog ${this._id.toString()} deleted');
+    logger.debug('dialog ${this._id.toString()} deleted');
     this._ua.destroyDialog(this);
   }
 
   SIPMessage.OutgoingRequest sendRequest(SipMethod method, options) {
     options = options ?? {};
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    var eventHandlers = options['eventHandlers'] ?? {};
+    EventManager eventHandlers =
+        options['eventHandlers'] as EventManager ?? new EventManager();
     var body = options['body'] ?? null;
-    SIPMessage.OutgoingRequest request = this._createRequest(method, extraHeaders, body);
+    SIPMessage.OutgoingRequest request =
+        this._createRequest(method, extraHeaders, body);
 
     // Increase the local CSeq on authentication.
-    eventHandlers['onAuthenticated'] = (request) {
+    eventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
       this._local_seqnum += 1;
-    };
+    });
 
     var request_sender = new DialogRequestSender(this, request, eventHandlers);
 
@@ -180,7 +183,8 @@ class Dialog {
   }
 
   // RFC 3261 12.2.1.1.
- SIPMessage.OutgoingRequest _createRequest(SipMethod method, extraHeaders, body) {
+  SIPMessage.OutgoingRequest _createRequest(
+      SipMethod method, extraHeaders, body) {
     extraHeaders = Utils.cloneArray(extraHeaders);
 
     if (this._local_seqnum == null) {
@@ -242,12 +246,9 @@ class Dialog {
       } else {
         this._uas_pending_reply = true;
         var stateChanged = () {
-          if (request.server_transaction.state ==
-                  TransactionState.ACCEPTED ||
-              request.server_transaction.state ==
-                  TransactionState.COMPLETED ||
-              request.server_transaction.state ==
-                  TransactionState.TERMINATED) {
+          if (request.server_transaction.state == TransactionState.ACCEPTED ||
+              request.server_transaction.state == TransactionState.COMPLETED ||
+              request.server_transaction.state == TransactionState.TERMINATED) {
             this._uas_pending_reply = false;
           }
         };
@@ -257,8 +258,7 @@ class Dialog {
       // RFC3261 12.2.2 Replace the dialog's remote target URI if the request is accepted.
       if (request.hasHeader('contact')) {
         request.server_transaction.on('stateChanged', () {
-          if (request.server_transaction.state ==
-              TransactionState.ACCEPTED) {
+          if (request.server_transaction.state == TransactionState.ACCEPTED) {
             this._remote_target = request.parseHeader('contact').uri;
           }
         });
@@ -267,8 +267,7 @@ class Dialog {
       // RFC6665 3.2 Replace the dialog's remote target URI if the request is accepted.
       if (request.hasHeader('contact')) {
         request.server_transaction.on('stateChanged', () {
-          if (request.server_transaction.state ==
-              TransactionState.COMPLETED) {
+          if (request.server_transaction.state == TransactionState.COMPLETED) {
             this._remote_target = request.parseHeader('contact').uri;
           }
         });

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 import 'package:sip_ua/src/RTCSession.dart';
 import 'package:sip_ua/src/NameAddrHeader.dart';
+import 'package:sip_ua/src/event_manager/event_manager.dart';
 
 import 'widgets/action_button.dart';
-import 'widgets/numpad.dart';
 import 'sip_ua_helper.dart';
 
 class CallScreenWidget extends StatefulWidget {
@@ -27,7 +27,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   NameAddrHeader _local_identity;
   NameAddrHeader _remote_identity;
   bool _showNumPad = false;
-  String _label;
+
   String _timeLabel = '00:00';
   Timer _timer;
 
@@ -103,37 +103,36 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   }
 
   void _bindEventListeners() {
-    helper.on('callState', _handleCalllState);
+    helper.on(EventCallState(), _handleCalllState);
   }
 
-  void _handleCalllState(String state, Map<String, dynamic> data) {
-    if (state == 'hold' || state == 'unhold') {
-      _hold = state == 'hold';
-      _holdOriginator = data['originator'] as String;
+  void _handleCalllState(EventCallState data) {
+    if (data.state == 'hold' || data.state == 'unhold') {
+      _hold = data.state == 'hold';
+      _holdOriginator = data.originator;
       this.setState(() {});
       return;
     }
 
-    if (state == 'muted') {
-      if (data['audio'] as bool) _audioMuted = true;
-      if (data['video'] as bool) _videoMuted = true;
+    if (data.state == 'muted') {
+      if (data.audio) _audioMuted = true;
+      if (data.video) _videoMuted = true;
       this.setState(() {});
       return;
     }
 
-    if (state == 'unmuted') {
-      if (data['audio'] as bool) _audioMuted = false;
-      if (data['video'] as bool) _videoMuted = false;
+    if (data.state == 'unmuted') {
+      if (data.audio) _audioMuted = false;
+      if (data.video) _videoMuted = false;
       this.setState(() {});
       return;
     }
 
-    if (state != 'stream') {
-      _state = state;
-      this.setState(() {});
+    if (data.state != 'stream') {
+      _state = data.state;
     }
 
-    switch (state) {
+    switch (data.state) {
       case 'stream':
         _handelStreams(data);
         break;
@@ -149,7 +148,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   }
 
   void _removeEventListeners() {
-    helper.remove('callState', _handleCalllState);
+    helper.remove(EventCallState(), _handleCalllState);
   }
 
   void _backToDialPad() {
@@ -159,15 +158,15 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     });
   }
 
-  void _handelStreams(Map<String, dynamic> event) async {
-    var stream = event['stream'] as MediaStream;
-    if (event['originator'] == 'local') {
+  void _handelStreams(EventCallState event) async {
+    var stream = event.stream;
+    if (event.originator == 'local') {
       if (_localRenderer != null) {
         _localRenderer.srcObject = stream;
       }
       _localStream = stream;
     }
-    if (event['originator'] == 'remote') {
+    if (event.originator == 'remote') {
       if (_remoteRenderer != null) {
         _remoteRenderer.srcObject = stream;
       }
@@ -245,7 +244,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
       _localStream.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
     }
   }
-
 
   Widget _buildActionButtons() {
     var hangupBtn = ActionButton(
@@ -351,7 +349,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     var actionWidgets = <Widget>[];
 
     if (_showNumPad) {
-
     } else {
       if (advanceActions.isNotEmpty) {
         actionWidgets.add(Padding(
@@ -361,7 +358,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
                 children: advanceActions)));
       }
     }
-  
+
     actionWidgets.add(Padding(
         padding: const EdgeInsets.all(3),
         child: Row(

@@ -3,6 +3,7 @@ import 'package:sip_ua/sip_ua.dart';
 import 'package:sip_ua/src/Config.dart' as config;
 import 'package:sip_ua/src/WebSocketInterface.dart';
 import 'dart:async';
+import 'package:sip_ua/src/event_manager/event_manager.dart';
 
 var ua;
 void main() {
@@ -15,15 +16,15 @@ void main() {
     configuration.uri = 'sip:100@127.0.0.1';
     try {
       ua = new UA(configuration);
-      ua.on('connecting',(data){
+      ua.on(EventConnecting(), (EventConnecting data) {
         print('connecting => ' + data.toString());
       });
 
-      ua.on('connected',(data){
+      ua.on(EventConnected, (EventConnected data) {
         print('connected => ' + data.toString());
       });
 
-      ua.on('disconnected',(data){
+      ua.on(EventDisconnected, (EventDisconnected data) {
         print('disconnected => ' + data.toString());
       });
       ua.start();

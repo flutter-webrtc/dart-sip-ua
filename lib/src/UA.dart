@@ -1,5 +1,4 @@
-import 'package:events2/events2.dart';
-
+import '../sip_ua.dart';
 import 'Config.dart' as config;
 import 'Config.dart';
 import 'Constants.dart' as DartSIP_C;
@@ -11,11 +10,11 @@ import 'Parser.dart' as Parser;
 import 'RTCSession.dart';
 import 'Registrator.dart';
 import 'SIPMessage.dart';
-import 'SIPMessage.dart' as SIPMessage;
 import 'Timers.dart';
 import 'Transport.dart';
 import 'URI.dart';
 import 'Utils.dart' as Utils;
+import 'event_manager/event_manager.dart';
 import 'logger.dart';
 import 'sanityCheck.dart';
 import 'transactions/Transactions.dart';
@@ -80,7 +79,7 @@ class Contact {
  * @throws {DartSIP.Exceptions.ConfigurationError} If a configuration parameter is invalid.
  * @throws {TypeError} If no configuration is given.
  */
-class UA extends EventEmitter {
+class UA extends EventManager {
   var _cache;
   Settings _configuration;
   var _dynConfiguration;
@@ -95,12 +94,10 @@ class UA extends EventEmitter {
   var _data;
   var _closeTimer;
   var _registrator;
-  final logger = new Logger('UA');
-  debug(msg) => logger.debug(msg);
-  debugerror(error) => logger.error(error);
+  final logger = new Log();
 
   UA(Settings configuration) {
-    debug('new() [configuration:${configuration.toString()}]');
+    logger.debug('new() [configuration:${configuration.toString()}]');
 
     this._cache = {'credentials': {}};
 
@@ -160,12 +157,12 @@ class UA extends EventEmitter {
    * Resume UA after being closed.
    */
   start() {
-    debug('start()');
+    logger.debug('start()');
 
     if (this._status == C.STATUS_INIT) {
       this._transport.connect();
     } else if (this._status == C.STATUS_USER_CLOSED) {
-      debug('restarting UA');
+      logger.debug('restarting UA');
 
       // Disconnect.
       if (this._closeTimer != null) {
@@ -178,9 +175,9 @@ class UA extends EventEmitter {
       this._status = C.STATUS_INIT;
       this._transport.connect();
     } else if (this._status == C.STATUS_READY) {
-      debug('UA is in READY status, not restarted');
+      logger.debug('UA is in READY status, not restarted');
     } else {
-      debug(
+      logger.debug(
           'ERROR: connection is down, Auto-Recovery system is trying to reconnect');
     }
 
@@ -192,7 +189,7 @@ class UA extends EventEmitter {
    * Register.
    */
   register() {
-    debug('register()');
+    logger.debug('register()');
     this._dynConfiguration.register = true;
     this._registrator.register();
   }
@@ -201,7 +198,7 @@ class UA extends EventEmitter {
    * Unregister.
    */
   unregister({all = false}) {
-    debug('unregister()');
+    logger.debug('unregister()');
 
     this._dynConfiguration.register = false;
     this._registrator.unregister(all);
@@ -238,7 +235,7 @@ class UA extends EventEmitter {
    *
    */
   RTCSession call(target, options) {
-    debug('call()');
+    logger.debug('call()');
     RTCSession session = new RTCSession(this);
     session.connect(target, options);
     return session;
@@ -256,7 +253,7 @@ class UA extends EventEmitter {
    */
   Message sendMessage(
       String target, String body, Map<String, dynamic> options) {
-    debug('sendMessage()');
+    logger.debug('sendMessage()');
     var message = new Message(this);
     message.send(target, body, options);
     return message;
@@ -266,7 +263,7 @@ class UA extends EventEmitter {
    * Terminate ongoing sessions.
    */
   void terminateSessions(Map<String, Object> options) {
-    debug('terminateSessions()');
+    logger.debug('terminateSessions()');
     this._sessions.forEach((idx, value) {
       if (!this._sessions[idx].isEnded()) {
         this._sessions[idx].terminate(options);
@@ -279,13 +276,13 @@ class UA extends EventEmitter {
    *
    */
   stop() {
-    debug('stop()');
+    logger.debug('stop()');
 
     // Remove dynamic settings.
     this._dynConfiguration = {};
 
     if (this._status == C.STATUS_USER_CLOSED) {
-      debug('UA already closed');
+      logger.debug('UA already closed');
 
       return;
     }
@@ -299,7 +296,7 @@ class UA extends EventEmitter {
     // Run  _terminate_ on every Session.
     this._sessions.forEach((session, _) {
       if (this._sessions.containsKey(session)) {
-        debug('closing session ${session}');
+        logger.debug('closing session ${session}');
         try {
           this._sessions[session].terminate();
         } catch (error) {}
@@ -349,7 +346,7 @@ class UA extends EventEmitter {
         return this._configuration.ha1;
 
       default:
-        debugerror('get() | cannot get "${parameter}" parameter in runtime');
+        logger.error('get() | cannot get "${parameter}" parameter in runtime');
 
         return null;
     }
@@ -388,7 +385,7 @@ class UA extends EventEmitter {
         }
 
       default:
-        debugerror('set() | cannot set "${parameter}" parameter in runtime');
+        logger.error('set() | cannot set "${parameter}" parameter in runtime');
 
         return false;
     }
@@ -405,7 +402,7 @@ class UA extends EventEmitter {
    */
   newTransaction(TransactionBase transaction) {
     this._transactions.addTransaction(transaction);
-    this.emit('newTransaction', {'transaction': transaction});
+    this.emit(EventNewTransaction(transaction: transaction));
   }
 
   /**
@@ -413,7 +410,7 @@ class UA extends EventEmitter {
    */
   destroyTransaction(TransactionBase transaction) {
     this._transactions.removeTransaction(transaction);
-    this.emit('transactionDestroyed', {'transaction': transaction});
+    this.emit(EventTransactionDestroyed(transaction: transaction));
   }
 
   /**
@@ -433,9 +430,10 @@ class UA extends EventEmitter {
   /**
    *  new Message
    */
-  newMessage(Message message, data) {
+  newMessage(Message message, String originator, dynamic request) {
     this._applicants.add(message);
-    this.emit('newMessage', data);
+    this.emit(EventNewMessage(
+        message: message, originator: originator, request: request));
   }
 
   /**
@@ -448,9 +446,10 @@ class UA extends EventEmitter {
   /**
    * new RTCSession
    */
-  newRTCSession(RTCSession session, data) {
+  newRTCSession({RTCSession session, String originator, dynamic request}) {
     this._sessions[session.id] = session;
-    this.emit('newRTCSession', data);
+    this.emit(EventNewRTCSession(
+        session: session, originator: originator, request: request));
   }
 
   /**
@@ -463,22 +462,22 @@ class UA extends EventEmitter {
   /**
    * Registered
    */
-  registered(data) {
-    this.emit('registered', data);
+  registered({dynamic response}) {
+    this.emit(EventRegistered(response: response));
   }
 
   /**
    * Unregistered
    */
-  unregistered(Map<String, dynamic> data) {
-    this.emit('unregistered', data);
+  unregistered({dynamic response, String cause}) {
+    this.emit(EventUnregister(response: response, cause: cause));
   }
 
   /**
    * Registration Failed
    */
-  registrationFailed(data) {
-    this.emit('registrationFailed', data);
+  registrationFailed({dynamic response, String cause}) {
+    this.emit(EventRegistrationFailed(response: response, cause: cause));
   }
 
   // =================
@@ -494,7 +493,7 @@ class UA extends EventEmitter {
     // Check that request URI points to us.
     if (request.ruri.user != this._configuration.uri.user &&
         request.ruri.user != this._contact.uri.user) {
-      debug('Request-URI does not point to us');
+      logger.debug('Request-URI does not point to us');
       if (request.method != SipMethod.ACK) {
         request.reply_sl(404);
       }
@@ -533,7 +532,7 @@ class UA extends EventEmitter {
     if (method == SipMethod.OPTIONS) {
       request.reply(200);
     } else if (method == SipMethod.MESSAGE) {
-      if (this.listeners('newMessage') == null) {
+      if (!this.hasListeners(EventNewMessage())) {
         request.reply(405);
         return;
       }
@@ -541,7 +540,7 @@ class UA extends EventEmitter {
       message.init_incoming(request);
     } else if (method == SipMethod.INVITE) {
       // Initial INVITE.
-      if (request.to_tag != null && this.listeners('newRTCSession').isEmpty) {
+      if (request.to_tag != null && !this.hasListeners(EventNewRTCSession())) {
         request.reply(405);
 
         return;
@@ -576,7 +575,7 @@ class UA extends EventEmitter {
               session.init_incoming(request);
             }
           } else {
-            debugerror('INVITE received but WebRTC is not supported');
+            logger.error('INVITE received but WebRTC is not supported');
             request.reply(488);
           }
           break;
@@ -590,7 +589,7 @@ class UA extends EventEmitter {
           if (session != null) {
             session.receiveRequest(request);
           } else {
-            debug('received CANCEL request for a non existent session');
+            logger.debug('received CANCEL request for a non existent session');
           }
           break;
         case SipMethod.ACK:
@@ -601,7 +600,7 @@ class UA extends EventEmitter {
           break;
         case SipMethod.NOTIFY:
           // Receive new sip event.
-          this.emit('sipEvent', {'event': request.event, 'request': request});
+          this.emit(new EventSipEvent(request: request));
           request.reply(200);
           break;
         default:
@@ -622,7 +621,8 @@ class UA extends EventEmitter {
         if (session != null) {
           session.receiveRequest(request);
         } else {
-          debug('received NOTIFY request for a non existent subscription');
+          logger
+              .debug('received NOTIFY request for a non existent subscription');
           request.reply(481, 'Subscription does not exist');
         }
       }
@@ -725,7 +725,7 @@ class UA extends EventEmitter {
       this._transport.ondisconnect = onTransportDisconnect;
       this._transport.ondata = onTransportData;
     } catch (e) {
-      debugerror(e);
+      logger.error(e);
       throw new Exceptions.ConfigurationError(
           'sockets', this._configuration.sockets);
     }
@@ -793,21 +793,21 @@ class UA extends EventEmitter {
       }
     }
 
-    debug('configuration parameters after validation:');
+    logger.debug('configuration parameters after validation:');
     for (var parameter in this._configuration) {
       // Only show the user user configurable parameters.
       if (config.settings.containsKey(parameter)) {
         switch (parameter) {
           case 'uri':
           case 'registrar_server':
-            debug('- ${parameter}: ${this._configuration[parameter]}');
+            logger.debug('- ${parameter}: ${this._configuration[parameter]}');
             break;
           case 'password':
           case 'ha1':
-            debug('- ${parameter}: NOT SHOWN');
+            logger.debug('- ${parameter}: NOT SHOWN');
             break;
           default:
-            debug(
+            logger.debug(
                 '- ${parameter}: ${JSON.stringify(this._configuration[parameter])}');
         }
       }
@@ -821,21 +821,21 @@ class UA extends EventEmitter {
  */
 
 // Transport connecting event.
-  onTransportConnecting(Map<String, dynamic> data) {
-    debug('Transport connecting');
-    this.emit('connecting', data);
+  onTransportConnecting(WebSocketInterface socket, int attempts) {
+    logger.debug('Transport connecting');
+    this.emit(EventConnecting(socket: socket));
   }
 
 // Transport connected event.
-  onTransportConnect(Map<String, dynamic> data) {
-    debug('Transport connected');
+  onTransportConnect(Transport transport) {
+    logger.debug('Transport connected');
     if (this._status == C.STATUS_USER_CLOSED) {
       return;
     }
     this._status = C.STATUS_READY;
     this._error = null;
 
-    this.emit('connected', data);
+    this.emit(EventConnected(transport: transport));
 
     if (this._dynConfiguration.register) {
       this._registrator.register();
@@ -843,13 +843,13 @@ class UA extends EventEmitter {
   }
 
 // Transport disconnected event.
-  onTransportDisconnect(Map<String, dynamic> data) {
+  onTransportDisconnect(WebSocketInterface socket, bool error) {
     // Run _onTransportError_ callback on every client transaction using _transport_.
     this._transactions.removeAll().forEach((transaction) {
       transaction.onTransportError();
     });
 
-    this.emit('disconnected', data);
+    this.emit(EventDisconnected(socket: socket, error: error));
 
     // Call registrator _onTransportClosed_.
     this._registrator.onTransportClosed();
@@ -861,18 +861,14 @@ class UA extends EventEmitter {
   }
 
 // Transport data event.
-  onTransportData(Map<String, dynamic> data) {
-    var transport = data['transport'];
-    String messageData = data['message'];
-
+  onTransportData(Transport transport, String messageData) {
     IncomingMessage message = Parser.parseMessage(messageData, this);
 
     if (message == null) {
       return;
     }
 
-    if (this._status == C.STATUS_USER_CLOSED &&
-        message is SIPMessage.IncomingRequest) {
+    if (this._status == C.STATUS_USER_CLOSED && message is IncomingRequest) {
       return;
     }
 
@@ -881,10 +877,10 @@ class UA extends EventEmitter {
       return;
     }
 
-    if (message is SIPMessage.IncomingRequest) {
+    if (message is IncomingRequest) {
       message.transport = transport;
       this.receiveRequest(message);
-    } else if (message is SIPMessage.IncomingResponse) {
+    } else if (message is IncomingResponse) {
       /* Unike stated in 18.1.2, if a response does not match
     * any transaction, it is discarded here and no passed to the core
     * in order to be discarded there.

@@ -1,10 +1,10 @@
 import '../../sip_ua.dart';
 import '../Timers.dart';
 import '../Transport.dart';
+import '../event_manager/event_manager.dart';
 import 'transaction_base.dart';
 
-final nist_logger = new Logger('NonInviteServerTransaction');
-debugnist(msg) => nist_logger.debug(msg);
+final logger = new Log();
 
 class NonInviteServerTransaction extends TransactionBase {
   var transportError;
@@ -25,11 +25,11 @@ class NonInviteServerTransaction extends TransactionBase {
 
   stateChanged(state) {
     this.state = state;
-    this.emit('stateChanged');
+    this.emit(EventStateChanged());
   }
 
   timer_J() {
-    debugnist('Timer J expired for transaction ${this.id}');
+    logger.debug('Timer J expired for transaction ${this.id}');
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
   }
@@ -38,7 +38,7 @@ class NonInviteServerTransaction extends TransactionBase {
     if (this.transportError == null) {
       this.transportError = true;
 
-      debugnist('transport error occurred, deleting transaction ${this.id}');
+      logger.debug('transport error occurred, deleting transaction ${this.id}');
 
       clearTimeout(this.J);
       this.stateChanged(TransactionState.TERMINATED);

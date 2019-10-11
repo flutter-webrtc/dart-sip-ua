@@ -1,9 +1,9 @@
-
-
 import '../sip_ua.dart';
 import 'Constants.dart';
 import 'DigestAuthentication.dart';
+import 'SIPMessage.dart';
 import 'UA.dart' as UAC;
+import 'event_manager/event_manager.dart';
 import 'logger.dart';
 import 'transactions/ack_client.dart';
 import 'transactions/invite_client.dart';
@@ -11,27 +11,19 @@ import 'transactions/non_invite_client.dart';
 import 'transactions/transaction_base.dart';
 
 // Default event handlers.
-var EventHandlers = {
-  'onRequestTimeout': () => {},
-  'onTransportError': () => {},
-  'onReceiveResponse': (response) => {},
-  'onAuthenticated': (request) => {}
-};
 
 class RequestSender {
   UA _ua;
-  var _eventHandlers;
+  EventManager _eventHandlers;
   SipMethod _method;
   var _request;
   var _auth;
   var _challenged;
   var _staled;
   TransactionBase clientTransaction;
-  final logger = new Logger('RequestSender');
-  debug(msg) => logger.debug(msg);
-  debugerror(error) => logger.error(error);
+  final logger = new Log();
 
-  RequestSender(UA ua, request, eventHandlers) {
+  RequestSender(UA ua, request, EventManager eventHandlers) {
     this._ua = ua;
     this._eventHandlers = eventHandlers;
     this._method = request.method;
@@ -40,17 +32,10 @@ class RequestSender {
     this._challenged = false;
     this._staled = false;
 
-    // Define the null handlers.
-    EventHandlers.forEach((handler, fn) {
-      if (this._eventHandlers[handler] == null) {
-        this._eventHandlers[handler] = EventHandlers[handler];
-      }
-    });
-
     // If ua is in closing process or even closed just allow sending Bye and ACK.
     if (ua.status == UAC.C.STATUS_USER_CLOSED &&
         (this._method != SipMethod.BYE || this._method != SipMethod.ACK)) {
-      this._eventHandlers['onTransportError']();
+      this._eventHandlers.emit(EventOnTransportError());
     }
   }
 
@@ -58,13 +43,19 @@ class RequestSender {
   * Create the client transaction and send the message.
   */
   send() {
-    var eventHandlers = {
-      'onRequestTimeout': () => {this._eventHandlers['onRequestTimeout']()},
-      'onTransportError': () => {this._eventHandlers['onTransportError']()},
-      'onAuthenticated': (request) =>
-          {this._eventHandlers['onAuthenticated'](request)},
-      'onReceiveResponse': (response) => {this._receiveResponse(response)}
-    };
+    EventManager eventHandlers = EventManager();
+    eventHandlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
+      this._eventHandlers.emit(event);
+    });
+    eventHandlers.on(EventOnTransportError(), (EventOnTransportError event) {
+      this._eventHandlers.emit(event);
+    });
+    eventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
+      this._eventHandlers.emit(event);
+    });
+    eventHandlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
+      this._receiveResponse(event.response);
+    });
 
     switch (this._method) {
       case SipMethod.INVITE:
@@ -76,7 +67,7 @@ class RequestSender {
             this._ua, this._ua.transport, this._request, eventHandlers);
         break;
       default:
-        this.clientTransaction =  new NonInviteClientTransaction(
+        this.clientTransaction = new NonInviteClientTransaction(
             this._ua, this._ua.transport, this._request, eventHandlers);
     }
 
@@ -87,7 +78,7 @@ class RequestSender {
   * Called from client transaction when receiving a correct response to the request.
   * Authenticate request if needed or pass the response back to the applicant.
   */
-  _receiveResponse(response) {
+  _receiveResponse(IncomingResponse response) {
     var challenge;
     var authorization_header_name;
     var status_code = response.status_code;
@@ -110,9 +101,9 @@ class RequestSender {
 
       // Verify it seems a valid challenge.
       if (challenge == null) {
-        debug(
+        logger.debug(
             '${response.status_code} with wrong or missing challenge, cannot authenticate');
-        this._eventHandlers['onReceiveResponse'](response);
+        this._eventHandlers.emit(EventOnReceiveResponse(response: response));
 
         return;
       }
@@ -138,9 +129,8 @@ class RequestSender {
               'stale': challenge.stale,
               'qop': challenge.qop,
             }),
-            this._request.ruri
-            )) {
-          this._eventHandlers['onReceiveResponse'](response);
+            this._request.ruri)) {
+          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
           return;
         }
         this._challenged = true;
@@ -155,20 +145,19 @@ class RequestSender {
 
         this._request = this._request.clone();
         this._request.cseq += 1;
-        this
-            ._request
-            .setHeader('cseq', '${this._request.cseq} ${SipMethodHelper.getName(this._method)}');
+        this._request.setHeader('cseq',
+            '${this._request.cseq} ${SipMethodHelper.getName(this._method)}');
         this
             ._request
             .setHeader(authorization_header_name, this._auth.toString());
 
-        this._eventHandlers['onAuthenticated'](this._request);
+        this._eventHandlers.emit(EventOnAuthenticated(request: this._request));
         this.send();
       } else {
-        this._eventHandlers['onReceiveResponse'](response);
+        this._eventHandlers.emit(EventOnReceiveResponse(response: response));
       }
     } else {
-      this._eventHandlers['onReceiveResponse'](response);
+      this._eventHandlers.emit(EventOnReceiveResponse(response: response));
     }
   }
 }

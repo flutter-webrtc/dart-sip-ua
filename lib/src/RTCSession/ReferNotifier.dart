@@ -1,5 +1,6 @@
 import '../Constants.dart' as DartSIP_C;
 import '../Constants.dart';
+import '../event_manager/event_manager.dart';
 import '../logger.dart';
 
 class C {
@@ -13,9 +14,7 @@ class ReferNotifier {
   var _id;
   var _expires;
   var _active;
-  final logger = Logger('RTCSession:ReferNotifier');
-  debug(msg) => logger.debug(msg);
-  debugerror(error) => logger.error(error);
+  final logger = Log();
 
   ReferNotifier(session, id, [expires]) {
     this._session = session;
@@ -28,7 +27,7 @@ class ReferNotifier {
   }
 
   notify(code, [reason]) {
-    debug('notify()');
+    logger.debug('notify()');
 
     if (this._active == false) {
       return;
@@ -44,6 +43,12 @@ class ReferNotifier {
       state = 'active;expires=${this._expires}';
     }
 
+    EventManager handlers = EventManager();
+    handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
+      // If a negative response is received, subscription is canceled.
+      this._active = false;
+    });
+
     // Put this in a try/catch block.
     this._session.sendRequest(SipMethod.NOTIFY, {
       'extraHeaders': [
@@ -52,12 +57,7 @@ class ReferNotifier {
         'Content-Type: ${C.body_type}'
       ],
       'body': 'SIP/2.0 ${code} ${reason}',
-      'eventHandlers': {
-        // If a negative response is received, subscription is canceled.
-        'onErrorResponse': () {
-          this._active = false;
-        }
-      }
+      'eventHandlers': handlers
     });
   }
 }

@@ -2,15 +2,13 @@ import '../sip_ua.dart';
 import 'Constants.dart' as DartSIP_C;
 import 'Constants.dart';
 import 'SIPMessage.dart';
-import 'SIPMessage.dart' as SIPMessage;
 import 'Transport.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 import 'transactions/invite_server.dart';
 import 'transactions/non_invite_server.dart';
 
-final logger = Logger('sanityCheck');
-debug(msg) => logger.debug(msg);
+final logger = Log();
 
 // Checks for requests and responses.
 const all = [minimumHeaders];
@@ -42,13 +40,13 @@ sanityCheck(IncomingMessage m, UA u, Transport t) {
     }
   }
 
-  if (message is SIPMessage.IncomingRequest) {
+  if (message is IncomingRequest) {
     for (var check in requests) {
       if (check() == false) {
         return false;
       }
     }
-  } else if (message is SIPMessage.IncomingResponse) {
+  } else if (message is IncomingResponse) {
     for (var check in responses) {
       if (check() == false) {
         return false;
@@ -128,12 +126,14 @@ rfc3261_8_2_2_2() {
     // If the branch matches the key of any IST then assume it is a retransmission
     // and ignore the INVITE.
     // TODO: we should reply the last response.
-    if (ua.transactions.getTransaction(InviteServerTransaction,message.via_branch) != null) {
+    if (ua.transactions
+            .getTransaction(InviteServerTransaction, message.via_branch) !=
+        null) {
       return false;
     }
     // Otherwise check whether it is a merged request.
     else {
-      ua.transactions.getAll(InviteServerTransaction).forEach(( tr) {
+      ua.transactions.getAll(InviteServerTransaction).forEach((tr) {
         if (tr.request.from_tag == fromTag &&
             tr.request.call_id == call_id &&
             tr.request.cseq == cseq) {
@@ -150,13 +150,15 @@ rfc3261_8_2_2_2() {
   // If the branch matches the key of any NIST then assume it is a retransmission
   // and ignore the request.
   // TODO: we should reply the last response.
-  else if (ua.transactions.getTransaction(NonInviteServerTransaction,message.via_branch) != null) {
+  else if (ua.transactions
+          .getTransaction(NonInviteServerTransaction, message.via_branch) !=
+      null) {
     return false;
   }
 
   // Otherwise check whether it is a merged request.
   else {
-    ua.transactions.getAll(NonInviteServerTransaction).forEach(( tr) {
+    ua.transactions.getAll(NonInviteServerTransaction).forEach((tr) {
       if (tr.request.from_tag == fromTag &&
           tr.request.call_id == call_id &&
           tr.request.cseq == cseq) {
@@ -170,7 +172,7 @@ rfc3261_8_2_2_2() {
 // Sanity Check functions for responses.
 rfc3261_8_1_3_3() {
   if (message.getHeaders('via').length > 1) {
-    debug(
+    logger.debug(
         'more than one Via header field present in the response, dropping the response');
 
     return false;
@@ -186,7 +188,7 @@ rfc3261_18_3_response() {
   }
 
   if (len < contentLength) {
-    debug(
+    logger.debug(
         'message body length is lower than the value in Content-Length header field, dropping the response');
 
     return false;
@@ -199,7 +201,7 @@ minimumHeaders() {
 
   for (var header in mandatoryHeaders) {
     if (!message.hasHeader(header)) {
-      debug(
+      logger.debug(
           'missing mandatory header field : ${header}, dropping the response');
 
       return false;
@@ -228,7 +230,8 @@ reply(status_code) {
   response += 'To: ${to}\r\n';
   response += 'From: ${message.getHeader('From')}\r\n';
   response += 'Call-ID: ${message.call_id}\r\n';
-  response += 'CSeq: ${message.cseq} ${SipMethodHelper.getName(message.method)}\r\n';
+  response +=
+      'CSeq: ${message.cseq} ${SipMethodHelper.getName(message.method)}\r\n';
   response += '\r\n';
 
   transport.send(response);
