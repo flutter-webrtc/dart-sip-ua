@@ -893,11 +893,12 @@ class RTCSession extends EventManager {
       } else {
         var dtmf = new RTCSession_DTMF.DTMF(this);
 
-        options['eventHandlers'] = {
-          'onFailed': () {
-            this._tones = null;
-          }
-        };
+        EventManager eventHandlers = EventManager();
+        eventHandlers.on(EventFailed(), (EventFailed event) {
+          this._tones = null;
+        });
+
+        options['eventHandlers'] = eventHandlers;
         dtmf.send(tone, options);
         timeout = duration + interToneGap;
       }

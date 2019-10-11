@@ -79,8 +79,7 @@ class DTMF extends EventManager {
 
     body += 'Duration=${this._duration}';
 
-    this._session.newDTMF(
-        {'originator': 'local', 'dtmf': this, 'request': this._request});
+    this._session.newDTMF('local', this, this._request);
 
     EventManager handlers = EventManager();
     handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
