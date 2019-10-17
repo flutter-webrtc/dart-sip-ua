@@ -2142,7 +2142,7 @@ class RTCSession extends EventManager {
 
       request_sender.send();
     } catch (error, s) {
-      logger.error(error, s);
+      logger.error(error, null, s);
       this._failed('local', null, null, null, DartSIP_C.causes.WEBRTC_ERROR);
       if (this._status == C.STATUS_TERMINATED) {
         return;
@@ -2397,7 +2397,7 @@ class RTCSession extends EventManager {
         'eventHandlers': handlers
       });
     } catch (e, s) {
-      logger.error(e, s);
+      logger.error(e, null, s);
       onFailed();
     }
   }

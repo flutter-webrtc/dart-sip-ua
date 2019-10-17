@@ -64,7 +64,7 @@ class EventManager {
       targets.remove(listener);
       targets.add(listener);
     } catch (e, s) {
-      logger.error(e, s);
+      logger.error(e, null, s);
     }
   }
 
@@ -103,7 +103,7 @@ class EventManager {
           //   logger.warn("invoking $event on $target");
           target(event);
         } catch (e, s) {
-          logger.error(e.toString(), s);
+          logger.error(e.toString(), null, s);
         }
       });
     }

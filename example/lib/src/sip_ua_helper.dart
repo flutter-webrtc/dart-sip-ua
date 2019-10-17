@@ -136,7 +136,7 @@ class SIPUAHelper extends EventManager {
       });
       this._ua.start();
     } catch (e, s) {
-      logger.error(e.toString(), s);
+      logger.error(e.toString(), null, s);
     }
   }
 
