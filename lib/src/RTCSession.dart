@@ -2077,9 +2077,8 @@ class RTCSession extends EventManager {
         (EventOnTransportError value) {
       this.onTransportError();
     });
-    localEventHandlers.on(EventOnAuthenticated(),
-        (EventOnAuthenticated request) {
-      this._request = request;
+    localEventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
+      this._request = event.request;
     });
     localEventHandlers.on(EventOnReceiveResponse(),
         (EventOnReceiveResponse event) {
