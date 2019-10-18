@@ -181,7 +181,7 @@ class SIPUAHelper extends EventManager {
     });
     eventHandlers.on(EventUnhold(), (EventUnhold e) {
       logger.debug('call unhold');
-      _handleCallState('unhold', null, null, null, null, null);
+      _handleCallState('unhold', null, null, e.originator, null, null);
     });
     eventHandlers.on(EventMuted(), (EventMuted e) {
       logger.debug('call muted');

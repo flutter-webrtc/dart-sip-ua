@@ -344,7 +344,7 @@ class EventHold extends EventType {
 }
 
 class EventUnhold extends EventType {
-  // String originator;
+  String originator;
   EventUnhold({String originator});
 }
 

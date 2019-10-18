@@ -2397,7 +2397,7 @@ class RTCSession extends EventManager {
         'eventHandlers': handlers
       });
     } catch (e, s) {
-      logger.error(e, null, s);
+      logger.error(e.toString(), null, s);
       onFailed();
     }
   }
@@ -2566,7 +2566,7 @@ class RTCSession extends EventManager {
       return sdpInput;
     }
 
-    Map<dynamic, dynamic> sdp = sdp_transform.parse(sdpInput);
+    Map<String, dynamic> sdp = sdp_transform.parse(sdpInput);
 
     // Local hold.
     if (this._localHold && !this._remoteHold) {
