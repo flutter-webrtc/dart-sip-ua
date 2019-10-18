@@ -1,5 +1,6 @@
 import 'Grammar.dart';
 import 'Utils.dart' as Utils;
+import 'WebSocketInterface.dart';
 import 'logger.dart';
 
 final logger = Log();
@@ -14,9 +15,10 @@ abstract class Socket {
   disconnect();
   send(data);
 
-  dynamic onconnect;
-  dynamic ondisconnect;
-  dynamic ondata;
+  void Function() onconnect;
+  void Function(WebSocketInterface socket, bool error, String reason)
+      ondisconnect;
+  void Function(dynamic data) ondata;
 }
 
 isSocket(socket) {

@@ -21,11 +21,12 @@ class WebSocketInterface implements Socket {
 
   final logger = Log();
   @override
-  dynamic onconnect;
+  void Function() onconnect;
   @override
-  dynamic ondisconnect;
+  void Function(WebSocketInterface socket, bool error, String reason)
+      ondisconnect;
   @override
-  dynamic ondata;
+  void Function(dynamic data) ondata;
 
   WebSocketInterface(String url, [Map<String, dynamic> wsExtraHeaders]) {
     logger.debug('new() [url:' + url + ']');
@@ -202,7 +203,7 @@ class WebSocketInterface implements Socket {
     if (wasClean == false) {
       logger.debug('WebSocket abrupt disconnection');
     }
-    this.ondisconnect(this, !wasClean);
+    this.ondisconnect(this, !wasClean, reason);
   }
 
   _onMessage(data) {

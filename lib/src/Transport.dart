@@ -4,6 +4,7 @@ import 'Timers.dart';
 import 'Utils.dart';
 import 'WebSocketInterface.dart';
 import 'logger.dart';
+import 'stack_trace_nj.dart';
 
 /**
  * Constants
@@ -146,8 +147,9 @@ class Transport {
 
     // Unbind socket event callbacks.
     this.socket.onconnect = () => {};
-    this.socket.ondisconnect = (data) => {};
-    this.socket.ondata = (data) => {};
+    this.socket.ondisconnect =
+        (WebSocketInterface socket, bool error, String reason) => {};
+    this.socket.ondata = (dynamic data) => {};
 
     this.socket.disconnect();
     this.ondisconnect(this.socket, false);
@@ -158,7 +160,9 @@ class Transport {
 
     if (!this.isConnected()) {
       logger.error(
-          'unable to send message, transport is not connected. Current state is ${this.status}');
+          'unable to send message, transport is not connected. Current state is ${this.status}',
+          null,
+          StackTraceNJ());
       return false;
     }
 
@@ -254,7 +258,7 @@ class Transport {
     this.onconnect(this);
   }
 
-  _onDisconnect(WebSocketInterface socket, bool error) {
+  _onDisconnect(WebSocketInterface socket, bool error, String reason) {
     this.status = C.STATUS_DISCONNECTED;
     this.ondisconnect(socket, error);
 

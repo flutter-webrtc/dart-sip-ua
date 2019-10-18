@@ -45,7 +45,8 @@ var testFunctions = [
           client.disconnect();
           completer.complete();
         };
-        client.ondisconnect = (reason) {
+        client.ondisconnect =
+            (WebSocketInterface socket, bool error, String reason) {
           print('ondisconnect => ${reason.toString()}');
           expect(client.isConnected(), false);
         };
