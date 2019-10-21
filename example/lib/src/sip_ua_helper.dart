@@ -194,7 +194,7 @@ class SIPUAHelper extends EventManager {
     eventHandlers.on(EventStream(), (EventStream e) async {
       // Wating for callscreen ready.
       Timer(Duration(milliseconds: 100), () {
-        _handleCallState('stream', null, e.stream, null, null, null);
+        _handleCallState('stream', null, e.stream, e.originator, null, null);
       });
     });
 
