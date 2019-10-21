@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 
 import 'package:flutter/material.dart';
-import 'src/sip_ua_helper.dart';
+import 'package:sip_ua/sip_ua.dart';
 import 'src/register.dart';
 import 'src/dialpad.dart';
 import 'src/callscreen.dart';

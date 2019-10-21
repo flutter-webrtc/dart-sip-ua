@@ -14,6 +14,7 @@ import 'Timers.dart';
 import 'Transport.dart';
 import 'URI.dart';
 import 'Utils.dart' as Utils;
+import 'WebSocketInterface.dart';
 import 'event_manager/event_manager.dart';
 import 'logger.dart';
 import 'sanityCheck.dart';

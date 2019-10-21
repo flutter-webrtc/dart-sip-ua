@@ -6,6 +6,7 @@ import 'Constants.dart' as DartSIP_C;
 import 'Exceptions.dart' as Exceptions;
 import 'Grammar.dart';
 import 'NameAddrHeader.dart';
+import 'UA.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 

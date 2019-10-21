@@ -3,6 +3,7 @@ import 'Constants.dart';
 import 'DigestAuthentication.dart';
 import 'SIPMessage.dart';
 import 'UA.dart' as UAC;
+import 'UA.dart';
 import 'event_manager/event_manager.dart';
 import 'logger.dart';
 import 'transactions/ack_client.dart';

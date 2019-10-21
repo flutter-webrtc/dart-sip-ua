@@ -1,3 +1,4 @@
+import 'package:sip_ua/src/UA.dart';
 import 'package:test/test.dart';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:sip_ua/src/Config.dart' as config;

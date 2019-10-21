@@ -19,6 +19,7 @@ import 'RequestSender.dart';
 import 'SIPMessage.dart';
 
 import 'Timers.dart';
+import 'UA.dart';
 import 'URI.dart';
 import 'Utils.dart' as Utils;
 import 'event_manager/event_manager.dart';
