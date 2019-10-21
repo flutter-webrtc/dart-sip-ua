@@ -7,6 +7,7 @@ import '../RTCSession/DTMF.dart';
 import '../RTCSession/Info.dart';
 import '../SIPMessage.dart';
 import '../Transport.dart';
+import '../WebSocketInterface.dart';
 import '../transactions/transaction_base.dart';
 
 /// each EventType class can implement this method and the EventManager will call it before
@@ -30,43 +31,6 @@ abstract class EventType {
 /// exactly what fields are available without the need to actually run the code.
 
 class EventStateChanged extends EventType {}
-
-class EventSocketState extends EventType {
-  String state;
-  IncomingMessage response;
-  EventSocketState({this.state, this.response});
-}
-
-class EventRegisterState extends EventType {
-  String state;
-  IncomingMessage response;
-  EventRegisterState({this.state, this.response});
-}
-
-class EventCallState extends EventType {
-  String state;
-  // dynamic response;
-  String originator;
-  MediaStream stream;
-  bool audio;
-  bool video;
-  EventCallState(
-      {this.state,
-      dynamic response,
-      this.originator,
-      this.stream,
-      this.audio,
-      this.video});
-}
-
-class EventUaState extends EventType {
-  String state;
-  // dynamic response;
-  // String originator;
-  // MediaStream stream;
-  EventUaState(
-      {this.state, dynamic response, String originator, MediaStream stream});
-}
 
 class EventNewTransaction extends EventType {
   // TransactionBase transaction;

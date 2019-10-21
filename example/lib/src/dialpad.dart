@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'sip_ua_helper.dart';
+
 import 'widgets/numpad.dart';
-import 'package:sip_ua/src/event_manager/event_manager.dart';
+import 'package:sip_ua/sip_ua.dart';
 
 class DialPadWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -11,7 +11,8 @@ class DialPadWidget extends StatefulWidget {
   _MyDialPadWidget createState() => _MyDialPadWidget();
 }
 
-class _MyDialPadWidget extends State<DialPadWidget> {
+class _MyDialPadWidget extends State<DialPadWidget>
+    implements SipUaHelperListener {
   String _dest;
   SIPUAHelper get helper => widget._helper;
   TextEditingController _textController;
@@ -33,14 +34,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
   }
 
   void _bindEventListeners() {
-    helper.on(EventRegisterState(), (EventRegisterState data) {
-      this.setState(() {});
-    });
-    helper.on(EventUaState(), (EventUaState data) {
-      if (data.state == 'newRTCSession') {
-        Navigator.pushNamed(context, '/callscreen');
-      }
-    });
+    helper.addSipUaHelperListener(this);
   }
 
   Widget _handleCall(BuildContext context, [bool voiceonly = false]) {
@@ -202,7 +196,7 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                     padding: const EdgeInsets.all(6.0),
                     child: Center(
                         child: Text(
-                      'Status: ${helper.registerState}',
+                      'Status: ${EnumHelper.getName(helper.registerState)}',
                       style: TextStyle(fontSize: 14, color: Colors.black54),
                     )),
                   ),
@@ -213,5 +207,17 @@ class _MyDialPadWidget extends State<DialPadWidget> {
                     children: _buildDialPad(),
                   )),
                 ])));
+  }
+
+  @override
+  void registrationStateChanged(RegistrationStateEnum state) {
+    this.setState(() {});
+  }
+
+  @override
+  void callStateChanged(CallState callState) {
+    if (callState.state == CallStateEnum.CALL_INITIATION) {
+      Navigator.pushNamed(context, '/callscreen');
+    }
   }
 }

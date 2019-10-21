@@ -19,6 +19,7 @@ dependencies:
   random_string: ^1.1.0
   logger: ^0.7.0+2
   intl: ^0.16.0
+  recase: ^2.0.1
   
 dev_dependencies:
   test: ^1.6.7
