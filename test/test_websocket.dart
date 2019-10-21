@@ -45,7 +45,8 @@ var testFunctions = [
           client.disconnect();
           completer.complete();
         };
-        client.ondisconnect = (reason) {
+        client.ondisconnect =
+            (WebSocketInterface socket, bool error, String reason) {
           print('ondisconnect => ${reason.toString()}');
           expect(client.isConnected(), false);
         };
@@ -76,21 +77,21 @@ var testFunctions = [
             new WebSocketInterface('ws://127.0.0.1:4041/sip');
         Transport trasnport = new Transport(socket);
 
-        trasnport.onconnecting = (socket) {
+        trasnport.onconnecting = (socket, attempt) {
           expect(trasnport.isConnecting(), true);
         };
 
-        trasnport.onconnect = (socket){
+        trasnport.onconnect = (socket) {
           expect(trasnport.isConnected(), true);
           trasnport.send('message');
         };
 
-        trasnport.ondata = (socket) {
-          expect(socket['message'], 'message');
+        trasnport.ondata = (Transport transport, String messageData) {
+          // expect(socket['message'], 'message');
           trasnport.disconnect();
         };
 
-        trasnport.ondisconnect = (socket){
+        trasnport.ondisconnect = (socket, bool error) {
           expect(trasnport.isConnected(), false);
           completer.complete();
         };

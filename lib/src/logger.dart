@@ -1,63 +1,132 @@
-enum Level { verbose, debug, info, warning, error, failure }
+import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
-class Logger {
-  String _tag;
-  bool colors;
-  bool printTime;
+import 'stack_trace_nj.dart';
+
+class Log extends Logger {
+  static Log _self;
+  static String _localPath;
+
+  Log();
+
+  Log._internal(String currentWorkingDirectory)
+      : super(printer: MyLogPrinter(currentWorkingDirectory));
+
+  debug(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.d(message, error, stackTrace);
+    return _self;
+  }
+
+  info(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.i(message, error, stackTrace);
+    return _self;
+  }
+
+  warn(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.w(message, error, stackTrace);
+    return _self;
+  }
+
+  error(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.e(message, error, stackTrace);
+    return _self;
+  }
+
+  factory Log.d(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    _self.d(message, error, stackTrace);
+    return _self;
+  }
+
+  factory Log.i(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    _self.i(message, error, stackTrace);
+    return _self;
+  }
+
+  factory Log.w(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    _self.w(message, error, stackTrace);
+    return _self;
+  }
+
+  factory Log.e(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    _self.e(message, error, stackTrace);
+    return _self;
+  }
+
+  static void autoInit() {
+    if (_self == null) {
+      init(".");
+    }
+  }
+
+  static void init(String currentWorkingDirectory) {
+    _self = Log._internal(currentWorkingDirectory);
+
+    StackTraceNJ frames = StackTraceNJ();
+
+    for (Stackframe frame in frames.frames) {
+      _localPath = frame.sourceFile.path
+          .substring(frame.sourceFile.path.lastIndexOf("/"));
+      break;
+    }
+  }
+}
+
+class MyLogPrinter extends LogPrinter {
   static final levelColors = {
     Level.verbose: AnsiColor.fg(AnsiColor.grey(0.5)),
     Level.debug: AnsiColor.none(),
     Level.info: AnsiColor.fg(12),
     Level.warning: AnsiColor.fg(208),
     Level.error: AnsiColor.fg(196),
-    Level.failure: AnsiColor.fg(199),
   };
-  static DateTime _startTime;
 
-  Logger(tag) {
-    this._tag = 'DartSIP:' + tag;
-    this.colors = false;
-    this.printTime = true;
-    if (_startTime == null) {
-      _startTime = DateTime.now();
+  bool colors = true;
+
+  String currentWorkingDirectory;
+
+  MyLogPrinter(this.currentWorkingDirectory);
+
+  @override
+  void log(LogEvent event) {
+    var formatter = DateFormat('yyyy-MM-dd HH:mm:ss.');
+    var now = DateTime.now();
+    var formattedDate = formatter.format(now) + now.millisecond.toString();
+
+    var color = _getLevelColor(event.level);
+
+    StackTraceNJ frames = StackTraceNJ();
+    int i = 0;
+    int depth = 0;
+    for (Stackframe frame in frames.frames) {
+      i++;
+      var path2 = frame.sourceFile.path;
+      if (!path2.contains(Log._localPath)) {
+        depth = i - 1;
+        break;
+      }
     }
-  }
 
-  void error(error) {
-    this.log('[' + _tag + '] ERROR: ' + error.toString(), Level.error);
-  }
+    print(color(
+        "[$formattedDate] ${event.level} ${StackTraceNJ(skipFrames: depth).formatStackTrace(methodCount: 1)} ::: ${event.message}"));
+    if (event.error != null) {
+      print("${event.error}");
+    }
 
-  void verbose(msg) {
-    this.log('[' + _tag + '] VERBOSE: ' + msg, Level.verbose);
-  }
-
-  void info(msg) {
-    this.log('[' + _tag + '] INFO: ' + msg, Level.info);
-  }
-
-  void debug(msg) {
-    this.log('[' + _tag + '] DEBUG: ' + msg, Level.debug);
-  }
-
-  void warn(msg) {
-    this.log('[' + _tag + '] WARN: ' + msg, Level.warning);
-  }
-
-  void failure(error) {
-    var log = '[' + _tag + '] FAILURE: ' + error;
-    this.log(log, Level.failure);
-    throw (log);
-  }
-
-  void log(message, level) {
-    String timeStr = printTime? getTime() : '';
-    formatAndPrint(level, message, timeStr);
-  }
-
-  formatAndPrint(Level level, String message, String time) {
-    var color = _getLevelColor(level);
-    for (var line in message.split('\n')) {
-      print(color('$time $line'));
+    if (event.stackTrace != null) {
+      if (event.stackTrace.runtimeType == StackTraceNJ) {
+        var st = event.stackTrace as StackTraceNJ;
+        print(color("${st}"));
+      } else {
+        print(color("${event.stackTrace}"));
+      }
     }
   }
 
@@ -67,27 +136,6 @@ class Logger {
     } else {
       return AnsiColor.none();
     }
-  }
-
-  String getTime() {
-    String _threeDigits(int n) {
-      if (n >= 100) return "${n}";
-      if (n >= 10) return "0${n}";
-      return "00${n}";
-    }
-
-    String _twoDigits(int n) {
-      if (n >= 10) return "${n}";
-      return "0${n}";
-    }
-
-    var now = DateTime.now();
-    String h = _twoDigits(now.hour);
-    String min = _twoDigits(now.minute);
-    String sec = _twoDigits(now.second);
-    String ms = _threeDigits(now.millisecond);
-    var timeSinceStart = now.difference(_startTime).toString();
-    return "$h:$min:$sec.$ms (+$timeSinceStart)";
   }
 }
 

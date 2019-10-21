@@ -1,20 +1,17 @@
-import 'package:events2/events2.dart';
-import '../Constants.dart' as DartSIP_C;
 import '../Constants.dart';
 import '../Exceptions.dart' as Exceptions;
 import '../RTCSession.dart' as RTCSession;
 import '../Utils.dart' as Utils;
+import '../event_manager/event_manager.dart';
 import '../logger.dart';
 
-class Info extends EventEmitter {
+class Info extends EventManager {
   var _session;
   var _direction;
   var _contentType;
   var _body;
   var request;
-  final logger = Logger('RTCSession:Info');
-  debug(msg) => logger.debug(msg);
-  debugerror(error) => logger.error(error);
+  final logger = Log();
 
   Info(session) {
     this._session = session;
@@ -52,26 +49,26 @@ class Info extends EventEmitter {
     this._session.newInfo(
         {'originator': 'local', 'info': this, 'request': this.request});
 
+    EventManager handlers = EventManager();
+    handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
+      this.emit(EventSucceeded(originator: 'remote', response: event.response));
+    });
+    handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
+      this.emit(EventFailed(originator: 'remote', response: event.response));
+    });
+    handlers.on(EventOnTransportError(), (EventOnTransportError event) {
+      this._session.onTransportError();
+    });
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
+      this._session.onRequestTimeout();
+    });
+    handlers.on(EventOnDialogError(), (EventOnDialogError event) {
+      this._session.onDialogError();
+    });
+
     this._session.sendRequest(SipMethod.INFO, {
       'extraHeaders': extraHeaders,
-      'eventHandlers': {
-        'onSuccessResponse': (response) {
-          this.emit(
-              'succeeded', {'originator': 'remote', 'response': response});
-        },
-        'onErrorResponse': (response) {
-          this.emit('failed', {'originator': 'remote', 'response': response});
-        },
-        'onTransportError': () {
-          this._session.onTransportError();
-        },
-        'onRequestTimeout': () {
-          this._session.onRequestTimeout();
-        },
-        'onDialogError': () {
-          this._session.onDialogError();
-        }
-      },
+      'eventHandlers': handlers,
       'body': body
     });
   }

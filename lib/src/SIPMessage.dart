@@ -9,8 +9,7 @@ import 'NameAddrHeader.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 
-final logger = Logger('SIPMessage');
-debug(msg) => logger.debug(msg);
+final logger = Log();
 
 /**
  * -param {String} method request method
@@ -100,7 +99,8 @@ class OutgoingRequest {
     this.setHeader('call-id', call_id);
 
     // CSeq.
-    var cseq = params['cseq'] ?? Utils.Math.floor(Utils.Math.randomDouble() * 10000);
+    var cseq =
+        params['cseq'] ?? Utils.Math.floor(Utils.Math.randomDouble() * 10000);
 
     this.cseq = cseq;
     this.setHeader('cseq', '${cseq} ${SipMethodHelper.getName(method)}');
@@ -214,10 +214,11 @@ class OutgoingRequest {
   }
 
   toString() {
-    var msg = '${SipMethodHelper.getName(this.method)} ${this.ruri} SIP/2.0\r\n';
+    var msg =
+        '${SipMethodHelper.getName(this.method)} ${this.ruri} SIP/2.0\r\n';
 
     this.headers.forEach((headerName, headerValues) {
-      headerValues.forEach((value){
+      headerValues.forEach((value) {
         msg += '$headerName: $value\r\n';
       });
     });
@@ -238,7 +239,8 @@ class OutgoingRequest {
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
-        if (this.ua.contact.pub_gruu != null || this.ua.contact.temp_gruu != null) {
+        if (this.ua.contact.pub_gruu != null ||
+            this.ua.contact.temp_gruu != null) {
           supported.add('gruu');
         }
         supported.add('ice');
@@ -250,9 +252,8 @@ class OutgoingRequest {
         }
         supported.add('ice');
         break;
-        default:
+      default:
         break;
-
     }
 
     supported.add('outbound');
@@ -294,7 +295,6 @@ class OutgoingRequest {
 }
 
 class InitialOutgoingInviteRequest extends OutgoingRequest {
-
   InitialOutgoingInviteRequest(ruri, ua, [params, extraHeaders, body])
       : super(SipMethod.INVITE, ruri, ua, params, extraHeaders, body) {
     this.transaction = null;
@@ -426,10 +426,10 @@ class IncomingMessage {
     name = Utils.headerize(name);
 
     if (this.headers[name] == null) {
-      debug('header "${name}" not present');
+      logger.debug('header "${name}" not present');
       return null;
     } else if (idx >= this.headers[name].length) {
-      debug('not so many "${name}" headers present');
+      logger.debug('not so many "${name}" headers present');
       return null;
     }
 
@@ -444,7 +444,8 @@ class IncomingMessage {
     var parsed = Grammar.parse(value, name.replaceAll('-', '_'));
     if (parsed == -1) {
       this.headers[name].splice(idx, 1); // delete from headers
-      debug('error parsing "${name}" header field with value "${value}"');
+      logger
+          .debug('error parsing "${name}" header field with value "${value}"');
       return null;
     } else {
       header['parsed'] = parsed;
@@ -564,7 +565,8 @@ class IncomingRequest extends IncomingMessage {
     response += 'To: ${to}\r\n';
     response += 'From: ${this.getHeader('From')}\r\n';
     response += 'Call-ID: ${this.call_id}\r\n';
-    response += 'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
+    response +=
+        'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
 
     for (var header in extraHeaders) {
       response += '${header.trim()}\r\n';
@@ -576,7 +578,8 @@ class IncomingRequest extends IncomingMessage {
         if (this.ua.configuration.session_timers) {
           supported.add('timer');
         }
-        if (this.ua.contact.pub_gruu != null || this.ua.contact.temp_gruu != null) {
+        if (this.ua.contact.pub_gruu != null ||
+            this.ua.contact.temp_gruu != null) {
           supported.add('gruu');
         }
         supported.add('ice');
@@ -591,7 +594,7 @@ class IncomingRequest extends IncomingMessage {
         }
         supported.add('replaces');
         break;
-        default:
+      default:
         break;
     }
 
@@ -658,7 +661,8 @@ class IncomingRequest extends IncomingMessage {
     response += 'To: ${to}\r\n';
     response += 'From: ${this.getHeader('From')}\r\n';
     response += 'Call-ID: ${this.call_id}\r\n';
-    response += 'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
+    response +=
+        'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
     response += 'Content-Length: ${0}\r\n\r\n';
 
     this.transport.send(response);

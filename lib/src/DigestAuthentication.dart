@@ -44,9 +44,7 @@ class DigestAuthentication {
   var _ha1;
   var _response;
   Credentials _credentials;
-  final logger = new Logger('DigestAuthentication');
-  debug(msg) => logger.debug(msg);
-  debugerror(error) => logger.error(error);
+  final logger = new Log();
 
   DigestAuthentication(this._credentials);
 
@@ -61,7 +59,8 @@ class DigestAuthentication {
         return this._ha1;
 
       default:
-        debugerror('get() | cannot get ' + parameter.toString() + ' parameter');
+        logger
+            .error('get() | cannot get ' + parameter.toString() + ' parameter');
 
         return null;
     }
@@ -81,7 +80,7 @@ class DigestAuthentication {
 
     if (this._algorithm != null) {
       if (this._algorithm != 'MD5') {
-        debugerror(
+        logger.error(
             'authenticate() | challenge with Digest algorithm different than "MD5", authentication aborted');
 
         return false;
@@ -91,14 +90,14 @@ class DigestAuthentication {
     }
 
     if (this._nonce == null) {
-      debugerror(
+      logger.error(
           'authenticate() | challenge without Digest nonce, authentication aborted');
 
       return false;
     }
 
     if (this._realm == null) {
-      debugerror(
+      logger.error(
           'authenticate() | challenge without Digest realm, authentication aborted');
 
       return false;
@@ -108,7 +107,7 @@ class DigestAuthentication {
     if (this._credentials.password == null) {
       // If ha1 is not provided we cannot authenticate.
       if (this._credentials.ha1 == null) {
-        debugerror(
+        logger.error(
             'authenticate() | no plain SIP password nor ha1 provided, authentication aborted');
 
         return false;
@@ -116,7 +115,7 @@ class DigestAuthentication {
 
       // If the realm does not match the stored realm we cannot authenticate.
       if (this._credentials.realm != this._realm) {
-        debugerror(
+        logger.error(
             'authenticate() | no plain SIP password, and stored "realm" does not match the given "realm", cannot authenticate [stored:"${this._credentials.realm}", given:"${this._realm}"]');
 
         return false;
@@ -131,7 +130,7 @@ class DigestAuthentication {
         this._qop = 'auth';
       } else {
         // Otherwise 'qop' is present but does not contain 'auth' or 'auth-int', so abort here.
-        debugerror(
+        logger.error(
             'authenticate() | challenge without Digest qop different than "auth" or "auth-int", authentication aborted');
 
         return false;
@@ -177,7 +176,7 @@ class DigestAuthentication {
       a2 = '${SipMethodHelper.getName(this._method)}:${this._uri}';
       ha2 = Utils.calculateMD5(a2);
 
-      debug('authenticate() | using qop=auth [a2:${a2}]');
+      logger.debug('authenticate() | using qop=auth [a2:${a2}]');
 
       // Response = MD5(HA1:nonce:nonceCount:credentialsNonce:qop:HA2).
       this._response = Utils.calculateMD5(
@@ -188,7 +187,7 @@ class DigestAuthentication {
           '${SipMethodHelper.getName(this._method)}:${this._uri}:${Utils.calculateMD5(body != null ? body : '')}';
       ha2 = Utils.calculateMD5(a2);
 
-      debug('authenticate() | using qop=auth-int [a2:${a2}]');
+      logger.debug('authenticate() | using qop=auth-int [a2:${a2}]');
 
       // Response = MD5(HA1:nonce:nonceCount:credentialsNonce:qop:HA2).
       this._response = Utils.calculateMD5(
@@ -198,13 +197,13 @@ class DigestAuthentication {
       a2 = '${SipMethodHelper.getName(this._method)}:${this._uri}';
       ha2 = Utils.calculateMD5(a2);
 
-      debug('authenticate() | using qop=null [a2:${a2}]');
+      logger.debug('authenticate() | using qop=null [a2:${a2}]');
 
       // Response = MD5(HA1:nonce:HA2).
       this._response = Utils.calculateMD5('${this._ha1}:${this._nonce}:${ha2}');
     }
 
-    debug('authenticate() | response generated');
+    logger.debug('authenticate() | response generated');
 
     return true;
   }

@@ -1,12 +1,9 @@
 import '../sip_ua.dart';
 import 'Grammar.dart';
 import 'SIPMessage.dart';
-import 'SIPMessage.dart' as SIPMessage;
 import 'logger.dart';
 
-final logger = new Logger('Parser');
-debug(msg) => logger.debug(msg);
-debugerror(error) => logger.error(error);
+final logger = new Log();
 
 /**
  * Parse SIP Message
@@ -17,33 +14,32 @@ IncomingMessage parseMessage(String data, UA ua) {
   int headerEnd = data.indexOf('\r\n');
 
   if (headerEnd == -1) {
-    debugerror('parseMessage() | no CRLF found, not a SIP message');
+    logger.error('parseMessage() | no CRLF found, not a SIP message');
     return null;
   }
 
   // Parse first line. Check if it is a Request or a Reply.
   String firstLine = data.substring(0, headerEnd);
   var parsed;
-  try{
+  try {
     parsed = Grammar.parse(firstLine, 'Request_Response');
-  }catch (FormatException )
-  {
+  } catch (FormatException) {
     // Catch exception and fake the expected -1 result
     parsed = -1;
   }
 
   if (parsed == -1) {
-    debugerror(
+    logger.error(
         'parseMessage() | error parsing first line of SIP message: "${firstLine}"');
 
     return null;
   } else if (parsed.status_code == null) {
-    IncomingRequest incomingRequest = new SIPMessage.IncomingRequest(ua);
+    IncomingRequest incomingRequest = new IncomingRequest(ua);
     incomingRequest.method = parsed.method;
     incomingRequest.ruri = parsed.uri;
     message = incomingRequest;
   } else {
-    message = new SIPMessage.IncomingResponse();
+    message = new IncomingResponse();
     message.status_code = parsed.status_code;
     message.reason_phrase = parsed.reason_phrase;
   }
@@ -64,7 +60,7 @@ IncomingMessage parseMessage(String data, UA ua) {
     }
     // Data.indexOf returned -1 due to a malformed message.
     else if (headerEnd == -1) {
-      debugerror('parseMessage() | malformed message');
+      logger.error('parseMessage() | malformed message');
 
       return null;
     }
@@ -72,7 +68,7 @@ IncomingMessage parseMessage(String data, UA ua) {
     parsed = parseHeader(message, data, headerStart, headerEnd);
 
     if (parsed != true) {
-      debugerror('parseMessage() |' + parsed['error']);
+      logger.error('parseMessage() |' + parsed['error']);
       return null;
     }
 
@@ -185,8 +181,9 @@ parseHeader(message, data, headerStart, headerEnd) {
       } else {
         for (var header in parsed) {
           message.addHeader('record-route', header['raw']);
-          message.headers['Record-Route'][message.getHeaders('record-route').length - 1]
-              ['parsed'] = header['parsed'];
+          message.headers['Record-Route']
+                  [message.getHeaders('record-route').length - 1]['parsed'] =
+              header['parsed'];
         }
       }
       break;
@@ -228,7 +225,7 @@ parseHeader(message, data, headerStart, headerEnd) {
       if (parsed != null) {
         message.cseq = parsed.value;
       }
-      if (message is SIPMessage.IncomingResponse) {
+      if (message is IncomingResponse) {
         message.method = parsed.method;
       }
       break;

@@ -8,10 +8,7 @@ import 'URI.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 
-  final logger = Logger('Config');
-  debug(msg) => logger.debug(msg);
-  info(msg) => logger.info(msg);
-  debugerror(error) => logger.error(error);
+final logger = Log();
 
 // Default settings.
 class Settings {
@@ -178,14 +175,13 @@ class Checks {
         dst.session_timers = session_timers;
       }
     },
-    'session_timers_refresh_method': ( src,  dst) {
+    'session_timers_refresh_method': (src, dst) {
       Settings srcSettings = src as Settings;
       Settings dstSettings = dst as Settings;
       SipMethod method = srcSettings.session_timers_refresh_method;
-        if (method == SipMethod.INVITE || method == SipMethod.UPDATE) {
-          dstSettings.session_timers_refresh_method = method;
-        }
-      
+      if (method == SipMethod.INVITE || method == SipMethod.UPDATE) {
+        dstSettings.session_timers_refresh_method = method;
+      }
     },
     'password': (src, dst) {
       var password = src.password;
@@ -246,17 +242,17 @@ load(dst, src) {
   try {
     // Check Mandatory parameters.
     checks.mandatory.forEach((parameter, fun) {
-      info('Check mandatory parameter => ${parameter}.');
+      logger.info('Check mandatory parameter => ${parameter}.');
       fun(src, dst);
     });
 
     // Check Optional parameters.
     checks.optional.forEach((parameter, fun) {
-      info('Check optional parameter => ${parameter}.');
+      logger.info('Check optional parameter => ${parameter}.');
       fun(src, dst);
     });
   } catch (e) {
-    debugerror(e.toString());
+    logger.error(e.toString());
     throw e;
   }
 }

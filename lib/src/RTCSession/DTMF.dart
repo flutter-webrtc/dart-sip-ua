@@ -1,9 +1,9 @@
-import 'package:events2/events2.dart';
-import '../Constants.dart' as DartSIP_C;
+import '../../sip_ua.dart';
 import '../Constants.dart';
 import '../Exceptions.dart' as Exceptions;
 import '../RTCSession.dart' as RTCSession;
 import '../Utils.dart' as Utils;
+import '../event_manager/event_manager.dart';
 import '../logger.dart';
 
 class C {
@@ -14,16 +14,14 @@ class C {
   static const DEFAULT_INTER_TONE_GAP = 500;
 }
 
-class DTMF extends EventEmitter {
+class DTMF extends EventManager {
   var _session;
   var _direction;
   var _tone;
   var _duration;
   var _request;
-  var eventHandlers;
-  final logger = Logger('RTCSession:DTMF');
-  debug(msg) => logger.debug(msg);
-  debugerror(error) => logger.error(error);
+  EventManager eventHandlers;
+  final logger = Log();
 
   DTMF(session) {
     this._session = session;
@@ -54,7 +52,7 @@ class DTMF extends EventEmitter {
 
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
 
-    this.eventHandlers = options['eventHandlers'] ?? {};
+    this.eventHandlers = options['eventHandlers'] ?? EventManager();
 
     // Check tone type.
     if (tone is String) {
@@ -81,33 +79,32 @@ class DTMF extends EventEmitter {
 
     body += 'Duration=${this._duration}';
 
-    this._session.newDTMF(
-        {'originator': 'local', 'dtmf': this, 'request': this._request});
+    this._session.newDTMF('local', this, this._request);
+
+    EventManager handlers = EventManager();
+    handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
+      this.emit(EventSucceeded(originator: 'remote', response: event.response));
+    });
+    handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
+      this.eventHandlers.emit(EventOnFialed());
+      this.emit(EventOnFialed());
+
+      this.emit(EventFailed(originator: 'remote', response: event.response));
+    });
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
+      this._session.onRequestTimeout();
+    });
+    handlers.on(EventOnTransportError(), (EventOnTransportError event) {
+      this._session.onTransportError();
+    });
+
+    handlers.on(EventOnDialogError(), (EventOnDialogError event) {
+      this._session.onDialogError();
+    });
 
     this._session.sendRequest(SipMethod.INFO, {
       'extraHeaders': extraHeaders,
-      'eventHandlers': {
-        'onSuccessResponse': (response) {
-          this.emit(
-              'succeeded', {'originator': 'remote', 'response': response});
-        },
-        'onErrorResponse': (response) {
-          if (this.eventHandlers['onFailed'] != null) {
-            this.eventHandlers['onFailed']();
-          }
-
-          this.emit('failed', {'originator': 'remote', 'response': response});
-        },
-        'onRequestTimeout': () {
-          this._session.onRequestTimeout();
-        },
-        'onTransportError': () {
-          this._session.onTransportError();
-        },
-        'onDialogError': () {
-          this._session.onDialogError();
-        }
-      },
+      'eventHandlers': handlers,
       'body': body
     });
   }
@@ -142,7 +139,7 @@ class DTMF extends EventEmitter {
     }
 
     if (this._tone == null) {
-      debug('invalid INFO DTMF received, discarded');
+      logger.debug('invalid INFO DTMF received, discarded');
     } else {
       this
           ._session
