@@ -1,7 +1,6 @@
-import 'package:events2/events2.dart';
-
 import '../../sip_ua.dart';
 import '../Transport.dart';
+import '../event_manager/event_manager.dart';
 
 enum TransactionState {
   // Transaction states.
@@ -14,7 +13,7 @@ enum TransactionState {
   CONFIRMED
 }
 
-abstract class TransactionBase extends EventEmitter {
+abstract class TransactionBase extends EventManager {
   String id;
   UA ua;
   Transport transport;

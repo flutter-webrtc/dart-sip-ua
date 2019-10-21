@@ -4,6 +4,7 @@ import 'Timers.dart';
 import 'Utils.dart';
 import 'WebSocketInterface.dart';
 import 'logger.dart';
+import 'stack_trace_nj.dart';
 
 /**
  * Constants
@@ -39,17 +40,15 @@ class Transport {
   var recover_attempts;
   var recovery_timer;
   var close_requested;
-  final logger = Logger('Transport');
-  debug(msg) => logger.debug(msg);
-  debugerror(error) => logger.error(error);
+  final logger = Log();
 
-  dynamic onconnecting;
-  dynamic ondisconnect;
-  dynamic onconnect;
-  dynamic ondata;
+  void Function(WebSocketInterface socket, int attempts) onconnecting;
+  void Function(WebSocketInterface socket, bool error) ondisconnect;
+  void Function(Transport transport) onconnect;
+  void Function(Transport transport, String messageData) ondata;
 
   Transport(sockets, [recovery_options = C.recovery_options]) {
-    debug('new()');
+    logger.debug('new()');
 
     this.status = C.STATUS_DISCONNECTED;
 
@@ -107,22 +106,21 @@ class Transport {
   get sip_uri => this.socket.sip_uri;
 
   connect() {
-    debug('connect()');
+    logger.debug('connect()');
 
     if (this.isConnected()) {
-      debug('Transport is already connected');
+      logger.debug('Transport is already connected');
 
       return;
     } else if (this.isConnecting()) {
-      debug('Transport is connecting');
+      logger.debug('Transport is connecting');
 
       return;
     }
 
     this.close_requested = false;
     this.status = C.STATUS_CONNECTING;
-    this.onconnecting(
-        {'socket': this.socket, 'attempts': this.recover_attempts});
+    this.onconnecting(this.socket, this.recover_attempts);
 
     if (!this.close_requested) {
       // Bind socket event callbacks.
@@ -135,7 +133,7 @@ class Transport {
   }
 
   disconnect() {
-    debug('close()');
+    logger.debug('close()');
 
     this.close_requested = true;
     this.recover_attempts = 0;
@@ -149,24 +147,27 @@ class Transport {
 
     // Unbind socket event callbacks.
     this.socket.onconnect = () => {};
-    this.socket.ondisconnect = (data) => {};
-    this.socket.ondata = (data) => {};
+    this.socket.ondisconnect =
+        (WebSocketInterface socket, bool error, String reason) => {};
+    this.socket.ondata = (dynamic data) => {};
 
     this.socket.disconnect();
-    this.ondisconnect({'socket': this.socket, 'error': false});
+    this.ondisconnect(this.socket, false);
   }
 
   bool send(data) {
-    debug('send()');
+    logger.debug('send()');
 
     if (!this.isConnected()) {
-      debugerror(
-          'unable to send message, transport is not connected. Current state is ${this.status}');
+      logger.error(
+          'unable to send message, transport is not connected. Current state is ${this.status}',
+          null,
+          StackTraceNJ());
       return false;
     }
 
     var message = data.toString();
-    debug('sending message:\n\n${message}\n');
+    logger.debug('sending message:\n\n${message}\n');
     return this.socket.send(message);
   }
 
@@ -182,7 +183,7 @@ class Transport {
    * Private API.
    */
 
-  _reconnect(error) {
+  _reconnect(bool error) {
     this.recover_attempts += 1;
 
     var k = Math.floor(
@@ -194,7 +195,7 @@ class Transport {
       k = this.recovery_options['max_interval'];
     }
 
-    debug(
+    logger.debug(
         'reconnection attempt: ${this.recover_attempts}. next connection attempt in ${k} seconds');
 
     this.recovery_timer = setTimeout(() {
@@ -254,12 +255,12 @@ class Transport {
       clearTimeout(this.recovery_timer);
       this.recovery_timer = null;
     }
-    this.onconnect({'socket': this});
+    this.onconnect(this);
   }
 
-  _onDisconnect(data) {
+  _onDisconnect(WebSocketInterface socket, bool error, String reason) {
     this.status = C.STATUS_DISCONNECTED;
-    this.ondisconnect(data);
+    this.ondisconnect(socket, error);
 
     if (this.close_requested) {
       return;
@@ -273,13 +274,13 @@ class Transport {
       });
     }
 
-    this._reconnect(data['error']);
+    this._reconnect(error);
   }
 
   _onData(data) {
     // CRLF Keep Alive response from server. Ignore it.
     if (data == '\r\n') {
-      debug('received message with CRLF Keep Alive response');
+      logger.debug('received message with CRLF Keep Alive response');
       return;
     }
     // Binary message.
@@ -287,19 +288,20 @@ class Transport {
       try {
         data = new String.fromCharCodes(data);
       } catch (evt) {
-        debug('received binary message failed to be converted into string,' +
-            ' message discarded');
+        logger.debug(
+            'received binary message failed to be converted into string,' +
+                ' message discarded');
         return;
       }
 
-      debug('received binary message:\n\n${data}\n');
+      logger.debug('received binary message:\n\n${data}\n');
     }
 
     // Text message.
     else {
-      debug('received text message:\n\n${data}\n');
+      logger.debug('received text message:\n\n${data}\n');
     }
 
-    this.ondata({'transport': this, 'message': data});
+    this.ondata(this, data);
   }
 }

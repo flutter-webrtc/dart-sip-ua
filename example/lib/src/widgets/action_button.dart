@@ -13,7 +13,7 @@ class ActionButton extends StatefulWidget {
       this.icon,
       this.onPressed,
       this.checked = false,
-      this.fillColor = null})
+      this.fillColor})
       : super(key: key);
 
   @override

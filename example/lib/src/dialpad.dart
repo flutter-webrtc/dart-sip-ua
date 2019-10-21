@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'sip_ua_helper.dart';
 import 'widgets/numpad.dart';
+import 'package:sip_ua/src/event_manager/event_manager.dart';
 
 class DialPadWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -31,14 +32,14 @@ class _MyDialPadWidget extends State<DialPadWidget> {
     this.setState(() {});
   }
 
-  void _handleRegisterState(String state, Map<String, dynamic> data) {
-    this.setState(() {});
-  }
-
   void _bindEventListeners() {
-    helper.on('registerState', _handleRegisterState);
-    helper.on('uaState', (String state, Map<String, dynamic> data) {
-      if (state == 'newRTCSession') Navigator.pushNamed(context, '/callscreen');
+    helper.on(EventRegisterState(), (EventRegisterState data) {
+      this.setState(() {});
+    });
+    helper.on(EventUaState(), (EventUaState data) {
+      if (data.state == 'newRTCSession') {
+        Navigator.pushNamed(context, '/callscreen');
+      }
     });
   }
 

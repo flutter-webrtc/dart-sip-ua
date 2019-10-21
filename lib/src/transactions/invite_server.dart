@@ -1,10 +1,10 @@
 import '../../sip_ua.dart';
 import '../Timers.dart';
 import '../Transport.dart';
+import '../event_manager/event_manager.dart';
 import 'transaction_base.dart';
 
-final ist_logger = new Logger('InviteServerTransaction');
-debugist(msg) => ist_logger.debug(msg);
+final logger = new Log();
 
 class InviteServerTransaction extends TransactionBase {
   var resendProvisionalTimer;
@@ -30,14 +30,14 @@ class InviteServerTransaction extends TransactionBase {
 
   stateChanged(state) {
     this.state = state;
-    this.emit('stateChanged');
+    this.emit(EventStateChanged());
   }
 
   timer_H() {
-    debugist('Timer H expired for transaction ${this.id}');
+    logger.debug('Timer H expired for transaction ${this.id}');
 
     if (this.state == TransactionState.COMPLETED) {
-      debugist('ACK not received, dialog will be terminated');
+      logger.debug('ACK not received, dialog will be terminated');
     }
 
     this.stateChanged(TransactionState.TERMINATED);
@@ -50,7 +50,7 @@ class InviteServerTransaction extends TransactionBase {
 
   // RFC 6026 7.1.
   timer_L() {
-    debugist('Timer L expired for transaction ${this.id}');
+    logger.debug('Timer L expired for transaction ${this.id}');
 
     if (this.state == TransactionState.ACCEPTED) {
       this.stateChanged(TransactionState.TERMINATED);
@@ -62,7 +62,7 @@ class InviteServerTransaction extends TransactionBase {
     if (this.transportError == null) {
       this.transportError = true;
 
-      debugist('transport error occurred, deleting transaction ${this.id}');
+      logger.debug('transport error occurred, deleting transaction ${this.id}');
 
       if (this.resendProvisionalTimer != null) {
         clearInterval(this.resendProvisionalTimer);

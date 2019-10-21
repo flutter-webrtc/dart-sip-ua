@@ -1,21 +1,20 @@
 import 'dart:async';
+import 'package:flutter_webrtc/media_stream.dart';
 import 'package:sip_ua/sip_ua.dart';
-import 'package:events2/events2.dart';
-import 'package:sip_ua/src/RTCSession.dart';
 import 'package:sip_ua/src/Message.dart';
+import 'package:sip_ua/src/RTCSession.dart';
+import 'package:sip_ua/src/SIPMessage.dart';
+import 'package:sip_ua/src/logger.dart';
+import 'package:sip_ua/src/event_manager/event_manager.dart';
 
-class SIPUAHelper extends EventEmitter {
+class SIPUAHelper extends EventManager {
   UA _ua;
   Settings _settings;
-  final logger = Logger('SIPUA::Helper');
+  final Log logger = Log();
   RTCSession _session;
   bool _registered = false;
   bool _connected = false;
   var _registerState = 'new';
-
-  void debug(dynamic msg) => logger.debug(msg);
-
-  void debugerror(dynamic error) => logger.error(error);
 
   RTCSession get session => _session;
 
@@ -64,7 +63,7 @@ class SIPUAHelper extends EventEmitter {
       String displayName,
       Map<String, dynamic> wsExtraHeaders]) async {
     if (this._ua != null) {
-      debugerror(
+      logger.error(
           'UA instance already exist!, stopping UA and creating a new one...');
       this._ua.stop();
     }
@@ -77,125 +76,127 @@ class SIPUAHelper extends EventEmitter {
 
     try {
       this._ua = UA(_settings);
-      this._ua.on('onnecting', (Map<String, dynamic> data) {
-        debug('onnecting => ' + data.toString());
-        _handleSocketState('onnecting', data);
+      this._ua.on(EventConnecting(), (EventConnecting event) {
+        logger.debug('connecting => ' + event.toString());
+        _handleSocketState('connecting', null);
       });
 
-      this._ua.on('connected', (Map<String, dynamic> data) {
-        debug('connected => ' + data.toString());
-        _handleSocketState('connected', data);
+      this._ua.on(EventConnected(), (EventConnected event) {
+        logger.debug('connected => ' + event.toString());
+        _handleSocketState('connected', null);
         _connected = true;
       });
 
-      this._ua.on('disconnected', (Map<String, dynamic> data) {
-        debug('disconnected => ' + data.toString());
-        _handleSocketState('disconnected', data);
+      this._ua.on(EventDisconnected(), (EventDisconnected event) {
+        logger.debug('disconnected => ' + event.toString());
+        _handleSocketState('disconnected', null);
         _connected = false;
       });
 
-      this._ua.on('registered', (Map<String, dynamic> data) {
-        debug('registered => ' + data.toString());
+      this._ua.on(EventRegistered(), (EventRegistered event) {
+        logger.debug('registered => ' + event.toString());
         _registered = true;
         _registerState = 'registered';
-        _handleRegisterState('registered', data);
+        _handleRegisterState('registered', event.response);
       });
 
-      this._ua.on('unregistered', (Map<String, dynamic> data) {
-        debug('unregistered => ' + data.toString());
+      this._ua.on(EventUnregister(), (EventUnregister event) {
+        logger.debug('unregistered => ' + event.toString());
         _registerState = 'unregistered';
         _registered = false;
-        _handleRegisterState('unregistered', data);
+        _handleRegisterState('unregistered', event.response);
       });
 
-      this._ua.on('registrationFailed', (Map<String, dynamic> data) {
-        debug('registrationFailed => ' + (data['cause'] as String));
-        _registerState = 'registrationFailed[${data['cause']}]';
+      this._ua.on(EventRegistrationFailed(), (EventRegistrationFailed event) {
+        logger.debug('registrationFailed => ' + (event.cause));
+        _registerState = 'registrationFailed[${event.cause}]';
         _registered = false;
-        _handleRegisterState('registrationFailed', data);
+        _handleRegisterState('registrationFailed', event.response);
       });
 
-      this._ua.on('newRTCSession', (Map<String, dynamic> data) {
-        debug('newRTCSession => ' + data.toString());
-        _session = data['session'] as RTCSession;
+      this._ua.on(EventNewRTCSession(), (EventNewRTCSession event) {
+        logger.debug('newRTCSession => ' + event.toString());
+        _session = event.session;
         if (_session.direction == 'incoming') {
           // Set event handlers.
-          (_options()['eventHandlers'] as Map<String, Function>)
-              .forEach((String event, Function func) {
-            _session.on(event, func);
-          });
+          _session
+              .addAllEventHandlers(_options()['eventHandlers'] as EventManager);
         }
-        _handleUAState('newRTCSession', data);
+        _handleUAState(EventUaState(state: "newRTCSession"));
       });
 
-      this._ua.on('newMessage', (Map<String, dynamic> data) {
-        debug('newMessage => ' + data.toString());
-        _handleUAState('newMessage', data);
+      this._ua.on(EventNewMessage(), (EventNewMessage event) {
+        logger.debug('newMessage => ' + event.toString());
+        _handleUAState(EventUaState(state: "newMessage"));
       });
 
-      this._ua.on('sipEvent', (Map<String, dynamic> data) {
-        debug('sipEvent => ' + data.toString());
-        _handleUAState('sipEvent', data);
+      this._ua.on(EventSipEvent(), (EventSipEvent event) {
+        logger.debug('sipEvent => ' + event.toString());
+        _handleUAState(EventUaState(state: "sipEvent"));
       });
       this._ua.start();
-    } catch (e) {
-      debugerror(e.toString());
+    } catch (e, s) {
+      logger.error(e.toString(), null, s);
     }
   }
 
   Map<String, Object> _options([bool voiceonly = false]) {
     // Register callbacks to desired call events
-    var eventHandlers = {
-      'connecting': (Map<String, dynamic> e) {
-        debug('call connecting');
-        _handleCallState('connecting', e);
-      },
-      'progress': (Map<String, dynamic> e) {
-        debug('call is in progress');
-        _handleCallState('progress', e);
-      },
-      'failed': (Map<String, dynamic> e) {
-        debug('call failed with cause: ' + (e['cause'] as String));
-        _handleCallState('failed', e);
-        _session = null;
-        var cause = 'failed (${e['cause']})';
-      },
-      'ended': (Map<String, dynamic> e) {
-        debug('call ended with cause: ' + (e['cause'] as String));
-        _handleCallState('ended', e);
-        _session = null;
-      },
-      'accepted': (Map<String, dynamic> e) {
-        debug('call accepted');
-        _handleCallState('accepted', e);
-      },
-      'confirmed': (Map<String, dynamic> e) {
-        debug('call confirmed');
-        _handleCallState('confirmed', e);
-      },
-      'hold': (Map<String, dynamic> e) {
-        debug('call hold');
-        _handleCallState('hold', e);
-      },
-      'unhold': (Map<String, dynamic> e) {
-        debug('call unhold');
-        _handleCallState('unhold', e);
-      },
-      'muted': (Map<String, dynamic> e) {
-        debug('call muted');
-        _handleCallState('muted', e);
-      },
-      'unmuted': (Map<String, dynamic> e) {
-        debug('call unmuted');
-        _handleCallState('unmuted', e);
-      },
-      'stream': (Map<String, dynamic> e) async {
-        // Wating for callscreen ready.
-        Timer(Duration(milliseconds: 100), () {
-          _handleCallState('stream', e);
-        });
-      }
-    };
+    EventManager eventHandlers = EventManager();
+
+    eventHandlers.on(EventConnecting(), (EventConnecting event) {
+      logger.debug('call connecting');
+      _handleCallState('connecting', null, null, null, null, null);
+    });
+
+    eventHandlers.on(EventProgress(), (EventProgress event) {
+      logger.debug('call is in progress');
+      _handleCallState(
+          'progress', event.response, null, event.originator, null, null);
+    });
+
+    eventHandlers.on(EventFailed(), (EventFailed event) {
+      logger.debug('call failed with cause: ' + (event.cause));
+      _handleCallState(
+          'failed', event.response, null, event.originator, null, null);
+      _session = null;
+    });
+
+    eventHandlers.on(EventEnded(), (EventEnded e) {
+      logger.debug('call ended with cause: ' + (e.cause));
+      _handleCallState('ended', null, null, e.originator, null, null);
+      _session = null;
+    });
+    eventHandlers.on(EventCallAccepted(), (EventCallAccepted e) {
+      logger.debug('call accepted');
+      _handleCallState('accepted', null, null, null, null, null);
+    });
+    eventHandlers.on(EventConfirmed(), (EventConfirmed e) {
+      logger.debug('call confirmed');
+      _handleCallState('confirmed', null, null, null, null, null);
+    });
+    eventHandlers.on(EventHold(), (EventHold e) {
+      logger.debug('call hold');
+      _handleCallState('hold', null, null, e.originator, null, null);
+    });
+    eventHandlers.on(EventUnhold(), (EventUnhold e) {
+      logger.debug('call unhold');
+      _handleCallState('unhold', null, null, e.originator, null, null);
+    });
+    eventHandlers.on(EventMuted(), (EventMuted e) {
+      logger.debug('call muted');
+      _handleCallState('muted', null, null, null, e.audio, e.video);
+    });
+    eventHandlers.on(EventUnmuted(), (EventUnmuted e) {
+      logger.debug('call unmuted');
+      _handleCallState('unmuted', null, null, null, e.audio, e.video);
+    });
+    eventHandlers.on(EventStream(), (EventStream e) async {
+      // Wating for callscreen ready.
+      Timer(Duration(milliseconds: 100), () {
+        _handleCallState('stream', null, e.stream, e.originator, null, null);
+      });
+    });
 
     var _defaultOptions = {
       'eventHandlers': eventHandlers,
@@ -251,12 +252,12 @@ class SIPUAHelper extends EventEmitter {
     return _defaultOptions;
   }
 
-  void _handleSocketState(String state, Map<String, dynamic> data) {
-    this.emit('socketState', state, data);
+  void _handleSocketState(String state, IncomingMessage response) {
+    this.emit(EventSocketState(state: state, response: response));
   }
 
-  void _handleRegisterState(String state, Map<String, dynamic> data) {
-    this.emit('registerState', state, data);
+  void _handleRegisterState(String state, IncomingMessage response) {
+    this.emit(EventRegisterState(state: state, response: response));
   }
 
   void hold() {
@@ -283,18 +284,26 @@ class SIPUAHelper extends EventEmitter {
     }
   }
 
-  void sendDTMF(String tones){
-     if (_session != null) {
+  void sendDTMF(String tones) {
+    if (_session != null) {
       _session.sendDTMF(tones);
     }
   }
 
-  void _handleCallState(String state, Map<String, dynamic> data) {
-    this.emit('callState', state, data);
+  void _handleCallState(String state, dynamic response, MediaStream stream,
+      String originator, bool audio, bool video) {
+    this.emit(EventCallState(
+        state: state,
+        response: response,
+        stream: stream,
+        originator: originator,
+        audio: audio,
+        video: video));
   }
 
-  void _handleUAState(String state, Map<String, dynamic> data) {
-    this.emit('uaState', state, data);
+  void _handleUAState(EventUaState event) {
+    logger.error("event $event");
+    this.emit(event);
   }
 
   Message sendMessage(String target, String body,

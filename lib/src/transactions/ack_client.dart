@@ -1,10 +1,10 @@
 import '../../sip_ua.dart';
 import '../Transport.dart';
 import '../Utils.dart';
+import '../event_manager/event_manager.dart';
 import 'transaction_base.dart';
 
-final act_logger = new Logger('AckClientTransaction');
-debugact(msg) => act_logger.debug(msg);
+final act_logger = new Log();
 
 class AckClientTransaction extends TransactionBase {
   var eventHandlers;
@@ -29,8 +29,7 @@ class AckClientTransaction extends TransactionBase {
   }
 
   onTransportError() {
-    debugact('transport error occurred for transaction ${this.id}');
-    this.eventHandlers['onTransportError']();
+    logger.debug('transport error occurred for transaction ${this.id}');
+    this.eventHandlers.emit(EventOnTransportError());
   }
 }
-

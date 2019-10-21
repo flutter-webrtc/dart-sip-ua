@@ -1,15 +1,15 @@
-import 'package:events2/events2.dart';
-
 import '../sip_ua.dart';
 import 'Constants.dart' as DartSIP_C;
 import 'Constants.dart';
 import 'Exceptions.dart' as Exceptions;
 import 'RequestSender.dart';
 import 'SIPMessage.dart' as SIPMessage;
+import 'SIPMessage.dart';
 import 'Utils.dart' as Utils;
+import 'event_manager/event_manager.dart';
 import 'logger.dart';
 
-class Message extends EventEmitter {
+class Message extends EventManager {
   UA _ua;
   var _request;
   var _closed;
@@ -18,9 +18,7 @@ class Message extends EventEmitter {
   var _remote_identity;
   var _is_replied;
   var _data;
-  final logger = new Logger('Message');
-  debug(msg) => logger.debug(msg);
-  debugerror(error) => logger.error(error);
+  final logger = new Log();
 
   Message(UA ua) {
     this._ua = ua;
@@ -62,15 +60,11 @@ class Message extends EventEmitter {
 
     // Get call options.
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    var eventHandlers = options['eventHandlers'] ?? {};
+    EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
     var contentType = options['contentType'] ?? 'text/plain';
 
     // Set event handlers.
-    for (var event in eventHandlers) {
-      if (eventHandlers.containsKey(event)) {
-        this.on(event, eventHandlers[event]);
-      }
-    }
+    addAllEventHandlers(eventHandlers);
 
     extraHeaders.add('Content-Type: $contentType');
 
@@ -80,17 +74,22 @@ class Message extends EventEmitter {
       this._request.body = body;
     }
 
-    var request_sender = new RequestSender(this._ua, this._request, {
-      'onRequestTimeout': () => () {
-            this._onRequestTimeout();
-          },
-      'onTransportError': () => () {
-            this._onTransportError();
-          },
-      'onReceiveResponse': (response) => () {
-            this._receiveResponse(response);
-          }
+    EventManager localEventHandlers = EventManager();
+    localEventHandlers.on(EventOnRequestTimeout(),
+        (EventOnRequestTimeout value) {
+      this._onRequestTimeout();
     });
+    localEventHandlers.on(EventOnTransportError(),
+        (EventOnTransportError value) {
+      this._onTransportError();
+    });
+    localEventHandlers.on(EventOnReceiveResponse(),
+        (EventOnReceiveResponse event) {
+      this._receiveResponse(event.response);
+    });
+
+    var request_sender =
+        new RequestSender(this._ua, this._request, localEventHandlers);
 
     this._newMessage('local', this._request);
 
@@ -208,31 +207,27 @@ class Message extends EventEmitter {
       this._remote_identity = request.to;
     }
 
-    this._ua.newMessage(
-        this, {'originator': originator, 'message': this, 'request': request});
+    this._ua.newMessage(this, originator, request);
   }
 
-  _failed(originator, response, cause) {
-    debug('MESSAGE failed');
+  _failed(String originator, IncomingResponse response, String cause) {
+    logger.debug('MESSAGE failed');
 
     this.close();
 
-    debug('emit "failed"');
+    logger.debug('emit "failed"');
 
-    this.emit('failed', {
-      'originator': originator,
-      'response': response ?? null,
-      'cause': cause
-    });
+    this.emit(
+        EventFailed(originator: originator, response: response, cause: cause));
   }
 
-  _succeeded(originator, response) {
-    debug('MESSAGE succeeded');
+  _succeeded(String originator, IncomingResponse response) {
+    logger.debug('MESSAGE succeeded');
 
     this.close();
 
-    debug('emit "succeeded"');
+    logger.debug('emit "succeeded"');
 
-    this.emit('succeeded', {'originator': originator, 'response': response});
+    this.emit(EventSucceeded(originator: originator, response: response));
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'sip_ua_helper.dart';
+import 'package:sip_ua/src/event_manager/event_manager.dart';
 
 class RegisterWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -27,16 +28,16 @@ class _MyRegisterWidget extends State<RegisterWidget> {
   initState() {
     super.initState();
     _registerState = helper.registerState;
-    helper.on('registerState', _handleRegisterState);
-    helper.on('socketState', _handleSocketState);
+    helper.on(EventRegisterState(), _handleRegisterState);
+    helper.on(EventSocketState(), _handleSocketState);
     _loadSettings();
   }
 
   @override
   deactivate() {
     super.deactivate();
-    helper.remove('registerState', _handleRegisterState);
-    helper.remove('socketState', _handleSocketState);
+    helper.remove(EventRegisterState(), _handleRegisterState);
+    helper.remove(EventSocketState(), _handleSocketState);
     _saveSettings();
   }
 
@@ -58,15 +59,15 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     prefs.commit();
   }
 
-  void _handleRegisterState(String state, Map<String, dynamic> data) {
+  void _handleRegisterState(EventRegisterState data) {
     this.setState(() {
-      _registerState = state;
+      _registerState = data.state;
     });
   }
 
-  void _handleSocketState(String state, Map<String, dynamic> data) {
+  void _handleSocketState(EventSocketState data) {
     this.setState(() {
-      _registerState = state;
+      _registerState = data.state;
     });
   }
 

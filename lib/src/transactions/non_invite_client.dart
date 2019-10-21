@@ -1,15 +1,15 @@
 import '../../sip_ua.dart';
-import '../SIPMessage.dart' as SIPMessage;
+import '../SIPMessage.dart';
 import '../Timers.dart';
 import '../Transport.dart';
 import '../Utils.dart';
+import '../event_manager/event_manager.dart';
 import 'transaction_base.dart';
 
-final nict_logger = new Logger('NonInviteClientTransaction');
-debugnict(msg) => nict_logger.debug(msg);
+final logger = new Log();
 
 class NonInviteClientTransaction extends TransactionBase {
-  var eventHandlers;
+  EventManager eventHandlers;
   var F, K;
 
   NonInviteClientTransaction(
@@ -31,7 +31,7 @@ class NonInviteClientTransaction extends TransactionBase {
 
   stateChanged(state) {
     this.state = state;
-    this.emit('stateChanged');
+    this.emit(EventStateChanged());
   }
 
   send() {
@@ -46,19 +46,19 @@ class NonInviteClientTransaction extends TransactionBase {
   }
 
   onTransportError() {
-    debugnict('transport error occurred, deleting transaction ${this.id}');
+    logger.debug('transport error occurred, deleting transaction ${this.id}');
     clearTimeout(this.F);
     clearTimeout(this.K);
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
-    this.eventHandlers['onTransportError']();
+    this.eventHandlers.emit(EventOnTransportError());
   }
 
   timer_F() {
-    debugnict('Timer F expired for transaction ${this.id}');
+    logger.debug('Timer F expired for transaction ${this.id}');
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
-    this.eventHandlers['onRequestTimeout']();
+    this.eventHandlers.emit(EventOnRequestTimeout());
   }
 
   timer_K() {
@@ -66,7 +66,7 @@ class NonInviteClientTransaction extends TransactionBase {
     this.ua.destroyTransaction(this);
   }
 
-  receiveResponse(SIPMessage.IncomingResponse response) {
+  receiveResponse(IncomingResponse response) {
     var status_code = response.status_code;
 
     if (status_code < 200) {
@@ -74,7 +74,7 @@ class NonInviteClientTransaction extends TransactionBase {
         case TransactionState.TRYING:
         case TransactionState.PROCEEDING:
           this.stateChanged(TransactionState.PROCEEDING);
-          this.eventHandlers['onReceiveResponse'](response);
+          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         default:
           break;
@@ -87,9 +87,9 @@ class NonInviteClientTransaction extends TransactionBase {
           clearTimeout(this.F);
 
           if (status_code == 408) {
-            this.eventHandlers['onRequestTimeout']();
+            this.eventHandlers.emit(EventOnRequestTimeout());
           } else {
-            this.eventHandlers['onReceiveResponse'](response);
+            this.eventHandlers.emit(EventOnReceiveResponse(response: response));
           }
 
           this.K = setTimeout(() {

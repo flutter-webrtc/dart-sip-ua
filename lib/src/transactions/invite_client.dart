@@ -4,11 +4,10 @@ import '../SIPMessage.dart' as SIPMessage;
 import '../Timers.dart';
 import '../Transport.dart';
 import '../Utils.dart';
+import '../event_manager/event_manager.dart';
 import 'transaction_base.dart';
 
-
-final ict_logger = new Logger('InviteClientTransaction');
-debugict(msg) => ict_logger.debug(msg);
+final logger = new Log();
 
 class InviteClientTransaction extends TransactionBase {
   var eventHandlers;
@@ -34,7 +33,7 @@ class InviteClientTransaction extends TransactionBase {
 
   stateChanged(TransactionState state) {
     this.state = state;
-    this.emit('stateChanged');
+    this.emit(EventStateChanged());
   }
 
   send() {
@@ -54,8 +53,8 @@ class InviteClientTransaction extends TransactionBase {
     clearTimeout(this.M);
 
     if (this.state != TransactionState.ACCEPTED) {
-      debugict('transport error occurred, deleting transaction ${this.id}');
-      this.eventHandlers['onTransportError']();
+      logger.debug('transport error occurred, deleting transaction ${this.id}');
+      this.eventHandlers.emit(EventOnTransportError());
     }
 
     this.stateChanged(TransactionState.TERMINATED);
@@ -64,7 +63,7 @@ class InviteClientTransaction extends TransactionBase {
 
   // RFC 6026 7.2.
   timer_M() {
-    debugict('Timer M expired for transaction ${this.id}');
+    logger.debug('Timer M expired for transaction ${this.id}');
 
     if (this.state == TransactionState.ACCEPTED) {
       clearTimeout(this.B);
@@ -75,16 +74,16 @@ class InviteClientTransaction extends TransactionBase {
 
   // RFC 3261 17.1.1.
   timer_B() {
-    debugict('Timer B expired for transaction ${this.id}');
+    logger.debug('Timer B expired for transaction ${this.id}');
     if (this.state == TransactionState.CALLING) {
       this.stateChanged(TransactionState.TERMINATED);
       this.ua.destroyTransaction(this);
-      this.eventHandlers['onRequestTimeout']();
+      this.eventHandlers.emit(EventOnRequestTimeout());
     }
   }
 
   timer_D() {
-    debugict('Timer D expired for transaction ${this.id}');
+    logger.debug('Timer D expired for transaction ${this.id}');
     clearTimeout(this.B);
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
@@ -140,10 +139,10 @@ class InviteClientTransaction extends TransactionBase {
       switch (this.state) {
         case TransactionState.CALLING:
           this.stateChanged(TransactionState.PROCEEDING);
-          this.eventHandlers['onReceiveResponse'](response);
+          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         case TransactionState.PROCEEDING:
-          this.eventHandlers['onReceiveResponse'](response);
+          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         default:
           break;
@@ -156,10 +155,10 @@ class InviteClientTransaction extends TransactionBase {
           this.M = setTimeout(() {
             this.timer_M();
           }, Timers.TIMER_M);
-          this.eventHandlers['onReceiveResponse'](response);
+          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         case TransactionState.ACCEPTED:
-          this.eventHandlers['onReceiveResponse'](response);
+          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         default:
           break;
@@ -170,7 +169,7 @@ class InviteClientTransaction extends TransactionBase {
         case TransactionState.PROCEEDING:
           this.stateChanged(TransactionState.COMPLETED);
           this.sendACK(response);
-          this.eventHandlers['onReceiveResponse'](response);
+          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         case TransactionState.COMPLETED:
           this.sendACK(response);
@@ -181,4 +180,3 @@ class InviteClientTransaction extends TransactionBase {
     }
   }
 }
-
