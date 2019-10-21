@@ -127,9 +127,9 @@ class EventDisconnected extends EventType {
 }
 
 class EventStream extends EventType {
-  // String originator;
+  String originator;
   MediaStream stream;
-  EventStream({String originator, this.stream});
+  EventStream({this.originator, this.stream});
 }
 
 class EventOnAuthenticated extends EventType {
