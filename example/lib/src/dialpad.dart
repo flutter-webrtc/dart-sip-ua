@@ -210,7 +210,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
   }
 
   @override
-  void registrationStateChanged(RegistrationStateEnum state) {
+  void registrationStateChanged(RegistrationStateEnum state, String cause) {
     this.setState(() {});
   }
 

@@ -57,7 +57,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     prefs.commit();
   }
 
-  void registrationStateChanged(RegistrationStateEnum state) {
+  void registrationStateChanged(RegistrationStateEnum state, String cause) {
     this.setState(() {
       _registerState = state;
     });

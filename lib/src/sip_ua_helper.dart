@@ -101,18 +101,20 @@ class SIPUAHelper extends EventManager {
       this._ua = UA(_settings);
       this._ua.on(EventConnecting(), (EventConnecting event) {
         logger.debug('connecting => ' + event.toString());
-        _notifyRegsistrationStateListeners(RegistrationStateEnum.CONNECTING);
+        _notifyRegsistrationStateListeners(
+            RegistrationStateEnum.CONNECTING, '');
       });
 
       this._ua.on(EventConnected(), (EventConnected event) {
         logger.debug('connected => ' + event.toString());
-        _notifyRegsistrationStateListeners(RegistrationStateEnum.CONNECTED);
+        _notifyRegsistrationStateListeners(RegistrationStateEnum.CONNECTED, '');
         _connected = true;
       });
 
       this._ua.on(EventDisconnected(), (EventDisconnected event) {
         logger.debug('disconnected => ' + event.toString());
-        _notifyRegsistrationStateListeners(RegistrationStateEnum.DISCONNECTED);
+        _notifyRegsistrationStateListeners(
+            RegistrationStateEnum.DISCONNECTED, '');
         _connected = false;
       });
 
@@ -120,14 +122,16 @@ class SIPUAHelper extends EventManager {
         logger.debug('registered => ' + event.toString());
         _registered = true;
         _registerState = RegistrationStateEnum.REGISTERED;
-        _notifyRegsistrationStateListeners(RegistrationStateEnum.REGISTERED);
+        _notifyRegsistrationStateListeners(
+            RegistrationStateEnum.REGISTERED, '');
       });
 
       this._ua.on(EventUnregister(), (EventUnregister event) {
         logger.debug('unregistered => ' + event.toString());
         _registerState = RegistrationStateEnum.UNREGISTERED;
         _registered = false;
-        _notifyRegsistrationStateListeners(RegistrationStateEnum.UNREGISTERED);
+        _notifyRegsistrationStateListeners(
+            RegistrationStateEnum.UNREGISTERED, '');
       });
 
       this._ua.on(EventRegistrationFailed(), (EventRegistrationFailed event) {
@@ -136,7 +140,7 @@ class SIPUAHelper extends EventManager {
             .REGISTRATION_FAILED; //'registrationFailed[${event.cause}]';
         _registered = false;
         _notifyRegsistrationStateListeners(
-            RegistrationStateEnum.REGISTRATION_FAILED);
+            RegistrationStateEnum.REGISTRATION_FAILED, event.cause);
       });
 
       this._ua.on(EventNewRTCSession(), (EventNewRTCSession event) {
@@ -173,8 +177,8 @@ class SIPUAHelper extends EventManager {
 
     eventHandlers.on(EventFailed(), (EventFailed event) {
       logger.debug('call failed with cause: ' + (event.cause));
-      _notifyCallStateListeners(
-          CallState(CallStateEnum.FAILED, originator: event.originator));
+      _notifyCallStateListeners(CallState(CallStateEnum.FAILED,
+          originator: event.originator, cause: event.cause));
       _session = null;
     });
 
@@ -215,8 +219,8 @@ class SIPUAHelper extends EventManager {
     eventHandlers.on(EventStream(), (EventStream e) async {
       // Wating for callscreen ready.
       Timer(Duration(milliseconds: 100), () {
-        _notifyCallStateListeners(
-            CallState(CallStateEnum.STREAM, stream: e.stream));
+        _notifyCallStateListeners(CallState(CallStateEnum.STREAM,
+            stream: e.stream, originator: e.originator));
       });
     });
 
@@ -323,9 +327,10 @@ class SIPUAHelper extends EventManager {
     _sipUaHelperListeners.remove(listener);
   }
 
-  void _notifyRegsistrationStateListeners(RegistrationStateEnum state) {
+  void _notifyRegsistrationStateListeners(
+      RegistrationStateEnum state, String cause) {
     _sipUaHelperListeners.forEach((listener) {
-      listener.registrationStateChanged(state);
+      listener.registrationStateChanged(state, cause);
     });
   }
 
@@ -337,7 +342,7 @@ class SIPUAHelper extends EventManager {
 }
 
 abstract class SipUaHelperListener {
-  void registrationStateChanged(RegistrationStateEnum state);
+  void registrationStateChanged(RegistrationStateEnum state, String cause);
   void callStateChanged(CallState state);
 }
 
@@ -360,11 +365,13 @@ enum CallStateEnum {
 class CallState {
   CallStateEnum state;
   String originator;
+  String cause;
   bool audio;
   bool video;
   MediaStream stream;
 
-  CallState(this.state, {this.originator, this.audio, this.video, this.stream});
+  CallState(this.state,
+      {this.originator, this.audio, this.video, this.stream, this.cause});
 }
 
 enum RegistrationStateEnum {
