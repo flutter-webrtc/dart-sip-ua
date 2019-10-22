@@ -234,7 +234,7 @@ class Dialog {
     } else if (request.cseq > this._remote_seqnum) {
       this._remote_seqnum = request.cseq;
     }
-
+    EventManager eventHandlers = request.server_transaction as EventManager;
     // RFC3261 14.2 Modifying an Existing Session -UAS BEHAVIOR-.
     if (request.method == SipMethod.INVITE ||
         (request.method == SipMethod.UPDATE && request.body != null)) {
@@ -246,19 +246,21 @@ class Dialog {
         return false;
       } else {
         this._uas_pending_reply = true;
-        var stateChanged = () {
+        void Function(EventStateChanged state) stateChanged;
+        stateChanged = (EventStateChanged state) {
           if (request.server_transaction.state == TransactionState.ACCEPTED ||
               request.server_transaction.state == TransactionState.COMPLETED ||
               request.server_transaction.state == TransactionState.TERMINATED) {
             this._uas_pending_reply = false;
+            eventHandlers.remove(EventStateChanged(), stateChanged);
           }
         };
-        request.server_transaction.once('stateChanged', stateChanged);
+        eventHandlers.on(EventStateChanged(), stateChanged);
       }
 
       // RFC3261 12.2.2 Replace the dialog's remote target URI if the request is accepted.
       if (request.hasHeader('contact')) {
-        request.server_transaction.on('stateChanged', () {
+        eventHandlers.on(EventStateChanged(), (EventStateChanged state) {
           if (request.server_transaction.state == TransactionState.ACCEPTED) {
             this._remote_target = request.parseHeader('contact').uri;
           }
@@ -267,7 +269,7 @@ class Dialog {
     } else if (request.method == SipMethod.NOTIFY) {
       // RFC6665 3.2 Replace the dialog's remote target URI if the request is accepted.
       if (request.hasHeader('contact')) {
-        request.server_transaction.on('stateChanged', () {
+        eventHandlers.on(EventStateChanged(), (EventStateChanged state) {
           if (request.server_transaction.state == TransactionState.COMPLETED) {
             this._remote_target = request.parseHeader('contact').uri;
           }

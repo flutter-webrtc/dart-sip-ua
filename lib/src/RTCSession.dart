@@ -777,7 +777,7 @@ class RTCSession extends EventManager {
           };
 
           // .., or when the INVITE transaction times out
-          this._request.server_transaction.on('stateChanged', () {
+          this._request.server_transaction.on(EventStateChanged(), (EventStateChanged state) {
             if (this._request.server_transaction.state ==
                 TransactionState.TERMINATED) {
               this.sendRequest(
@@ -1817,7 +1817,7 @@ class RTCSession extends EventManager {
       // Send answer.
       sendAnswer(desc.sdp);
     } catch (error) {
-      logger.error(error);
+      logger.error(error.toString());
     }
   }
 

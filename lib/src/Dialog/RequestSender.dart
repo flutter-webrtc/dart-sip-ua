@@ -61,7 +61,7 @@ class DialogRequestSender {
                 this._request.body != null)) &&
         request_sender.clientTransaction.state != TransactionState.TERMINATED) {
       this._dialog.uac_pending_reply = true;
-
+      EventManager eventHandlers = request_sender.clientTransaction;
       void Function(EventStateChanged data) stateChanged;
       stateChanged = (EventStateChanged data) {
         if (request_sender.clientTransaction.state ==
@@ -70,13 +70,12 @@ class DialogRequestSender {
                 TransactionState.COMPLETED ||
             request_sender.clientTransaction.state ==
                 TransactionState.TERMINATED) {
-          request_sender.clientTransaction
-              .remove(EventStateChanged(), stateChanged);
+          eventHandlers.remove(EventStateChanged(), stateChanged);
           this._dialog.uac_pending_reply = false;
         }
       };
 
-      request_sender.clientTransaction.on(EventStateChanged(), stateChanged);
+      eventHandlers.on(EventStateChanged(), stateChanged);
     }
   }
 

@@ -175,7 +175,7 @@ class EventUpdate extends EventType {
 //  bool Function(dynamic options) callback;
 //  bool Function(dynamic options) reject;
   EventUpdate(
-      {String request,
+      {dynamic request,
       bool Function(dynamic options) callback,
       bool Function(dynamic options) reject});
 }
