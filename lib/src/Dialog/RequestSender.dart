@@ -5,6 +5,7 @@ import '../RTCSession.dart' as RTCSession;
 import '../RequestSender.dart';
 import '../SIPMessage.dart';
 import '../Timers.dart';
+import '../UA.dart';
 import '../event_manager/event_manager.dart';
 import '../transactions/transaction_base.dart';
 

@@ -3,8 +3,10 @@ import '../Constants.dart';
 import '../SIPMessage.dart' as SIPMessage;
 import '../Timers.dart';
 import '../Transport.dart';
+import '../UA.dart';
 import '../Utils.dart';
 import '../event_manager/event_manager.dart';
+import '../logger.dart';
 import 'transaction_base.dart';
 
 final logger = new Log();

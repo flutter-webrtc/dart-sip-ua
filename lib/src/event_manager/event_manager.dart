@@ -1,4 +1,5 @@
 import '../../sip_ua.dart';
+import '../logger.dart';
 import 'events.dart';
 
 export 'events.dart';

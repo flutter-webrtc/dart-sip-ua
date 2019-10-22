@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'sip_ua_helper.dart';
-import 'package:sip_ua/src/event_manager/event_manager.dart';
+import 'package:sip_ua/sip_ua.dart';
 
 class RegisterWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -10,7 +9,8 @@ class RegisterWidget extends StatefulWidget {
   _MyRegisterWidget createState() => _MyRegisterWidget();
 }
 
-class _MyRegisterWidget extends State<RegisterWidget> {
+class _MyRegisterWidget extends State<RegisterWidget>
+    implements SipUaHelperListener {
   String _password;
   String _wsUri;
   String _sipUri;
@@ -20,7 +20,7 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     'Host': 'tryit.jssip.net:10443'
   };
   SharedPreferences prefs;
-  String _registerState;
+  RegistrationStateEnum _registerState;
 
   SIPUAHelper get helper => widget._helper;
 
@@ -28,16 +28,14 @@ class _MyRegisterWidget extends State<RegisterWidget> {
   initState() {
     super.initState();
     _registerState = helper.registerState;
-    helper.on(EventRegisterState(), _handleRegisterState);
-    helper.on(EventSocketState(), _handleSocketState);
+    helper.addSipUaHelperListener(this);
     _loadSettings();
   }
 
   @override
   deactivate() {
     super.deactivate();
-    helper.remove(EventRegisterState(), _handleRegisterState);
-    helper.remove(EventSocketState(), _handleSocketState);
+    helper.removeSipUaHelperListener(this);
     _saveSettings();
   }
 
@@ -59,15 +57,9 @@ class _MyRegisterWidget extends State<RegisterWidget> {
     prefs.commit();
   }
 
-  void _handleRegisterState(EventRegisterState data) {
+  void registrationStateChanged(RegistrationStateEnum state, String cause) {
     this.setState(() {
-      _registerState = data.state;
-    });
-  }
-
-  void _handleSocketState(EventSocketState data) {
-    this.setState(() {
-      _registerState = data.state;
+      _registerState = state;
     });
   }
 
@@ -122,7 +114,7 @@ class _MyRegisterWidget extends State<RegisterWidget> {
                             const EdgeInsets.fromLTRB(48.0, 18.0, 48.0, 18.0),
                         child: Center(
                             child: Text(
-                          'Register Status: $_registerState',
+                          'Register Status: ${EnumHelper.getName(_registerState)}',
                           style: TextStyle(fontSize: 18, color: Colors.black54),
                         )),
                       ),
@@ -257,5 +249,10 @@ class _MyRegisterWidget extends State<RegisterWidget> {
                         ),
                       ))
                 ])));
+  }
+
+  @override
+  void callStateChanged(CallState state) {
+    //NO OP
   }
 }

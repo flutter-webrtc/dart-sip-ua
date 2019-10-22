@@ -6,6 +6,7 @@ import 'RequestSender.dart';
 import 'SIPMessage.dart';
 import 'Timers.dart';
 import 'Transport.dart';
+import 'UA.dart';
 import 'Utils.dart' as Utils;
 import 'event_manager/event_manager.dart';
 import 'logger.dart';

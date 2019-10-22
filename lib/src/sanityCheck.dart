@@ -3,6 +3,7 @@ import 'Constants.dart' as DartSIP_C;
 import 'Constants.dart';
 import 'SIPMessage.dart';
 import 'Transport.dart';
+import 'UA.dart';
 import 'Utils.dart' as Utils;
 import 'logger.dart';
 import 'transactions/invite_server.dart';

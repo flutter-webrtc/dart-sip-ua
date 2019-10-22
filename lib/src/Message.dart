@@ -5,6 +5,7 @@ import 'Exceptions.dart' as Exceptions;
 import 'RequestSender.dart';
 import 'SIPMessage.dart' as SIPMessage;
 import 'SIPMessage.dart';
+import 'UA.dart';
 import 'Utils.dart' as Utils;
 import 'event_manager/event_manager.dart';
 import 'logger.dart';

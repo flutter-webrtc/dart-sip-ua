@@ -1,12 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/webrtc.dart';
-import 'package:sip_ua/src/RTCSession.dart';
-import 'package:sip_ua/src/NameAddrHeader.dart';
-import 'package:sip_ua/src/event_manager/event_manager.dart';
 
 import 'widgets/action_button.dart';
-import 'sip_ua_helper.dart';
+import 'package:sip_ua/sip_ua.dart';
 
 class CallScreenWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -15,7 +12,8 @@ class CallScreenWidget extends StatefulWidget {
   _MyCallScreenWidget createState() => _MyCallScreenWidget();
 }
 
-class _MyCallScreenWidget extends State<CallScreenWidget> {
+class _MyCallScreenWidget extends State<CallScreenWidget>
+    implements SipUaHelperListener {
   RTCVideoRenderer _localRenderer = RTCVideoRenderer();
   RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
   double _localVideoHeight;
@@ -23,9 +21,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   EdgeInsetsGeometry _localVideoMargin;
   MediaStream _localStream;
   MediaStream _remoteStream;
-  String _direction;
-  NameAddrHeader _local_identity;
-  NameAddrHeader _remote_identity;
+
   bool _showNumPad = false;
 
   String _timeLabel = '00:00';
@@ -36,9 +32,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
   bool _speakerOn = false;
   bool _hold = false;
   String _holdOriginator;
-  String _state = 'new';
-
-  RTCSession get session => helper.session;
+  CallStateEnum _state = CallStateEnum.NONE;
 
   SIPUAHelper get helper => widget._helper;
 
@@ -46,24 +40,22 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
       (_localStream == null || _localStream.getVideoTracks().isEmpty) &&
       (_remoteStream == null || _remoteStream.getVideoTracks().isEmpty);
 
-  String get remote_identity =>
-      _remote_identity.display_name ?? _remote_identity.uri.user;
+  String get remote_identity => helper.remote_identity;
+
+  String get direction => helper.direction;
 
   @override
   initState() {
     super.initState();
     _initRenderers();
-    _bindEventListeners();
+    helper.addSipUaHelperListener(this);
     _startTimer();
-    _direction = session.direction.toUpperCase();
-    _local_identity = session.local_identity;
-    _remote_identity = session.remote_identity;
   }
 
   @override
   deactivate() {
     super.deactivate();
-    _removeEventListeners();
+    helper.removeSipUaHelperListener(this);
     _disposeRenderers();
   }
 
@@ -102,55 +94,60 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     }
   }
 
-  void _bindEventListeners() {
-    helper.on(EventCallState(), _handleCalllState);
-  }
-
-  void _handleCalllState(EventCallState data) {
-    if (data.state == 'hold' || data.state == 'unhold') {
-      _hold = data.state == 'hold';
-      _holdOriginator = data.originator;
+  @override
+  void callStateChanged(CallState callState) {
+    if (callState.state == CallStateEnum.HOLD ||
+        callState.state == CallStateEnum.UNHOLD) {
+      _hold = callState.state == CallStateEnum.HOLD;
+      _holdOriginator = callState.originator;
       this.setState(() {});
       return;
     }
 
-    if (data.state == 'muted') {
-      if (data.audio) _audioMuted = true;
-      if (data.video) _videoMuted = true;
+    if (callState.state == CallStateEnum.MUTED) {
+      if (callState.audio) _audioMuted = true;
+      if (callState.video) _videoMuted = true;
       this.setState(() {});
       return;
     }
 
-    if (data.state == 'unmuted') {
-      if (data.audio) _audioMuted = false;
-      if (data.video) _videoMuted = false;
+    if (callState.state == CallStateEnum.UNMUTED) {
+      if (callState.audio) _audioMuted = false;
+      if (callState.video) _videoMuted = false;
       this.setState(() {});
       return;
     }
 
-    if (data.state != 'stream') {
-      _state = data.state;
+    if (callState.state != CallStateEnum.STREAM) {
+      _state = callState.state;
     }
 
-    switch (data.state) {
-      case 'stream':
-        _handelStreams(data);
+    switch (callState.state) {
+      case CallStateEnum.STREAM:
+        _handelStreams(callState);
         break;
-      case 'progress':
-      case 'connecting':
-      case 'confirmed':
-        break;
-      case 'ended':
-      case 'failed':
+      case CallStateEnum.ENDED:
+      case CallStateEnum.FAILED:
         _backToDialPad();
         break;
+      case CallStateEnum.UNMUTED:
+      case CallStateEnum.MUTED:
+      case CallStateEnum.CONNECTING:
+      case CallStateEnum.PROGRESS:
+      case CallStateEnum.ACCEPTED:
+      case CallStateEnum.CONFIRMED:
+      case CallStateEnum.HOLD:
+      case CallStateEnum.UNHOLD:
+      case CallStateEnum.NONE:
+      case CallStateEnum.CALL_INITIATION:
+        break;
     }
   }
 
-  void _removeEventListeners() {
-    helper.remove(EventCallState(), _handleCalllState);
+  @override
+  void registrationStateChanged(RegistrationStateEnum state, String cause) {
+    //NO OP
   }
-
   void _backToDialPad() {
     _timer.cancel();
     Timer(Duration(seconds: 2), () {
@@ -158,7 +155,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     });
   }
 
-  void _handelStreams(EventCallState event) async {
+  void _handelStreams(CallState event) async {
     var stream = event.stream;
     if (event.originator == 'local') {
       if (_localRenderer != null) {
@@ -264,9 +261,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     var advanceActions = <Widget>[];
 
     switch (_state) {
-      case 'new':
-      case 'connecting':
-        if (_direction == 'INCOMING') {
+      case CallStateEnum.NONE:
+      case CallStateEnum.CONNECTING:
+        if (direction == 'INCOMING') {
           basicActions.add(ActionButton(
             title: "Accept",
             fillColor: Colors.green,
@@ -278,8 +275,8 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
           basicActions.add(hangupBtn);
         }
         break;
-      case 'accepted':
-      case 'confirmed':
+      case CallStateEnum.ACCEPTED:
+      case CallStateEnum.CONFIRMED:
         {
           advanceActions.add(ActionButton(
             title: _audioMuted ? 'unmute' : 'mute',
@@ -334,11 +331,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
           ));
         }
         break;
-      case 'failed':
-      case 'ended':
+      case CallStateEnum.FAILED:
+      case CallStateEnum.ENDED:
         basicActions.add(hangupBtnInactive);
         break;
-      case 'progress':
+      case CallStateEnum.PROGRESS:
         basicActions.add(hangupBtn);
         break;
       default:
@@ -441,7 +438,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget> {
     return Scaffold(
         appBar: AppBar(
             automaticallyImplyLeading: false,
-            title: Text('[$_direction] ${_state}')),
+            title: Text('[$direction] ${EnumHelper.getName(_state)}')),
         body: Container(
           child: _buildContent(),
         ),
