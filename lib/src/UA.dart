@@ -316,12 +316,11 @@ class UA extends EventManager {
     if (num_transactions == 0 && num_sessions == 0) {
       this._transport.disconnect();
     } else {
-      this._closeTimer = setTimeout(
-          () => () {
-                this._closeTimer = null;
-                this._transport.disconnect();
-              },
-          2000);
+      this._closeTimer = setTimeout(() {
+        logger.info("Closing connection");
+        this._closeTimer = null;
+        this._transport.disconnect();
+      }, 2000);
     }
   }
 
