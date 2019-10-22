@@ -101,8 +101,9 @@ class RTCSession extends EventManager {
   NameAddrHeader _remote_identity;
 
   String _contact;
-  var _tones;
-  var _sendDTMF;
+  String _tones;
+  Future<void> dtmfFuture = (Completer<void>()..complete(1)).future;
+
   final logger = new Log();
 
   Function(IncomingRequest) receiveRequest;
@@ -800,14 +801,16 @@ class RTCSession extends EventManager {
     }
   }
 
-  sendDTMF(tones, [options]) {
+  /// tones may be a single character or a string of dtmf digits
+  sendDTMF(String tones, [Map<String, dynamic> options]) {
     logger.debug('sendDTMF() | tones: ${tones.toString()}');
 
-    options = options ?? {};
+    options = options ?? Map();
 
-    var position = 0;
-    var duration = options['duration'] ?? null;
-    var interToneGap = options['interToneGap'] ?? null;
+    // sensible defaults
+    var duration = options['duration'] ?? RTCSession_DTMF.C.DEFAULT_DURATION;
+    var interToneGap =
+        options['interToneGap'] ?? RTCSession_DTMF.C.DEFAULT_INTER_TONE_GAP;
 
     if (tones == null) {
       throw new Exceptions.TypeError('Not enough arguments');
@@ -864,51 +867,42 @@ class RTCSession extends EventManager {
       interToneGap = Utils.Math.abs(interToneGap);
     }
 
-    if (this._tones != null) {
-      // Tones are already queued, just add to the queue.
-      this._tones += tones;
-      return;
-    }
+    //// ***************** and follows the actual code to queue DTMF tone(s) **********************
 
-    this._tones = tones;
+    ///using dtmfFuture to queue the playing of the tones
 
-    _sendDTMF = () {
-      var timeout;
-
-      if (this._status == C.STATUS_TERMINATED ||
-          this._tones == null ||
-          position >= this._tones.length) {
-        // Stop sending DTMF.
-        this._tones = null;
-
-        return;
-      }
-
-      var tone = this._tones[position];
-
-      position += 1;
-
+    for (int i = 0; i < tones.length; i++) {
+      String tone = tones[i];
       if (tone == ',') {
-        timeout = 2000;
-      } else {
-        var dtmf = new RTCSession_DTMF.DTMF(this);
-
-        EventManager eventHandlers = EventManager();
-        eventHandlers.on(EventFailed(), (EventFailed event) {
-          this._tones = null;
+        // queue the delay
+        dtmfFuture = dtmfFuture.then((_) async {
+          if (this._status == C.STATUS_TERMINATED) {
+            return;
+          }
+          await Future.delayed(Duration(milliseconds: 2000), () {});
         });
+      } else {
+        // queue playing the tone
+        dtmfFuture = dtmfFuture.then((_) async {
+          if (this._status == C.STATUS_TERMINATED) {
+            return;
+          }
 
-        options['eventHandlers'] = eventHandlers;
-        dtmf.send(tone, options);
-        timeout = duration + interToneGap;
+          var dtmf = new RTCSession_DTMF.DTMF(this);
+
+          EventManager eventHandlers = EventManager();
+          eventHandlers.on(EventFailed(), (EventFailed event) {
+            logger.error("Failed to send DTMF ${event.cause}");
+          });
+
+          options['eventHandlers'] = eventHandlers;
+
+          dtmf.send(tone, options);
+          await Future.delayed(
+              Duration(milliseconds: duration + interToneGap), () {});
+        });
       }
-
-      // Set timeout for the next tone.
-      setTimeout(() => _sendDTMF, timeout);
-    };
-
-    // Send the first tone.
-    _sendDTMF();
+    }
   }
 
   sendInfo(contentType, body, options) {
