@@ -135,7 +135,7 @@ getHeader(String data, int headerStart) {
   return end;
 }
 
-parseHeader(message, data, headerStart, headerEnd) {
+parseHeader(IncomingMessage message, data, headerStart, headerEnd) {
   var parsed;
   var hcolonIndex = data.indexOf(':', headerStart);
   var headerName = data.substring(headerStart, hcolonIndex).trim();

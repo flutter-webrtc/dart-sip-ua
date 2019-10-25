@@ -1,4 +1,5 @@
 import '../../sip_ua.dart';
+import '../SIPMessage.dart';
 import '../Timers.dart';
 import '../Transport.dart';
 import '../UA.dart';
@@ -18,7 +19,7 @@ class InviteServerTransaction extends TransactionBase {
     this.ua = ua;
     this.transport = transport;
     this.request = request;
-    this.last_response = '';
+    this.last_response = IncomingMessage();
     request.server_transaction = this;
 
     this.state = TransactionState.PROCEEDING;
@@ -87,7 +88,8 @@ class InviteServerTransaction extends TransactionBase {
   }
 
   // INVITE Server Transaction RFC 3261 17.2.1.
-  receiveResponse(status_code, response, onSuccess, onFailure) {
+  void receiveResponse(int status_code, IncomingMessage response,
+      [void Function() onSuccess, void Function() onFailure]) {
     if (status_code >= 100 && status_code <= 199) {
       switch (this.state) {
         case TransactionState.PROCEEDING:

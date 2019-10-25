@@ -1,4 +1,5 @@
 import '../../sip_ua.dart';
+import '../SIPMessage.dart';
 import '../Transport.dart';
 import '../UA.dart';
 import '../event_manager/event_manager.dart';
@@ -19,9 +20,14 @@ abstract class TransactionBase extends EventManager {
   UA ua;
   Transport transport;
   TransactionState state;
-  var last_response;
+  IncomingMessage last_response;
   var request;
   void onTransportError();
 
   void send();
+
+  void receiveResponse(int status_code, IncomingMessage response,
+      [void Function() onSuccess, void Function() onFailure]) {
+    // default NO_OP implementation
+  }
 }

@@ -94,7 +94,7 @@ class UA extends EventManager {
   TransactionBag _transactions = TransactionBag();
   var _data;
   var _closeTimer;
-  var _registrator;
+  Registrator _registrator;
   final logger = new Log();
 
   UA(Settings configuration) {
@@ -299,8 +299,13 @@ class UA extends EventManager {
       if (this._sessions.containsKey(session)) {
         logger.debug('closing session ${session}');
         try {
-          this._sessions[session].terminate();
-        } catch (error) {}
+          RTCSession rtcSession = this._sessions[session];
+          if (!rtcSession.isEnded()) {
+            rtcSession.terminate();
+          }
+        } catch (error, s) {
+          Log.e(error.toString(), null, s);
+        }
       }
     });
 
@@ -487,7 +492,7 @@ class UA extends EventManager {
   /**
    * Request reception
    */
-  receiveRequest(request) {
+  receiveRequest(IncomingRequest request) {
     SipMethod method = request.method;
 
     // Check that request URI points to us.
@@ -892,7 +897,7 @@ class UA extends EventManager {
               ._transactions
               .getTransaction(InviteClientTransaction, message.via_branch);
           if (transaction != null) {
-            transaction.receiveResponse(message);
+            transaction.receiveResponse(message.status_code, message);
           }
           break;
         case SipMethod.ACK:
@@ -903,7 +908,7 @@ class UA extends EventManager {
               ._transactions
               .getTransaction(NonInviteClientTransaction, message.via_branch);
           if (transaction != null) {
-            transaction.receiveResponse(message);
+            transaction.receiveResponse(message.status_code, message);
           }
           break;
       }
