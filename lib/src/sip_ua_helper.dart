@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_webrtc/media_stream.dart';
+import 'package:logger/logger.dart';
 
 import 'Config.dart';
 import 'Message.dart';
@@ -24,6 +25,12 @@ class SIPUAHelper extends EventManager {
   bool get connected => _connected;
 
   RegistrationStateEnum get registerState => _registerState;
+
+  SIPUAHelper() {
+    Log.loggingLevel = Level.debug;
+  }
+
+  set loggingLevel(Level loggingLevel) => Log.loggingLevel = loggingLevel;
 
   String get remote_identity {
     if (_session != null && _session.remote_identity != null) {
