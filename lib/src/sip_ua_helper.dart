@@ -47,15 +47,33 @@ class SIPUAHelper extends EventManager {
   }
 
   void stop() async {
-    await this._ua.stop();
+    if (this._ua != null) {
+      await this._ua.stop();
+    } else {
+      Log.w("ERROR: stop called but not started, call start first.");
+    }
   }
 
   void register() {
+    assert(this._ua != null,
+        "register called but not started, you must call start first.");
     this._ua.register();
   }
 
+  bool isRegistered() {
+    if (this._ua != null) {
+      return this._ua.isRegistered();
+    }
+    return false;
+  }
+
   void unregister([bool all = true]) {
-    this._ua.unregister(all: all);
+    if (this._ua != null) {
+      assert(!this._ua.isRegistered(), "ERROR: you must call register first.");
+      this._ua.unregister(all: all);
+    } else {
+      Log.e("ERROR: unregister called, you must call start first.");
+    }
   }
 
   Future<RTCSession> call(String uri, [bool voiceonly = false]) async {
@@ -135,7 +153,7 @@ class SIPUAHelper extends EventManager {
       });
 
       this._ua.on(EventRegistrationFailed(), (EventRegistrationFailed event) {
-        logger.debug('registrationFailed => ' + (event.cause));
+        logger.error('registrationFailed => ' + (event.cause));
         _registerState = RegistrationStateEnum
             .REGISTRATION_FAILED; //'registrationFailed[${event.cause}]';
         _registered = false;

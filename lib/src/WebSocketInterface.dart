@@ -133,8 +133,10 @@ class WebSocketInterface implements Socket {
       });
       _closed = false;
       _connected = true;
+      logger.debug("Web Socket is now connected");
       this._onOpen();
-    } catch (e) {
+    } catch (e, s) {
+      Log.e(e.toString(), null, s);
       _connected = false;
       this._onError(e.toString());
     }
