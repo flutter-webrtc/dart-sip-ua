@@ -69,7 +69,7 @@ class EventUnregister extends EventType {
 
 class EventSipEvent extends EventType {
   //OutgoingRequest request;
-  EventSipEvent({OutgoingRequest request});
+  EventSipEvent({IncomingRequest request});
 }
 
 class EventConnected extends EventType {
