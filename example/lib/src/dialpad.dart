@@ -1,7 +1,6 @@
+import 'package:dart_sip_ua_example/src/widgets/action_button.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'widgets/numpad.dart';
 import 'package:sip_ua/sip_ua.dart';
 
 class DialPadWidget extends StatefulWidget {
@@ -81,6 +80,46 @@ class _MyDialPadWidget extends State<DialPadWidget>
     });
   }
 
+  List<Widget> _buildNumPad() {
+    var lables = [
+      [
+        {'1': ''},
+        {'2': 'abc'},
+        {'3': 'def'}
+      ],
+      [
+        {'4': 'ghi'},
+        {'5': 'jkl'},
+        {'6': 'mno'}
+      ],
+      [
+        {'7': 'pqrs'},
+        {'8': 'tuv'},
+        {'9': 'wxyz'}
+      ],
+      [
+        {'*': ''},
+        {'0': '+'},
+        {'#': ''}
+      ],
+    ];
+
+    return lables
+        .map((row) => Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: row
+                    .map((label) => ActionButton(
+                          title: '${label.keys.first}',
+                          subTitle: '${label.values.first}',
+                          onPressed: () => _handleNum(label.keys.first),
+                          number: true,
+                        ))
+                    .toList())))
+        .toList();
+  }
+
   List<Widget> _buildDialPad() {
     return [
       Container(
@@ -101,29 +140,35 @@ class _MyDialPadWidget extends State<DialPadWidget>
                       controller: _textController,
                     )),
               ])),
-      NumPad(onPressed: (number) => _handleNum(number)),
       Container(
           width: 300,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.videocam, color: Colors.grey),
-                onPressed: () => _handleCall(context),
-              ),
-              FloatingActionButton(
-                heroTag: "audio_call",
-                child: Icon(Icons.dialer_sip),
-                backgroundColor: Colors.green,
-                onPressed: () => _handleCall(context, true),
-              ),
-              IconButton(
-                icon: Icon(Icons.backspace, color: Colors.grey),
-                onPressed: () => _handleBackSpace(),
-              ),
-            ],
-          ))
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: _buildNumPad())),
+      Container(
+          width: 300,
+          child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  ActionButton(
+                    icon: Icons.videocam,
+                    onPressed: () => _handleCall(context),
+                  ),
+                  ActionButton(
+                    icon: Icons.dialer_sip,
+                    fillColor: Colors.green,
+                    onPressed: () => _handleCall(context, true),
+                  ),
+                  ActionButton(
+                    icon: Icons.keyboard_arrow_left,
+                    onPressed: () => _handleBackSpace(),
+                  ),
+                ],
+              )))
     ];
   }
 
