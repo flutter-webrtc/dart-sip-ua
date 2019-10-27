@@ -16,13 +16,21 @@ class SIPUAHelper extends EventManager {
   Settings _settings;
   final Log logger = Log();
   RTCSession _session;
-  bool _registered = false;
-  bool _connected = false;
   RegistrationStateEnum _registerState = RegistrationStateEnum.NONE;
 
-  bool get registered => _registered;
+  bool get registered {
+    if (this._ua != null) {
+      return this._ua.isRegistered();
+    }
+    return false;
+  }
 
-  bool get connected => _connected;
+  bool get connected {
+    if (this._ua != null) {
+      return this._ua.isConnected();
+    }
+    return false;
+  }
 
   RegistrationStateEnum get registerState => _registerState;
 
@@ -67,16 +75,9 @@ class SIPUAHelper extends EventManager {
     this._ua.register();
   }
 
-  bool isRegistered() {
-    if (this._ua != null) {
-      return this._ua.isRegistered();
-    }
-    return false;
-  }
-
   void unregister([bool all = true]) {
     if (this._ua != null) {
-      assert(!this._ua.isRegistered(), "ERROR: you must call register first.");
+      assert(!registered, "ERROR: you must call register first.");
       this._ua.unregister(all: all);
     } else {
       Log.e("ERROR: unregister called, you must call start first.");
@@ -133,19 +134,16 @@ class SIPUAHelper extends EventManager {
       this._ua.on(EventConnected(), (EventConnected event) {
         logger.debug('connected => ' + event.toString());
         _notifyRegsistrationStateListeners(RegistrationStateEnum.CONNECTED, '');
-        _connected = true;
       });
 
       this._ua.on(EventDisconnected(), (EventDisconnected event) {
         logger.debug('disconnected => ' + event.toString());
         _notifyRegsistrationStateListeners(
             RegistrationStateEnum.DISCONNECTED, '');
-        _connected = false;
       });
 
       this._ua.on(EventRegistered(), (EventRegistered event) {
         logger.debug('registered => ' + event.toString());
-        _registered = true;
         _registerState = RegistrationStateEnum.REGISTERED;
         _notifyRegsistrationStateListeners(
             RegistrationStateEnum.REGISTERED, '');
@@ -154,7 +152,6 @@ class SIPUAHelper extends EventManager {
       this._ua.on(EventUnregister(), (EventUnregister event) {
         logger.debug('unregistered => ' + event.toString());
         _registerState = RegistrationStateEnum.UNREGISTERED;
-        _registered = false;
         _notifyRegsistrationStateListeners(
             RegistrationStateEnum.UNREGISTERED, '');
       });
@@ -163,7 +160,6 @@ class SIPUAHelper extends EventManager {
         logger.error('registrationFailed => ' + (event.cause));
         _registerState = RegistrationStateEnum
             .REGISTRATION_FAILED; //'registrationFailed[${event.cause}]';
-        _registered = false;
         _notifyRegsistrationStateListeners(
             RegistrationStateEnum.REGISTRATION_FAILED, event.cause);
       });
