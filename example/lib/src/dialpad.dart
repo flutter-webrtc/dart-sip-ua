@@ -64,11 +64,11 @@ class _MyDialPadWidget extends State<DialPadWidget>
     return null;
   }
 
-  void _handleBackSpace() {
+  void _handleBackSpace([bool deleteAll = false]) {
     var text = _textController.text;
     if (text.isNotEmpty) {
       this.setState(() {
-        text = text.substring(0, text.length - 1);
+        text = deleteAll ? '' : text.substring(0, text.length - 1);
         _textController.text = text;
       });
     }
@@ -166,6 +166,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
                   ActionButton(
                     icon: Icons.keyboard_arrow_left,
                     onPressed: () => _handleBackSpace(),
+                    onLongPress: () => _handleBackSpace(true),
                   ),
                 ],
               )))

@@ -8,6 +8,7 @@ class ActionButton extends StatefulWidget {
   final bool number;
   final Color fillColor;
   final Function() onPressed;
+  final Function() onLongPress;
 
   const ActionButton(
       {Key key,
@@ -15,6 +16,7 @@ class ActionButton extends StatefulWidget {
       this.subTitle = '',
       this.icon,
       this.onPressed,
+      this.onLongPress,
       this.checked = false,
       this.number = false,
       this.fillColor})
@@ -32,46 +34,49 @@ class _ActionButtonState extends State<ActionButton> {
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        RawMaterialButton(
-          onPressed: widget.onPressed,
-          splashColor: widget.fillColor != null
-              ? widget.fillColor
-              : (widget.checked ? Colors.white : Colors.blue),
-          fillColor: widget.fillColor != null
-              ? widget.fillColor
-              : (widget.checked ? Colors.blue : Colors.white),
-          elevation: 10.0,
-          shape: CircleBorder(),
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: widget.number
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                        Text('${widget.title}',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: widget.fillColor != null
-                                  ? widget.fillColor
-                                  : Colors.grey[500],
-                            )),
-                        Text('${widget.subTitle}'.toUpperCase(),
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: widget.fillColor != null
-                                  ? widget.fillColor
-                                  : Colors.grey[500],
-                            ))
-                      ])
-                : Icon(
-                    widget.icon,
-                    size: 30.0,
-                    color: widget.fillColor != null
-                        ? Colors.white
-                        : (widget.checked ? Colors.white : Colors.blue),
-                  ),
-          ),
-        ),
+        GestureDetector(
+            onLongPress: widget.onLongPress,
+            onTap: widget.onPressed,
+            child: RawMaterialButton(
+              onPressed: widget.onPressed,
+              splashColor: widget.fillColor != null
+                  ? widget.fillColor
+                  : (widget.checked ? Colors.white : Colors.blue),
+              fillColor: widget.fillColor != null
+                  ? widget.fillColor
+                  : (widget.checked ? Colors.blue : Colors.white),
+              elevation: 10.0,
+              shape: CircleBorder(),
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: widget.number
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                            Text('${widget.title}',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: widget.fillColor != null
+                                      ? widget.fillColor
+                                      : Colors.grey[500],
+                                )),
+                            Text('${widget.subTitle}'.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 8,
+                                  color: widget.fillColor != null
+                                      ? widget.fillColor
+                                      : Colors.grey[500],
+                                ))
+                          ])
+                    : Icon(
+                        widget.icon,
+                        size: 30.0,
+                        color: widget.fillColor != null
+                            ? Colors.white
+                            : (widget.checked ? Colors.white : Colors.blue),
+                      ),
+              ),
+            )),
         widget.number
             ? Container(
                 margin: EdgeInsets.symmetric(vertical: 4.0, horizontal: 2.0))
