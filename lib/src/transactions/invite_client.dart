@@ -1,6 +1,7 @@
 import '../../sip_ua.dart';
 import '../Constants.dart';
 import '../SIPMessage.dart' as SIPMessage;
+import '../SIPMessage.dart';
 import '../Timers.dart';
 import '../Transport.dart';
 import '../UA.dart';
@@ -134,7 +135,8 @@ class InviteClientTransaction extends TransactionBase {
     this.transport.send(cancel);
   }
 
-  receiveResponse(SIPMessage.IncomingMessage response) {
+  void receiveResponse(int status_code, IncomingMessage response,
+      [void Function() onSuccess, void Function() onFailure]) {
     var status_code = response.status_code;
 
     if (status_code >= 100 && status_code <= 199) {

@@ -8,7 +8,9 @@ import 'Grammar.dart';
 import 'NameAddrHeader.dart';
 import 'UA.dart';
 import 'Utils.dart' as Utils;
+import 'grammar_parser.dart';
 import 'logger.dart';
+import 'transactions/transaction_base.dart';
 
 final logger = Log();
 
@@ -343,9 +345,12 @@ class IncomingMessage {
   var reason_phrase;
   var session_expires;
   var session_expires_refresher;
+  Data event;
+  dynamic replaces;
+  dynamic refer_to;
 
   IncomingMessage() {
-    this.data = null;
+    this.data = '';
     this.headers = null;
     this.method = null;
     this.via = null;
@@ -356,7 +361,7 @@ class IncomingMessage {
     this.from_tag = null;
     this.to = null;
     this.to_tag = null;
-    this.body = null;
+    this.body = '';
     this.sdp = null;
   }
 
@@ -505,7 +510,7 @@ class IncomingRequest extends IncomingMessage {
   UA ua;
   var ruri;
   var transport;
-  var server_transaction;
+  TransactionBase server_transaction;
 
   IncomingRequest(UA ua) : super() {
     this.ua = ua;
@@ -623,9 +628,12 @@ class IncomingRequest extends IncomingMessage {
       response += 'Content-Length: ${0}\r\n\r\n';
     }
 
+    IncomingMessage message = IncomingMessage();
+    message.data = response;
+
     this
         .server_transaction
-        .receiveResponse(code, response, onSuccess, onFailure);
+        .receiveResponse(code, message, onSuccess, onFailure);
   }
 
   /**

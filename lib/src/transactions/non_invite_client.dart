@@ -68,9 +68,8 @@ class NonInviteClientTransaction extends TransactionBase {
     this.ua.destroyTransaction(this);
   }
 
-  receiveResponse(IncomingResponse response) {
-    var status_code = response.status_code;
-
+  void receiveResponse(int status_code, IncomingMessage response,
+      [void Function() onSuccess, void Function() onFailure]) {
     if (status_code < 200) {
       switch (this.state) {
         case TransactionState.TRYING:

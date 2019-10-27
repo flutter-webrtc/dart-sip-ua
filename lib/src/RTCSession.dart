@@ -1760,7 +1760,7 @@ class RTCSession extends EventManager {
   /**
    * In dialog UPDATE Reception
    */
-  void _receiveUpdate(request) async {
+  void _receiveUpdate(IncomingRequest request) async {
     logger.debug('receiveUpdate()');
 
     var rejected = false;

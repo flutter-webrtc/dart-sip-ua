@@ -4,6 +4,7 @@ import 'Dialog/RequestSender.dart';
 import 'Exceptions.dart' as Exceptions;
 import 'RTCSession.dart';
 import 'SIPMessage.dart' as SIPMessage;
+import 'SIPMessage.dart';
 import 'UA.dart';
 import 'Utils.dart' as Utils;
 import 'event_manager/event_manager.dart';
@@ -165,7 +166,7 @@ class Dialog {
     return request;
   }
 
-  receiveRequest(request) {
+  receiveRequest(IncomingRequest request) {
     // Check in-dialog request.
     if (!this._checkInDialogRequest(request)) {
       return;

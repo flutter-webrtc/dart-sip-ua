@@ -69,7 +69,7 @@ class EventUnregister extends EventType {
 
 class EventSipEvent extends EventType {
   //OutgoingRequest request;
-  EventSipEvent({OutgoingRequest request});
+  EventSipEvent({IncomingRequest request});
 }
 
 class EventConnected extends EventType {
@@ -175,7 +175,7 @@ class EventUpdate extends EventType {
 //  bool Function(dynamic options) callback;
 //  bool Function(dynamic options) reject;
   EventUpdate(
-      {dynamic request,
+      {IncomingRequest request,
       bool Function(dynamic options) callback,
       bool Function(dynamic options) reject});
 }

@@ -1,3 +1,5 @@
+import 'package:sip_ua/src/SIPMessage.dart';
+
 import '../../sip_ua.dart';
 import '../Timers.dart';
 import '../Transport.dart';
@@ -17,7 +19,7 @@ class NonInviteServerTransaction extends TransactionBase {
     this.ua = ua;
     this.transport = transport;
     this.request = request;
-    this.last_response = '';
+    this.last_response = IncomingMessage();
     request.server_transaction = this;
 
     this.state = TransactionState.TRYING;
@@ -48,7 +50,8 @@ class NonInviteServerTransaction extends TransactionBase {
     }
   }
 
-  receiveResponse(status_code, response, onSuccess, onFailure) {
+  receiveResponse(int status_code, IncomingMessage response,
+      [void Function() onSuccess, void Function() onFailure]) {
     if (status_code == 100) {
       /* RFC 4320 4.1
        * 'A SIP element MUST NOT

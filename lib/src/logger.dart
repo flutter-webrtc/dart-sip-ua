@@ -1,39 +1,40 @@
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
+import 'enum_helper.dart';
 import 'stack_trace_nj.dart';
 
 class Log extends Logger {
   static Log _self;
   static String _localPath;
 
+  static Level _loggingLevel = Level.debug;
+
   Log();
+
+  static set loggingLevel(Level loggingLevel) => _loggingLevel = loggingLevel;
 
   Log._internal(String currentWorkingDirectory)
       : super(printer: MyLogPrinter(currentWorkingDirectory));
 
-  debug(String message, [dynamic error, StackTrace stackTrace]) {
+  void debug(String message, [dynamic error, StackTrace stackTrace]) {
     autoInit();
     Log.d(message, error, stackTrace);
-    return _self;
   }
 
-  info(String message, [dynamic error, StackTrace stackTrace]) {
+  void info(String message, [dynamic error, StackTrace stackTrace]) {
     autoInit();
     Log.i(message, error, stackTrace);
-    return _self;
   }
 
-  warn(String message, [dynamic error, StackTrace stackTrace]) {
+  void warn(String message, [dynamic error, StackTrace stackTrace]) {
     autoInit();
     Log.w(message, error, stackTrace);
-    return _self;
   }
 
-  error(String message, [dynamic error, StackTrace stackTrace]) {
+  void error(String message, [dynamic error, StackTrace stackTrace]) {
     autoInit();
     Log.e(message, error, stackTrace);
-    return _self;
   }
 
   factory Log.d(String message, [dynamic error, StackTrace stackTrace]) {
@@ -80,7 +81,7 @@ class Log extends Logger {
 }
 
 class MyLogPrinter extends LogPrinter {
-  static final levelColors = {
+  static final Map<Level, AnsiColor> levelColors = {
     Level.verbose: AnsiColor.fg(AnsiColor.grey(0.5)),
     Level.debug: AnsiColor.none(),
     Level.info: AnsiColor.fg(12),
@@ -96,6 +97,11 @@ class MyLogPrinter extends LogPrinter {
 
   @override
   void log(LogEvent event) {
+    if (EnumHelper.getIndexOf(Level.values, Log._loggingLevel) >
+        EnumHelper.getIndexOf(Level.values, event.level)) {
+      // don't log events where the log level is set higher
+      return;
+    }
     var formatter = DateFormat('yyyy-MM-dd HH:mm:ss.');
     var now = DateTime.now();
     var formattedDate = formatter.format(now) + now.millisecond.toString();
