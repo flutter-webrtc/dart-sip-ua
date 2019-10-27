@@ -1,3 +1,5 @@
+import 'package:sip_ua/src/event_manager/events.dart';
+
 import 'Exceptions.dart' as Exceptions;
 import 'Socket.dart' as Socket;
 import 'Timers.dart';
@@ -43,7 +45,7 @@ class Transport {
   final logger = Log();
 
   void Function(WebSocketInterface socket, int attempts) onconnecting;
-  void Function(WebSocketInterface socket, bool error) ondisconnect;
+  void Function(WebSocketInterface socket, ErrorCause cause) ondisconnect;
   void Function(Transport transport) onconnect;
   void Function(Transport transport, String messageData) ondata;
 
@@ -148,11 +150,17 @@ class Transport {
     // Unbind socket event callbacks.
     this.socket.onconnect = () => {};
     this.socket.ondisconnect =
-        (WebSocketInterface socket, bool error, String reason) => {};
+        (WebSocketInterface socket, bool error, int closeCode, String reason) =>
+            {};
     this.socket.ondata = (dynamic data) => {};
 
     this.socket.disconnect();
-    this.ondisconnect(this.socket, false);
+    this.ondisconnect(
+        this.socket,
+        ErrorCause(
+            cause: 'disconnect',
+            status_code: 0,
+            reason_phrase: 'close by local'));
   }
 
   bool send(data) {
@@ -258,9 +266,13 @@ class Transport {
     this.onconnect(this);
   }
 
-  _onDisconnect(WebSocketInterface socket, bool error, String reason) {
+  _onDisconnect(
+      WebSocketInterface socket, bool error, int closeCode, String reason) {
     this.status = C.STATUS_DISCONNECTED;
-    this.ondisconnect(socket, error);
+    this.ondisconnect(
+        socket,
+        ErrorCause(
+            cause: 'error', status_code: closeCode, reason_phrase: reason));
 
     if (this.close_requested) {
       return;

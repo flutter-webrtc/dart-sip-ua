@@ -23,7 +23,7 @@ class WebSocketInterface implements Socket {
   @override
   void Function() onconnect;
   @override
-  void Function(WebSocketInterface socket, bool error, String reason)
+  void Function(WebSocketInterface socket, bool error, int closeCode, String reason)
       ondisconnect;
   @override
   void Function(dynamic data) ondata;
@@ -174,7 +174,7 @@ class WebSocketInterface implements Socket {
       this._ws.add(message);
       setTimeout(() {
         // extra message to wake asterisk up
-        this._ws.add("");
+        //this._ws.add("");
       }, 100);
 
       return true;
@@ -205,7 +205,7 @@ class WebSocketInterface implements Socket {
     if (wasClean == false) {
       logger.debug('WebSocket abrupt disconnection');
     }
-    this.ondisconnect(this, !wasClean, reason);
+    this.ondisconnect(this, !wasClean, code,  reason);
   }
 
   _onMessage(data) {

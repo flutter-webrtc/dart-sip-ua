@@ -169,8 +169,8 @@ class Message extends EventManager {
       this._succeeded('remote', response);
     } else {
       var cause = Utils.sipErrorCause(response.status_code);
-
-      this._failed('remote', response, cause);
+      this._failed(
+          'remote', response.status_code, cause, response.reason_phrase);
     }
   }
 
@@ -178,14 +178,16 @@ class Message extends EventManager {
     if (this._closed != null) {
       return;
     }
-    this._failed('system', null, DartSIP_C.causes.REQUEST_TIMEOUT);
+    this._failed(
+        'system', 408, DartSIP_C.causes.REQUEST_TIMEOUT, 'Request Timeout');
   }
 
   _onTransportError() {
     if (this._closed != null) {
       return;
     }
-    this._failed('system', null, DartSIP_C.causes.CONNECTION_ERROR);
+    this._failed(
+        'system', 500, DartSIP_C.causes.CONNECTION_ERROR, 'Transport Error');
   }
 
   close() {
@@ -211,15 +213,17 @@ class Message extends EventManager {
     this._ua.newMessage(this, originator, request);
   }
 
-  _failed(String originator, IncomingResponse response, String cause) {
+  _failed(
+      String originator, int status_code, String cause, String reason_phrase) {
     logger.debug('MESSAGE failed');
-
     this.close();
-
     logger.debug('emit "failed"');
-
-    this.emit(
-        EventFailed(originator: originator, response: response, cause: cause));
+    this.emit(EventCallFailed(
+        originator: originator,
+        cause: ErrorCause(
+            cause: cause,
+            status_code: status_code,
+            reason_phrase: reason_phrase)));
   }
 
   _succeeded(String originator, IncomingResponse response) {

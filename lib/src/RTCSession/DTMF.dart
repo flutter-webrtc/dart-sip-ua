@@ -89,7 +89,7 @@ class DTMF extends EventManager {
       this.eventHandlers.emit(EventOnFialed());
       this.emit(EventOnFialed());
 
-      this.emit(EventFailed(originator: 'remote', response: event.response));
+      this.emit(EventCallFailed(originator: 'remote', response: event.response));
     });
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
       this._session.onRequestTimeout();

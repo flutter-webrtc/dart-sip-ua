@@ -145,9 +145,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   @override
-  void registrationStateChanged(RegistrationStateEnum state, String cause) {
-    //NO OP
-  }
+  void transportStateChanged(TransportState state) {}
+
+  @override
+  void registrationStateChanged(RegistrationState state) {}
+
   void _backToDialPad() {
     _timer.cancel();
     Timer(Duration(seconds: 2), () {

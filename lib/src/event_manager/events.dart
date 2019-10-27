@@ -50,21 +50,30 @@ class EventNewMessage extends EventType {
   EventNewMessage({Message message, this.originator, OutgoingRequest request});
 }
 
+class ErrorCause {
+  int status_code;
+  String cause;
+  String reason_phrase;
+  ErrorCause({this.status_code, this.cause, this.reason_phrase});
+  @override
+  String toString() {
+    return 'Code: [$status_code], Cause: $cause, Reason: $reason_phrase';
+  }
+}
+
 class EventRegistered extends EventType {
-  IncomingMessage response;
-  EventRegistered({this.response});
+  ErrorCause cause;
+  EventRegistered({this.cause});
 }
 
 class EventRegistrationFailed extends EventType {
-  IncomingMessage response;
-  String cause;
-  EventRegistrationFailed({this.response, this.cause});
+  ErrorCause cause;
+  EventRegistrationFailed({this.cause});
 }
 
 class EventUnregister extends EventType {
-  IncomingMessage response;
-  //String cause;
-  EventUnregister({this.response, String cause});
+  ErrorCause cause;
+  EventUnregister({this.cause});
 }
 
 class EventSipEvent extends EventType {
@@ -72,22 +81,22 @@ class EventSipEvent extends EventType {
   EventSipEvent({IncomingRequest request});
 }
 
-class EventConnected extends EventType {
-  //Transport transport;
-  EventConnected({Transport transport});
+class EventSocketConnected extends EventType {
+  WebSocketInterface socket;
+  EventSocketConnected({this.socket});
 }
 
-class EventConnecting extends EventType {
+class EventSocketConnecting extends EventType {
   //OutgoingRequest request;
   WebSocketInterface socket;
 
-  EventConnecting({dynamic request, this.socket});
+  EventSocketConnecting({this.socket});
 }
 
-class EventDisconnected extends EventType {
-  // WebSocketInterface socket;
-  // bool error;
-  EventDisconnected({WebSocketInterface socket, bool error});
+class EventSocketDisconnected extends EventType {
+  WebSocketInterface socket;
+  ErrorCause cause;
+  EventSocketDisconnected({WebSocketInterface socket, this.cause});
 }
 
 class EventStream extends EventType {
@@ -125,7 +134,7 @@ class EventSetLocalDescriptionFailed extends EventType {
 
 class EventFailedUnderScore extends EventType {
 //  String originator;
-  String cause;
+  ErrorCause cause;
   dynamic message;
   EventFailedUnderScore({String originator, this.cause, this.message});
 }
@@ -164,10 +173,10 @@ class EventReplaces extends EventType {
       bool Function(dynamic options) reject});
 }
 
-class EventConfirmed extends EventType {
+class EventCallConfirmed extends EventType {
 //  String originator;
 //  String ack;
-  EventConfirmed({String originator, dynamic ack});
+  EventCallConfirmed({String originator, dynamic ack});
 }
 
 class EventUpdate extends EventType {
@@ -216,12 +225,16 @@ class EventRefer extends EventType {
       bool Function(dynamic options) reject});
 }
 
-class EventEnded extends EventType {
+class EventCallConnecting extends EventType {
+  EventCallConnecting({OutgoingRequest request});
+}
+
+class EventCallEnded extends EventType {
   String originator;
-  String cause;
+  ErrorCause cause;
   IncomingRequest request;
 //  dynamic message;
-  EventEnded({this.originator, this.cause, this.request});
+  EventCallEnded({this.originator, this.cause, this.request});
 }
 
 class EventOnFialed extends EventType {}
@@ -232,12 +245,12 @@ class EventTrying extends EventType {
   EventTrying({String request, String status_line});
 }
 
-class EventProgress extends EventType {
+class EventCallProgress extends EventType {
   // OutgoingRequest request;
   // String status_line;
   String originator;
   IncomingMessage response;
-  EventProgress(
+  EventCallProgress(
       {String request, String status_line, this.originator, this.response});
 }
 
@@ -252,16 +265,16 @@ class EventAccepted extends EventType {
 
 class EventCallAccepted extends EventType {}
 
-class EventFailed extends EventType {
+class EventCallFailed extends EventType {
   // String state;
   IncomingMessage response;
   String originator;
   // MediaStream stream;
-  String cause;
+  ErrorCause cause;
   // dynamic message;
   // OutgoingRequest request;
   // String status_line;
-  EventFailed(
+  EventCallFailed(
       {String state,
       this.response,
       this.originator,
@@ -302,26 +315,26 @@ class EventGetusermediafailed extends EventType {
   EventGetusermediafailed({dynamic exception});
 }
 
-class EventHold extends EventType {
+class EventCallHold extends EventType {
   String originator;
-  EventHold({this.originator});
+  EventCallHold({this.originator});
 }
 
-class EventUnhold extends EventType {
+class EventCallUnhold extends EventType {
   String originator;
-  EventUnhold({String originator});
+  EventCallUnhold({String originator});
 }
 
-class EventMuted extends EventType {
+class EventCallMuted extends EventType {
   bool audio;
   bool video;
-  EventMuted({this.audio, this.video});
+  EventCallMuted({this.audio, this.video});
 }
 
-class EventUnmuted extends EventType {
+class EventCallUnmuted extends EventType {
   bool audio;
   bool video;
-  EventUnmuted({this.audio, this.video});
+  EventCallUnmuted({this.audio, this.video});
 }
 
 class EventNewRTCSession extends EventType {

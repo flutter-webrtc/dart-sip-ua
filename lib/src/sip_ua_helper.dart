@@ -5,6 +5,7 @@ import 'package:logger/logger.dart';
 import 'Config.dart';
 import 'Message.dart';
 import 'RTCSession.dart';
+import 'Socket.dart';
 import 'UA.dart';
 import 'WebSocketInterface.dart';
 import 'logger.dart';
@@ -16,7 +17,14 @@ class SIPUAHelper extends EventManager {
   Settings _settings;
   final Log logger = Log();
   RTCSession _session;
-  RegistrationStateEnum _registerState = RegistrationStateEnum.NONE;
+  RegistrationState _registerState =
+      RegistrationState(state: RegistrationStateEnum.NONE);
+
+  SIPUAHelper() {
+    Log.loggingLevel = Level.debug;
+  }
+
+  set loggingLevel(Level loggingLevel) => Log.loggingLevel = loggingLevel;
 
   bool get registered {
     if (this._ua != null) {
@@ -32,13 +40,7 @@ class SIPUAHelper extends EventManager {
     return false;
   }
 
-  RegistrationStateEnum get registerState => _registerState;
-
-  SIPUAHelper() {
-    Log.loggingLevel = Level.debug;
-  }
-
-  set loggingLevel(Level loggingLevel) => Log.loggingLevel = loggingLevel;
+  RegistrationState get registerState => _registerState;
 
   String get remote_identity {
     if (_session != null && _session.remote_identity != null) {
@@ -125,43 +127,47 @@ class SIPUAHelper extends EventManager {
 
     try {
       this._ua = UA(_settings);
-      this._ua.on(EventConnecting(), (EventConnecting event) {
+      this._ua.on(EventSocketConnecting(), (EventSocketConnecting event) {
         logger.debug('connecting => ' + event.toString());
-        _notifyRegsistrationStateListeners(
-            RegistrationStateEnum.CONNECTING, '');
+        _notifyTransportStateListeners(TransportState(
+            TransportStateEnum.CONNECTING,
+            socket: event.socket));
       });
 
-      this._ua.on(EventConnected(), (EventConnected event) {
+      this._ua.on(EventSocketConnected(), (EventSocketConnected event) {
         logger.debug('connected => ' + event.toString());
-        _notifyRegsistrationStateListeners(RegistrationStateEnum.CONNECTED, '');
+        _notifyTransportStateListeners(
+            TransportState(TransportStateEnum.CONNECTED, socket: event.socket));
       });
 
-      this._ua.on(EventDisconnected(), (EventDisconnected event) {
-        logger.debug('disconnected => ' + event.toString());
-        _notifyRegsistrationStateListeners(
-            RegistrationStateEnum.DISCONNECTED, '');
+      this._ua.on(EventSocketDisconnected(), (EventSocketDisconnected event) {
+        logger.debug('disconnected => ' + (event.cause.toString()));
+        _notifyTransportStateListeners(TransportState(
+            TransportStateEnum.DISCONNECTED,
+            socket: event.socket,
+            cause: event.cause));
       });
 
       this._ua.on(EventRegistered(), (EventRegistered event) {
-        logger.debug('registered => ' + event.toString());
-        _registerState = RegistrationStateEnum.REGISTERED;
-        _notifyRegsistrationStateListeners(
-            RegistrationStateEnum.REGISTERED, '');
+        logger.debug('registered => ' + event.cause.toString());
+        _registerState = RegistrationState(
+            state: RegistrationStateEnum.REGISTERED, cause: event.cause);
+        _notifyRegsistrationStateListeners(_registerState);
       });
 
       this._ua.on(EventUnregister(), (EventUnregister event) {
-        logger.debug('unregistered => ' + event.toString());
-        _registerState = RegistrationStateEnum.UNREGISTERED;
-        _notifyRegsistrationStateListeners(
-            RegistrationStateEnum.UNREGISTERED, '');
+        logger.debug('unregistered => ' + event.cause.toString());
+        _registerState = RegistrationState(
+            state: RegistrationStateEnum.UNREGISTERED, cause: event.cause);
+        _notifyRegsistrationStateListeners(_registerState);
       });
 
       this._ua.on(EventRegistrationFailed(), (EventRegistrationFailed event) {
-        logger.error('registrationFailed => ' + (event.cause));
-        _registerState = RegistrationStateEnum
-            .REGISTRATION_FAILED; //'registrationFailed[${event.cause}]';
-        _notifyRegsistrationStateListeners(
-            RegistrationStateEnum.REGISTRATION_FAILED, event.cause);
+        logger.debug('registrationFailed => ' + (event.cause.toString()));
+        _registerState = RegistrationState(
+            state: RegistrationStateEnum.REGISTRATION_FAILED,
+            cause: event.cause);
+        _notifyRegsistrationStateListeners(_registerState);
       });
 
       this._ua.on(EventNewRTCSession(), (EventNewRTCSession event) {
@@ -185,54 +191,54 @@ class SIPUAHelper extends EventManager {
     // Register callbacks to desired call events
     EventManager eventHandlers = EventManager();
 
-    eventHandlers.on(EventConnecting(), (EventConnecting event) {
+    eventHandlers.on(EventCallConnecting(), (EventCallConnecting event) {
       logger.debug('call connecting');
       _notifyCallStateListeners(CallState(CallStateEnum.CONNECTING));
     });
 
-    eventHandlers.on(EventProgress(), (EventProgress event) {
+    eventHandlers.on(EventCallProgress(), (EventCallProgress event) {
       logger.debug('call is in progress');
       _notifyCallStateListeners(
           CallState(CallStateEnum.PROGRESS, originator: event.originator));
     });
 
-    eventHandlers.on(EventFailed(), (EventFailed event) {
-      logger.debug('call failed with cause: ' + (event.cause));
+    eventHandlers.on(EventCallFailed(), (EventCallFailed event) {
+      logger.debug('call failed with cause: ' + (event.cause.toString()));
       _notifyCallStateListeners(CallState(CallStateEnum.FAILED,
           originator: event.originator, cause: event.cause));
       _session = null;
     });
 
-    eventHandlers.on(EventEnded(), (EventEnded e) {
-      logger.debug('call ended with cause: ' + (e.cause));
-      _notifyCallStateListeners(
-          CallState(CallStateEnum.ENDED, originator: e.originator));
+    eventHandlers.on(EventCallEnded(), (EventCallEnded e) {
+      logger.debug('call ended with cause: ' + (e.cause.toString()));
+      _notifyCallStateListeners(CallState(CallStateEnum.ENDED,
+          originator: e.originator, cause: e.cause));
       _session = null;
     });
     eventHandlers.on(EventCallAccepted(), (EventCallAccepted e) {
       logger.debug('call accepted');
       _notifyCallStateListeners(CallState(CallStateEnum.ACCEPTED));
     });
-    eventHandlers.on(EventConfirmed(), (EventConfirmed e) {
+    eventHandlers.on(EventCallConfirmed(), (EventCallConfirmed e) {
       logger.debug('call confirmed');
       _notifyCallStateListeners(CallState(CallStateEnum.CONFIRMED));
     });
-    eventHandlers.on(EventHold(), (EventHold e) {
+    eventHandlers.on(EventCallHold(), (EventCallHold e) {
       logger.debug('call hold');
       _notifyCallStateListeners(
           CallState(CallStateEnum.HOLD, originator: e.originator));
     });
-    eventHandlers.on(EventUnhold(), (EventUnhold e) {
+    eventHandlers.on(EventCallUnhold(), (EventCallUnhold e) {
       logger.debug('call unhold');
       _notifyCallStateListeners(
           CallState(CallStateEnum.UNHOLD, originator: e.originator));
     });
-    eventHandlers.on(EventMuted(), (EventMuted e) {
+    eventHandlers.on(EventCallMuted(), (EventCallMuted e) {
       logger.debug('call muted');
       _notifyCallStateListeners(
           CallState(CallStateEnum.MUTED, audio: e.audio, video: e.video));
     });
-    eventHandlers.on(EventUnmuted(), (EventUnmuted e) {
+    eventHandlers.on(EventCallUnmuted(), (EventCallUnmuted e) {
       logger.debug('call unmuted');
       _notifyCallStateListeners(
           CallState(CallStateEnum.UNMUTED, audio: e.audio, video: e.video));
@@ -251,13 +257,13 @@ class SIPUAHelper extends EventManager {
         'iceServers': [
           {'url': 'stun:stun.l.google.com:19302'},
           /*
-                  * turn server configuration example.
-                  {
-                    'url': 'turn:123.45.67.89:3478',
-                    'username': 'change_to_real_user',
-                    'credential': 'change_to_real_secret'
-                  },
-                  */
+           * turn server configuration example.
+            {
+              'url': 'turn:123.45.67.89:3478',
+              'username': 'change_to_real_user',
+              'credential': 'change_to_real_secret'
+            },
+          */
         ]
       },
       'mediaConstraints': {
@@ -348,10 +354,15 @@ class SIPUAHelper extends EventManager {
     _sipUaHelperListeners.remove(listener);
   }
 
-  void _notifyRegsistrationStateListeners(
-      RegistrationStateEnum state, String cause) {
+  void _notifyTransportStateListeners(TransportState state) {
     _sipUaHelperListeners.forEach((listener) {
-      listener.registrationStateChanged(state, cause);
+      listener.transportStateChanged(state);
+    });
+  }
+
+  void _notifyRegsistrationStateListeners(RegistrationState state) {
+    _sipUaHelperListeners.forEach((listener) {
+      listener.registrationStateChanged(state);
     });
   }
 
@@ -360,11 +371,6 @@ class SIPUAHelper extends EventManager {
       listener.callStateChanged(state);
     });
   }
-}
-
-abstract class SipUaHelperListener {
-  void registrationStateChanged(RegistrationStateEnum state, String cause);
-  void callStateChanged(CallState state);
 }
 
 enum CallStateEnum {
@@ -385,22 +391,44 @@ enum CallStateEnum {
 
 class CallState {
   CallStateEnum state;
+  ErrorCause cause;
   String originator;
-  String cause;
   bool audio;
   bool video;
   MediaStream stream;
-
   CallState(this.state,
       {this.originator, this.audio, this.video, this.stream, this.cause});
 }
 
 enum RegistrationStateEnum {
-  CONNECTING,
-  CONNECTED,
-  DISCONNECTED,
   REGISTRATION_FAILED,
   REGISTERED,
   UNREGISTERED,
   NONE,
+}
+
+class RegistrationState {
+  RegistrationStateEnum state;
+  ErrorCause cause;
+  RegistrationState({this.state, this.cause});
+}
+
+enum TransportStateEnum {
+  CONNECTING,
+  CONNECTED,
+  DISCONNECTED,
+  NONE,
+}
+
+class TransportState {
+  TransportStateEnum state;
+  Socket socket;
+  ErrorCause cause;
+  TransportState(this.state, {this.socket = null, this.cause});
+}
+
+abstract class SipUaHelperListener {
+  void transportStateChanged(TransportState state);
+  void registrationStateChanged(RegistrationState state);
+  void callStateChanged(CallState state);
 }

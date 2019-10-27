@@ -256,9 +256,12 @@ class _MyDialPadWidget extends State<DialPadWidget>
   }
 
   @override
-  void registrationStateChanged(RegistrationStateEnum state, String cause) {
+  void registrationStateChanged(RegistrationState state) {
     this.setState(() {});
   }
+
+  @override
+  void transportStateChanged(TransportState state) {}
 
   @override
   void callStateChanged(CallState callState) {

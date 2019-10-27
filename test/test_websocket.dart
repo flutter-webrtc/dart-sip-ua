@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:sip_ua/src/event_manager/events.dart';
 import 'package:test/test.dart';
 import 'package:sip_ua/src/WebSocketInterface.dart';
 import 'package:sip_ua/src/Transport.dart';
@@ -46,8 +47,8 @@ var testFunctions = [
           completer.complete();
         };
         client.ondisconnect =
-            (WebSocketInterface socket, bool error, String reason) {
-          print('ondisconnect => ${reason.toString()}');
+            (WebSocketInterface socket, bool error, int closeCode, String reason) {
+          print('ondisconnect => error $error [$closeCode] ${reason.toString()}');
           expect(client.isConnected(), false);
         };
         client.connect();
@@ -91,7 +92,7 @@ var testFunctions = [
           trasnport.disconnect();
         };
 
-        trasnport.ondisconnect = (socket, bool error) {
+        trasnport.ondisconnect = (socket, ErrorCause cause) {
           expect(trasnport.isConnected(), false);
           completer.complete();
         };

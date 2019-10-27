@@ -95,13 +95,13 @@ class ReferSubscriber extends EventManager {
       this.emit(EventTrying(request: request, status_line: status_line));
     } else if (Utils.test1XX(status_code)) {
       /// 1XX Progressing
-      this.emit(EventProgress(request: request, status_line: status_line));
+      this.emit(EventCallProgress(request: request, status_line: status_line));
     } else if (Utils.test2XX(status_code)) {
       /// 2XX OK
       this.emit(EventAccepted(request: request, status_line: status_line));
     } else {
       /// 200+ Error
-      this.emit(EventFailed(request: request, status_line: status_line));
+      this.emit(EventCallFailed(request: request, status_line: status_line));
     }
   }
 

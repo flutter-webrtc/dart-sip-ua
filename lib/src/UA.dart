@@ -468,21 +468,33 @@ class UA extends EventManager {
    * Registered
    */
   registered({dynamic response}) {
-    this.emit(EventRegistered(response: response));
+    this.emit(EventRegistered(
+        cause: ErrorCause(
+            cause: 'registered',
+            status_code: response.status_code,
+            reason_phrase: response.reason_phrase)));
   }
 
   /**
    * Unregistered
    */
   unregistered({dynamic response, String cause}) {
-    this.emit(EventUnregister(response: response, cause: cause));
+    this.emit(EventUnregister(
+        cause: ErrorCause(
+            cause: cause ?? 'unregistered',
+            status_code: response?.status_code ?? 0,
+            reason_phrase: response?.reason_phrase ?? '')));
   }
 
   /**
    * Registration Failed
    */
   registrationFailed({dynamic response, String cause}) {
-    this.emit(EventRegistrationFailed(response: response, cause: cause));
+    this.emit(EventRegistrationFailed(
+        cause: ErrorCause(
+            cause: response.cause,
+            status_code: response.status_code,
+            reason_phrase: response.reason_phrase)));
   }
 
   // =================
@@ -828,7 +840,7 @@ class UA extends EventManager {
 // Transport connecting event.
   onTransportConnecting(WebSocketInterface socket, int attempts) {
     logger.debug('Transport connecting');
-    this.emit(EventConnecting(socket: socket));
+    this.emit(EventSocketConnecting(socket: socket));
   }
 
 // Transport connected event.
@@ -840,7 +852,7 @@ class UA extends EventManager {
     this._status = C.STATUS_READY;
     this._error = null;
 
-    this.emit(EventConnected(transport: transport));
+    this.emit(EventSocketConnected(socket: transport.socket));
 
     if (this._dynConfiguration.register) {
       this._registrator.register();
@@ -848,13 +860,13 @@ class UA extends EventManager {
   }
 
 // Transport disconnected event.
-  onTransportDisconnect(WebSocketInterface socket, bool error) {
+  onTransportDisconnect(WebSocketInterface socket, ErrorCause cause) {
     // Run _onTransportError_ callback on every client transaction using _transport_.
     this._transactions.removeAll().forEach((transaction) {
       transaction.onTransportError();
     });
 
-    this.emit(EventDisconnected(socket: socket, error: error));
+    this.emit(EventSocketDisconnected(socket: socket, cause: cause));
 
     // Call registrator _onTransportClosed_.
     this._registrator.onTransportClosed();

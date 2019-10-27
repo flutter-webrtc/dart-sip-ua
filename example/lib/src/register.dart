@@ -20,7 +20,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     'Host': 'tryit.jssip.net:10443'
   };
   SharedPreferences prefs;
-  RegistrationStateEnum _registerState;
+  RegistrationState _registerState;
 
   SIPUAHelper get helper => widget._helper;
 
@@ -57,7 +57,8 @@ class _MyRegisterWidget extends State<RegisterWidget>
     prefs.commit();
   }
 
-  void registrationStateChanged(RegistrationStateEnum state, String cause) {
+  @override
+  void registrationStateChanged(RegistrationState state) {
     this.setState(() {
       _registerState = state;
     });
@@ -114,7 +115,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
                             const EdgeInsets.fromLTRB(48.0, 18.0, 48.0, 18.0),
                         child: Center(
                             child: Text(
-                          'Register Status: ${EnumHelper.getName(_registerState)}',
+                          'Register Status: ${EnumHelper.getName(_registerState.state)}',
                           style: TextStyle(fontSize: 18, color: Colors.black54),
                         )),
                       ),
@@ -255,4 +256,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
   void callStateChanged(CallState state) {
     //NO OP
   }
+
+  @override
+  void transportStateChanged(TransportState state) {}
 }

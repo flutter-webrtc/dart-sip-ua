@@ -54,7 +54,7 @@ class Info extends EventManager {
       this.emit(EventSucceeded(originator: 'remote', response: event.response));
     });
     handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
-      this.emit(EventFailed(originator: 'remote', response: event.response));
+      this.emit(EventCallFailed(originator: 'remote', response: event.response));
     });
     handlers.on(EventOnTransportError(), (EventOnTransportError event) {
       this._session.onTransportError();
