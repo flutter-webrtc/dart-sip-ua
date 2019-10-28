@@ -30,4 +30,14 @@ class EnumHelper {
   static String reCase(String value) {
     return ReCase(value).titleCase;
   }
+
+  static T getEnum<T>(String enumName, List<T> values) {
+    String cleanedName = reCase(enumName);
+    for (int i = 0; i < values.length; i++) {
+      if (cleanedName == getName(values[i])) {
+        return values[i];
+      }
+    }
+    throw Exception("$cleanedName doesn't exist in the list of enums $values");
+  }
 }
