@@ -129,22 +129,20 @@ class SIPUAHelper extends EventManager {
       this._ua = UA(_settings);
       this._ua.on(EventSocketConnecting(), (EventSocketConnecting event) {
         logger.debug('connecting => ' + event.toString());
-        _notifyTransportStateListeners(TransportState(
-            TransportStateEnum.CONNECTING,
-            socket: event.socket));
+        _notifyTransportStateListeners(
+            TransportState(TransportStateEnum.CONNECTING));
       });
 
       this._ua.on(EventSocketConnected(), (EventSocketConnected event) {
         logger.debug('connected => ' + event.toString());
         _notifyTransportStateListeners(
-            TransportState(TransportStateEnum.CONNECTED, socket: event.socket));
+            TransportState(TransportStateEnum.CONNECTED));
       });
 
       this._ua.on(EventSocketDisconnected(), (EventSocketDisconnected event) {
         logger.debug('disconnected => ' + (event.cause.toString()));
         _notifyTransportStateListeners(TransportState(
             TransportStateEnum.DISCONNECTED,
-            socket: event.socket,
             cause: event.cause));
       });
 
@@ -422,9 +420,8 @@ enum TransportStateEnum {
 
 class TransportState {
   TransportStateEnum state;
-  Socket socket;
   ErrorCause cause;
-  TransportState(this.state, {this.socket = null, this.cause});
+  TransportState(this.state, {this.cause});
 }
 
 abstract class SipUaHelperListener {
