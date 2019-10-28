@@ -86,9 +86,9 @@ class SIPUAHelper extends EventManager {
     }
   }
 
-  Future<RTCSession> call(String uri, [bool voiceonly = false]) async {
+  Future<RTCSession> call(String target, [bool voiceonly = false]) async {
     if (_ua != null && _ua.isConnected()) {
-      _session = _ua.call(uri, this._options(voiceonly));
+      _session = _ua.call(target, this._options(voiceonly));
       return _session;
     } else {
       logger.error(
@@ -100,6 +100,12 @@ class SIPUAHelper extends EventManager {
   void answer() {
     if (_session != null) {
       _session.answer(this._options());
+    }
+  }
+
+  void refer(String target) {
+    if (_session != null) {
+      _session.refer(target);
     }
   }
 
@@ -250,6 +256,12 @@ class SIPUAHelper extends EventManager {
             stream: e.stream, originator: e.originator));
       });
     });
+    eventHandlers.on(EventCallRefer(), (EventCallRefer refer) async {
+      logger.debug('call refer received');
+      _notifyCallStateListeners(CallState(CallStateEnum.REFER, refer: refer));
+      //Always accept.
+      refer.accept(null, this._options(true));
+    });
 
     var _defaultOptions = {
       'eventHandlers': eventHandlers,
@@ -374,6 +386,7 @@ class SIPUAHelper extends EventManager {
 }
 
 enum CallStateEnum {
+  NONE,
   STREAM,
   UNMUTED,
   MUTED,
@@ -383,9 +396,9 @@ enum CallStateEnum {
   ENDED,
   ACCEPTED,
   CONFIRMED,
+  REFER,
   HOLD,
   UNHOLD,
-  NONE,
   CALL_INITIATION
 }
 
@@ -396,15 +409,21 @@ class CallState {
   bool audio;
   bool video;
   MediaStream stream;
+  EventCallRefer refer;
   CallState(this.state,
-      {this.originator, this.audio, this.video, this.stream, this.cause});
+      {this.originator,
+      this.audio,
+      this.video,
+      this.stream,
+      this.cause,
+      this.refer});
 }
 
 enum RegistrationStateEnum {
+  NONE,
   REGISTRATION_FAILED,
   REGISTERED,
   UNREGISTERED,
-  NONE,
 }
 
 class RegistrationState {
@@ -414,10 +433,10 @@ class RegistrationState {
 }
 
 enum TransportStateEnum {
+  NONE,
   CONNECTING,
   CONNECTED,
   DISCONNECTED,
-  NONE,
 }
 
 class TransportState {

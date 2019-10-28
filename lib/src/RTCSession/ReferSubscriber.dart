@@ -43,7 +43,7 @@ class ReferSubscriber extends EventManager {
 
     // Referred-By header field.
     var referredBy =
-        'Referred-By: <${this._session._ua._configuration.uri._scheme}:${this._session._ua._configuration.uri._user}@${this._session._ua._configuration.uri._host}>';
+        'Referred-By: <${this._session.ua.configuration.uri.scheme}:${this._session.ua.configuration.uri.user}@${this._session.ua.configuration.uri.host}>';
 
     extraHeaders.add(referredBy);
 
@@ -81,15 +81,16 @@ class ReferSubscriber extends EventManager {
       return;
     }
 
-    var status_line = Grammar.parse(request.body.trim(), 'Status_Line');
+    var status_line = request.body.trim();
+    var parsed = Grammar.parse(status_line, 'Status_Line');
 
-    if (status_line == -1) {
+    if (parsed == -1) {
       logger.debug(
           'receiveNotify() | error parsing NOTIFY body: "${request.body}"');
       return;
     }
 
-    var status_code = status_line.status_code.toString();
+    var status_code = parsed.status_code.toString();
     if (Utils.test100(status_code)) {
       /// 100 Trying
       this.emit(EventTrying(request: request, status_line: status_line));

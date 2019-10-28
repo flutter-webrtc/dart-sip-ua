@@ -107,7 +107,7 @@
         "RPAREN": _parse_RPAREN, 
         "RAQUOT": _parse_RAQUOT, 
         "LAQUOT": _parse_LAQUOT,
-        "COMMA": _parse_COMMA, 
+        "COMMA": _parse_COMMA,
         "SEMI": _parse_SEMI, 
         "COLON": _parse_COLON, 
         "LDQUOT": _parse_LDQUOT, 
@@ -189,7 +189,7 @@
         "Method": _parse_Method,
         "Status_Line": _parse_Status_Line,
         "Status_Code": _parse_Status_Code, 
-        "extension_code": _parse_extension_code, 
+        "extension_code": _parse_extension_code,
         "Reason_Phrase": _parse_Reason_Phrase,
         "Allow_Events": parse_Allow_Events,
         "Call_ID": parse_Call_ID,
@@ -294,11 +294,11 @@
         "hex12": _parse_hex12, 
         "Refer_To": parse_Refer_To,
         "Replaces": parse_Replaces,
-        "call_id": _parse_call_id, 
-        "replaces_param": _parse_replaces_param, 
-        "to_tag": _parse_to_tag, 
-        "from_tag": _parse_from_tag, 
-        "early_flag": _parse_early_flag 
+        "call_id": _parse_call_id,
+        "replaces_param": _parse_replaces_param,
+        "to_tag": _parse_to_tag,
+        "from_tag": _parse_from_tag,
+        "early_flag": _parse_early_flag
       };
       if (input == null) {
         throw new ArgumentError('text: $input');
@@ -697,7 +697,8 @@ extension_method  <- token
 
 ## STATUS LINE
 
-Status_Line     <- SIP_Version SP Status_Code SP Reason_Phrase
+Status_Line     <- SIP_Version SP Status_Code SP Reason_Phrase {
+                $$ = data; }
 
 Status_Code     <- status_code: extension_code {
                   data.status_code = parseInt(status_code.join(''));
@@ -839,14 +840,14 @@ Content_Length      <- length: (DIGIT +) {
 
 ## CONTENT-TYPE
 
-Content_Type        <- media_type {
+Content_Type        <- media_type  {
                         $$ = _text(); }
 
 media_type          <- m_type SLASH m_subtype (SEMI m_parameter)*
 
 m_type              <- discrete_type / composite_type
 
-discrete_type       <- "text"i / "image"i / "audio"i / "video"i / "application"i
+discrete_type       <- "text"i / "image"i / "audio"i / "video"i / "application"i / "message"i
                     / extension_token
 
 composite_type      <- "message"i / "multipart"i / extension_token

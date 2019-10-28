@@ -1,6 +1,7 @@
 import 'package:flutter_webrtc/webrtc.dart';
 
 import '../../sip_ua.dart';
+import '../NameAddrHeader.dart';
 import '../Message.dart';
 import '../RTCSession.dart';
 import '../RTCSession/DTMF.dart';
@@ -215,18 +216,17 @@ class EventCreateOfferFailed extends EventType {
   EventCreateOfferFailed({dynamic exception});
 }
 
-class EventRefer extends EventType {
-//  OutgoingRequest request;
-  // bool Function(dynamic arg1, dynamic arg2) accept2;
-  // bool Function(dynamic options) reject;
-  EventRefer(
-      {String request,
-      bool Function(dynamic arg1, dynamic arg2) accept2,
-      bool Function(dynamic options) reject});
+class EventCallRefer extends EventType {
+  String aor;
+  //bool Function({Function initCallback, dynamic options}) accept;
+  dynamic accept;
+  //bool Function(dynamic options) reject;
+  dynamic reject;
+  EventCallRefer({this.aor, this.accept, this.reject});
 }
 
 class EventCallConnecting extends EventType {
-  EventCallConnecting({OutgoingRequest request});
+  EventCallConnecting({dynamic request});
 }
 
 class EventCallEnded extends EventType {
@@ -242,25 +242,25 @@ class EventOnFialed extends EventType {}
 class EventTrying extends EventType {
 //  OutgoingRequest request;
 //  String status_line;
-  EventTrying({String request, String status_line});
+  EventTrying({dynamic request, String status_line});
 }
 
 class EventCallProgress extends EventType {
   // OutgoingRequest request;
   // String status_line;
   String originator;
-  IncomingMessage response;
+  dynamic response;
   EventCallProgress(
-      {String request, String status_line, this.originator, this.response});
+      {dynamic request, String status_line, this.originator, this.response});
 }
 
 class EventAccepted extends EventType {
   // OutgoingRequest request;
   // String status_line;
   // String originator;
-  IncomingMessage response;
+  dynamic response;
   EventAccepted(
-      {String request, String status_line, String originator, this.response});
+      {dynamic request, String status_line, String originator, this.response});
 }
 
 class EventCallAccepted extends EventType {}

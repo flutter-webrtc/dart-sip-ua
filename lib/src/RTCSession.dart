@@ -761,8 +761,8 @@ class RTCSession extends EventManager {
           throw new Exceptions.InvalidStateError(
               'Invalid status_code: ${status_code}');
         } else if (status_code != null) {
-          extraHeaders.add(
-              'Reason: SIP ;case=${status_code}; text="${reason_phrase}"');
+          extraHeaders
+              .add('Reason: SIP ;case=${status_code}; text="${reason_phrase}"');
         }
 
         /* RFC 3261 section 15 (Terminating a session):
@@ -1962,7 +1962,7 @@ class RTCSession extends EventManager {
     var notifier =
         new RTCSession_ReferNotifier.ReferNotifier(this, request.cseq);
 
-    var accept = (initCallback, options) {
+    var accept2 = (initCallback, options) {
       initCallback = (initCallback is Function) ? initCallback : null;
 
       if (this._status != C.STATUS_WAITING_FOR_ACK &&
@@ -1998,6 +1998,7 @@ class RTCSession extends EventManager {
         options['extraHeaders'].add('Replaces: ${replaces}');
       }
       session.connect(request.refer_to.uri.toAor(), options, initCallback);
+      return true;
     };
 
     var reject = () {
@@ -2007,10 +2008,10 @@ class RTCSession extends EventManager {
     logger.debug('emit "refer"');
 
     // Emit 'refer'.
-    this.emit(EventRefer(
-        request: request,
-        accept2: (initCallback, options) {
-          accept(initCallback, options);
+    this.emit(EventCallRefer(
+        aor: request.refer_to.uri.toAor(),
+        accept: (initCallback, options) {
+          accept2(initCallback, options);
         },
         reject: (_) {
           reject();
@@ -2033,8 +2034,8 @@ class RTCSession extends EventManager {
           var id;
           var referSubscriber;
 
-          if (request.event.params && request.event.params.id) {
-            id = request.event.params.id;
+          if (request.event.params['id'] != null) {
+            id = Utils.parseInt(request.event.params['id'], 10);
             referSubscriber = this._referSubscribers[id];
           } else if (this._referSubscribers.length == 1) {
             referSubscriber =
