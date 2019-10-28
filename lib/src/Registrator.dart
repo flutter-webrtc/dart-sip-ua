@@ -9,6 +9,7 @@ import 'Transport.dart';
 import 'UA.dart';
 import 'Utils.dart' as Utils;
 import 'event_manager/event_manager.dart';
+import 'event_manager/internal_events.dart';
 import 'logger.dart';
 
 const MIN_REGISTER_EXPIRES = 10; // In seconds.

@@ -3,6 +3,7 @@ import '../Exceptions.dart' as Exceptions;
 import '../RTCSession.dart' as RTCSession;
 import '../Utils.dart' as Utils;
 import '../event_manager/event_manager.dart';
+import '../event_manager/internal_events.dart';
 import '../logger.dart';
 
 class Info extends EventManager {

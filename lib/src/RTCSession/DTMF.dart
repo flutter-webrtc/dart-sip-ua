@@ -4,6 +4,7 @@ import '../Exceptions.dart' as Exceptions;
 import '../RTCSession.dart' as RTCSession;
 import '../Utils.dart' as Utils;
 import '../event_manager/event_manager.dart';
+import '../event_manager/internal_events.dart';
 import '../logger.dart';
 
 class C {
@@ -88,7 +89,6 @@ class DTMF extends EventManager {
     handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
       this.eventHandlers.emit(EventOnFialed());
       this.emit(EventOnFialed());
-
       this.emit(EventCallFailed(originator: 'remote', response: event.response));
     });
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {

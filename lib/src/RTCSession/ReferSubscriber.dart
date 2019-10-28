@@ -4,6 +4,7 @@ import '../Constants.dart';
 import '../Grammar.dart';
 import '../Utils.dart' as Utils;
 import '../event_manager/event_manager.dart';
+import '../event_manager/internal_events.dart';
 import '../logger.dart';
 
 class ReferSubscriber extends EventManager {
@@ -90,16 +91,16 @@ class ReferSubscriber extends EventManager {
     var status_code = parsed.status_code.toString();
     if (Utils.test100(status_code)) {
       /// 100 Trying
-      this.emit(EventTrying(request: request, status_line: status_line));
+      this.emit(EventReferTrying(request: request, status_line: status_line));
     } else if (Utils.test1XX(status_code)) {
       /// 1XX Progressing
-      this.emit(EventCallProgress(request: request, status_line: status_line));
+      this.emit(EventReferProgress(request: request, status_line: status_line));
     } else if (Utils.test2XX(status_code)) {
       /// 2XX OK
-      this.emit(EventAccepted(request: request, status_line: status_line));
+      this.emit(EventReferAccepted(request: request, status_line: status_line));
     } else {
       /// 200+ Error
-      this.emit(EventCallFailed(request: request, status_line: status_line));
+      this.emit(EventReferFailed(request: request, status_line: status_line));
     }
   }
 
@@ -108,7 +109,7 @@ class ReferSubscriber extends EventManager {
 
     logger.debug('emit "requestSucceeded"');
 
-    this.emit(EventRequestSucceeded(response: response));
+    this.emit(EventReferRequestSucceeded(response: response));
   }
 
   _requestFailed(response, cause) {
@@ -116,6 +117,6 @@ class ReferSubscriber extends EventManager {
 
     logger.debug('emit "requestFailed"');
 
-    this.emit(EventRequestFailed(response: response, cause: cause));
+    this.emit(EventReferRequestFailed(response: response, cause: cause));
   }
 }

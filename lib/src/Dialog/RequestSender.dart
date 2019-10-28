@@ -7,6 +7,7 @@ import '../SIPMessage.dart';
 import '../Timers.dart';
 import '../UA.dart';
 import '../event_manager/event_manager.dart';
+import '../event_manager/internal_events.dart';
 import '../transactions/transaction_base.dart';
 
 class DialogRequestSender {

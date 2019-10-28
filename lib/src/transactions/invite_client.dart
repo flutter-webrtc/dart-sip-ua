@@ -7,6 +7,7 @@ import '../Transport.dart';
 import '../UA.dart';
 import '../Utils.dart';
 import '../event_manager/event_manager.dart';
+import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import 'transaction_base.dart';
 
