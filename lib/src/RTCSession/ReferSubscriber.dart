@@ -46,7 +46,6 @@ class ReferSubscriber extends EventManager {
         'Referred-By: <${this._session.ua.configuration.uri.scheme}:${this._session.ua.configuration.uri.user}@${this._session.ua.configuration.uri.host}>';
 
     extraHeaders.add(referredBy);
-
     extraHeaders.add('Contact: ${this._session.contact}');
 
     EventManager handlers = EventManager();
@@ -56,11 +55,9 @@ class ReferSubscriber extends EventManager {
     handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
       this._requestFailed(event.response, DartSIP_C.causes.REJECTED);
     });
-
     handlers.on(EventOnTransportError(), (EventOnTransportError event) {
       this._requestFailed(null, DartSIP_C.causes.CONNECTION_ERROR);
     });
-
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
       this._requestFailed(null, DartSIP_C.causes.REQUEST_TIMEOUT);
     });

@@ -267,12 +267,12 @@ class EventCallAccepted extends EventType {}
 
 class EventCallFailed extends EventType {
   // String state;
-  IncomingMessage response;
+  dynamic response;
   String originator;
   // MediaStream stream;
   ErrorCause cause;
   // dynamic message;
-  // OutgoingRequest request;
+  dynamic request;
   // String status_line;
   EventCallFailed(
       {String state,
@@ -281,7 +281,7 @@ class EventCallFailed extends EventType {
       MediaStream stream,
       this.cause,
       String message,
-      OutgoingRequest request,
+      this.request,
       String status_line});
 }
 
