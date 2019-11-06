@@ -140,6 +140,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       case CallStateEnum.UNHOLD:
       case CallStateEnum.NONE:
       case CallStateEnum.CALL_INITIATION:
+      case CallStateEnum.REFER:
         break;
     }
   }
@@ -228,7 +229,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     }
   }
 
-  void _handleTransfer() {}
+  void _handleTransfer() {
+    helper.refer('bob');
+  }
 
   void _handleDtmf(String tone) {
     print('Dtmf tone => $tone');

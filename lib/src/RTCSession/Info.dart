@@ -3,6 +3,7 @@ import '../Exceptions.dart' as Exceptions;
 import '../RTCSession.dart' as RTCSession;
 import '../Utils.dart' as Utils;
 import '../event_manager/event_manager.dart';
+import '../event_manager/internal_events.dart';
 import '../logger.dart';
 
 class Info extends EventManager {
@@ -46,15 +47,15 @@ class Info extends EventManager {
 
     extraHeaders.add('Content-Type: ${contentType}');
 
-    this._session.newInfo(
-        {'originator': 'local', 'info': this, 'request': this.request});
+    this._session.newInfo('local', this, this.request);
 
     EventManager handlers = EventManager();
     handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
       this.emit(EventSucceeded(originator: 'remote', response: event.response));
     });
     handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
-      this.emit(EventCallFailed(originator: 'remote', response: event.response));
+      this.emit(
+          EventCallFailed(originator: 'remote', response: event.response));
     });
     handlers.on(EventOnTransportError(), (EventOnTransportError event) {
       this._session.onTransportError();
@@ -82,8 +83,6 @@ class Info extends EventManager {
     this._contentType = request.getHeader('content-type');
     this._body = request.body;
 
-    this
-        ._session
-        .newInfo({'originator': 'remote', 'info': this, 'request': request});
+    this._session.newInfo('remote', this, request);
   }
 }

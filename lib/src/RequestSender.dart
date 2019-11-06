@@ -5,6 +5,7 @@ import 'SIPMessage.dart';
 import 'UA.dart' as UAC;
 import 'UA.dart';
 import 'event_manager/event_manager.dart';
+import 'event_manager/internal_events.dart';
 import 'logger.dart';
 import 'transactions/ack_client.dart';
 import 'transactions/invite_client.dart';

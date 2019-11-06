@@ -13,8 +13,8 @@ import 'RTCSession/DTMF.dart' as RTCSession_DTMF;
 import 'RTCSession/DTMF.dart';
 import 'RTCSession/Info.dart' as RTCSession_Info;
 import 'RTCSession/Info.dart';
-import 'RTCSession/ReferNotifier.dart' as RTCSession_ReferNotifier;
-import 'RTCSession/ReferSubscriber.dart' as RTCSession_ReferSubscriber;
+import 'RTCSession/ReferNotifier.dart';
+import 'RTCSession/ReferSubscriber.dart';
 import 'RequestSender.dart';
 import 'SIPMessage.dart';
 
@@ -23,6 +23,7 @@ import 'UA.dart';
 import 'URI.dart';
 import 'Utils.dart' as Utils;
 import 'event_manager/event_manager.dart';
+import 'event_manager/internal_events.dart';
 import 'logger.dart';
 import 'transactions/transaction_base.dart';
 
@@ -600,7 +601,7 @@ class RTCSession extends EventManager {
             DartSIP_C.causes.USER_DENIED_MEDIA_ACCESS,
             'User Denied Media Access');
         logger.error('emit "getusermediafailed" [error:${error.toString()}]');
-        this.emit(EventGetusermediafailed(exception: error));
+        this.emit(EventGetUserMediaFailed(exception: error));
         throw new Exceptions.InvalidStateError('getUserMedia() failed');
       }
     }
@@ -761,8 +762,8 @@ class RTCSession extends EventManager {
           throw new Exceptions.InvalidStateError(
               'Invalid status_code: ${status_code}');
         } else if (status_code != null) {
-          extraHeaders.add(
-              'Reason: SIP ;case=${status_code}; text="${reason_phrase}"');
+          extraHeaders
+              .add('Reason: SIP ;case=${status_code}; text="${reason_phrase}"');
         }
 
         /* RFC 3261 section 15 (Terminating a session):
@@ -1161,7 +1162,7 @@ class RTCSession extends EventManager {
   /**
    * Refer
    */
-  refer(target, [options]) {
+  ReferSubscriber refer(target, [options]) {
     logger.debug('refer()');
 
     options = options ?? {};
@@ -1170,7 +1171,7 @@ class RTCSession extends EventManager {
 
     if (this._status != C.STATUS_WAITING_FOR_ACK &&
         this._status != C.STATUS_CONFIRMED) {
-      return false;
+      return null;
     }
 
     // Check target validity.
@@ -1179,7 +1180,7 @@ class RTCSession extends EventManager {
       throw new Exceptions.TypeError('Invalid target: ${originalTarget}');
     }
 
-    var referSubscriber = new RTCSession_ReferSubscriber.ReferSubscriber(this);
+    var referSubscriber = new ReferSubscriber(this);
 
     referSubscriber.sendRefer(target, options);
 
@@ -1189,13 +1190,14 @@ class RTCSession extends EventManager {
     this._referSubscribers[id] = referSubscriber;
 
     // Listen for ending events so we can remove it from the map.
-    referSubscriber.on(EventRequestFailed(), (EventRequestFailed data) {
+    referSubscriber.on(EventReferRequestFailed(),
+        (EventReferRequestFailed data) {
       this._referSubscribers.remove(id);
     });
-    referSubscriber.on(EventAccepted(), (EventAccepted data) {
+    referSubscriber.on(EventReferAccepted(), (EventReferAccepted data) {
       this._referSubscribers.remove(id);
     });
-    referSubscriber.on(EventCallFailed(), (EventCallFailed data) {
+    referSubscriber.on(EventReferFailed(), (EventReferFailed data) {
       this._referSubscribers.remove(id);
     });
 
@@ -1318,7 +1320,7 @@ class RTCSession extends EventManager {
               this._status == C.STATUS_WAITING_FOR_ACK ||
               this._status == C.STATUS_CONFIRMED) {
             var contentType = request.getHeader('content-type');
-            if (contentType &&
+            if (contentType != null &&
                 contentType.contains(new RegExp(r'^application\/dtmf-relay',
                     caseSensitive: false))) {
               new RTCSession_DTMF.DTMF(this).init_incoming(request);
@@ -1959,10 +1961,9 @@ class RTCSession extends EventManager {
     // Reply before the transaction timer expires.
     request.reply(202);
 
-    var notifier =
-        new RTCSession_ReferNotifier.ReferNotifier(this, request.cseq);
+    var notifier = new ReferNotifier(this, request.cseq);
 
-    var accept = (initCallback, options) {
+    var accept2 = (initCallback, options) {
       initCallback = (initCallback is Function) ? initCallback : null;
 
       if (this._status != C.STATUS_WAITING_FOR_ACK &&
@@ -1977,16 +1978,16 @@ class RTCSession extends EventManager {
             event.response.status_code, event.response.reason_phrase);
       });
 
-      session.on(EventAccepted(), (EventAccepted event) {
+      session.on(EventCallAccepted(), (EventCallAccepted event) {
         notifier.notify(
             event.response.status_code, event.response.reason_phrase);
       });
 
       session.on(EventFailedUnderScore(), (EventFailedUnderScore data) {
-        if (data.message != null) {
-          notifier.notify(data.message.status_code, data.message.reason_phrase);
+        if (data.cause != null) {
+          notifier.notify(data.cause.status_code, data.cause.reason_phrase);
         } else {
-          notifier.notify(487, data.cause);
+          notifier.notify(487, data.cause.cause);
         }
       });
       // Consider the Replaces header present in the Refer-To URI.
@@ -1998,6 +1999,7 @@ class RTCSession extends EventManager {
         options['extraHeaders'].add('Replaces: ${replaces}');
       }
       session.connect(request.refer_to.uri.toAor(), options, initCallback);
+      return true;
     };
 
     var reject = () {
@@ -2007,10 +2009,10 @@ class RTCSession extends EventManager {
     logger.debug('emit "refer"');
 
     // Emit 'refer'.
-    this.emit(EventRefer(
-        request: request,
-        accept2: (initCallback, options) {
-          accept(initCallback, options);
+    this.emit(EventCallRefer(
+        aor: request.refer_to.uri.toAor(),
+        accept: (initCallback, options) {
+          accept2(initCallback, options);
         },
         reject: (_) {
           reject();
@@ -2033,8 +2035,8 @@ class RTCSession extends EventManager {
           var id;
           var referSubscriber;
 
-          if (request.event.params && request.event.params.id) {
-            id = request.event.params.id;
+          if (request.event.params['id'] != null) {
+            id = Utils.parseInt(request.event.params['id'], 10);
             referSubscriber = this._referSubscribers[id];
           } else if (this._referSubscribers.length == 1) {
             referSubscriber =
@@ -2823,7 +2825,7 @@ class RTCSession extends EventManager {
     logger.debug('session accepted');
     this._start_time = new DateTime.now();
     logger.debug('emit "accepted"');
-    this.emit(EventAccepted(originator: originator, response: message));
+    this.emit(EventCallAccepted(originator: originator, response: message));
   }
 
   _confirmed(originator, ack) {
@@ -2854,7 +2856,6 @@ class RTCSession extends EventManager {
 
     this.emit(EventFailedUnderScore(
       originator: originator,
-      message: message,
       cause: errorCause,
     ));
 
@@ -2862,7 +2863,6 @@ class RTCSession extends EventManager {
     logger.debug('emit "failed"');
     this.emit(EventCallFailed(
         originator: originator,
-        message: message,
         request: request,
         cause: errorCause,
         response: response));

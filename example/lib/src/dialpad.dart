@@ -242,7 +242,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
                     padding: const EdgeInsets.all(6.0),
                     child: Center(
                         child: Text(
-                      'Status: ${EnumHelper.getName(helper.registerState)}',
+                      'Status: ${EnumHelper.getName(helper.registerState.state)}',
                       style: TextStyle(fontSize: 14, color: Colors.black54),
                     )),
                   ),

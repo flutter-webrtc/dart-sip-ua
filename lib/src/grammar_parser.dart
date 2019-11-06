@@ -313,7 +313,7 @@ class GrammarParser {
   
   static final List<String> _expect91 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "application", "audio", "image", "message", "multipart", "text", "video", "x-", "~"];
   
-  static final List<String> _expect92 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "application", "audio", "image", "text", "video", "x-", "~"];
+  static final List<String> _expect92 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "application", "audio", "image", "message", "text", "video", "x-", "~"];
   
   static final List<String> _expect93 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "alphanum", "message", "multipart", "x-", "~"];
   
@@ -329,7 +329,7 @@ class GrammarParser {
   
   static final List<String> _expect99 = <String>["Digest"];
   
-  static final List<bool> _lookahead = _unmap([0x2800001, 0x1ac0093, 0x700000, 0x51a00000, 0x7e03ff6c, 0x7e0fffff, 0x271fffff, 0x1afff1c, 0x7ce00000, 0x77fffff, 0x780ffd98, 0x743fffff, 0xc7fffff, 0x330, 0x8000000, 0x18000000, 0x603ff2ca, 0x60ffffff, 0x31ffffff, 0x557ffdcc, 0x21ffffff, 0x63ffffff, 0x2afff998, 0x43ffffff, 0x47fffffe, 0x1ffb651, 0x7fffffe, 0xe000000, 0x3ff6ca3, 0xffffffc, 0x1c008000, 0x7fed946, 0x1ffffff8, 0x3a801010, 0xffdb28c, 0x3ffffff0, 0x75022020, 0x3ff87318, 0x7fffffe0, 0x7fffffd5, 0x7ff0e331, 0x7fffffd0, 0x7fffffab, 0xe0e63, 0x7fffffcb, 0x7fffff43, 0x7fc018c7, 0x7fffffd7, 0x7ffffe87, 0x7fb8398f, 0x7fffff27, 0x7ffffd0f, 0x78731f, 0x7ffffe58, 0x7ffffa1f, 0x7000063f, 0x607fffff, 0x7fffffff, 0x7ffffc07, 0x7ffff81f, 0x7f80ffff, 0x7f07ffff, 0x442fffff, 0x400, 0x440d000, 0x840, 0x701ffd00, 0x60000007, 0x7e07fff, 0x7fc00000, 0x7f, 0x3f8000, 0x2000, 0x130b00, 0x4004c2eb, 0x1800011a, 0xec01]);
+  static final List<bool> _lookahead = _unmap([0x2800001, 0x1ac0093, 0x700000, 0x51a00000, 0x7e03ff6c, 0x7e0fffff, 0x271fffff, 0x1afff1c, 0x7ce00000, 0x77fffff, 0x780ffd98, 0x743fffff, 0xc7fffff, 0x330, 0x8000000, 0x18000000, 0x603ff2ca, 0x60ffffff, 0x31ffffff, 0x557ffdcc, 0x21ffffff, 0x63ffffff, 0x2afff998, 0x43ffffff, 0x47fffffe, 0x1ffb651, 0x7fffffe, 0xe000000, 0x3ff6ca3, 0xffffffc, 0x1c008000, 0x7fed946, 0x1ffffff8, 0x3a811010, 0x1ffc398c, 0x7ffffff0, 0x7fffffea, 0x3ff87198, 0x7fffffe8, 0x7fffffd5, 0x40070731, 0x7fffffe5, 0x7fffffa1, 0x7fe00c63, 0x7fffffeb, 0x7fffff43, 0x7fdc1cc7, 0x7fffff93, 0x7ffffe87, 0x3c398f, 0x7fffff2c, 0x7ffffd0f, 0x7800031f, 0x703fffff, 0x7fffffff, 0x7ffffe03, 0x7ffffc0f, 0x7fc07fff, 0x7f83ffff, 0x2217ffff, 0x200, 0x2206800, 0x420, 0x780ffe80, 0x70000003, 0x3f03fff, 0x7fe00000, 0x3f, 0x1fc000, 0x1000, 0x40098580, 0x20026175, 0x4c00008d, 0x7600]);
   
   static final List<bool> _mapping0 = _unmap([0x3ffffff, 0x7fffffe]);
   
@@ -401,13 +401,13 @@ class GrammarParser {
   
   static final List<int> _strings37 = <int>[105, 109, 97, 103, 101];
   
-  static final List<int> _strings38 = <int>[116, 101, 120, 116];
+  static final List<int> _strings38 = <int>[109, 101, 115, 115, 97, 103, 101];
   
-  static final List<int> _strings39 = <int>[118, 105, 100, 101, 111];
+  static final List<int> _strings39 = <int>[116, 101, 120, 116];
   
   static final List<int> _strings4 = <int>[116, 114, 97, 110, 115, 112, 111, 114, 116, 61];
   
-  static final List<int> _strings40 = <int>[109, 101, 115, 115, 97, 103, 101];
+  static final List<int> _strings40 = <int>[118, 105, 100, 101, 111];
   
   static final List<int> _strings41 = <int>[109, 117, 108, 116, 105, 112, 97, 114, 116];
   
@@ -643,9 +643,9 @@ class GrammarParser {
   
   static final List<List<int>> _transitions67 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 65, 97, 73, 105, 77, 109, 84, 116, 86, 118, 120, 122, 126, 126]];
   
-  static final List<List<int>> _transitions68 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [65, 97, 73, 105, 84, 116, 86, 118], [77, 109]];
+  static final List<List<int>> _transitions68 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 77, 109, 120, 122, 126, 126], [65, 97, 73, 105, 84, 116, 86, 118]];
   
-  static final List<List<int>> _transitions69 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [65, 97], [73, 105], [84, 116], [86, 118]];
+  static final List<List<int>> _transitions69 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 120, 122, 126, 126], [65, 97], [73, 105], [77, 109], [84, 116], [86, 118]];
   
   static final List<List<int>> _transitions7 = [[9, 9, 13, 13, 32, 32]];
   
@@ -5803,6 +5803,20 @@ class GrammarParser {
           if (!success) break;
           seq[4] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $3 = seq[2];
+            final $4 = seq[3];
+            final $5 = seq[4];
+            final $start = startPos0;
+            var pos0 = _startPos, offset = $start;
+            {
+            ///CODE_START
+            $$ = data;
+            ///CODE_END
+            }
+          }
           break;
         }
         if (!success) {
@@ -6962,7 +6976,7 @@ class GrammarParser {
         while (true) {
           var startPos1 = _startPos;
           _startPos = _cursor;
-          $$ = _matchString(_strings40, 'message', true);
+          $$ = _matchString(_strings38, 'message', true);
           _startPos = startPos1;
           if (success) break;
           var startPos2 = _startPos;
@@ -7664,17 +7678,23 @@ class GrammarParser {
       case 3:
         var startPos4 = _startPos;
         _startPos = _cursor;
-        $$ = _matchString(_strings38, 'text', true);
+        $$ = _matchString(_strings38, 'message', true);
         _startPos = startPos4;
         break;
       case 4:
         var startPos5 = _startPos;
         _startPos = _cursor;
-        $$ = _matchString(_strings39, 'video', true);
+        $$ = _matchString(_strings39, 'text', true);
         _startPos = startPos5;
         break;
       case 5:
+        var startPos6 = _startPos;
+        _startPos = _cursor;
+        $$ = _matchString(_strings40, 'video', true);
+        _startPos = startPos6;
+        break;
       case 6:
+      case 7:
         $$ = null;
         success = false;
         break;
@@ -10487,13 +10507,7 @@ class GrammarParser {
         _startPos = startPos2;
         break;
       case 2:
-        var startPos3 = _startPos;
-        _startPos = _cursor;
-        $$ = _parse_composite_type();
-        _startPos = startPos3;
-        break;
       case 3:
-      case 4:
         $$ = null;
         success = false;
         break;
@@ -19949,7 +19963,7 @@ class GrammarParser {
         "RPAREN": _parse_RPAREN,  
         "RAQUOT": _parse_RAQUOT,  
         "LAQUOT": _parse_LAQUOT, 
-        "COMMA": _parse_COMMA,  
+        "COMMA": _parse_COMMA, 
         "SEMI": _parse_SEMI,  
         "COLON": _parse_COLON,  
         "LDQUOT": _parse_LDQUOT,  
@@ -20031,7 +20045,7 @@ class GrammarParser {
         "Method": _parse_Method, 
         "Status_Line": _parse_Status_Line, 
         "Status_Code": _parse_Status_Code,  
-        "extension_code": _parse_extension_code,  
+        "extension_code": _parse_extension_code, 
         "Reason_Phrase": _parse_Reason_Phrase, 
         "Allow_Events": parse_Allow_Events, 
         "Call_ID": parse_Call_ID, 
@@ -20136,16 +20150,16 @@ class GrammarParser {
         "hex12": _parse_hex12,  
         "Refer_To": parse_Refer_To, 
         "Replaces": parse_Replaces, 
-        "call_id": _parse_call_id,  
-        "replaces_param": _parse_replaces_param,  
-        "to_tag": _parse_to_tag,  
-        "from_tag": _parse_from_tag,  
-        "early_flag": _parse_early_flag  
+        "call_id": _parse_call_id, 
+        "replaces_param": _parse_replaces_param, 
+        "to_tag": _parse_to_tag, 
+        "from_tag": _parse_from_tag, 
+        "early_flag": _parse_early_flag 
       }; 
       if (input == null) { 
         throw new ArgumentError('text: $input'); 
-      } 
-      _input = _toCodePoints(input); 
+      }
+      _input = _toCodePoints(input);
       _inputLen = _input.length; 
       reset(0); 
    

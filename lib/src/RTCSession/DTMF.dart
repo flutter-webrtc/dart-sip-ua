@@ -4,6 +4,7 @@ import '../Exceptions.dart' as Exceptions;
 import '../RTCSession.dart' as RTCSession;
 import '../Utils.dart' as Utils;
 import '../event_manager/event_manager.dart';
+import '../event_manager/internal_events.dart';
 import '../logger.dart';
 
 class C {
@@ -88,8 +89,8 @@ class DTMF extends EventManager {
     handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
       this.eventHandlers.emit(EventOnFialed());
       this.emit(EventOnFialed());
-
-      this.emit(EventCallFailed(originator: 'remote', response: event.response));
+      this.emit(
+          EventCallFailed(originator: 'remote', response: event.response));
     });
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
       this._session.onRequestTimeout();
@@ -123,13 +124,13 @@ class DTMF extends EventManager {
 
       if (body.length >= 1) {
         if ((body[0]).contains(new RegExp(reg_tone))) {
-          this._tone = body[0].replace(reg_tone, '\$2');
+          this._tone = body[0].replaceAll(reg_tone, '\$2');
         }
       }
       if (body.length >= 2) {
         if ((body[1]).contains(new RegExp(reg_duration))) {
           this._duration =
-              Utils.parseInt(body[1].replace(reg_duration, '\$2'), 10);
+              Utils.parseInt(body[1].replaceAll(reg_duration, '\$2'), 10);
         }
       }
     }
@@ -141,9 +142,7 @@ class DTMF extends EventManager {
     if (this._tone == null) {
       logger.debug('invalid INFO DTMF received, discarded');
     } else {
-      this
-          ._session
-          .newDTMF({'originator': 'remote', 'dtmf': this, 'request': request});
+      this._session.newDTMF('remote', this, request);
     }
   }
 }
