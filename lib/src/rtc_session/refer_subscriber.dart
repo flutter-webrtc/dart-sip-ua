@@ -1,8 +1,8 @@
 import '../../sip_ua.dart';
-import '../Constants.dart' as DartSIP_C;
-import '../Constants.dart';
-import '../Grammar.dart';
-import '../Utils.dart' as Utils;
+import '../constants.dart' as DartSIP_C;
+import '../constants.dart';
+import '../grammar.dart';
+import '../utils.dart' as Utils;
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';

@@ -1,6 +1,6 @@
 import 'events.dart';
-import '../SIPMessage.dart';
-import '../RTCSession.dart';
+import '../sip_message.dart';
+import '../rtc_session.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 
 class EventNewRTCSession extends EventType {

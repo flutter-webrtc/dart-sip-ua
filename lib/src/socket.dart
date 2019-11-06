@@ -1,6 +1,6 @@
-import 'Grammar.dart';
-import 'Utils.dart' as Utils;
-import 'WebSocketInterface.dart';
+import 'grammar.dart';
+import 'utils.dart' as Utils;
+import 'websocket_interface.dart';
 import 'logger.dart';
 
 final logger = Log();

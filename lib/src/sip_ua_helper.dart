@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter_webrtc/media_stream.dart';
 import 'package:logger/logger.dart';
 
-import 'Config.dart';
-import 'Message.dart';
-import 'RTCSession.dart';
-import 'Socket.dart';
-import 'UA.dart';
-import 'WebSocketInterface.dart';
+import 'config.dart';
+import 'message.dart';
+import 'rtc_session.dart';
+import 'socket.dart';
+import 'ua.dart';
+import 'websocket_interface.dart';
 import 'logger.dart';
 import 'event_manager/event_manager.dart';
 import 'stack_trace_nj.dart';

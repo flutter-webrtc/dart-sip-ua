@@ -1,10 +1,10 @@
 import 'package:sip_ua/src/event_manager/events.dart';
 
-import 'Exceptions.dart' as Exceptions;
-import 'Socket.dart' as Socket;
-import 'Timers.dart';
-import 'Utils.dart';
-import 'WebSocketInterface.dart';
+import 'exceptions.dart' as Exceptions;
+import 'socket.dart' as Socket;
+import 'timers.dart';
+import 'utils.dart';
+import 'websocket_interface.dart';
 import 'logger.dart';
 import 'stack_trace_nj.dart';
 

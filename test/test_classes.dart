@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:sip_ua/src/URI.dart';
-import 'package:sip_ua/src/NameAddrHeader.dart';
+import 'package:sip_ua/src/uri.dart';
+import 'package:sip_ua/src/name_addr_header.dart';
 
 var testFunctions = [
   () => test("Class: URI", () {

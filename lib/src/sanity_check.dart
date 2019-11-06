@@ -1,10 +1,10 @@
 import '../sip_ua.dart';
-import 'Constants.dart' as DartSIP_C;
-import 'Constants.dart';
-import 'SIPMessage.dart';
-import 'Transport.dart';
-import 'UA.dart';
-import 'Utils.dart' as Utils;
+import 'constants.dart' as DartSIP_C;
+import 'constants.dart';
+import 'sip_message.dart';
+import 'transport.dart';
+import 'ua.dart';
+import 'utils.dart' as Utils;
 import 'logger.dart';
 import 'transactions/invite_server.dart';
 import 'transactions/non_invite_server.dart';

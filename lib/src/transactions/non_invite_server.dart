@@ -1,9 +1,9 @@
-import 'package:sip_ua/src/SIPMessage.dart';
+import 'package:sip_ua/src/sip_message.dart';
 
 import '../../sip_ua.dart';
-import '../Timers.dart';
-import '../Transport.dart';
-import '../UA.dart';
+import '../timers.dart';
+import '../transport.dart';
+import '../ua.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';

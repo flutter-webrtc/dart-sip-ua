@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'URI.dart';
-import 'Grammar.dart';
+import 'uri.dart';
+import 'grammar.dart';
 
 class NameAddrHeader {
   final JsonDecoder decoder = new JsonDecoder();

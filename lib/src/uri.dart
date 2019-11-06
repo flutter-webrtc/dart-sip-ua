@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'Grammar.dart';
-import 'Constants.dart' as DartSIP_C;
-import 'Utils.dart' as Utils;
+import 'grammar.dart';
+import 'constants.dart' as DartSIP_C;
+import 'utils.dart' as Utils;
 
 /**
  * -param {String} [scheme]

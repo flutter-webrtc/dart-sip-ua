@@ -1,5 +1,5 @@
 import 'events.dart';
-import '../WebSocketInterface.dart';
+import '../websocket_interface.dart';
 
 class EventSocketConnected extends EventType {
   WebSocketInterface socket;

@@ -1,11 +1,11 @@
 import '../../sip_ua.dart';
-import '../Constants.dart';
-import '../Dialog.dart';
-import '../RTCSession.dart' as RTCSession;
-import '../RequestSender.dart';
-import '../SIPMessage.dart';
-import '../Timers.dart';
-import '../UA.dart';
+import '../constants.dart';
+import '../dialog.dart';
+import '../rtc_session.dart' as RTCSession;
+import '../request_sender.dart';
+import '../sip_message.dart';
+import '../timers.dart';
+import '../ua.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../transactions/transaction_base.dart';

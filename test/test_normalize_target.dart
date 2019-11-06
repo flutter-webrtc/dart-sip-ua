@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:sip_ua/src/Utils.dart' as Utils;
+import 'package:sip_ua/src/utils.dart' as Utils;
 
 var testFunctions = [
   () => test("NormalizeTarget: valid targets", () {

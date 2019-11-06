@@ -1,12 +1,12 @@
 import '../sip_ua.dart';
-import 'Constants.dart';
-import 'Constants.dart' as DartSIP_C;
-import 'Exceptions.dart' as Exceptions;
-import 'Grammar.dart';
-import 'Socket.dart' as Socket;
-import 'URI.dart';
-import 'Utils.dart' as Utils;
-import 'WebSocketInterface.dart';
+import 'constants.dart';
+import 'constants.dart' as DartSIP_C;
+import 'exceptions.dart' as Exceptions;
+import 'grammar.dart';
+import 'socket.dart' as Socket;
+import 'uri.dart';
+import 'utils.dart' as Utils;
+import 'websocket_interface.dart';
 import 'logger.dart';
 
 final logger = Log();

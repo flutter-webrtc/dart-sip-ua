@@ -1,9 +1,9 @@
 import '../sip_ua.dart';
-import 'Constants.dart';
-import 'DigestAuthentication.dart';
-import 'SIPMessage.dart';
-import 'UA.dart' as UAC;
-import 'UA.dart';
+import 'constants.dart';
+import 'digest_authentication.dart';
+import 'sip_message.dart';
+import 'ua.dart' as UAC;
+import 'ua.dart';
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
 import 'logger.dart';

@@ -2,9 +2,9 @@
 // Processing tool available at https://github.com/mezoni/peg
 
 import 'dart:core';
-import 'Constants.dart';
-import 'URI.dart';
-import 'NameAddrHeader.dart';
+import 'constants.dart';
+import 'uri.dart';
+import 'name_addr_header.dart';
 
 class Data {
   var host;

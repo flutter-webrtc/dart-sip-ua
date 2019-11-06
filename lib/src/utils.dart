@@ -5,9 +5,9 @@ import 'package:crypto/crypto.dart';
 import 'package:uuid/uuid.dart';
 import 'package:random_string/random_string.dart';
 
-import 'Grammar.dart';
-import 'URI.dart';
-import 'Constants.dart' as DartSIP_C;
+import 'grammar.dart';
+import 'uri.dart';
+import 'constants.dart' as DartSIP_C;
 
 test100(statusCode){
   return statusCode.contains(new RegExp(r'^100$'));

@@ -1,5 +1,5 @@
-import 'Constants.dart';
-import 'Utils.dart' as Utils;
+import 'constants.dart';
+import 'utils.dart' as Utils;
 import 'logger.dart';
 
 class Challenge {

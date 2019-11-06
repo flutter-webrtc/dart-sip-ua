@@ -1,13 +1,13 @@
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
 import '../sip_ua.dart';
-import 'Constants.dart';
-import 'Constants.dart' as DartSIP_C;
-import 'Exceptions.dart' as Exceptions;
-import 'Grammar.dart';
-import 'NameAddrHeader.dart';
-import 'UA.dart';
-import 'Utils.dart' as Utils;
+import 'constants.dart';
+import 'constants.dart' as DartSIP_C;
+import 'exceptions.dart' as Exceptions;
+import 'grammar.dart';
+import 'name_addr_header.dart';
+import 'ua.dart';
+import 'utils.dart' as Utils;
 import 'grammar_parser.dart';
 import 'logger.dart';
 import 'transactions/transaction_base.dart';

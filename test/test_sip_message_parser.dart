@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:sip_ua/src/Parser.dart';
+import 'package:sip_ua/src/parser.dart';
 import 'data/sip_message.dart';
 
 var testFunctions = [

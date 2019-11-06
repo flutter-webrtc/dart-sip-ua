@@ -2,14 +2,14 @@ import 'package:flutter_webrtc/webrtc.dart';
 
 import 'events.dart';
 import '../../sip_ua.dart';
-import '../NameAddrHeader.dart';
-import '../Message.dart';
-import '../RTCSession.dart';
-import '../RTCSession/DTMF.dart';
-import '../RTCSession/Info.dart';
-import '../SIPMessage.dart';
-import '../Transport.dart';
-import '../WebSocketInterface.dart';
+import '../name_addr_header.dart';
+import '../message.dart';
+import '../rtc_session.dart';
+import '../rtc_session/dtmf.dart';
+import '../rtc_session/info.dart';
+import '../sip_message.dart';
+import '../transport.dart';
+import '../websocket_interface.dart';
 import '../transactions/transaction_base.dart';
 
 class EventStateChanged extends EventType {}

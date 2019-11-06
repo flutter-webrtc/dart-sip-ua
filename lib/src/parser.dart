@@ -1,7 +1,7 @@
 import '../sip_ua.dart';
-import 'Grammar.dart';
-import 'SIPMessage.dart';
-import 'UA.dart';
+import 'grammar.dart';
+import 'sip_message.dart';
+import 'ua.dart';
 import 'logger.dart';
 
 final logger = new Log();

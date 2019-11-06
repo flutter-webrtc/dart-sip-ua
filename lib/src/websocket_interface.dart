@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'Grammar.dart';
-import 'Socket.dart';
-import 'Timers.dart';
+import 'grammar.dart';
+import 'socket.dart';
+import 'timers.dart';
 import 'logger.dart';
 
 class WebSocketInterface implements Socket {
