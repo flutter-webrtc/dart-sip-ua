@@ -200,7 +200,6 @@ class SIPUAHelper extends EventManager {
   Map<String, Object> _options([bool voiceonly = false]) {
     // Register callbacks to desired call events
     EventManager eventHandlers = EventManager();
-
     eventHandlers.on(EventCallConnecting(), (EventCallConnecting event) {
       logger.debug('call connecting');
       _notifyCallStateListeners(CallState(CallStateEnum.CONNECTING));
@@ -261,7 +260,7 @@ class SIPUAHelper extends EventManager {
       logger.debug('Refer received, Transfer current call to => ${refer.aor}');
       _notifyCallStateListeners(CallState(CallStateEnum.REFER, refer: refer));
       //Always accept.
-      refer.accept((session){
+      refer.accept((session) {
         logger.debug('New session initialized.');
       }, this._options(true));
     });

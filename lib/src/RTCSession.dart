@@ -1320,7 +1320,7 @@ class RTCSession extends EventManager {
               this._status == C.STATUS_WAITING_FOR_ACK ||
               this._status == C.STATUS_CONFIRMED) {
             var contentType = request.getHeader('content-type');
-            if (contentType &&
+            if (contentType != null &&
                 contentType.contains(new RegExp(r'^application\/dtmf-relay',
                     caseSensitive: false))) {
               new RTCSession_DTMF.DTMF(this).init_incoming(request);
