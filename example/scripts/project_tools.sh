@@ -15,7 +15,7 @@ function create() {
     cd $FLUTTER_APP_FOLDER
     if [ ! -d "ios" ] && [ ! -d "android" ];then
         echo "Create flutter project: name=$FLUTTER_APP_PROJECT_NAME, org=$FLUTTER_APP_ORG ..."
-        flutter create --project-name $FLUTTER_APP_PROJECT_NAME --org $FLUTTER_APP_ORG .
+        flutter create --android-language java --ios-language objc --project-name $FLUTTER_APP_PROJECT_NAME --org $FLUTTER_APP_ORG .
         add_permission_label
     else
         echo "Project [$FLUTTER_APP_PROJECT_NAME] already exists!"
