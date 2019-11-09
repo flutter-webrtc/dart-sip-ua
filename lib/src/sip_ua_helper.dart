@@ -15,6 +15,7 @@ import 'stack_trace_nj.dart';
 class SIPUAHelper extends EventManager {
   UA _ua;
   Settings _settings;
+  UaSettings _uaSettings;
   final Log logger = Log();
   RTCSession _session;
   RegistrationState _registerState =
@@ -121,21 +122,23 @@ class SIPUAHelper extends EventManager {
     }
   }
 
-  void start(String wsUrl, String uri,
-      [String password,
-      String displayName,
-      Map<String, dynamic> wsExtraHeaders]) async {
+  void start(UaSettings uaSettings) async {
     if (this._ua != null) {
       logger.warn(
           'UA instance already exist!, stopping UA and creating a new one...');
       this._ua.stop();
     }
+
+    _uaSettings = uaSettings;
+
     _settings = Settings();
-    var socket = WebSocketInterface(wsUrl, wsExtraHeaders);
+    var socket = WebSocketInterface(
+        uaSettings.webSocketUrl, uaSettings.webSocketExtraHeaders);
     _settings.sockets = [socket];
-    _settings.uri = uri;
-    _settings.password = password;
-    _settings.display_name = displayName;
+    _settings.uri = uaSettings.uri;
+    _settings.password = uaSettings.password;
+    _settings.display_name = uaSettings.displayName;
+    _settings.authorization_user = uaSettings.authorizationUser;
 
     try {
       this._ua = UA(_settings);
@@ -451,4 +454,14 @@ abstract class SipUaHelperListener {
   void transportStateChanged(TransportState state);
   void registrationStateChanged(RegistrationState state);
   void callStateChanged(CallState state);
+}
+
+class UaSettings {
+  String webSocketUrl;
+  Map<String, dynamic> webSocketExtraHeaders;
+
+  String uri;
+  String authorizationUser;
+  String password;
+  String displayName;
 }

@@ -26,7 +26,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   void _loadSettings() async {
     prefs = await SharedPreferences.getInstance();
-    _dest = prefs.getString('dest') ?? 'sip:111_6ackea@tryit.jssip.net';
+    _dest = prefs.getString('dest') ?? 'sip:hello_jssip@tryit.jssip.net';
     _textController = TextEditingController(text: _dest);
     _textController.text = _dest;
     this.setState(() {});

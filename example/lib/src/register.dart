@@ -15,6 +15,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
   String _wsUri;
   String _sipUri;
   String _displayName;
+  String _authorizationUser;
   Map<String, String> _wsExtraHeaders = {
     'Origin': ' https://tryit.jssip.net',
     'Host': 'tryit.jssip.net:10443'
@@ -46,6 +47,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
       _sipUri = prefs.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
       _displayName = prefs.getString('display_name') ?? 'Flutter SIP UA';
       _password = prefs.getString('password');
+      _authorizationUser = prefs.getString('auth_user');
     });
   }
 
@@ -54,6 +56,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     prefs.setString('sip_uri', _sipUri);
     prefs.setString('display_name', _displayName);
     prefs.setString('password', _password);
+    prefs.setString('auth_user', _authorizationUser);
     prefs.commit();
   }
 
@@ -91,9 +94,17 @@ class _MyRegisterWidget extends State<RegisterWidget>
     } else if (_sipUri == null) {
       _alert(context, "SIP URI");
     }
-    bool addExtraHeaders = _wsExtraHeaders.isNotEmpty;
-    helper.start(_wsUri, _sipUri, _password, _displayName,
-        addExtraHeaders ? _wsExtraHeaders : null);
+
+    UaSettings settings = UaSettings();
+
+    settings.webSocketUrl = _wsUri;
+    settings.uri = _sipUri;
+    settings.authorizationUser = _authorizationUser;
+    settings.password = _password;
+    settings.displayName = _displayName;
+    settings.webSocketExtraHeaders = _wsExtraHeaders;
+
+    helper.start(settings);
   }
 
   @override
@@ -169,6 +180,36 @@ class _MyRegisterWidget extends State<RegisterWidget>
                           onChanged: (value) {
                             setState(() {
                               _sipUri = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(46.0, 18.0, 48.0, 0),
+                        child: Align(
+                          child: Text('Authorization User:'),
+                          alignment: Alignment.centerLeft,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(48.0, 0.0, 48.0, 0),
+                        child: TextField(
+                          keyboardType: TextInputType.text,
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(10.0),
+                            border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black12)),
+                            hintText: _authorizationUser ?? '[Empty]',
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _authorizationUser = value;
                             });
                           },
                         ),
