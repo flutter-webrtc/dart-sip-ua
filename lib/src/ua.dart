@@ -20,7 +20,7 @@ import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
 import 'logger.dart';
 import 'sanity_check.dart';
-import 'transactions/Transactions.dart';
+import 'transactions/transactions.dart';
 import 'transactions/invite_client.dart';
 import 'transactions/invite_server.dart';
 import 'transactions/non_invite_client.dart';
