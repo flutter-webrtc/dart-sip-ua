@@ -1,6 +1,6 @@
 import '../sip_ua.dart';
 import 'constants.dart';
-import 'Dialog/request_sender.dart';
+import 'dialog/request_sender.dart';
 import 'exceptions.dart' as Exceptions;
 import 'rtc_session.dart';
 import 'sip_message.dart' as SIPMessage;
