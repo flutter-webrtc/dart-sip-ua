@@ -494,7 +494,7 @@ class UA extends EventManager {
   registrationFailed({dynamic response, String cause}) {
     this.emit(EventRegistrationFailed(
         cause: ErrorCause(
-            cause: response.cause,
+            cause: Utils.sipErrorCause(response.status_code),
             status_code: response.status_code,
             reason_phrase: response.reason_phrase)));
   }

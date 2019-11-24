@@ -4,21 +4,15 @@ import 'package:flutter/foundation.dart'
 
 import 'package:flutter/material.dart';
 import 'package:sip_ua/sip_ua.dart';
+import 'package:flutter_webrtc/webrtc.dart';
 import 'src/register.dart';
 import 'src/dialpad.dart';
 import 'src/callscreen.dart';
 import 'src/about.dart';
 
-bool isMobile() {
-  return Platform.isAndroid || Platform.isIOS;
-}
-
-bool isDesktop() {
-  return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-}
-
 void main() {
-  if (isDesktop()) debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  if (WebRTC.platformIsDesktop)
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   runApp(MyApp());
 }
 
