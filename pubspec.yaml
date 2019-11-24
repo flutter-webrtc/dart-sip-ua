@@ -11,7 +11,6 @@ dependencies:
   flutter_webrtc:
     git:
       url: https://github.com/cloudwebrtc/flutter-webrtc.git
-      ref: desktop
   parser_error: ^0.1.1
   sdp_transform:
     git:
