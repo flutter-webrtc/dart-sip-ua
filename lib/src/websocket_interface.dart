@@ -77,12 +77,6 @@ class WebSocketInterface implements Socket {
     }
     logger.debug('connecting to WebSocket ${this._url}');
     try {
-      /*this._ws = await WebSocket.connect(this._url, headers: {
-        'Sec-WebSocket-Protocol': _websocket_protocol,
-        ...this._wsExtraHeaders
-      });
-      */
-
       this._ws = WebSocketImpl(this._url);
 
       this._ws.onOpen = () {
