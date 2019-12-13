@@ -3,7 +3,7 @@ version: 0.1.0
 description: A dart-lang version of the SIP UA stack.
 homepage: https://github.com/cloudwebrtc/dart-sip-ua
 environment:
-  sdk: ">2.2.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
   crypto: ^2.1.2
@@ -15,6 +15,7 @@ dependencies:
   logger: ^0.7.0+2
   intl: ^0.16.0
   recase: ^2.0.1
+  path: ^1.6.4
 
 dev_dependencies:
   test: ^1.6.7
