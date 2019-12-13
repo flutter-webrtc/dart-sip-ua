@@ -7,6 +7,15 @@ A dart-lang version of the SIP UA stack, ported from [JsSIP](https://github.com/
 - Audio/video calls ([flutter-webrtc](https://github.com/cloudwebrtc/flutter-webrtc)) and instant messaging
 - Support with standard SIP servers such as OpenSIPS, Kamailio, Asterisk and FreeSWITCH.
 
+## Currently supported platforms
+- [X] iOS
+- [X] Android
+- [X] Web
+- [X] macOS
+- [ ] Linux
+- [ ] Windows
+- [ ] Fuchsia
+
 ## NOTE
 Thanks to the original authors of [JsSIP](https://github.com/versatica/JsSIP) for providing the JS version, which makes it possible to port the [dart-lang](https://dart.dev).
 - [José Luis Millán](https://github.com/jmillan)
