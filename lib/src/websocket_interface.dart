@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'websocket_dart_impl.dart'
+    if (dart.library.js) 'websocket_web_impl.dart';
 import 'dart:math';
 
 import 'grammar.dart';
@@ -13,7 +14,7 @@ class WebSocketInterface implements Socket {
   String _sip_uri;
   String _via_transport;
   String _websocket_protocol = 'sip';
-  WebSocket _ws;
+  WebSocketImpl _ws;
   var _closed = false;
   var _connected = false;
   var weight;
@@ -23,7 +24,8 @@ class WebSocketInterface implements Socket {
   @override
   void Function() onconnect;
   @override
-  void Function(WebSocketInterface socket, bool error, int closeCode, String reason)
+  void Function(
+          WebSocketInterface socket, bool error, int closeCode, String reason)
       ondisconnect;
   @override
   void Function(dynamic data) ondata;
@@ -60,45 +62,6 @@ class WebSocketInterface implements Socket {
   @override
   get url => this._url;
 
-  /// For test only.
-  Future<WebSocket> _connectForBadCertificate(
-      String scheme, String host, int port) async {
-    try {
-      Random r = new Random();
-      String key = base64.encode(List<int>.generate(8, (_) => r.nextInt(255)));
-      SecurityContext securityContext = new SecurityContext();
-      HttpClient client = HttpClient(context: securityContext);
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) {
-        print('Allow self-signed certificate => $host:$port. ');
-        return true;
-      };
-
-      HttpClientRequest request = await client.getUrl(Uri.parse(
-          (scheme == 'wss' ? 'https' : 'http') +
-              '://$host:$port/ws')); // form the correct url here
-
-      request.headers.add('Connection', 'Upgrade');
-      request.headers.add('Upgrade', 'websocket');
-      request.headers.add('Sec-WebSocket-Protocol', _websocket_protocol);
-      request.headers.add(
-          'Sec-WebSocket-Version', '13'); // insert the correct version here
-      request.headers.add('Sec-WebSocket-Key', key.toLowerCase());
-
-      HttpClientResponse response = await request.close();
-      var socket = await response.detachSocket();
-      var webSocket = WebSocket.fromUpgradedSocket(
-        socket,
-        protocol: _websocket_protocol,
-        serverSide: false,
-      );
-
-      return webSocket;
-    } catch (e) {
-      throw e;
-    }
-  }
-
   @override
   connect() async {
     logger.debug('connect()');
@@ -114,27 +77,29 @@ class WebSocketInterface implements Socket {
     }
     logger.debug('connecting to WebSocket ${this._url}');
     try {
-      this._ws = await WebSocket.connect(this._url, headers: {
+      this._ws = WebSocketImpl(this._url);
+
+      this._ws.onOpen = () {
+        _closed = false;
+        _connected = true;
+        logger.debug("Web Socket is now connected");
+        this._onOpen();
+      };
+
+      this._ws.onMessage = (data) {
+        this._onMessage(data);
+      };
+
+      this._ws.onClose = (closeCode, closeReason) {
+        logger.debug('Closed [${closeCode}, ${closeReason}]!');
+        _connected = false;
+        this._onClose(true, closeCode, closeReason);
+      };
+
+      await this._ws.connect(headers: {
         'Sec-WebSocket-Protocol': _websocket_protocol,
         ...this._wsExtraHeaders
       });
-
-      /// Allow self-signed certificate, for test only.
-      /// var parsed_url = Grammar.parse(this._url, 'absoluteURI');
-      /// this._ws = await _connectForBadCertificate(parsed_url.scheme, parsed_url.host, parsed_url.port);
-
-      this._ws.listen((data) {
-        this._onMessage(data);
-      }, onDone: () {
-        logger.debug(
-            'Closed by server [${this._ws.closeCode}, ${this._ws.closeReason}]!');
-        _connected = false;
-        this._onClose(true, this._ws.closeCode, this._ws.closeReason);
-      });
-      _closed = false;
-      _connected = true;
-      logger.debug("Web Socket is now connected");
-      this._onOpen();
     } catch (e, s) {
       Log.e(e.toString(), null, s);
       _connected = false;
@@ -166,17 +131,7 @@ class WebSocketInterface implements Socket {
       throw 'transport closed';
     }
     try {
-      // temporary diagnostic message add to the end of every SIP message sent
-      // var now = new DateTime.now();
-      // String tmp = message +
-      //    "\nSIP message generated and sent at: ${now}\n"; // + ("A" * 4096);
-
-      this._ws.add(message);
-      setTimeout(() {
-        // extra message to wake asterisk up
-        //this._ws.add("");
-      }, 100);
-
+      this._ws.send(message);
       return true;
     } catch (error) {
       logger.error('send() | error sending message: ' + error.toString());
@@ -189,7 +144,7 @@ class WebSocketInterface implements Socket {
   }
 
   isConnecting() {
-    return this._ws != null && this._ws.readyState == WebSocket.connecting;
+    return this._ws != null && this._ws.isConnecting();
   }
 
   /**
@@ -205,7 +160,7 @@ class WebSocketInterface implements Socket {
     if (wasClean == false) {
       logger.debug('WebSocket abrupt disconnection');
     }
-    this.ondisconnect(this, !wasClean, code,  reason);
+    this.ondisconnect(this, !wasClean, code, reason);
   }
 
   _onMessage(data) {

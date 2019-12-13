@@ -301,7 +301,7 @@ class Transport {
         data = new String.fromCharCodes(data);
       } catch (evt) {
         logger.debug(
-            'received binary message failed to be converted into string,' +
+            'received binary message [${data.runtimeType}]failed to be converted into string,' +
                 ' message discarded');
         return;
       }

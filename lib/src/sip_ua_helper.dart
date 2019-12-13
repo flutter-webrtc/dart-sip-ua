@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter_webrtc/media_stream.dart';
+import 'package:flutter_webrtc/webrtc.dart';
 import 'package:logger/logger.dart';
 
 import 'config.dart';

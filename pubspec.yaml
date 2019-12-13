@@ -9,9 +9,7 @@ dependencies:
   crypto: ^2.1.2
   flutter_webrtc: ^0.2.2
   parser_error: ^0.1.1
-  sdp_transform:
-    git:
-      url: https://github.com/cloudwebrtc/dart-sdp-transform.git
+  sdp_transform: ^0.2.0
   uuid: ^2.0.2
   random_string: ^1.1.0
   logger: ^0.7.0+2

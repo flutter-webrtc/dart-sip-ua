@@ -1,7 +1,9 @@
-import 'package:dart_sip_ua_example/src/widgets/action_button.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sip_ua/sip_ua.dart';
+
+import 'utils/key_value_store.dart'
+    if (dart.library.js) 'utils/key_value_store_web.dart';
+import 'widgets/action_button.dart';
 
 class DialPadWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -15,7 +17,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
   String _dest;
   SIPUAHelper get helper => widget._helper;
   TextEditingController _textController;
-  SharedPreferences prefs;
+  KeyValueStore _keyValueStore = KeyValueStore();
 
   @override
   initState() {
@@ -25,8 +27,9 @@ class _MyDialPadWidget extends State<DialPadWidget>
   }
 
   void _loadSettings() async {
-    prefs = await SharedPreferences.getInstance();
-    _dest = prefs.getString('dest') ?? 'sip:hello_jssip@tryit.jssip.net';
+    await _keyValueStore.init();
+    _dest =
+        _keyValueStore.getString('dest') ?? 'sip:hello_jssip@tryit.jssip.net';
     _textController = TextEditingController(text: _dest);
     _textController.text = _dest;
     this.setState(() {});
@@ -60,7 +63,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
       return null;
     }
     helper.call(dest, voiceonly);
-    prefs.setString('dest', dest);
+    _keyValueStore.setString('dest', dest);
     return null;
   }
 

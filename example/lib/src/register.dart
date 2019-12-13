@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sip_ua/sip_ua.dart';
+
+import 'utils/key_value_store.dart'
+    if (dart.library.js) 'utils/key_value_store_web.dart';
 
 class RegisterWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -20,7 +22,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     'Origin': ' https://tryit.jssip.net',
     'Host': 'tryit.jssip.net:10443'
   };
-  SharedPreferences prefs;
+  KeyValueStore _keyValueStore = KeyValueStore();
   RegistrationState _registerState;
 
   SIPUAHelper get helper => widget._helper;
@@ -41,23 +43,22 @@ class _MyRegisterWidget extends State<RegisterWidget>
   }
 
   void _loadSettings() async {
-    prefs = await SharedPreferences.getInstance();
+    await _keyValueStore.init();
     this.setState(() {
-      _wsUri = prefs.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
-      _sipUri = prefs.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
-      _displayName = prefs.getString('display_name') ?? 'Flutter SIP UA';
-      _password = prefs.getString('password');
-      _authorizationUser = prefs.getString('auth_user');
+      _wsUri = _keyValueStore.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
+      _sipUri = _keyValueStore.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
+      _displayName = _keyValueStore.getString('display_name') ?? 'Flutter SIP UA';
+      _password = _keyValueStore.getString('password');
+      _authorizationUser = _keyValueStore.getString('auth_user');
     });
   }
 
   void _saveSettings() {
-    prefs.setString('ws_uri', _wsUri);
-    prefs.setString('sip_uri', _sipUri);
-    prefs.setString('display_name', _displayName);
-    prefs.setString('password', _password);
-    prefs.setString('auth_user', _authorizationUser);
-    prefs.commit();
+    _keyValueStore.setString('ws_uri', _wsUri);
+    _keyValueStore.setString('sip_uri', _sipUri);
+    _keyValueStore.setString('display_name', _displayName);
+    _keyValueStore.setString('password', _password);
+    _keyValueStore.setString('auth_user', _authorizationUser);
   }
 
   @override
