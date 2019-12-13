@@ -18,7 +18,6 @@ abstract class EventType {
 /// These changes will make it much easier to reason about where Events go to and come from, as well as
 /// exactly what fields are available without the need to actually run the code.
 
-
 /// A general error cause class.
 class ErrorCause {
   int status_code;

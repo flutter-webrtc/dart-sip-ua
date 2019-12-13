@@ -85,8 +85,10 @@ class EventStream extends EventType {
 
 class EventCallRefer extends EventType {
   String aor;
+
   /// bool Function({Function initCallback, dynamic options}) accept;
   dynamic accept;
+
   /// bool Function(dynamic options) reject;
   dynamic reject;
   EventCallRefer({this.aor, this.accept, this.reject});

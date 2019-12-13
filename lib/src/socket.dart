@@ -16,7 +16,8 @@ abstract class Socket {
   send(data);
 
   void Function() onconnect;
-  void Function(WebSocketInterface socket, bool error, int closeCode, String reason)
+  void Function(
+          WebSocketInterface socket, bool error, int closeCode, String reason)
       ondisconnect;
   void Function(dynamic data) ondata;
 }

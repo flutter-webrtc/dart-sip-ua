@@ -9,29 +9,31 @@ import 'grammar.dart';
 import 'uri.dart';
 import 'constants.dart' as DartSIP_C;
 
-test100(statusCode){
+test100(statusCode) {
   return statusCode.contains(new RegExp(r'^100$'));
 }
 
-test1XX(statusCode){
+test1XX(statusCode) {
   return statusCode.contains(new RegExp(r'^1[0-9]{2}$'));
 }
 
-test2XX(statusCode){
+test2XX(statusCode) {
   return statusCode.contains(new RegExp(r'^2[0-9]{2}$'));
 }
 
 class Math {
   static final _random = DartMath.Random();
-  static floor(num){
+  static floor(num) {
     return num.floor();
   }
-  static abs(num){
+
+  static abs(num) {
     return num.abs();
   }
+
   static randomDouble() => _random.nextDouble();
   static random() => _random.nextInt(0x7FFFFFFF);
-  static pow(a, b){
+  static pow(a, b) {
     return DartMath.pow(a, b);
   }
 }
@@ -206,7 +208,9 @@ headerize(String string) {
     if (part != 0) {
       hname += '-';
     }
-    hname += new String.fromCharCodes([name[part].codeUnitAt(0)]).toUpperCase() + name[part].substring(1);
+    hname +=
+        new String.fromCharCodes([name[part].codeUnitAt(0)]).toUpperCase() +
+            name[part].substring(1);
   }
   if (exceptions[hname] != null) {
     hname = exceptions[hname];
@@ -241,5 +245,5 @@ calculateMD5(string) {
 }
 
 cloneArray(array) {
-  return (array != null && array is List)? array.sublist(0) : [];
+  return (array != null && array is List) ? array.sublist(0) : [];
 }

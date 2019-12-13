@@ -11,7 +11,7 @@ class ErrorImpl extends Error {
 }
 
 class ConfigurationError extends ErrorImpl {
-  ConfigurationError(parameter, [ value]) {
+  ConfigurationError(parameter, [value]) {
     this.code = 1;
     this.name = 'CONFIGURATION_ERROR';
     this.parameter = parameter;

@@ -22,17 +22,16 @@ Timer setTimeout(fn, duration) {
 }
 
 clearTimeout(Timer timer) {
-  if(timer != null)
-    timer.cancel();
+  if (timer != null) timer.cancel();
 }
 
 Timer setInterval(fn, interval) {
-  return new Timer.periodic(new Duration(milliseconds: interval), (Timer timer) {
+  return new Timer.periodic(new Duration(milliseconds: interval),
+      (Timer timer) {
     fn();
   });
 }
 
 clearInterval(Timer timer) {
-  if(timer != null)
-    timer.cancel();
+  if (timer != null) timer.cancel();
 }

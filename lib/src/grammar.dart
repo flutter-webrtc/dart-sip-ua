@@ -3,7 +3,7 @@ import "package:parser_error/parser_error.dart";
 import 'grammar_parser.dart';
 
 class Grammar {
-  static parse(String input,String startRule) {
+  static parse(String input, String startRule) {
     var parser = new GrammarParser('');
     var result = parser.parse(input, startRule);
     if (!parser.success) {
