@@ -8,7 +8,7 @@ typedef void OnOpenCallback();
 
 class WebSocketImpl {
   String _url;
-  var _socket;
+  WebSocket _socket;
   OnOpenCallback onOpen;
   OnMessageCallback onMessage;
   OnCloseCallback onClose;

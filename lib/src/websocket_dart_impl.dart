@@ -10,7 +10,7 @@ typedef void OnOpenCallback();
 
 class WebSocketImpl {
   String _url;
-  var _socket;
+  WebSocket _socket;
   final logger = Log();
   OnOpenCallback onOpen;
   OnMessageCallback onMessage;
@@ -34,7 +34,7 @@ class WebSocketImpl {
         this?.onClose(_socket.closeCode, _socket.closeReason);
       });
     } catch (e) {
-      this.onClose(_socket.closeCode, _socket.closeReason);
+      this.onClose(500, e.toString());
     }
   }
 
