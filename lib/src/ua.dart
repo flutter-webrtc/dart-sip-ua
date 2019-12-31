@@ -744,7 +744,7 @@ class UA extends EventManager {
       this._transport.ondisconnect = onTransportDisconnect;
       this._transport.ondata = onTransportData;
     } catch (e) {
-      logger.error(e);
+      logger.error('Failed to _loadConfig: ${e.toString()}');
       throw new Exceptions.ConfigurationError(
           'sockets', this._configuration.sockets);
     }

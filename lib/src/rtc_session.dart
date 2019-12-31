@@ -679,7 +679,7 @@ class RTCSession extends EventManager {
       if (this._status == C.STATUS_TERMINATED) {
         return;
       }
-      logger.error(error.toString());
+      logger.error('Failed to answer(): ${error.toString()}');
     }
   }
 
@@ -1799,7 +1799,7 @@ class RTCSession extends EventManager {
       }
       sendAnswer(desc.sdp);
     } catch (error) {
-      logger.error(error);
+      logger.error('Got anerror on re-INVITE: ${error.toString()}');
     }
   }
 
@@ -1863,7 +1863,7 @@ class RTCSession extends EventManager {
       // Send answer.
       sendAnswer(desc.sdp);
     } catch (error) {
-      logger.error(error.toString());
+      logger.error('Got error on UPDATE: ${error.toString()}');
     }
   }
 
@@ -2195,7 +2195,7 @@ class RTCSession extends EventManager {
       if (this._status == C.STATUS_TERMINATED) {
         return;
       }
-      logger.error(error);
+      logger.error('Failed to _sendInitialRequest: ${error.toString()}');
       throw error;
     }
   }

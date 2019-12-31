@@ -253,7 +253,7 @@ load(dst, src) {
       fun(src, dst);
     });
   } catch (e) {
-    logger.error(e.toString());
+    logger.error('Failed to load config: ${e.toString()}');
     throw e;
   }
 }

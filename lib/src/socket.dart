@@ -30,7 +30,6 @@ isSocket(socket) {
 
   if (socket == null) {
     logger.error('null DartSIP.Socket instance');
-
     return false;
   }
 
