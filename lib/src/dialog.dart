@@ -236,7 +236,7 @@ class Dialog {
     } else if (request.cseq > this._remote_seqnum) {
       this._remote_seqnum = request.cseq;
     }
-    EventManager eventHandlers = request.server_transaction as EventManager;
+    EventManager eventHandlers = request.server_transaction;
     // RFC3261 14.2 Modifying an Existing Session -UAS BEHAVIOR-.
     if (request.method == SipMethod.INVITE ||
         (request.method == SipMethod.UPDATE && request.body != null)) {

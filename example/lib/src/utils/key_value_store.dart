@@ -5,7 +5,7 @@ class KeyValueStore {
   KeyValueStore();
   SharedPreferences _preferences;
 
-  init() async {
+  void init() async {
     _preferences = await SharedPreferences.getInstance();
   }
 

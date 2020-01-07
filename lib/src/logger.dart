@@ -114,7 +114,7 @@ class MyLogPrinter extends LogPrinter {
     for (Stackframe frame in frames.frames) {
       i++;
       var path2 = frame.sourceFile.path;
-      if (!path2.contains(Log._localPath)) {
+      if (!path2.contains(Log._localPath) && !path2.contains("logger.dart")) {
         depth = i - 1;
         break;
       }

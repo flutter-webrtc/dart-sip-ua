@@ -159,7 +159,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _handelStreams(CallState event) async {
-    var stream = event.stream;
+    MediaStream stream = event.stream;
     if (event.originator == 'local') {
       if (_localRenderer != null) {
         _localRenderer.srcObject = stream;
@@ -238,16 +238,16 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         return AlertDialog(
           title: Text('Enter target to transfer.'),
           content: TextField(
-              onChanged: (String text) {
-                setState(() {
-                  _tansfer_target = text;
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'URI or Username',
-              ),
-              textAlign: TextAlign.center,
+            onChanged: (String text) {
+              setState(() {
+                _tansfer_target = text;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'URI or Username',
             ),
+            textAlign: TextAlign.center,
+          ),
           actions: <Widget>[
             FlatButton(
               child: Text('Ok'),

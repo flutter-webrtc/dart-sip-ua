@@ -1,5 +1,5 @@
-import 'dart:html';
-import 'dart:js_util' as JSUtils;
+import 'web_socket_dummy.dart' if (dart.library.js) 'dart:html';
+import 'web_socket_dummy.dart' if (dart.library.js) 'dart:js_util' as JSUtils;
 import 'logger.dart';
 
 typedef void OnMessageCallback(dynamic msg);

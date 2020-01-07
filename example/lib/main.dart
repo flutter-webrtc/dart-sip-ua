@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 
@@ -11,8 +10,9 @@ import 'src/callscreen.dart';
 import 'src/about.dart';
 
 void main() {
-  if (WebRTC.platformIsDesktop)
+  if (WebRTC.platformIsDesktop) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
   runApp(MyApp());
 }
 

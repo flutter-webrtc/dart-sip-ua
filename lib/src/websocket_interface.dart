@@ -120,7 +120,8 @@ class WebSocketInterface implements Socket {
         this._ws.close();
       }
     } catch (error) {
-      logger.error('close() | error closing the WebSocket: ' + error);
+      logger
+          .error('close() | error closing the WebSocket: ' + error.toString());
     }
   }
 
