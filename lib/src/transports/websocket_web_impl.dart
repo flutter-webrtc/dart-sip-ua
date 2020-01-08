@@ -1,6 +1,6 @@
-import 'web_socket_dummy.dart' if (dart.library.js) 'dart:html';
-import 'web_socket_dummy.dart' if (dart.library.js) 'dart:js_util' as JSUtils;
-import 'logger.dart';
+import 'dart:html';
+import 'dart:js_util' as JSUtils;
+import '../logger.dart';
 
 typedef void OnMessageCallback(dynamic msg);
 typedef void OnCloseCallback(int code, String reason);
@@ -16,7 +16,7 @@ class WebSocketImpl {
 
   WebSocketImpl(this._url);
 
-  connect({Object protocols, Object headers}) async {
+  void connect({Object protocols, Object headers}) async {
     logger.info('connect $_url, $headers, $protocols');
     try {
       _socket = WebSocket(_url, 'sip');
@@ -43,7 +43,7 @@ class WebSocketImpl {
     }
   }
 
-  send(data) {
+  void send(data) {
     if (_socket != null && _socket.readyState == WebSocket.OPEN) {
       _socket.send(data);
       logger.debug('send: $data');
@@ -52,11 +52,11 @@ class WebSocketImpl {
     }
   }
 
-  isConnecting() {
+  bool isConnecting() {
     return _socket != null && _socket.readyState == WebSocket.CONNECTING;
   }
 
-  close() {
+  void close() {
     _socket.close();
   }
 }

@@ -4,10 +4,10 @@ import 'websocket_dart_impl.dart'
     if (dart.library.js) 'websocket_web_impl.dart';
 import 'dart:math';
 
-import 'grammar.dart';
-import 'socket.dart';
-import 'timers.dart';
-import 'logger.dart';
+import '../grammar.dart';
+import '../socket.dart';
+import '../timers.dart';
+import '../logger.dart';
 
 class WebSocketInterface implements Socket {
   String _url;
@@ -140,23 +140,23 @@ class WebSocketInterface implements Socket {
     }
   }
 
-  isConnected() {
+  bool isConnected() {
     return _connected;
   }
 
-  isConnecting() {
+  bool isConnecting() {
     return this._ws != null && this._ws.isConnecting();
   }
 
   /**
    * WebSocket Event Handlers
    */
-  _onOpen() {
+  void _onOpen() {
     logger.debug('WebSocket ${this._url} connected');
     this.onconnect();
   }
 
-  _onClose(wasClean, code, reason) {
+  void _onClose(wasClean, code, reason) {
     logger.debug('WebSocket ${this._url} closed');
     if (wasClean == false) {
       logger.debug('WebSocket abrupt disconnection');
@@ -164,7 +164,7 @@ class WebSocketInterface implements Socket {
     this.ondisconnect(this, !wasClean, code, reason);
   }
 
-  _onMessage(data) {
+  void _onMessage(data) {
     logger.debug('Received WebSocket message');
     if (data != null) {
       if (data.toString().trim().length > 0) {
@@ -175,7 +175,7 @@ class WebSocketInterface implements Socket {
     }
   }
 
-  _onError(e) {
+  void _onError(e) {
     logger.error('WebSocket ${this._url} error: ${e}');
   }
 }

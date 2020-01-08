@@ -9,7 +9,7 @@ import '../rtc_session/dtmf.dart';
 import '../rtc_session/info.dart';
 import '../sip_message.dart';
 import '../transport.dart';
-import '../websocket_interface.dart';
+import '../transports/websocket_interface.dart';
 import '../transactions/transaction_base.dart';
 
 class EventStateChanged extends EventType {}

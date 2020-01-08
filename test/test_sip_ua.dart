@@ -2,7 +2,7 @@ import 'package:sip_ua/src/ua.dart';
 import 'package:test/test.dart';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:sip_ua/src/config.dart' as config;
-import 'package:sip_ua/src/websocket_interface.dart';
+import 'package:sip_ua/src/transports/websocket_interface.dart';
 import 'dart:async';
 import 'package:sip_ua/src/event_manager/event_manager.dart';
 

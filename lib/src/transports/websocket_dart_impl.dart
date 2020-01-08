@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:async';
-import 'logger.dart';
+import '../logger.dart';
 
 typedef void OnMessageCallback(dynamic msg);
 typedef void OnCloseCallback(int code, String reason);
@@ -17,7 +17,7 @@ class WebSocketImpl {
   OnCloseCallback onClose;
   WebSocketImpl(this._url);
 
-  connect({Object protocols, Object headers}) async {
+  void connect({Object protocols, Object headers}) async {
     logger.info('connect $_url, $headers, $protocols');
     try {
       _socket =
@@ -38,18 +38,18 @@ class WebSocketImpl {
     }
   }
 
-  send(data) {
+  void send(data) {
     if (_socket != null) {
       _socket.add(data);
       logger.debug('send: $data');
     }
   }
 
-  close() {
+  void close() {
     _socket.close();
   }
 
-  isConnecting() {
+  bool isConnecting() {
     return _socket != null && _socket.readyState == WebSocket.connecting;
   }
 

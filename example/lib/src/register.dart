@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sip_ua/sip_ua.dart';
-
-import 'utils/key_value_store.dart'
-    if (dart.library.js) 'utils/key_value_store_web.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterWidget extends StatefulWidget {
   final SIPUAHelper _helper;
@@ -22,7 +20,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     'Origin': ' https://tryit.jssip.net',
     'Host': 'tryit.jssip.net:10443'
   };
-  KeyValueStore _keyValueStore = KeyValueStore();
+  SharedPreferences _preferences;
   RegistrationState _registerState;
 
   SIPUAHelper get helper => widget._helper;
@@ -43,22 +41,22 @@ class _MyRegisterWidget extends State<RegisterWidget>
   }
 
   void _loadSettings() async {
-    await _keyValueStore.init();
+     _preferences = await SharedPreferences.getInstance();
     this.setState(() {
-      _wsUri = _keyValueStore.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
-      _sipUri = _keyValueStore.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
-      _displayName = _keyValueStore.getString('display_name') ?? 'Flutter SIP UA';
-      _password = _keyValueStore.getString('password');
-      _authorizationUser = _keyValueStore.getString('auth_user');
+      _wsUri = _preferences.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
+      _sipUri = _preferences.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
+      _displayName = _preferences.getString('display_name') ?? 'Flutter SIP UA';
+      _password = _preferences.getString('password');
+      _authorizationUser = _preferences.getString('auth_user');
     });
   }
 
   void _saveSettings() {
-    _keyValueStore.setString('ws_uri', _wsUri);
-    _keyValueStore.setString('sip_uri', _sipUri);
-    _keyValueStore.setString('display_name', _displayName);
-    _keyValueStore.setString('password', _password);
-    _keyValueStore.setString('auth_user', _authorizationUser);
+    _preferences.setString('ws_uri', _wsUri);
+    _preferences.setString('sip_uri', _sipUri);
+    _preferences.setString('display_name', _displayName);
+    _preferences.setString('password', _password);
+    _preferences.setString('auth_user', _authorizationUser);
   }
 
   @override

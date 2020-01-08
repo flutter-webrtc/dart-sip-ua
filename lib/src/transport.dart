@@ -4,7 +4,7 @@ import 'exceptions.dart' as Exceptions;
 import 'socket.dart' as Socket;
 import 'timers.dart';
 import 'utils.dart';
-import 'websocket_interface.dart';
+import 'transports/websocket_interface.dart';
 import 'logger.dart';
 import 'stack_trace_nj.dart';
 

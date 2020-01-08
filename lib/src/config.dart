@@ -6,7 +6,7 @@ import 'grammar.dart';
 import 'socket.dart' as Socket;
 import 'uri.dart';
 import 'utils.dart' as Utils;
-import 'websocket_interface.dart';
+import 'transports/websocket_interface.dart';
 import 'logger.dart';
 
 final logger = Log();

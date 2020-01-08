@@ -3,14 +3,14 @@ import 'package:flutter_webrtc/webrtc.dart';
 import 'package:logger/logger.dart';
 
 import 'config.dart';
+import 'event_manager/event_manager.dart';
+import 'logger.dart';
 import 'message.dart';
 import 'rtc_session.dart';
 import 'socket.dart';
-import 'ua.dart';
-import 'websocket_interface.dart';
-import 'logger.dart';
-import 'event_manager/event_manager.dart';
 import 'stack_trace_nj.dart';
+import 'transports/websocket_interface.dart';
+import 'ua.dart';
 
 class SIPUAHelper extends EventManager {
   UA _ua;
