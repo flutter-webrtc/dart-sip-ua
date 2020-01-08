@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
+import 'dart_html_dummy.dart' if (dart.library.js) 'dart:html';
 
 class KeyValueStore {
   KeyValueStore();
   Storage _storage;
 
-  init() async {
-    _storage = window.localStorage;
+  void init() async {
+    _storage = window.localStorage as Storage;
   }
 
   String getString(String key) => _storage[key];
