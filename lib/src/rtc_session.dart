@@ -675,11 +675,11 @@ class RTCSession extends EventManager {
         this._failed('system', null, null, null, 500,
             DartSIP_C.causes.CONNECTION_ERROR, 'Transport Error');
       });
-    } catch (error) {
+    } catch (error, s) {
       if (this._status == C.STATUS_TERMINATED) {
         return;
       }
-      logger.error('Failed to answer(): ${error.toString()}');
+      logger.error('Failed to answer(): ${error.toString()}', error, s );
     }
   }
 
@@ -1635,7 +1635,7 @@ class RTCSession extends EventManager {
       if (candidate != null) {
         this.emit(EventIceCandidate(candidate, ready));
         if (!finished) {
-          ready();
+          //ready();
         }
       }
     };
@@ -2693,14 +2693,15 @@ class RTCSession extends EventManager {
    * @param  {IncomingRequest} request
    * @param  {Array} responseExtraHeaders  Extra headers for the 200 response.
    */
-  _handleSessionTimersInIncomingRequest(request, responseExtraHeaders) {
+  _handleSessionTimersInIncomingRequest(IncomingRequest request, responseExtraHeaders) {
     if (!this._sessionTimers.enabled) {
       return;
     }
 
     var session_expires_refresher;
 
-    if (request.session_expires > 0 &&
+    if (request.session_expires != null &&
+        request.session_expires > 0 &&
         request.session_expires >= DartSIP_C.MIN_SESSION_EXPIRES) {
       this._sessionTimers.currentExpires = request.session_expires;
       session_expires_refresher = request.session_expires_refresher ?? 'uas';

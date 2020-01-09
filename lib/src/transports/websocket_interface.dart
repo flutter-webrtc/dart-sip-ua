@@ -42,7 +42,7 @@ class WebSocketInterface implements Socket {
       throw new AssertionError('Invalid argument: ${url}');
     } else {
       var port = parsed_url.port != null ? ':${parsed_url.port}' : '';
-      this._sip_uri = 'sip:${parsed_url.host}${port};transport=ws';
+      this._sip_uri = 'sip:${parsed_url.host}${port};transport=${parsed_url.scheme}';
       logger.debug('SIP URI: ${this._sip_uri}');
       this._via_transport = parsed_url.scheme.toUpperCase();
     }
