@@ -1635,7 +1635,14 @@ class RTCSession extends EventManager {
       if (candidate != null) {
         this.emit(EventIceCandidate(candidate, ready));
         if (!finished) {
-          //ready();
+          finished = true;
+          /**
+           *  Just wait for 3 seconds. In the case of multiple network connections,
+           *  the RTCIceGatheringStateComplete event needs to wait for 10 ~ 30 seconds.
+           *  Because trickle ICE is not defined in the sip protocol, the delay of
+           * initiating a call to answer the call waiting will be unacceptable.
+           */
+          setTimeout(() => ready(), 3000);
         }
       }
     };
