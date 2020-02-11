@@ -10,6 +10,6 @@ Make sure your flutter is using the `dev` channel.
 - `./scripts/project_tools.sh create`
 - `flutter run`
 
-## Fro Desktop or Web
+## For Desktop or Web
 - `flutter run -d macos`
 - `flutter run -d web|chrome`
