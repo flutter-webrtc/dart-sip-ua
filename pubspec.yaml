@@ -4,6 +4,7 @@ description: A dart-lang version of the SIP UA stack.
 homepage: https://github.com/cloudwebrtc/dart-sip-ua
 environment:
   sdk: ">=2.2.0 <3.0.0"
+  flutter: ">=1.10.0"
 
 dependencies:
   crypto: ^2.1.2
