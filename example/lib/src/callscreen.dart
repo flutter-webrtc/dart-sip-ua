@@ -484,9 +484,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       ));
     }
 
-    return Stack(
-      children: <Widget>[
-        ...stackWidgets,
+    stackWidgets.addAll([
         Positioned(
           top: voiceonly ? 48 : 6,
           left: 0,
@@ -522,7 +520,10 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             ],
           )),
         ),
-      ],
+    ]);
+
+    return Stack(
+      children: stackWidgets,
     );
   }
 
