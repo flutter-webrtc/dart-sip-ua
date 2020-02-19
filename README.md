@@ -16,6 +16,37 @@ A dart-lang version of the SIP UA stack, ported from [JsSIP](https://github.com/
 - [ ] Windows
 - [ ] Fuchsia
 
+## Quickstart for Web platform
+- [Install Flutter](https://flutter.dev/docs/get-started/install)
+- Verify the install:
+```
+flutter doctor
+```
+- Run:
+```
+flutter channel beta
+flutter upgrade
+flutter config --enable-web
+git clone https://github.com/cloudwebrtc/dart-sip-ua.git
+cd dart-sip-ua/example
+flutter create .
+flutter pub get
+flutter run -d chrome
+```
+Application should have loaded in Chrome.
+
+Register with SIP server:
+
+In the application, enter connexion settings by clicking the top-right hamburger menu, then click `Accounts`
+- Click `Register`
+  - If registration is ok, it should say `Status: Registered` at the top
+  - If it fails to register, open Chrome Dev tools and looks for errors in the Javascript Console.
+
+Calling:
+- Once registered, click the top-left `Back Arrow` to return to keypad.
+- Enter a phone number
+- Click the green phone icone
+
 ## NOTE
 Thanks to the original authors of [JsSIP](https://github.com/versatica/JsSIP) for providing the JS version, which makes it possible to port the [dart-lang](https://dart.dev).
 - [José Luis Millán](https://github.com/jmillan)
