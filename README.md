@@ -47,6 +47,25 @@ Calling:
 - Enter a phone number
 - Click the green phone icone
 
+#### Chrome access to microphone on macOS
+
+On macOS, if Chrome gives you an error in the Javascript console when trying to access your microphone:
+
+Instead of running:
+```
+flutter run -d chrome
+```
+Close all running instances of Chrome then run:
+```
+flutter run -d web-server
+```
+and wait for the webserver URL to show:
+```
+lib/main.dart is being served at http://[::1]:<PORT>
+```
+Then open a fresh Chrome instance and paste the URL in the location bar.
+Chrome should now be ok with microphone access.
+
 ## NOTE
 Thanks to the original authors of [JsSIP](https://github.com/versatica/JsSIP) for providing the JS version, which makes it possible to port the [dart-lang](https://dart.dev).
 - [José Luis Millán](https://github.com/jmillan)
