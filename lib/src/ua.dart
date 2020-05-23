@@ -104,7 +104,7 @@ class UA extends EventManager {
 
     this._cache = {'credentials': {}};
 
-    this._configuration = config.settings;
+    this._configuration = new Settings();
     this._dynConfiguration = new DynamicSettings();
     this._dialogs = {};
 
