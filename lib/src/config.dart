@@ -58,8 +58,6 @@ class Settings {
   var hostport_params = null;
 }
 
-var settings = new Settings();
-
 // Configuration checks.
 class Checks {
   var mandatory = {
