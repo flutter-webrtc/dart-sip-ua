@@ -3,6 +3,7 @@ import 'package:flutter_webrtc/webrtc.dart';
 import 'package:logger/logger.dart';
 
 import 'config.dart';
+import 'constants.dart' as DartSIP_C;
 import 'event_manager/event_manager.dart';
 import 'logger.dart';
 import 'message.dart';
@@ -139,6 +140,7 @@ class SIPUAHelper extends EventManager {
     _settings.password = uaSettings.password;
     _settings.display_name = uaSettings.displayName;
     _settings.authorization_user = uaSettings.authorizationUser;
+    _settings.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
 
     try {
       this._ua = UA(_settings);
@@ -460,6 +462,7 @@ class UaSettings {
   String webSocketUrl;
   Map<String, dynamic> webSocketExtraHeaders;
   bool allowBadCertificate = false;
+  String userAgent;
 
   String uri;
   String authorizationUser;

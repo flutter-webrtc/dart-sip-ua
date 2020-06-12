@@ -103,6 +103,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     settings.displayName = _displayName;
     settings.webSocketExtraHeaders = _wsExtraHeaders;
     settings.allowBadCertificate = true;
+    settings.userAgent = 'Dart SIP Client v1.0.0';
 
     helper.start(settings);
   }
