@@ -16,8 +16,11 @@ class WebSocketImpl {
 
   WebSocketImpl(this._url);
 
-  void connect({Object protocols, Object headers}) async {
-    logger.info('connect $_url, $headers, $protocols');
+  void connect(
+      {Iterable<String> protocols,
+      Map<String, String> extHeaders,
+      bool allowBadCertificate = false}) async {
+    logger.info('connect $_url, $extHeaders, $protocols');
     try {
       _socket = WebSocket(_url, 'sip');
       _socket.onOpen.listen((e) {
@@ -46,7 +49,7 @@ class WebSocketImpl {
   void send(data) {
     if (_socket != null && _socket.readyState == WebSocket.OPEN) {
       _socket.send(data);
-      logger.debug('send: $data');
+      logger.debug('send: \n\n$data');
     } else {
       logger.error('WebSocket not connected, message $data not sent');
     }

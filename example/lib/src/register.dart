@@ -102,6 +102,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     settings.password = _password;
     settings.displayName = _displayName;
     settings.webSocketExtraHeaders = _wsExtraHeaders;
+    settings.allowBadCertificate = true;
 
     helper.start(settings);
   }

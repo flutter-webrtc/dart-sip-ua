@@ -133,7 +133,7 @@ class SIPUAHelper extends EventManager {
 
     _settings = Settings();
     var socket = WebSocketInterface(
-        uaSettings.webSocketUrl, uaSettings.webSocketExtraHeaders);
+        uaSettings.webSocketUrl, uaSettings.webSocketExtraHeaders, uaSettings.allowBadCertificate);
     _settings.sockets = [socket];
     _settings.uri = uaSettings.uri;
     _settings.password = uaSettings.password;
@@ -459,6 +459,7 @@ abstract class SipUaHelperListener {
 class UaSettings {
   String webSocketUrl;
   Map<String, dynamic> webSocketExtraHeaders;
+  bool allowBadCertificate = false;
 
   String uri;
   String authorizationUser;

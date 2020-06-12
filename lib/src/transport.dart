@@ -175,7 +175,7 @@ class Transport {
     }
 
     var message = data.toString();
-    logger.debug('sending message:\n\n${message}\n');
+    //logger.debug('sending message:\n\n${message}\n');
     return this.socket.send(message);
   }
 

@@ -14,6 +14,7 @@ class WebSocketInterface implements Socket {
   String _sip_uri;
   String _via_transport;
   String _websocket_protocol = 'sip';
+  bool _allowBadCertificate = false;
   WebSocketImpl _ws;
   var _closed = false;
   var _connected = false;
@@ -30,7 +31,8 @@ class WebSocketInterface implements Socket {
   @override
   void Function(dynamic data) ondata;
 
-  WebSocketInterface(String url, [Map<String, dynamic> wsExtraHeaders]) {
+  WebSocketInterface(String url,
+      [Map<String, dynamic> wsExtraHeaders, bool allowBadCertificate]) {
     logger.debug('new() [url:' + url + ']');
     this._url = url;
     var parsed_url = Grammar.parse(url, 'absoluteURI');
@@ -42,11 +44,13 @@ class WebSocketInterface implements Socket {
       throw new AssertionError('Invalid argument: ${url}');
     } else {
       var port = parsed_url.port != null ? ':${parsed_url.port}' : '';
-      this._sip_uri = 'sip:${parsed_url.host}${port};transport=${parsed_url.scheme}';
+      this._sip_uri =
+          'sip:${parsed_url.host}${port};transport=${parsed_url.scheme}';
       logger.debug('SIP URI: ${this._sip_uri}');
       this._via_transport = parsed_url.scheme.toUpperCase();
     }
     this._wsExtraHeaders = wsExtraHeaders ?? {};
+    this._allowBadCertificate = allowBadCertificate ?? false;
   }
 
   @override
@@ -96,10 +100,10 @@ class WebSocketInterface implements Socket {
         this._onClose(true, closeCode, closeReason);
       };
 
-      await this._ws.connect(headers: {
+      await this._ws.connect(extHeaders: {
         'Sec-WebSocket-Protocol': _websocket_protocol,
         ...this._wsExtraHeaders
-      });
+      }, allowBadCertificate: this._allowBadCertificate);
     } catch (e, s) {
       Log.e(e.toString(), null, s);
       _connected = false;
