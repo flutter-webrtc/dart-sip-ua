@@ -1,5 +1,11 @@
 ## Changelog
 
+[0.2.1] - 2020.06.12
+
+* Add UnHandledResponse for registrationFailed.
+* Add allowBadCertificate for UaSettings.
+* Upgrade recase and logger.
+
 [0.2.0] - 2020.05.27
 
 * Fixed bug for incoming call.
