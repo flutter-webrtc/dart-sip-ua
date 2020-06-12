@@ -14,6 +14,12 @@ import 'logger.dart';
 
 const MIN_REGISTER_EXPIRES = 10; // In seconds.
 
+class UnHandledResponse {
+  var status_code;
+  var reason_phrase;
+  UnHandledResponse(this.status_code, this.reason_phrase);
+}
+
 class Registrator {
   UA _ua;
   Transport _transport;
@@ -127,11 +133,11 @@ class Registrator {
     EventManager localEventHandlers = EventManager();
     localEventHandlers.on(EventOnRequestTimeout(),
         (EventOnRequestTimeout value) {
-      this._registrationFailure(null, DartSIP_C.causes.REQUEST_TIMEOUT);
+      this._registrationFailure(UnHandledResponse(408, DartSIP_C.causes.REQUEST_TIMEOUT), DartSIP_C.causes.REQUEST_TIMEOUT);
     });
     localEventHandlers.on(EventOnTransportError(),
         (EventOnTransportError value) {
-      this._registrationFailure(null, DartSIP_C.causes.CONNECTION_ERROR);
+      this._registrationFailure(UnHandledResponse(500, DartSIP_C.causes.CONNECTION_ERROR), DartSIP_C.causes.CONNECTION_ERROR);
     });
     localEventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated value) {
       this._cseq += 1;
