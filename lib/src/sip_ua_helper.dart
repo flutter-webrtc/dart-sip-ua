@@ -272,19 +272,7 @@ class SIPUAHelper extends EventManager {
 
     var _defaultOptions = {
       'eventHandlers': eventHandlers,
-      'pcConfig': {
-        'iceServers': [
-          {'url': 'stun:stun.l.google.com:19302'},
-          /*
-           * turn server configuration example.
-            {
-              'url': 'turn:123.45.67.89:3478',
-              'username': 'change_to_real_user',
-              'credential': 'change_to_real_secret'
-            },
-          */
-        ]
-      },
+      'pcConfig': {'iceServers': _uaSettings.iceServers},
       'mediaConstraints': {
         "audio": true,
         "video": voiceonly
@@ -468,4 +456,14 @@ class UaSettings {
   String authorizationUser;
   String password;
   String displayName;
+  
+  List<Map<String, String>> iceServers = [
+    {'url': 'stun:stun.l.google.com:19302'},
+// turn server configuration example.
+//    {
+//      'url': 'turn:123.45.67.89:3478',
+//      'username': 'change_to_real_user',
+//      'credential': 'change_to_real_secret'
+//    },
+  ];
 }
