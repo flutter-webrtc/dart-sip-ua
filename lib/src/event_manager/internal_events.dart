@@ -24,13 +24,6 @@ class EventTransactionDestroyed extends EventType {
   EventTransactionDestroyed({this.transaction});
 }
 
-class EventNewMessage extends EventType {
-  dynamic request;
-  String originator;
-  Message message;
-  EventNewMessage({this.message, this.originator, this.request});
-}
-
 class EventSipEvent extends EventType {
   IncomingRequest request;
   EventSipEvent({this.request});

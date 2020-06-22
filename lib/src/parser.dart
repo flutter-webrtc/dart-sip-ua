@@ -1,3 +1,4 @@
+import 'dart:convert' show utf8;
 import '../sip_ua.dart';
 import 'grammar.dart';
 import 'sip_message.dart';
@@ -86,7 +87,11 @@ IncomingMessage parseMessage(String data, UA ua) {
     if (contentLength is String) {
       contentLength = int.tryParse(contentLength) ?? 0;
     }
-    message.body = data.substring(bodyStart, bodyStart + contentLength);
+        if(contentLength > 0) {
+      var encoded = utf8.encode(data);
+      List<int> content = encoded.sublist(bodyStart, bodyStart + contentLength);
+      message.body = utf8.decode(content);
+    }
   } else {
     message.body = data.substring(bodyStart);
   }

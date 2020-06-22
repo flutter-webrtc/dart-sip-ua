@@ -199,6 +199,14 @@ class SIPUAHelper extends EventManager {
         _notifyCallStateListeners(CallState(CallStateEnum.CALL_INITIATION));
       });
 
+      this._ua.on(EventNewMessage(), (EventNewMessage event) {
+        logger.debug('newMessage => ' + event.toString());
+        //Only notify incoming message to listener
+        if (event.message.direction == 'incoming') {
+          SIPMessageRequest message = new SIPMessageRequest(event.message, event.originator, event.request);
+          _notifyNewMessageListeners(message);
+        }
+      });
       this._ua.start();
     } catch (e, s) {
       logger.error(e.toString(), null, s);
@@ -381,6 +389,12 @@ class SIPUAHelper extends EventManager {
       listener.callStateChanged(state);
     });
   }
+
+  void _notifyNewMessageListeners(SIPMessageRequest msg) {
+    _sipUaHelperListeners.forEach((listener) {
+      listener.onNewMessage(msg);
+    });
+  }
 }
 
 enum CallStateEnum {
@@ -443,10 +457,19 @@ class TransportState {
   TransportState(this.state, {this.cause});
 }
 
+class SIPMessageRequest {
+  dynamic request;
+  String originator;
+  Message message;
+  SIPMessageRequest(this.message, this.originator, this.request);
+}
+
 abstract class SipUaHelperListener {
   void transportStateChanged(TransportState state);
   void registrationStateChanged(RegistrationState state);
   void callStateChanged(CallState state);
+    //For SIP new messaga coming
+  void onNewMessage(SIPMessageRequest msg);
 }
 
 class UaSettings {

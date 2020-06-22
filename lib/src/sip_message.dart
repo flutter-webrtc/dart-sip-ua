@@ -1,3 +1,4 @@
+import 'dart:convert' show utf8;
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
 import '../sip_ua.dart';
@@ -269,7 +270,10 @@ class OutgoingRequest {
     msg += 'User-Agent: ${userAgent}\r\n';
 
     if (this.body != null) {
-      var length = this.body.length;
+      logger.debug("Outgoing Message: " + this.body);
+      //Here we should calculate the real content length for UTF8
+      var encoded = utf8.encode(this.body);
+      var length = encoded.length;
       msg += 'Content-Length: ${length}\r\n\r\n';
       msg += this.body;
     } else {
