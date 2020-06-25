@@ -3,12 +3,14 @@ import 'call_events.dart';
 import 'refer_events.dart';
 import 'register_events.dart';
 import 'transport_events.dart';
+import 'message_events.dart';
 
 export 'events.dart';
 export 'call_events.dart';
 export 'refer_events.dart';
 export 'register_events.dart';
 export 'transport_events.dart';
+export 'message_events.dart';
 
 import '../logger.dart';
 

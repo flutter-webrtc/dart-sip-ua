@@ -18,9 +18,12 @@ class _MyDialPadWidget extends State<DialPadWidget>
   TextEditingController _textController;
   SharedPreferences _preferences;
 
+  String receivedMsg;
+
   @override
   initState() {
     super.initState();
+    receivedMsg = "";
     _bindEventListeners();
     _loadSettings();
   }
@@ -31,6 +34,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
         _preferences.getString('dest') ?? 'sip:hello_jssip@tryit.jssip.net';
     _textController = TextEditingController(text: _dest);
     _textController.text = _dest;
+    
     this.setState(() {});
   }
 
@@ -248,6 +252,14 @@ class _MyDialPadWidget extends State<DialPadWidget>
                       style: TextStyle(fontSize: 14, color: Colors.black54),
                     )),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Center(
+                        child: Text(
+                      'Received Message: ${receivedMsg}',
+                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                    )),
+                  ),
                   Container(
                       child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -270,5 +282,14 @@ class _MyDialPadWidget extends State<DialPadWidget>
     if (callState.state == CallStateEnum.CALL_INITIATION) {
       Navigator.pushNamed(context, '/callscreen');
     }
+  }
+
+  @override
+  void onNewMessage(SIPMessageRequest msg) {
+     //Save the incoming message to DB
+    String msgBody = msg.request.body as String;
+    setState(() {
+      receivedMsg = msgBody;
+    });
   }
 }

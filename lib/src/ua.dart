@@ -557,6 +557,7 @@ class UA extends EventManager {
       }
       var message = new Message(this);
       message.init_incoming(request);
+      return;
     } else if (method == SipMethod.INVITE) {
       // Initial INVITE.
       if (request.to_tag != null && !this.hasListeners(EventNewRTCSession())) {
