@@ -301,4 +301,9 @@ class _MyRegisterWidget extends State<RegisterWidget>
 
   @override
   void transportStateChanged(TransportState state) {}
+
+  @override
+  void onNewMessage(SIPMessageRequest msg) {
+    // NO OP
+  }
 }

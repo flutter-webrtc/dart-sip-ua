@@ -80,7 +80,7 @@ class SIPUAHelper extends EventManager {
     return false;
   }
 
-  Call findCall (String id){
+  Call findCall(String id) {
     return _calls[id];
   }
 
@@ -155,9 +155,19 @@ class SIPUAHelper extends EventManager {
               .addAllEventHandlers(_options()['eventHandlers'] as EventManager);
         }
         _calls[event.id] =
-              Call(event.id, session, CallStateEnum.CALL_INITIATION);
+            Call(event.id, session, CallStateEnum.CALL_INITIATION);
         _notifyCallStateListeners(
             event, CallState(CallStateEnum.CALL_INITIATION));
+      });
+
+      this._ua.on(EventNewMessage(), (EventNewMessage event) {
+        logger.debug('newMessage => ' + event.toString());
+        //Only notify incoming message to listener
+        if (event.message.direction == 'incoming') {
+          SIPMessageRequest message = new SIPMessageRequest(
+              event.message, event.originator, event.request);
+          _notifyNewMessageListeners(message);
+        }
       });
 
       _ua.start();
@@ -165,8 +175,9 @@ class SIPUAHelper extends EventManager {
       logger.error(event.toString(), null, s);
     }
   }
-  
-  Map<String, Object> buildCallOptions([bool voiceonly = false]) => _options(voiceonly);
+
+  Map<String, Object> buildCallOptions([bool voiceonly = false]) =>
+      _options(voiceonly);
 
   Map<String, Object> _options([bool voiceonly = false]) {
     // Register callbacks to desired call events
@@ -249,19 +260,7 @@ class SIPUAHelper extends EventManager {
 
     var _defaultOptions = {
       'eventHandlers': eventHandlers,
-      'pcConfig': {
-        'iceServers': [
-          {'url': 'stun:stun.l.google.com:19302'},
-          /*
-           * turn server configuration example.
-            {
-              'url': 'turn:123.45.67.89:3478',
-              'username': 'change_to_real_user',
-              'credential': 'change_to_real_secret'
-            },
-          */
-        ]
-      },
+      'pcConfig': {'iceServers': _uaSettings.iceServers},
       'mediaConstraints': {
         'audio': true,
         'video': voiceonly
@@ -341,6 +340,12 @@ class SIPUAHelper extends EventManager {
     call.UpdateState(state.state);
     _sipUaHelperListeners.forEach((listener) {
       listener.callStateChanged(call, state);
+    });
+  }
+
+  void _notifyNewMessageListeners(SIPMessageRequest msg) {
+    _sipUaHelperListeners.forEach((listener) {
+      listener.onNewMessage(msg);
     });
   }
 }
@@ -490,10 +495,19 @@ class TransportState {
   TransportState(this.state, {this.cause});
 }
 
+class SIPMessageRequest {
+  dynamic request;
+  String originator;
+  Message message;
+  SIPMessageRequest(this.message, this.originator, this.request);
+}
+
 abstract class SipUaHelperListener {
   void transportStateChanged(TransportState state);
   void registrationStateChanged(RegistrationState state);
   void callStateChanged(Call call, CallState state);
+  //For SIP new messaga coming
+  void onNewMessage(SIPMessageRequest msg);
 }
 
 class UaSettings {
@@ -505,4 +519,14 @@ class UaSettings {
   String authorizationUser;
   String password;
   String displayName;
+
+  List<Map<String, String>> iceServers = [
+    {'url': 'stun:stun.l.google.com:19302'},
+// turn server configuration example.
+//    {
+//      'url': 'turn:123.45.67.89:3478',
+//      'username': 'change_to_real_user',
+//      'credential': 'change_to_real_secret'
+//    },
+  ];
 }

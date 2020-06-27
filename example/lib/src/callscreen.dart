@@ -541,4 +541,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 24.0),
             child: Container(width: 320, child: _buildActionButtons())));
   }
+
+  @override
+  void onNewMessage(SIPMessageRequest msg) {
+    // NO OP
+  }
 }

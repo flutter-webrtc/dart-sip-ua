@@ -55,8 +55,8 @@ class Message extends EventManager {
     }
 
     // Check target validity.
-    target = this._ua.normalizeTarget(target);
-    if (target == null) {
+    var normalized = this._ua.normalizeTarget(target);
+    if (normalized == null) {
       throw new Exceptions.TypeError('Invalid target: ${originalTarget}');
     }
 
@@ -71,7 +71,7 @@ class Message extends EventManager {
     extraHeaders.add('Content-Type: $contentType');
 
     this._request = new SIPMessage.OutgoingRequest(
-        SipMethod.MESSAGE, target, this._ua, null, extraHeaders);
+      SipMethod.MESSAGE, normalized, this._ua, null, extraHeaders);
     if (body != null) {
       this._request.body = body;
     }
