@@ -18,6 +18,30 @@ void main() {
 
 class MyApp extends StatelessWidget {
   final SIPUAHelper _helper = SIPUAHelper();
+  var routes = {
+    '/': (helper) => DialPadWidget(helper),
+    '/register': (helper) => RegisterWidget(helper),
+    '/callscreen': (helper, {arguments}) => CallScreenWidget(helper, arguments),
+    '/about': (helper) => AboutWidget(),
+  };
+
+  Route<dynamic> _onGenerateRoute(RouteSettings settings) {
+    final String name = settings.name;
+    final Function pageContentBuilder = routes[name];
+    if (pageContentBuilder != null) {
+      if (settings.arguments != null) {
+        final Route route = MaterialPageRoute(
+            builder: (context) =>
+                pageContentBuilder(_helper, arguments: settings.arguments));
+        return route;
+      } else {
+        final Route route = MaterialPageRoute(
+            builder: (context) => pageContentBuilder(_helper));
+        return route;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,12 +51,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Roboto',
       ),
       initialRoute: '/',
-      routes: {
-        '/': (context) => DialPadWidget(_helper),
-        '/register': (context) => RegisterWidget(_helper),
-        '/callscreen': (context) => CallScreenWidget(_helper),
-        '/about': (context) => AboutWidget(),
-      },
+      onGenerateRoute: _onGenerateRoute,
     );
   }
 }

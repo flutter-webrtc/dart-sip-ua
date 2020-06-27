@@ -7,7 +7,8 @@ import 'package:sip_ua/sip_ua.dart';
 
 class CallScreenWidget extends StatefulWidget {
   final SIPUAHelper _helper;
-  CallScreenWidget(this._helper, {Key key}) : super(key: key);
+  final Call _call;
+  CallScreenWidget(this._helper, this._call, {Key key}) : super(key: key);
   @override
   _MyCallScreenWidget createState() => _MyCallScreenWidget();
 }
@@ -23,26 +24,25 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   MediaStream _remoteStream;
 
   bool _showNumPad = false;
-
   String _timeLabel = '00:00';
   Timer _timer;
-
   bool _audioMuted = false;
   bool _videoMuted = false;
   bool _speakerOn = false;
   bool _hold = false;
   String _holdOriginator;
   CallStateEnum _state = CallStateEnum.NONE;
-
   SIPUAHelper get helper => widget._helper;
 
   bool get voiceonly =>
       (_localStream == null || _localStream.getVideoTracks().isEmpty) &&
       (_remoteStream == null || _remoteStream.getVideoTracks().isEmpty);
 
-  String get remote_identity => helper.remote_identity;
+  String get remote_identity => call.remote_identity;
 
-  String get direction => helper.direction;
+  String get direction => call.direction;
+
+  Call get call => widget._call;
 
   @override
   initState() {
@@ -95,7 +95,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   @override
-  void callStateChanged(CallState callState) {
+  void callStateChanged(Call call, CallState callState) {
     if (callState.state == CallStateEnum.HOLD ||
         callState.state == CallStateEnum.UNHOLD) {
       _hold = callState.state == CallStateEnum.HOLD;
@@ -191,12 +191,12 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _handleHangup() {
-    helper.hangup();
+    call.hangup();
     _timer.cancel();
   }
 
   void _handleAccept() {
-    helper.answer();
+    call.answer(helper.buildCallOptions());
   }
 
   void _switchCamera() {
@@ -207,25 +207,25 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _muteAudio() {
     if (_audioMuted) {
-      helper.unmute(true, false);
+      call.unmute(true, false);
     } else {
-      helper.mute(true, false);
+      call.mute(true, false);
     }
   }
 
   void _muteVideo() {
     if (_videoMuted) {
-      helper.unmute(false, true);
+      call.unmute(false, true);
     } else {
-      helper.mute(false, true);
+      call.mute(false, true);
     }
   }
 
   void _handleHold() {
     if (_hold) {
-      helper.unhold();
+      call.unhold();
     } else {
-      helper.hold();
+      call.hold();
     }
   }
 
@@ -252,7 +252,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             FlatButton(
               child: Text('Ok'),
               onPressed: () {
-                helper.refer(_tansfer_target);
+                call.refer(_tansfer_target);
                 Navigator.of(context).pop();
               },
             ),
@@ -270,7 +270,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _handleDtmf(String tone) {
     print('Dtmf tone => $tone');
-    helper.sendDTMF(tone);
+    call.sendDTMF(tone);
   }
 
   void _handleKeyPad() {

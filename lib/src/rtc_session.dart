@@ -586,7 +586,8 @@ class RTCSession extends EventManager {
       this._localMediaStreamLocallyGenerated = true;
       try {
         stream = await navigator.getUserMedia(mediaConstraints);
-        this.emit(EventStream(originator: 'local', stream: stream));
+        this.emit(
+            EventStream(session: this, originator: 'local', stream: stream));
       } catch (error) {
         if (this._status == C.STATUS_TERMINATED) {
           throw new Exceptions.InvalidStateError('terminated');
@@ -679,7 +680,7 @@ class RTCSession extends EventManager {
       if (this._status == C.STATUS_TERMINATED) {
         return;
       }
-      logger.error('Failed to answer(): ${error.toString()}', error, s );
+      logger.error('Failed to answer(): ${error.toString()}', error, s);
     }
   }
 
@@ -1564,7 +1565,8 @@ class RTCSession extends EventManager {
     };
 
     this._connection.onAddStream = (stream) {
-      this.emit(EventStream(originator: 'remote', stream: stream));
+      this.emit(
+          EventStream(session: this, originator: 'remote', stream: stream));
     };
 
     logger.debug('emit "peerconnection"');
@@ -2017,6 +2019,7 @@ class RTCSession extends EventManager {
 
     // Emit 'refer'.
     this.emit(EventCallRefer(
+        session: this,
         aor: request.refer_to.uri.toAor(),
         accept: (initCallback, options) {
           accept2(initCallback, options);
@@ -2148,7 +2151,8 @@ class RTCSession extends EventManager {
       this._localMediaStreamLocallyGenerated = true;
       try {
         stream = await navigator.getUserMedia(mediaConstraints);
-        this.emit(EventStream(originator: 'local', stream: stream));
+        this.emit(
+            EventStream(session: this, originator: 'local', stream: stream));
       } catch (error) {
         if (this._status == C.STATUS_TERMINATED) {
           throw new Exceptions.InvalidStateError('terminated');
@@ -2383,7 +2387,7 @@ class RTCSession extends EventManager {
     }
 
     onFailed([response]) {
-      eventHandlers.emit(EventCallFailed(response: response));
+      eventHandlers.emit(EventCallFailed(session: this, response: response));
     }
 
     onSucceeded(IncomingResponse response) async {
@@ -2488,7 +2492,7 @@ class RTCSession extends EventManager {
     }
 
     onFailed([response]) {
-      eventHandlers.emit(EventCallFailed(response: response));
+      eventHandlers.emit(EventCallFailed(session: this, response: response));
     }
 
     onSucceeded(IncomingResponse response) async {
@@ -2700,7 +2704,8 @@ class RTCSession extends EventManager {
    * @param  {IncomingRequest} request
    * @param  {Array} responseExtraHeaders  Extra headers for the 200 response.
    */
-  _handleSessionTimersInIncomingRequest(IncomingRequest request, responseExtraHeaders) {
+  _handleSessionTimersInIncomingRequest(
+      IncomingRequest request, responseExtraHeaders) {
     if (!this._sessionTimers.enabled) {
       return;
     }
@@ -2820,27 +2825,30 @@ class RTCSession extends EventManager {
   _connecting(request) {
     logger.debug('session connecting');
     logger.debug('emit "connecting"');
-    this.emit(EventCallConnecting(request: request));
+    this.emit(EventCallConnecting(session: this, request: request));
   }
 
   _progress(originator, response) {
     logger.debug('session progress');
     logger.debug('emit "progress"');
-    this.emit(EventCallProgress(originator: originator, response: response));
+    this.emit(EventCallProgress(
+        session: this, originator: originator, response: response));
   }
 
   _accepted(originator, [message]) {
     logger.debug('session accepted');
     this._start_time = new DateTime.now();
     logger.debug('emit "accepted"');
-    this.emit(EventCallAccepted(originator: originator, response: message));
+    this.emit(EventCallAccepted(
+        session: this, originator: originator, response: message));
   }
 
   _confirmed(originator, ack) {
     logger.debug('session confirmed');
     this._is_confirmed = true;
     logger.debug('emit "confirmed"');
-    this.emit(EventCallConfirmed(originator: originator, ack: ack));
+    this.emit(
+        EventCallConfirmed(session: this, originator: originator, ack: ack));
   }
 
   _ended(originator, IncomingRequest request, ErrorCause cause) {
@@ -2848,8 +2856,8 @@ class RTCSession extends EventManager {
     this._end_time = new DateTime.now();
     this._close();
     logger.debug('emit "ended"');
-    this.emit(
-        EventCallEnded(originator: originator, request: request, cause: cause));
+    this.emit(EventCallEnded(
+        session: this, originator: originator, request: request, cause: cause));
   }
 
   _failed(String originator, message, request, response, int status_code,
@@ -2870,6 +2878,7 @@ class RTCSession extends EventManager {
     this._close();
     logger.debug('emit "failed"');
     this.emit(EventCallFailed(
+        session: this,
         originator: originator,
         request: request,
         cause: errorCause,
@@ -2880,27 +2889,27 @@ class RTCSession extends EventManager {
     logger.debug('session onhold');
     this._setLocalMediaStatus();
     logger.debug('emit "hold"');
-    this.emit(EventCallHold(originator: originator));
+    this.emit(EventCallHold(session: this, originator: originator));
   }
 
   _onunhold(String originator) {
     logger.debug('session onunhold');
     this._setLocalMediaStatus();
     logger.debug('emit "unhold"');
-    this.emit(EventCallUnhold(originator: originator));
+    this.emit(EventCallUnhold(session: this, originator: originator));
   }
 
   _onmute([bool audio, bool video]) {
     logger.debug('session onmute');
     this._setLocalMediaStatus();
     logger.debug('emit "muted"');
-    this.emit(EventCallMuted(audio: audio, video: video));
+    this.emit(EventCallMuted(session: this, audio: audio, video: video));
   }
 
   _onunmute([bool audio, bool video]) {
     logger.debug('session onunmute');
     this._setLocalMediaStatus();
     logger.debug('emit "unmuted"');
-    this.emit(EventCallUnmuted(audio: audio, video: video));
+    this.emit(EventCallUnmuted(session: this, audio: audio, video: video));
   }
 }

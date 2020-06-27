@@ -3,87 +3,102 @@ import '../sip_message.dart';
 import '../rtc_session.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 
-class EventNewRTCSession extends EventType {
+class CallEvent extends EventType {
   RTCSession session;
+  String get id => session.id;
+  CallEvent(this.session);
+}
+
+class EventNewRTCSession extends CallEvent {
   String originator;
   dynamic request;
-  EventNewRTCSession({this.session, String originator, dynamic request});
+  EventNewRTCSession({RTCSession session, String originator, dynamic request})
+      : super(session);
 }
 
-class EventCallConnecting extends EventType {
-  EventCallConnecting({dynamic request});
+class EventCallConnecting extends CallEvent {
+  EventCallConnecting({RTCSession session, dynamic request}) : super(session);
 }
 
-class EventCallEnded extends EventType {
+class EventCallEnded extends CallEvent {
   String originator;
   ErrorCause cause;
   IncomingRequest request;
-  EventCallEnded({this.originator, this.cause, this.request});
+  EventCallEnded(
+      {RTCSession session, this.originator, this.cause, this.request})
+      : super(session);
 }
 
-class EventCallProgress extends EventType {
+class EventCallProgress extends CallEvent {
   String originator;
   dynamic response;
-  EventCallProgress({this.originator, this.response});
+  EventCallProgress({RTCSession session, this.originator, this.response})
+      : super(session);
 }
 
-class EventCallConfirmed extends EventType {
+class EventCallConfirmed extends CallEvent {
   String originator;
   dynamic ack;
-  EventCallConfirmed({this.originator, this.ack});
+  EventCallConfirmed({RTCSession session, this.originator, this.ack})
+      : super(session);
 }
 
-class EventCallHold extends EventType {
+class EventCallHold extends CallEvent {
   String originator;
-  EventCallHold({this.originator});
+  EventCallHold({RTCSession session, this.originator}) : super(session);
 }
 
-class EventCallUnhold extends EventType {
+class EventCallUnhold extends CallEvent {
   String originator;
-  EventCallUnhold({String originator});
+  EventCallUnhold({RTCSession session, String originator}) : super(session);
 }
 
-class EventCallMuted extends EventType {
+class EventCallMuted extends CallEvent {
   bool audio;
   bool video;
-  EventCallMuted({this.audio, this.video});
+  EventCallMuted({RTCSession session, this.audio, this.video}) : super(session);
 }
 
-class EventCallUnmuted extends EventType {
+class EventCallUnmuted extends CallEvent {
   bool audio;
   bool video;
-  EventCallUnmuted({this.audio, this.video});
+  EventCallUnmuted({RTCSession session, this.audio, this.video})
+      : super(session);
 }
 
-class EventCallAccepted extends EventType {
+class EventCallAccepted extends CallEvent {
   String originator;
   dynamic response;
-  EventCallAccepted({this.originator, this.response});
+  EventCallAccepted({RTCSession session, this.originator, this.response})
+      : super(session);
 }
 
-class EventCallFailed extends EventType {
+class EventCallFailed extends CallEvent {
   dynamic response;
   String originator;
   ErrorCause cause;
   dynamic request;
   String status_line;
   EventCallFailed(
-      {String state,
+      {RTCSession session,
+      String state,
       this.response,
       this.originator,
       MediaStream stream,
       this.cause,
       this.request,
-      this.status_line});
+      this.status_line})
+      : super(session);
 }
 
-class EventStream extends EventType {
+class EventStream extends CallEvent {
   String originator;
   MediaStream stream;
-  EventStream({this.originator, this.stream});
+  EventStream({RTCSession session, this.originator, this.stream})
+      : super(session);
 }
 
-class EventCallRefer extends EventType {
+class EventCallRefer extends CallEvent {
   String aor;
 
   /// bool Function({Function initCallback, dynamic options}) accept;
@@ -91,5 +106,6 @@ class EventCallRefer extends EventType {
 
   /// bool Function(dynamic options) reject;
   dynamic reject;
-  EventCallRefer({this.aor, this.accept, this.reject});
+  EventCallRefer({RTCSession session, this.aor, this.accept, this.reject})
+      : super(session);
 }

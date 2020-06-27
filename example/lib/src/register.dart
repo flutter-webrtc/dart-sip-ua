@@ -295,7 +295,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
   }
 
   @override
-  void callStateChanged(CallState state) {
+  void callStateChanged(Call call, CallState state) {
     //NO OP
   }
 

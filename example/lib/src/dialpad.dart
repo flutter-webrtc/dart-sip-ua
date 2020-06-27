@@ -27,8 +27,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   void _loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
-    _dest =
-        _preferences.getString('dest') ?? 'sip:hello_jssip@tryit.jssip.net';
+    _dest = _preferences.getString('dest') ?? 'sip:hello_jssip@tryit.jssip.net';
     _textController = TextEditingController(text: _dest);
     _textController.text = _dest;
     this.setState(() {});
@@ -266,9 +265,9 @@ class _MyDialPadWidget extends State<DialPadWidget>
   void transportStateChanged(TransportState state) {}
 
   @override
-  void callStateChanged(CallState callState) {
+  void callStateChanged(Call call, CallState callState) {
     if (callState.state == CallStateEnum.CALL_INITIATION) {
-      Navigator.pushNamed(context, '/callscreen');
+      Navigator.pushNamed(context, '/callscreen', arguments: call);
     }
   }
 }
