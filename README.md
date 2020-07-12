@@ -16,6 +16,24 @@ A dart-lang version of the SIP UA stack, ported from [JsSIP](https://github.com/
 - [ ] Windows
 - [ ] Fuchsia
 
+## Install
+
+### Android
+
+- Proguard rules:
+
+```
+-keep class io.flutter.app.** { *; }
+-keep class io.flutter.plugin.**  { *; }
+-keep class io.flutter.util.**  { *; }
+-keep class io.flutter.view.**  { *; }
+-keep class io.flutter.**  { *; }
+-keep class io.flutter.plugins.**  { *; }
+
+-keep class com.cloudwebrtc.webrtc.** {*;}
+-keep class org.webrtc.** {*;}
+```
+
 ## Quickstart for Web platform
 - [Install Flutter](https://flutter.dev/docs/get-started/install)
 - Verify the install:
