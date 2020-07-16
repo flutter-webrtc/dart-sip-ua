@@ -337,7 +337,7 @@ class SIPUAHelper extends EventManager {
       logger.e('Call ${event.id} not found!');
       return;
     }
-    call.UpdateState(state.state);
+    call.state = state.state;
     _sipUaHelperListeners.forEach((listener) {
       listener.callStateChanged(call, state);
     });
@@ -373,8 +373,8 @@ class Call {
   RTCSession _session;
   Call(this._id, this._session, this._stateEnum);
 
-  void UpdateState(CallStateEnum stateEnum) {
-    _stateEnum = stateEnum;
+  set state(CallStateEnum state) {
+    _stateEnum = state;
   }
 
   CallStateEnum get state => _stateEnum;
