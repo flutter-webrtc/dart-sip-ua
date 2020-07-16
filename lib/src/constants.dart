@@ -1,4 +1,4 @@
-var USER_AGENT = 'dart-sip-ua v0.0.1';
+var USER_AGENT = 'dart-sip-ua v0.2.2';
 
 // SIP scheme.
 var SIP = 'sip';
