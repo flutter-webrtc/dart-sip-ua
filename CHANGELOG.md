@@ -1,4 +1,10 @@
-## Changelog
+# Changelog
+
+[0.2.2] - 2020.07.16
+
+* Refactor call API, move answer, hangup, hold etc methos to Call class.
+* Add SIP message listener to listen the new incoming SIP text message.
+* Expose ha1 in UaSettings.
 
 [0.2.1] - 2020.06.12
 
