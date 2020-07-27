@@ -16,26 +16,31 @@ void main() {
   runApp(MyApp());
 }
 
+typedef PageContentBuilder = Widget Function(
+    [SIPUAHelper helper, Object arguments]);
+
 class MyApp extends StatelessWidget {
   final SIPUAHelper _helper = SIPUAHelper();
-  var routes = {
-    '/': (helper) => DialPadWidget(helper),
-    '/register': (helper) => RegisterWidget(helper),
-    '/callscreen': (helper, {arguments}) => CallScreenWidget(helper, arguments),
-    '/about': (helper) => AboutWidget(),
+  Map<String, PageContentBuilder> routes = {
+    '/': ([SIPUAHelper helper, Object arguments]) => DialPadWidget(helper),
+    '/register': ([SIPUAHelper helper, Object arguments]) =>
+        RegisterWidget(helper),
+    '/callscreen': ([SIPUAHelper helper, Object arguments]) =>
+        CallScreenWidget(helper, arguments as Call),
+    '/about': ([SIPUAHelper helper, Object arguments]) => AboutWidget(),
   };
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
-    final Function pageContentBuilder = routes[name];
+    final PageContentBuilder pageContentBuilder = routes[name];
     if (pageContentBuilder != null) {
       if (settings.arguments != null) {
-        final Route route = MaterialPageRoute(
+        final Route route = MaterialPageRoute<Widget>(
             builder: (context) =>
-                pageContentBuilder(_helper, arguments: settings.arguments));
+                pageContentBuilder(_helper, settings.arguments));
         return route;
       } else {
-        final Route route = MaterialPageRoute(
+        final Route route = MaterialPageRoute<Widget>(
             builder: (context) => pageContentBuilder(_helper));
         return route;
       }
