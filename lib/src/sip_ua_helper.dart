@@ -94,8 +94,8 @@ class SIPUAHelper extends EventManager {
     _uaSettings = uaSettings;
 
     _settings = Settings();
-    var socket = WebSocketInterface(uaSettings.webSocketUrl,
-        uaSettings.webSocketExtraHeaders, uaSettings.allowBadCertificate);
+    var socket = WebSocketInterface(
+        uaSettings.webSocketUrl, uaSettings.webSocketSettings);
     _settings.sockets = [socket];
     _settings.uri = uaSettings.uri;
     _settings.password = uaSettings.password;
@@ -516,10 +516,23 @@ abstract class SipUaHelperListener {
   void onNewMessage(SIPMessageRequest msg);
 }
 
+class WebSocketSettings {
+  /// Add additional HTTP headers, such as:'Origin','Host' or others
+  Map<String, dynamic> extraHeaders = {};
+
+  /// `User Agent` field for dart http client.
+  String userAgent;
+
+  /// Don‘t check the server certificate
+  /// for self-signed certificate.
+  bool allowBadCertificate = false;
+}
+
 class UaSettings {
   String webSocketUrl;
-  Map<String, dynamic> webSocketExtraHeaders;
-  bool allowBadCertificate = false;
+  WebSocketSettings webSocketSettings = WebSocketSettings();
+
+  /// `User Agent` field for sip message.
   String userAgent;
   String uri;
   String authorizationUser;

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:async';
+import 'package:sip_ua/src/sip_ua_helper.dart';
+
 import '../logger.dart';
 import '../grammar.dart';
 
@@ -19,19 +21,17 @@ class WebSocketImpl {
   WebSocketImpl(this._url);
 
   void connect(
-      {Iterable<String> protocols,
-      Map<String, String> extHeaders,
-      bool allowBadCertificate = false}) async {
-    logger.info('connect $_url, $extHeaders, $protocols');
+      {Iterable<String> protocols, WebSocketSettings webSocketSettings}) async {
+    logger.info('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
-      if (allowBadCertificate) {
+      if (webSocketSettings.allowBadCertificate) {
         /// Allow self-signed certificate, for test only.
         var parsed_url = Grammar.parse(_url, 'absoluteURI');
-        _socket = await _connectForBadCertificate(
-            parsed_url.scheme, parsed_url.host, parsed_url.port, extHeaders);
+        _socket = await _connectForBadCertificate(parsed_url.scheme,
+            parsed_url.host, parsed_url.port, webSocketSettings);
       } else {
         _socket = await WebSocket.connect(_url,
-            protocols: protocols, headers: extHeaders);
+            protocols: protocols, headers: webSocketSettings.extraHeaders);
       }
 
       this?.onOpen();
@@ -62,12 +62,17 @@ class WebSocketImpl {
 
   /// For test only.
   Future<WebSocket> _connectForBadCertificate(String scheme, String host,
-      int port, Map<String, String> extHeaders) async {
+      int port, WebSocketSettings webSocketSettings) async {
     try {
       var r = new Random();
       var key = base64.encode(List<int>.generate(8, (_) => r.nextInt(255)));
       var securityContext = new SecurityContext();
       var client = HttpClient(context: securityContext);
+
+      if (webSocketSettings.userAgent != null) {
+        client.userAgent = webSocketSettings.userAgent;
+      }
+
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) {
         logger.warn('Allow self-signed certificate => $host:$port. ');
@@ -86,7 +91,7 @@ class WebSocketImpl {
 
       //request.headers.add('Origin', 'http://localhost:5060');
       //request.headers.add('Sec-WebSocket-Protocol', 'sip');
-      extHeaders.forEach((key, value) {
+      webSocketSettings.extraHeaders.forEach((key, value) {
         request.headers.add(key, value);
       });
 

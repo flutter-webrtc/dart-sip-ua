@@ -41,10 +41,12 @@ class _MyRegisterWidget extends State<RegisterWidget>
   }
 
   void _loadSettings() async {
-     _preferences = await SharedPreferences.getInstance();
+    _preferences = await SharedPreferences.getInstance();
     this.setState(() {
-      _wsUri = _preferences.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
-      _sipUri = _preferences.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
+      _wsUri =
+          _preferences.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
+      _sipUri =
+          _preferences.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
       _displayName = _preferences.getString('display_name') ?? 'Flutter SIP UA';
       _password = _preferences.getString('password');
       _authorizationUser = _preferences.getString('auth_user');
@@ -97,12 +99,14 @@ class _MyRegisterWidget extends State<RegisterWidget>
     UaSettings settings = UaSettings();
 
     settings.webSocketUrl = _wsUri;
+    settings.webSocketSettings.extraHeaders = _wsExtraHeaders;
+    settings.webSocketSettings.allowBadCertificate = true;
+    settings.webSocketSettings.userAgent = 'Dart/2.8 (dart:io) for OpenSIPS.';
+
     settings.uri = _sipUri;
     settings.authorizationUser = _authorizationUser;
     settings.password = _password;
     settings.displayName = _displayName;
-    settings.webSocketExtraHeaders = _wsExtraHeaders;
-    settings.allowBadCertificate = true;
     settings.userAgent = 'Dart SIP Client v1.0.0';
 
     helper.start(settings);
@@ -187,7 +191,6 @@ class _MyRegisterWidget extends State<RegisterWidget>
                       ),
                     ],
                   ),
-
                   Column(
                     children: <Widget>[
                       Padding(

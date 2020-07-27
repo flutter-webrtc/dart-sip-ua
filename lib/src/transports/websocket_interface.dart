@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:sip_ua/sip_ua.dart';
+
 import 'websocket_dart_impl.dart'
     if (dart.library.js) 'websocket_web_impl.dart';
 import 'dart:math';
@@ -19,7 +21,7 @@ class WebSocketInterface implements Socket {
   var _closed = false;
   var _connected = false;
   var weight;
-  Map<String, dynamic> _wsExtraHeaders;
+  WebSocketSettings _webSocketSettings;
 
   final logger = Log();
   @override
@@ -31,8 +33,7 @@ class WebSocketInterface implements Socket {
   @override
   void Function(dynamic data) ondata;
 
-  WebSocketInterface(String url,
-      [Map<String, dynamic> wsExtraHeaders, bool allowBadCertificate]) {
+  WebSocketInterface(String url, [WebSocketSettings webSocketSettings]) {
     logger.debug('new() [url:' + url + ']');
     this._url = url;
     var parsed_url = Grammar.parse(url, 'absoluteURI');
@@ -49,8 +50,7 @@ class WebSocketInterface implements Socket {
       logger.debug('SIP URI: ${this._sip_uri}');
       this._via_transport = parsed_url.scheme.toUpperCase();
     }
-    this._wsExtraHeaders = wsExtraHeaders ?? {};
-    this._allowBadCertificate = allowBadCertificate ?? false;
+    this._webSocketSettings = webSocketSettings ?? WebSocketSettings();
   }
 
   @override
@@ -100,10 +100,9 @@ class WebSocketInterface implements Socket {
         this._onClose(true, closeCode, closeReason);
       };
 
-      await this._ws.connect(extHeaders: {
-        'Sec-WebSocket-Protocol': _websocket_protocol,
-        ...this._wsExtraHeaders
-      }, allowBadCertificate: this._allowBadCertificate);
+      await _ws.connect(
+          protocols: [_websocket_protocol],
+          webSocketSettings: _webSocketSettings);
     } catch (e, s) {
       Log.e(e.toString(), null, s);
       _connected = false;

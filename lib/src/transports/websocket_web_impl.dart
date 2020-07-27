@@ -1,5 +1,7 @@
 import 'dart:html';
 import 'dart:js_util' as JSUtils;
+import 'package:sip_ua/src/sip_ua_helper.dart';
+
 import '../logger.dart';
 
 typedef void OnMessageCallback(dynamic msg);
@@ -17,10 +19,8 @@ class WebSocketImpl {
   WebSocketImpl(this._url);
 
   void connect(
-      {Iterable<String> protocols,
-      Map<String, String> extHeaders,
-      bool allowBadCertificate = false}) async {
-    logger.info('connect $_url, $extHeaders, $protocols');
+      {Iterable<String> protocols, WebSocketSettings webSocketSettings}) async {
+    logger.info('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
       _socket = WebSocket(_url, 'sip');
       _socket.onOpen.listen((e) {
