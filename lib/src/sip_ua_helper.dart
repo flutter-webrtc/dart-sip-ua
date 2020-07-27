@@ -428,20 +428,25 @@ class Call {
     _session.sendDTMF(tones);
   }
 
+  String get display_name {
+    assert(_session != null,
+        'ERROR(get remote_identity): rtc session is invalid!');
+    if (_session.remote_identity != null &&
+        _session.remote_identity.display_name != null) {
+      return _session.remote_identity.display_name;
+    }
+    return '';
+  }
+
   String get remote_identity {
     assert(_session != null,
         'ERROR(get remote_identity): rtc session is invalid!');
-    if (_session.remote_identity != null) {
-      if (_session.remote_identity.display_name != null) {
-        return _session.remote_identity.display_name;
-      } else {
-        if (_session.remote_identity.uri != null &&
-            _session.remote_identity.uri.user != null) {
-          return _session.remote_identity.uri.user;
-        }
-      }
+    if (_session.remote_identity != null &&
+        _session.remote_identity.uri != null &&
+        _session.remote_identity.uri.user != null) {
+      return _session.remote_identity.uri.user;
     }
-    return "";
+    return '';
   }
 
   String get direction {
@@ -449,7 +454,7 @@ class Call {
     if (_session.direction != null) {
       return _session.direction.toUpperCase();
     }
-    return "";
+    return '';
   }
 }
 
