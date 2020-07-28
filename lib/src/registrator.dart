@@ -111,7 +111,7 @@ class Registrator {
       return;
     }
 
-    var extraHeaders = [];
+    var extraHeaders = _extraHeaders ?? [];
 
     extraHeaders.add(
         'Contact: ${this._contact};expires=${this._expires}${this._extraContactParams}');
@@ -274,7 +274,7 @@ class Registrator {
       this._registrationTimer = null;
     }
 
-    var extraHeaders = [];
+    var extraHeaders = _extraHeaders ?? [];
 
     if (unregister_all) {
       extraHeaders.add('Contact: *${this._extraContactParams}');
