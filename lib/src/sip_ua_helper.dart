@@ -103,9 +103,6 @@ class SIPUAHelper extends EventManager {
     _settings.display_name = uaSettings.displayName;
     _settings.authorization_user = uaSettings.authorizationUser;
     _settings.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
-    _settings.register_extra_headers = uaSettings.registerParams.extraHeaders;
-    _settings.register_extra_contact_params =
-        uaSettings.registerParams.extraContactParams;
 
     try {
       _ua = UA(_settings);
@@ -531,20 +528,9 @@ class WebSocketSettings {
   bool allowBadCertificate = false;
 }
 
-class RegisterParams {
-  /// Allow extra headers and Contact Params to be sent on REGISTER
-  /// Mainly used for RFC8599 Support
-  /// https://github.com/cloudwebrtc/dart-sip-ua/issues/89
-  Map<String, dynamic> extraHeaders = {};
-  Map<String, dynamic> extraContactParams = {};
-}
-
 class UaSettings {
   String webSocketUrl;
   WebSocketSettings webSocketSettings = WebSocketSettings();
-
-  /// Mainly used for RFC8599 Push Notification Support
-  RegisterParams registerParams = RegisterParams();
 
   /// `User Agent` field for sip message.
   String userAgent;

@@ -66,10 +66,10 @@ class Registrator {
     this._contact += ';+sip.ice';
 
     // Custom headers for REGISTER and un-REGISTER.
-    this.setExtraHeaders(ua.configuration.register_extra_headers);
+    this._extraHeaders = [];
 
     // Custom Contact header params for REGISTER and un-REGISTER.
-    this.setExtraContactParams(ua.configuration.register_extra_contact_params);
+    this._extraContactParams = '';
 
     if (reg_id != null) {
       this._contact += ';reg-id=${reg_id}';
@@ -111,7 +111,7 @@ class Registrator {
       return;
     }
 
-    var extraHeaders = this._extraHeaders ?? [];
+    var extraHeaders = _extraHeaders ?? [];
 
     extraHeaders.add(
         'Contact: ${this._contact};expires=${this._expires}${this._extraContactParams}');
@@ -133,15 +133,11 @@ class Registrator {
     EventManager localEventHandlers = EventManager();
     localEventHandlers.on(EventOnRequestTimeout(),
         (EventOnRequestTimeout value) {
-      this._registrationFailure(
-          UnHandledResponse(408, DartSIP_C.causes.REQUEST_TIMEOUT),
-          DartSIP_C.causes.REQUEST_TIMEOUT);
+      this._registrationFailure(UnHandledResponse(408, DartSIP_C.causes.REQUEST_TIMEOUT), DartSIP_C.causes.REQUEST_TIMEOUT);
     });
     localEventHandlers.on(EventOnTransportError(),
         (EventOnTransportError value) {
-      this._registrationFailure(
-          UnHandledResponse(500, DartSIP_C.causes.CONNECTION_ERROR),
-          DartSIP_C.causes.CONNECTION_ERROR);
+      this._registrationFailure(UnHandledResponse(500, DartSIP_C.causes.CONNECTION_ERROR), DartSIP_C.causes.CONNECTION_ERROR);
     });
     localEventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated value) {
       this._cseq += 1;
@@ -278,7 +274,7 @@ class Registrator {
       this._registrationTimer = null;
     }
 
-    var extraHeaders = this._extraHeaders ?? [];
+    var extraHeaders = _extraHeaders ?? [];
 
     if (unregister_all) {
       extraHeaders.add('Contact: *${this._extraContactParams}');
