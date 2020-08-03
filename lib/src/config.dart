@@ -39,6 +39,8 @@ class Settings {
   // Registration parameters.
   var register = true;
   var register_expires = 600;
+  var register_extra_headers = null;
+  var register_extra_contact_params = null;
   var registrar_server = null;
 
   // Connection options.
@@ -209,6 +211,20 @@ class Checks {
       if (register_expires == null) return;
       if (register_expires > 0) {
         dst.register_expires = register_expires;
+      }
+    },
+    'register_extra_headers': (src, dst) {
+      var register_extra_headers = src.register_extra_headers;
+      if (register_extra_headers == null) return;
+      if (register_extra_headers is List<String>) {
+        dst.register_extra_headers = register_extra_headers;
+      }
+    },
+    'register_extra_contact_params': (src, dst) {
+      var register_extra_contact_params = src.register_extra_contact_params;
+      if (register_extra_contact_params == null) return;
+      if (register_extra_contact_params is Map<String, dynamic>) {
+        dst.register_extra_contact_params = register_extra_contact_params;
       }
     },
     'registrar_server': (src, dst) {

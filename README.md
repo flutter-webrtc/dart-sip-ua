@@ -6,6 +6,7 @@ A dart-lang version of the SIP UA stack, ported from [JsSIP](https://github.com/
 - SIP over WebSocket (use real SIP in your flutter mobile, [desktop](https://flutter.dev/desktop), [web](https://flutter.dev/web) apps)
 - Audio/video calls ([flutter-webrtc](https://github.com/cloudwebrtc/flutter-webrtc)) and instant messaging
 - Support with standard SIP servers such as OpenSIPS, Kamailio, Asterisk and FreeSWITCH.
+- RFC8599 Push Notification Support using Contact Params - https://tools.ietf.org/html/rfc8599#section-4
 
 ## Currently supported platforms
 - [X] iOS
