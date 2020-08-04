@@ -428,7 +428,7 @@ class Call {
     _session.sendDTMF(tones);
   }
 
-  String get display_name {
+  String get remote_display_name {
     assert(_session != null,
         'ERROR(get remote_identity): rtc session is invalid!');
     if (_session.remote_identity != null &&
@@ -445,6 +445,17 @@ class Call {
         _session.remote_identity.uri != null &&
         _session.remote_identity.uri.user != null) {
       return _session.remote_identity.uri.user;
+    }
+    return '';
+  }
+
+  String get local_identity {
+    assert(
+        _session != null, 'ERROR(get local_identity): rtc session is invalid!');
+    if (_session.local_identity != null &&
+        _session.local_identity.uri != null &&
+        _session.local_identity.uri.user != null) {
+      return _session.local_identity.uri.user;
     }
     return '';
   }
