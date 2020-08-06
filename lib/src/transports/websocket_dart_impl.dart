@@ -65,7 +65,7 @@ class WebSocketImpl {
       int port, WebSocketSettings webSocketSettings) async {
     try {
       var r = new Random();
-      var key = base64.encode(List<int>.generate(8, (_) => r.nextInt(255)));
+      var key = base64.encode(List<int>.generate(16, (_) => r.nextInt(255)));
       var securityContext = new SecurityContext();
       var client = HttpClient(context: securityContext);
 
