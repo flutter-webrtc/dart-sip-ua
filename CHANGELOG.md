@@ -1,5 +1,13 @@
 # Changelog
 
+[0.2.3] - 2020.08.25
+
+* Add display_name for Call.
+* Add WebSocketSettings.
+* Fix the invalid extraHeaders in Registrator.
+* Exposed local_identity for Call.
+* Fixed Sec-WebSocket-Key keys are not 24 bytes.
+
 [0.2.2] - 2020.07.16
 
 * Refactor call API, move answer, hangup, hold etc methos to Call class.
