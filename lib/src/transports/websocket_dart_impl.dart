@@ -81,16 +81,15 @@ class WebSocketImpl {
 
       var request = await client.getUrl(Uri.parse(
           (scheme == 'wss' ? 'https' : 'http') +
-              '://$host:$port/ws')); // form the correct url here
+              '://$host:$port')); // form the correct url here
 
       request.headers.add('Connection', 'Upgrade');
       request.headers.add('Upgrade', 'websocket');
       request.headers.add(
           'Sec-WebSocket-Version', '13'); // insert the correct version here
       request.headers.add('Sec-WebSocket-Key', key.toLowerCase());
+      request.headers.add('Sec-WebSocket-Protocol', 'sip');
 
-      //request.headers.add('Origin', 'http://localhost:5060');
-      //request.headers.add('Sec-WebSocket-Protocol', 'sip');
       webSocketSettings.extraHeaders.forEach((key, value) {
         request.headers.add(key, value);
       });
