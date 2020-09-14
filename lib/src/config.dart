@@ -40,6 +40,7 @@ class Settings {
   var register = true;
   var register_expires = 600;
   var registrar_server = null;
+  var register_extra_contact_uri_params = null;
 
   // Connection options.
   List<WebSocketInterface> sockets = null;
@@ -223,6 +224,15 @@ class Checks {
         return;
       } else {
         dst.registrar_server = parsed;
+      }
+    },
+    'register_extra_contact_uri_params': (src, dst) {
+      var register_extra_contact_uri_params =
+          src.register_extra_contact_uri_params;
+      if (register_extra_contact_uri_params == null) return;
+      if (register_extra_contact_uri_params is Map<String, dynamic>) {
+        dst.register_extra_contact_uri_params =
+            register_extra_contact_uri_params;
       }
     },
     'use_preloaded_route': (src, dst) {
