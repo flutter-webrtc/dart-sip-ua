@@ -10,6 +10,7 @@ import 'ua.dart';
 import 'utils.dart' as Utils;
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
+import 'grammar.dart';
 import 'logger.dart';
 
 const MIN_REGISTER_EXPIRES = 10; // In seconds.
@@ -71,6 +72,10 @@ class Registrator {
     // Custom Contact header params for REGISTER and un-REGISTER.
     this._extraContactParams = '';
 
+    // Custom Contact URI params for REGISTER and un-REGISTER.
+    this.setExtraContactUriParams(
+        ua.configuration.register_extra_contact_uri_params);
+
     if (reg_id != null) {
       this._contact += ';reg-id=${reg_id}';
       this._contact +=
@@ -103,6 +108,21 @@ class Registrator {
         this._extraContactParams += ('=${param_value}');
       }
     });
+  }
+
+  setExtraContactUriParams(extraContactUriParams) {
+    if (extraContactUriParams is! Map) {
+      extraContactUriParams = {};
+    }
+
+    var contact = Grammar.parse(this._contact, 'Contact')[0]['parsed'];
+    contact.uri.clearParams();
+
+    extraContactUriParams.forEach((param_key, param_value) {
+      contact.uri.setParam(param_key, param_value);
+    });
+
+    this._contact = contact.toString();
   }
 
   register() {
