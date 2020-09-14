@@ -1,4 +1,4 @@
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import 'events.dart';
 import '../../sip_ua.dart';

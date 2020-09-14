@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart'
 
 import 'package:flutter/material.dart';
 import 'package:sip_ua/sip_ua.dart';
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'src/register.dart';
 import 'src/dialpad.dart';
 import 'src/callscreen.dart';

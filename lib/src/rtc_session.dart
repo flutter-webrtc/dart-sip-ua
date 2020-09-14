@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
 import '../sip_ua.dart';
@@ -585,7 +585,7 @@ class RTCSession extends EventManager {
         mediaConstraints['video'] != null) {
       this._localMediaStreamLocallyGenerated = true;
       try {
-        stream = await navigator.getUserMedia(mediaConstraints);
+        stream = await MediaDevices.getUserMedia(mediaConstraints);
         this.emit(
             EventStream(session: this, originator: 'local', stream: stream));
       } catch (error) {
@@ -2150,7 +2150,7 @@ class RTCSession extends EventManager {
         mediaConstraints['video'] != null) {
       this._localMediaStreamLocallyGenerated = true;
       try {
-        stream = await navigator.getUserMedia(mediaConstraints);
+        stream = await MediaDevices.getUserMedia(mediaConstraints);
         this.emit(
             EventStream(session: this, originator: 'local', stream: stream));
       } catch (error) {

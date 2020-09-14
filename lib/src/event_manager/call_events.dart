@@ -1,7 +1,7 @@
 import 'events.dart';
 import '../sip_message.dart';
 import '../rtc_session.dart';
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class CallEvent extends EventType {
   RTCSession session;
