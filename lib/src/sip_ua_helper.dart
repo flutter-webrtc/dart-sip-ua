@@ -103,6 +103,7 @@ class SIPUAHelper extends EventManager {
     _settings.display_name = uaSettings.displayName;
     _settings.authorization_user = uaSettings.authorizationUser;
     _settings.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
+    _settings.register = uaSettings.register;
     _settings.register_expires = uaSettings.register_expires;
     _settings.register_extra_contact_uri_params =
         uaSettings.registerParams.extraContactUriParams;
