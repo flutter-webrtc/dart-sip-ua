@@ -103,6 +103,8 @@ class SIPUAHelper extends EventManager {
     _settings.display_name = uaSettings.displayName;
     _settings.authorization_user = uaSettings.authorizationUser;
     _settings.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
+    _settings.register = uaSettings.register;
+    _settings.register_expires = uaSettings.register_expires;
     _settings.register_extra_contact_uri_params =
         uaSettings.registerParams.extraContactUriParams;
 
@@ -551,6 +553,13 @@ class WebSocketSettings {
 class UaSettings {
   String webSocketUrl;
   WebSocketSettings webSocketSettings = WebSocketSettings();
+
+  /// May not need to register if on a static IP, just Auth
+  /// Default is true
+  bool register;
+
+  /// Default is 600 secs in config.dart
+  int register_expires;
 
   /// Mainly used for RFC8599 Push Notification Support
   RegisterParams registerParams = RegisterParams();
