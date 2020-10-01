@@ -82,13 +82,14 @@ class WebSocketImpl {
       var request = await client.getUrl(Uri.parse(
           (scheme == 'wss' ? 'https' : 'http') +
               '://$host:$port')); // form the correct url here
-
-      request.headers.add('Connection', 'Upgrade');
-      request.headers.add('Upgrade', 'websocket');
-      request.headers.add(
-          'Sec-WebSocket-Version', '13'); // insert the correct version here
-      request.headers.add('Sec-WebSocket-Key', key.toLowerCase());
-      request.headers.add('Sec-WebSocket-Protocol', 'sip');
+      request.headers.add('Connection', 'Upgrade', preserveHeaderCase: true);
+      request.headers.add('Upgrade', 'websocket', preserveHeaderCase: true);
+      request.headers.add('Sec-WebSocket-Version', '13',
+          preserveHeaderCase: true); // insert the correct version here
+      request.headers.add('Sec-WebSocket-Key', key.toLowerCase(),
+          preserveHeaderCase: true);
+      request.headers
+          .add('Sec-WebSocket-Protocol', 'sip', preserveHeaderCase: true);
 
       webSocketSettings.extraHeaders.forEach((key, value) {
         request.headers.add(key, value);
