@@ -92,7 +92,7 @@ class WebSocketImpl {
           .add('Sec-WebSocket-Protocol', 'sip', preserveHeaderCase: true);
 
       webSocketSettings.extraHeaders.forEach((key, value) {
-        request.headers.add(key, value);
+        request.headers.add(key, value, preserveHeaderCase: true);
       });
 
       var response = await request.close();
