@@ -12,7 +12,7 @@ typedef void OnCloseCallback(int code, String reason);
 typedef void OnOpenCallback();
 
 class WebSocketImpl {
-  String _url;
+  final String _url;
   WebSocket _socket;
   final logger = Log();
   OnOpenCallback onOpen;
@@ -26,22 +26,20 @@ class WebSocketImpl {
     try {
       if (webSocketSettings.allowBadCertificate) {
         /// Allow self-signed certificate, for test only.
-        var parsed_url = Grammar.parse(_url, 'absoluteURI');
-        _socket = await _connectForBadCertificate(parsed_url.scheme,
-            parsed_url.host, parsed_url.port, webSocketSettings);
+        _socket = await _connectForBadCertificate(_url, webSocketSettings);
       } else {
         _socket = await WebSocket.connect(_url,
             protocols: protocols, headers: webSocketSettings.extraHeaders);
       }
 
-      this?.onOpen();
+      onOpen?.call();
       _socket.listen((data) {
-        this?.onMessage(data);
+        onMessage?.call(data);
       }, onDone: () {
-        this?.onClose(_socket.closeCode, _socket.closeReason);
+        onClose?.call(_socket.closeCode, _socket.closeReason);
       });
     } catch (e) {
-      this.onClose(500, e.toString());
+      onClose?.call(500, e.toString());
     }
   }
 
@@ -61,8 +59,8 @@ class WebSocketImpl {
   }
 
   /// For test only.
-  Future<WebSocket> _connectForBadCertificate(String scheme, String host,
-      int port, WebSocketSettings webSocketSettings) async {
+  Future<WebSocket> _connectForBadCertificate(
+      String url, WebSocketSettings webSocketSettings) async {
     try {
       var r = new Random();
       var key = base64.encode(List<int>.generate(16, (_) => r.nextInt(255)));
@@ -79,9 +77,11 @@ class WebSocketImpl {
         return true;
       };
 
-      var request = await client.getUrl(Uri.parse(
-          (scheme == 'wss' ? 'https' : 'http') +
-              '://$host:$port')); // form the correct url here
+      var parsed_uri = Uri.parse(url);
+      var uri = parsed_uri.replace(
+          scheme: parsed_uri.scheme == 'wss' ? 'https' : 'http');
+
+      var request = await client.getUrl(uri); // form the correct url here
       request.headers.add('Connection', 'Upgrade', preserveHeaderCase: true);
       request.headers.add('Upgrade', 'websocket', preserveHeaderCase: true);
       request.headers.add('Sec-WebSocket-Version', '13',
