@@ -33,7 +33,7 @@ function add_permission_label() {
     python add-line.py -i ../ios/Runner/Info.plist -s '<key>UILaunchStoryboardName</key>' -t '	<string>$(PRODUCT_NAME) Camera Usage!</string>'
     python add-line.py -i ../ios/Runner/Info.plist -s '<key>UILaunchStoryboardName</key>' -t '	<key>NSMicrophoneUsageDescription</key>'
     python add-line.py -i ../ios/Runner/Info.plist -s '<key>UILaunchStoryboardName</key>' -t '	<string>$(PRODUCT_NAME) Microphone Usage!</string>'
-    python add-line.py -i ../ios/Podfile -s "#platform :ios, '9.0'" -t "platform :ios, '10.0'" -r
+    python add-line.py -i ../ios/Podfile -s "# platform :ios, '9.0'" -t "platform :ios, '10.0'" -r
     echo ""
     echo "Add permission labels to AndroidManifest.xml."
     echo ""
