@@ -33,7 +33,7 @@ function add_permission_label() {
     python add-line.py -i ../ios/Runner/Info.plist -s '<key>UILaunchStoryboardName</key>' -t '	<string>$(PRODUCT_NAME) Camera Usage!</string>'
     python add-line.py -i ../ios/Runner/Info.plist -s '<key>UILaunchStoryboardName</key>' -t '	<key>NSMicrophoneUsageDescription</key>'
     python add-line.py -i ../ios/Runner/Info.plist -s '<key>UILaunchStoryboardName</key>' -t '	<string>$(PRODUCT_NAME) Microphone Usage!</string>'
-    python add-line.py -i ../ios/Podfile -s "# platform :ios" -t "platform :ios" -r
+    python add-line.py -i ../ios/Podfile -s "#platform :ios, '9.0'" -t "platform :ios, '10.0'" -r
     echo ""
     echo "Add permission labels to AndroidManifest.xml."
     echo ""
@@ -45,6 +45,7 @@ function add_permission_label() {
     python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />'
     python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />'
     python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />'
+if [ -d "macos" ]; then
     echo ""
     echo "Add permission labels to macOS."
     echo ""
@@ -66,6 +67,7 @@ function add_permission_label() {
     python add-line.py -i ../macos/Runner/Release.entitlements -s '</dict>' -t '       <true/>'
     python add-line.py -i ../macos/Runner/Release.entitlements -s '</dict>' -t '       <key>com.apple.security.network.client</key>'
     python add-line.py -i ../macos/Runner/Release.entitlements -s '</dict>' -t '       <true/>'
+fi
 }
 
 if [ "$CMD" == "create" ];
