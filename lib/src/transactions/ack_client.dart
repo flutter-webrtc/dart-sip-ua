@@ -25,13 +25,15 @@ class AckClientTransaction extends TransactionBase {
     this.request.setHeader('via', via);
   }
 
-  send() {
+  @override
+  void send() {
     if (!this.transport.send(this.request)) {
       this.onTransportError();
     }
   }
 
-  onTransportError() {
+  @override
+  void onTransportError() {
     logger.debug('transport error occurred for transaction ${this.id}');
     this.eventHandlers.emit(EventOnTransportError());
   }

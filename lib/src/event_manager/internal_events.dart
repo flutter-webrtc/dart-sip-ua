@@ -143,7 +143,7 @@ class EventOnRequestTimeout extends EventType {
 class EventOnReceiveResponse extends EventType {
   IncomingResponse response;
   EventOnReceiveResponse({this.response});
-  sanityCheck() {
+  void sanityCheck() {
     assert(response != null);
   }
 }

@@ -101,13 +101,13 @@ class Transport {
    * Instance Methods
    */
 
-  get via_transport => this.socket.via_transport;
+  String get via_transport => this.socket.via_transport;
 
-  get url => this.socket.url;
+  String get url => this.socket.url;
 
-  get sip_uri => this.socket.sip_uri;
+  String get sip_uri => this.socket.sip_uri;
 
-  connect() {
+  void connect() {
     logger.debug('connect()');
 
     if (this.isConnected()) {
@@ -134,7 +134,7 @@ class Transport {
     return;
   }
 
-  disconnect() {
+  void disconnect() {
     logger.debug('close()');
 
     this.close_requested = true;
@@ -191,7 +191,7 @@ class Transport {
    * Private API.
    */
 
-  _reconnect(bool error) {
+  void _reconnect(bool error) {
     this.recover_attempts += 1;
 
     var k = Math.floor(
@@ -220,7 +220,7 @@ class Transport {
   /**
    * get the next available socket with higher weight
    */
-  _getSocket() {
+  void _getSocket() {
     var candidates = [];
 
     this.sockets.forEach((socket) {
@@ -254,7 +254,7 @@ class Transport {
    * Socket Event Handlers
    */
 
-  _onConnect() {
+  void _onConnect() {
     this.recover_attempts = 0;
     this.status = C.STATUS_CONNECTED;
 
@@ -266,7 +266,7 @@ class Transport {
     this.onconnect(this);
   }
 
-  _onDisconnect(
+  void _onDisconnect(
       WebSocketInterface socket, bool error, int closeCode, String reason) {
     this.status = C.STATUS_DISCONNECTED;
     this.ondisconnect(
@@ -289,7 +289,7 @@ class Transport {
     this._reconnect(error);
   }
 
-  _onData(data) {
+  void _onData(data) {
     // CRLF Keep Alive response from server. Ignore it.
     if (data == '\r\n') {
       logger.debug('received message with CRLF Keep Alive response');

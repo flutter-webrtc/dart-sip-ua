@@ -1,4 +1,5 @@
 import 'dart:convert' show utf8;
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
 import '../sip_ua.dart';
@@ -115,7 +116,7 @@ class OutgoingRequest {
    * -param {String} name header name
    * -param {String | Array} value header value
    */
-  setHeader(name, value) {
+  void setHeader(name, value) {
     // Remove the header from extraHeaders if present.
     var regexp = new RegExp('^\\s*${name}\\s*:', caseSensitive: false);
 
@@ -133,7 +134,7 @@ class OutgoingRequest {
    * -param {String} name header name
    * -returns {String|null} Returns the specified header, null if header doesn't exist.
    */
-  getHeader(name) {
+  dynamic getHeader(name) {
     var headers = this.headers[Utils.headerize(name)];
 
     if (headers != null) {
@@ -157,7 +158,7 @@ class OutgoingRequest {
    * -param {String} name header name
    * -returns {Array} Array with all the headers of the specified name.
    */
-  getHeaders(name) {
+  List getHeaders(name) {
     var headers = this.headers[Utils.headerize(name)];
     var result = [];
 
@@ -185,7 +186,7 @@ class OutgoingRequest {
    * -param {String} name header name
    * -returns {boolean} true if header with given name exists, false otherwise
    */
-  hasHeader(name) {
+  bool hasHeader(name) {
     if (this.headers[Utils.headerize(name)]) {
       return true;
     } else {
@@ -208,7 +209,7 @@ class OutgoingRequest {
    *
    * Returns this.sdp.
    */
-  parseSDP({force = false}) {
+  dynamic parseSDP({force = false}) {
     if (!force && this.sdp != null) {
       return this.sdp;
     } else {
@@ -217,7 +218,8 @@ class OutgoingRequest {
     }
   }
 
-  toString() {
+  @override
+  String toString() {
     var msg =
         '${SipMethodHelper.getName(this.method)} ${this.ruri} SIP/2.0\r\n';
 
@@ -283,7 +285,7 @@ class OutgoingRequest {
     return msg;
   }
 
-  clone() {
+  OutgoingRequest clone() {
     var request = new OutgoingRequest(this.method, this.ruri, this.ua);
 
     this.headers.forEach((name, value) {
@@ -307,11 +309,11 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
     this.transaction = null;
   }
 
-  cancel(reason) {
+  void cancel(reason) {
     this.transaction.cancel(reason);
   }
 
-  clone() {
+  InitialOutgoingInviteRequest clone() {
     var request = new InitialOutgoingInviteRequest(this.ruri, this.ua);
 
     this.headers.forEach((name, value) {
@@ -373,7 +375,7 @@ class IncomingMessage {
   * Insert a header of the given name and value into the last position of the
   * header array.
   */
-  addHeader(name, value) {
+  void addHeader(name, value) {
     var header = {'raw': value};
 
     name = Utils.headerize(name);
@@ -388,7 +390,7 @@ class IncomingMessage {
   /**
    * Get the value of the given header name at the given position.
    */
-  getHeader(name) {
+  dynamic getHeader(name) {
     var header = this.headers[Utils.headerize(name)];
 
     if (header != null) {
@@ -403,7 +405,7 @@ class IncomingMessage {
   /**
    * Get the header/s of the given name.
    */
-  getHeaders(name) {
+  List<dynamic> getHeaders(name) {
     var headers = this.headers[Utils.headerize(name)];
     var result = [];
 
@@ -432,7 +434,7 @@ class IncomingMessage {
   * -returns {Object|null} Parsed header object, null if the header
   *  is not present or in case of a parsing error.
   */
-  parseHeader(name, {idx = 0}) {
+  dynamic parseHeader(name, {idx = 0}) {
     name = Utils.headerize(name);
 
     if (this.headers[name] == null) {
@@ -474,7 +476,7 @@ class IncomingMessage {
    * -example
    * message.s('via',3).port
    */
-  s(name, {idx = 0}) {
+  dynamic s(name, {idx = 0}) {
     return this.parseHeader(name, idx: idx);
   }
 
@@ -483,7 +485,7 @@ class IncomingMessage {
   * -param {String} name header name
   * -param {String} value header value
   */
-  setHeader(name, value) {
+  void setHeader(name, value) {
     var header = {'raw': value};
 
     this.headers[Utils.headerize(name)] = [header];
@@ -496,7 +498,7 @@ class IncomingMessage {
    *
    * Returns this.sdp.
    */
-  parseSDP({force = false}) {
+  dynamic parseSDP({force = false}) {
     if (!force && this.sdp != null) {
       return this.sdp;
     } else {
@@ -505,7 +507,8 @@ class IncomingMessage {
     }
   }
 
-  toString() {
+  @override
+  String toString() {
     return this.data;
   }
 }
@@ -533,7 +536,7 @@ class IncomingRequest extends IncomingMessage {
   * -param {Function} [onSuccess] onSuccess callback
   * -param {Function} [onFailure] onFailure callback
   */
-  reply(code, [reason, extraHeaders, body, onSuccess, onFailure]) {
+  void reply(code, [reason, extraHeaders, body, onSuccess, onFailure]) {
     var supported = [];
     var to = this.getHeader('To');
 
@@ -645,7 +648,7 @@ class IncomingRequest extends IncomingMessage {
   * -param {Number} code status code
   * -param {String} reason reason phrase
   */
-  reply_sl(code, [reason]) {
+  void reply_sl(code, [reason]) {
     var vias = this.getHeaders('via');
 
     // Validate code and reason values.

@@ -35,12 +35,12 @@ class InviteClientTransaction extends TransactionBase {
     this.ua.newTransaction(this);
   }
 
-  stateChanged(TransactionState state) {
+  void stateChanged(TransactionState state) {
     this.state = state;
     this.emit(EventStateChanged());
   }
 
-  send() {
+  void send() {
     this.stateChanged(TransactionState.CALLING);
     this.B = setTimeout(() {
       this.timer_B();
@@ -51,7 +51,7 @@ class InviteClientTransaction extends TransactionBase {
     }
   }
 
-  onTransportError() {
+  void onTransportError() {
     clearTimeout(this.B);
     clearTimeout(this.D);
     clearTimeout(this.M);
@@ -66,7 +66,7 @@ class InviteClientTransaction extends TransactionBase {
   }
 
   // RFC 6026 7.2.
-  timer_M() {
+  void timer_M() {
     logger.debug('Timer M expired for transaction ${this.id}');
 
     if (this.state == TransactionState.ACCEPTED) {
@@ -77,7 +77,7 @@ class InviteClientTransaction extends TransactionBase {
   }
 
   // RFC 3261 17.1.1.
-  timer_B() {
+  void timer_B() {
     logger.debug('Timer B expired for transaction ${this.id}');
     if (this.state == TransactionState.CALLING) {
       this.stateChanged(TransactionState.TERMINATED);
@@ -86,14 +86,14 @@ class InviteClientTransaction extends TransactionBase {
     }
   }
 
-  timer_D() {
+  void timer_D() {
     logger.debug('Timer D expired for transaction ${this.id}');
     clearTimeout(this.B);
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
   }
 
-  sendACK(response) {
+  void sendACK(response) {
     var ack = new SIPMessage.OutgoingRequest(
         SipMethod.ACK, this.request.ruri, this.ua, {
       'route_set': this.request.getHeaders('route'),
@@ -112,7 +112,7 @@ class InviteClientTransaction extends TransactionBase {
     this.transport.send(ack);
   }
 
-  cancel(reason) {
+  void cancel(reason) {
     // Send only if a provisional response (>100) has been received.
     if (this.state != TransactionState.PROCEEDING) {
       return;

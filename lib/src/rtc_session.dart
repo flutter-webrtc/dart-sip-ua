@@ -66,7 +66,7 @@ class RFC4028Timers {
 }
 
 class RTCSession extends EventManager {
-  var _id;
+  String _id;
   UA _ua;
   var _request;
   bool _late_sdp;
@@ -192,7 +192,7 @@ class RTCSession extends EventManager {
   // Expose session failed/ended causes as a property of the RTCSession instance.
   get causes => DartSIP_C.causes;
 
-  get id => this._id;
+  String get id => this._id;
 
   get connection => this._connection;
 
@@ -210,7 +210,7 @@ class RTCSession extends EventManager {
 
   get data => this._data;
 
-  get ua => this._ua;
+  UA get ua => this._ua;
 
   set data(_data) {
     this._data = _data;
@@ -218,7 +218,7 @@ class RTCSession extends EventManager {
 
   get status => this._status;
 
-  isInProgress() {
+  bool isInProgress() {
     switch (this._status) {
       case C.STATUS_NULL:
       case C.STATUS_INVITE_SENT:
@@ -231,7 +231,7 @@ class RTCSession extends EventManager {
     }
   }
 
-  isEstablished() {
+  bool isEstablished() {
     switch (this._status) {
       case C.STATUS_ANSWERED:
       case C.STATUS_WAITING_FOR_ACK:
@@ -242,7 +242,7 @@ class RTCSession extends EventManager {
     }
   }
 
-  isEnded() {
+  bool isEnded() {
     switch (this._status) {
       case C.STATUS_CANCELED:
       case C.STATUS_TERMINATED:
@@ -252,15 +252,15 @@ class RTCSession extends EventManager {
     }
   }
 
-  isMuted() {
+  Map<String, dynamic> isMuted() {
     return {'audio': this._audioMuted, 'video': this._videoMuted};
   }
 
-  isOnHold() {
+  Map<String, dynamic> isOnHold() {
     return {'local': this._localHold, 'remote': this._remoteHold};
   }
 
-  connect(target, [options, initCallback]) async {
+  void connect(target, [options, initCallback]) async {
     logger.debug('connect()');
 
     options = options ?? {};
@@ -364,7 +364,7 @@ class RTCSession extends EventManager {
         mediaConstraints, rtcOfferConstraints, mediaStream);
   }
 
-  init_incoming(request, [initCallback]) {
+  void init_incoming(request, [initCallback]) {
     logger.debug('init_incoming()');
 
     var expires;
@@ -456,7 +456,7 @@ class RTCSession extends EventManager {
   /**
    * Answer the call.
    */
-  answer(options) async {
+  void answer(options) async {
     logger.debug('answer()');
     var request = this._request;
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
@@ -687,7 +687,7 @@ class RTCSession extends EventManager {
   /**
    * Terminate the call.
    */
-  terminate([Map<String, Object> options]) {
+  void terminate([Map<String, Object> options]) {
     logger.debug('terminate()');
 
     options = options ?? {};
@@ -830,7 +830,7 @@ class RTCSession extends EventManager {
   }
 
   /// tones may be a single character or a string of dtmf digits
-  sendDTMF(String tones, [Map<String, dynamic> options]) {
+  void sendDTMF(String tones, [Map<String, dynamic> options]) {
     logger.debug('sendDTMF() | tones: ${tones.toString()}');
 
     options = options ?? Map();
@@ -933,7 +933,7 @@ class RTCSession extends EventManager {
     }
   }
 
-  sendInfo(contentType, body, options) {
+  void sendInfo(contentType, body, options) {
     logger.debug('sendInfo()');
 
     // Check Session Status.
@@ -950,7 +950,7 @@ class RTCSession extends EventManager {
   /**
    * Mute
    */
-  mute([audio = true, video = true]) {
+  void mute([audio = true, video = true]) {
     logger.debug('mute()');
 
     var audioMuted = false, videoMuted = false;
@@ -975,7 +975,7 @@ class RTCSession extends EventManager {
   /**
    * Unmute
    */
-  unmute([audio = true, video = true]) {
+  void unmute([audio = true, video = true]) {
     logger.debug('unmute()');
 
     var audioUnMuted = false, videoUnMuted = false;
@@ -1006,7 +1006,7 @@ class RTCSession extends EventManager {
   /**
    * Hold
    */
-  hold([options, done]) {
+  bool hold([options, done]) {
     logger.debug('hold()');
 
     options = options ?? {};
@@ -1058,7 +1058,7 @@ class RTCSession extends EventManager {
     return true;
   }
 
-  unhold([options, done]) {
+  bool unhold([options, done]) {
     logger.debug('unhold()');
 
     options = options ?? {};
@@ -1109,7 +1109,7 @@ class RTCSession extends EventManager {
     return true;
   }
 
-  renegotiate([options, done]) {
+  bool renegotiate([options, done]) {
     logger.debug('renegotiate()');
 
     options = options ?? {};
@@ -1208,7 +1208,7 @@ class RTCSession extends EventManager {
   /**
    * Send a generic in-dialog Request
    */
-  sendRequest(SipMethod method, [options]) {
+  OutgoingRequest sendRequest(SipMethod method, [options]) {
     logger.debug('sendRequest()');
 
     return this._dialog.sendRequest(method, options);
@@ -1217,7 +1217,7 @@ class RTCSession extends EventManager {
   /**
    * In dialog Request Reception
    */
-  _receiveRequest(request) async {
+  void _receiveRequest(request) async {
     logger.debug('receiveRequest()');
 
     if (request.method == SipMethod.CANCEL) {
@@ -1364,7 +1364,7 @@ class RTCSession extends EventManager {
   /**
    * Session Callbacks
    */
-  onTransportError() {
+  void onTransportError() {
     logger.error('onTransportError()');
     if (this._status != C.STATUS_TERMINATED) {
       this.terminate({
@@ -1375,7 +1375,7 @@ class RTCSession extends EventManager {
     }
   }
 
-  onRequestTimeout() {
+  void onRequestTimeout() {
     logger.error('onRequestTimeout()');
 
     if (this._status != C.STATUS_TERMINATED) {
@@ -1387,7 +1387,7 @@ class RTCSession extends EventManager {
     }
   }
 
-  onDialogError() {
+  void onDialogError() {
     logger.error('onDialogError()');
 
     if (this._status != C.STATUS_TERMINATED) {
@@ -1400,7 +1400,7 @@ class RTCSession extends EventManager {
   }
 
   // Called from DTMF handler.
-  newDTMF(String originator, DTMF dtmf, dynamic request) {
+  void newDTMF(String originator, DTMF dtmf, dynamic request) {
     logger.debug('newDTMF()');
 
     this.emit(
@@ -1408,7 +1408,7 @@ class RTCSession extends EventManager {
   }
 
   // Called from Info handler.
-  newInfo(String originator, Info info, dynamic request) {
+  void newInfo(String originator, Info info, dynamic request) {
     logger.debug('newInfo()');
 
     this.emit(
@@ -1418,7 +1418,7 @@ class RTCSession extends EventManager {
   /**
    * Check if RTCSession is ready for an outgoing re-INVITE or UPDATE with SDP.
    */
-  _isReadyToReOffer() {
+  bool _isReadyToReOffer() {
     if (!this._rtcReady) {
       logger.debug('_isReadyToReOffer() | internal WebRTC status not ready');
 
@@ -1444,7 +1444,7 @@ class RTCSession extends EventManager {
     return true;
   }
 
-  _close() async {
+  void _close() async {
     logger.debug('close()');
     if (this._status == C.STATUS_TERMINATED) {
       return;
@@ -1507,10 +1507,10 @@ class RTCSession extends EventManager {
    * Response retransmissions cannot be accomplished by transaction layer
    *  since it is destroyed when receiving the first 2xx answer
    */
-  _setInvite2xxTimer(request, body) {
+  void _setInvite2xxTimer(request, body) {
     var timeout = Timers.T1;
 
-    invite2xxRetransmission() {
+    void invite2xxRetransmission() {
       if (this._status != C.STATUS_WAITING_FOR_ACK) {
         return;
       }
@@ -1533,7 +1533,7 @@ class RTCSession extends EventManager {
    * If a UAS generates a 2xx response and never receives an ACK,
    *  it SHOULD generate a BYE to terminate the dialog.
    */
-  _setACKTimer() {
+  void _setACKTimer() {
     this._timers.ackTimer = setTimeout(() {
       if (this._status == C.STATUS_WAITING_FOR_ACK) {
         logger.debug('no ACK received, terminating the session');
@@ -1731,7 +1731,7 @@ class RTCSession extends EventManager {
     var contentType = request.getHeader('Content-Type');
     var rejected = false;
 
-    reject(options) {
+    bool reject(options) {
       rejected = true;
 
       var status_code = options['status_code'] ?? 403;
@@ -1747,6 +1747,7 @@ class RTCSession extends EventManager {
       }
 
       request.reply(status_code, reason_phrase, extraHeaders);
+      return true;
     }
 
     // Emit 'reinvite'.
@@ -1820,7 +1821,7 @@ class RTCSession extends EventManager {
 
     var rejected = false;
 
-    reject(options) {
+    bool reject(options) {
       rejected = true;
 
       var status_code = options['status_code'] ?? 403;
@@ -1836,11 +1837,12 @@ class RTCSession extends EventManager {
       }
 
       request.reply(status_code, reason_phrase, extraHeaders);
+      return true;
     }
 
     var contentType = request.getHeader('Content-Type');
 
-    sendAnswer(sdp) {
+    void sendAnswer(sdp) {
       var extraHeaders = ['Contact: ${this._contact}'];
       this._handleSessionTimersInIncomingRequest(request, extraHeaders);
       request.reply(200, null, extraHeaders, sdp);
@@ -1876,7 +1878,7 @@ class RTCSession extends EventManager {
     }
   }
 
-  _processInDialogSdpOffer(request) async {
+  Future<RTCSessionDescription> _processInDialogSdpOffer(request) async {
     logger.debug('_processInDialogSdpOffer()');
 
     var sdp = request.parseSDP();
@@ -1951,7 +1953,7 @@ class RTCSession extends EventManager {
   /**
    * In dialog Refer Reception
    */
-  _receiveRefer(request) {
+  void _receiveRefer(request) {
     logger.debug('receiveRefer()');
 
     if (request.refer_to == null) {
@@ -2032,7 +2034,7 @@ class RTCSession extends EventManager {
   /**
    * In dialog Notify Reception
    */
-  _receiveNotify(request) {
+  void _receiveNotify(request) {
     logger.debug('receiveNotify()');
 
     if (request.event == null) {
@@ -2079,10 +2081,10 @@ class RTCSession extends EventManager {
   /**
    * INVITE with Replaces Reception
    */
-  _receiveReplaces(request) {
+  void _receiveReplaces(request) {
     logger.debug('receiveReplaces()');
 
-    accept(initCallback) {
+    bool accept(initCallback) {
       if (this._status != C.STATUS_WAITING_FOR_ACK &&
           this._status != C.STATUS_CONFIRMED) {
         return false;
@@ -2096,9 +2098,10 @@ class RTCSession extends EventManager {
       });
 
       session.init_incoming(request, initCallback);
+      return true;
     }
 
-    reject() {
+    void reject() {
       logger.debug('Replaced INVITE rejected by the user');
       request.reply(486);
     }
@@ -2212,7 +2215,7 @@ class RTCSession extends EventManager {
   }
 
   /// Reception of Response for Initial INVITE
-  _receiveInviteResponse(IncomingResponse response) async {
+  void _receiveInviteResponse(IncomingResponse response) async {
     logger.debug('receiveInviteResponse()');
 
     /// Handle 2XX retransmissions and responses from forked requests.
@@ -2367,7 +2370,7 @@ class RTCSession extends EventManager {
   /**
    * Send Re-INVITE
    */
-  _sendReinvite([options]) async {
+  void _sendReinvite([options]) async {
     logger.debug('sendReinvite()');
 
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
@@ -2386,11 +2389,11 @@ class RTCSession extends EventManager {
           'Session-Expires: ${this._sessionTimers.currentExpires};refresher=${this._sessionTimers.refresher ? 'uac' : 'uas'}');
     }
 
-    onFailed([response]) {
+    void onFailed([response]) {
       eventHandlers.emit(EventCallFailed(session: this, response: response));
     }
 
-    onSucceeded(IncomingResponse response) async {
+    void onSucceeded(IncomingResponse response) async {
       if (this._status == C.STATUS_TERMINATED) {
         return;
       }
@@ -2470,7 +2473,7 @@ class RTCSession extends EventManager {
   /**
    * Send UPDATE
    */
-  _sendUpdate([options]) async {
+  void _sendUpdate([options]) async {
     logger.debug('sendUpdate()');
 
     options = options ?? {};
@@ -2491,11 +2494,11 @@ class RTCSession extends EventManager {
           'Session-Expires: ${this._sessionTimers.currentExpires};refresher=${this._sessionTimers.refresher ? 'uac' : 'uas'}');
     }
 
-    onFailed([response]) {
+    void onFailed([response]) {
       eventHandlers.emit(EventCallFailed(session: this, response: response));
     }
 
-    onSucceeded(IncomingResponse response) async {
+    void onSucceeded(IncomingResponse response) async {
       if (this._status == C.STATUS_TERMINATED) {
         return;
       }
@@ -2601,7 +2604,7 @@ class RTCSession extends EventManager {
     }
   }
 
-  _acceptAndTerminate(response, [status_code, reason_phrase]) async {
+  void _acceptAndTerminate(response, [status_code, reason_phrase]) async {
     logger.debug('acceptAndTerminate()');
 
     var extraHeaders = [];
@@ -2679,7 +2682,7 @@ class RTCSession extends EventManager {
     return sdp_transform.write(sdp, null);
   }
 
-  _setLocalMediaStatus() {
+  void _setLocalMediaStatus() {
     var enableAudio = true, enableVideo = true;
 
     if (this._localHold || this._remoteHold) {
@@ -2704,7 +2707,7 @@ class RTCSession extends EventManager {
    * @param  {IncomingRequest} request
    * @param  {Array} responseExtraHeaders  Extra headers for the 200 response.
    */
-  _handleSessionTimersInIncomingRequest(
+  void _handleSessionTimersInIncomingRequest(
       IncomingRequest request, responseExtraHeaders) {
     if (!this._sessionTimers.enabled) {
       return;
@@ -2733,7 +2736,7 @@ class RTCSession extends EventManager {
    * Handle SessionTimers for an incoming response to INVITE or UPDATE.
    * @param  {IncomingResponse} response
    */
-  _handleSessionTimersInIncomingResponse(response) {
+  void _handleSessionTimersInIncomingResponse(response) {
     if (!this._sessionTimers.enabled) {
       return;
     }
@@ -2753,7 +2756,7 @@ class RTCSession extends EventManager {
     this._runSessionTimer();
   }
 
-  _runSessionTimer() {
+  void _runSessionTimer() {
     var expires = this._sessionTimers.currentExpires;
 
     this._sessionTimers.running = true;
@@ -2795,7 +2798,7 @@ class RTCSession extends EventManager {
     }
   }
 
-  _toggleMuteAudio(mute) {
+  void _toggleMuteAudio(mute) {
     List<MediaStream> streams = this._connection.getLocalStreams();
     streams.forEach((stream) {
       if (stream.getAudioTracks().isNotEmpty) {
@@ -2805,7 +2808,7 @@ class RTCSession extends EventManager {
     });
   }
 
-  _toggleMuteVideo(mute) {
+  void _toggleMuteVideo(mute) {
     List<MediaStream> streams = this._connection.getLocalStreams();
     streams.forEach((stream) {
       if (stream.getVideoTracks().isNotEmpty) {
@@ -2815,27 +2818,27 @@ class RTCSession extends EventManager {
     });
   }
 
-  _newRTCSession(String originator, dynamic request) {
+  void _newRTCSession(String originator, dynamic request) {
     logger.debug('newRTCSession()');
     this
         ._ua
         .newRTCSession(originator: originator, session: this, request: request);
   }
 
-  _connecting(request) {
+  void _connecting(request) {
     logger.debug('session connecting');
     logger.debug('emit "connecting"');
     this.emit(EventCallConnecting(session: this, request: request));
   }
 
-  _progress(originator, response) {
+  void _progress(originator, response) {
     logger.debug('session progress');
     logger.debug('emit "progress"');
     this.emit(EventCallProgress(
         session: this, originator: originator, response: response));
   }
 
-  _accepted(originator, [message]) {
+  void _accepted(originator, [message]) {
     logger.debug('session accepted');
     this._start_time = new DateTime.now();
     logger.debug('emit "accepted"');
@@ -2843,7 +2846,7 @@ class RTCSession extends EventManager {
         session: this, originator: originator, response: message));
   }
 
-  _confirmed(originator, ack) {
+  void _confirmed(originator, ack) {
     logger.debug('session confirmed');
     this._is_confirmed = true;
     logger.debug('emit "confirmed"');
@@ -2851,7 +2854,7 @@ class RTCSession extends EventManager {
         EventCallConfirmed(session: this, originator: originator, ack: ack));
   }
 
-  _ended(originator, IncomingRequest request, ErrorCause cause) {
+  void _ended(originator, IncomingRequest request, ErrorCause cause) {
     logger.debug('session ended');
     this._end_time = new DateTime.now();
     this._close();
@@ -2860,7 +2863,7 @@ class RTCSession extends EventManager {
         session: this, originator: originator, request: request, cause: cause));
   }
 
-  _failed(String originator, message, request, response, int status_code,
+  void _failed(String originator, message, request, response, int status_code,
       String cause, String reason_phrase) {
     logger.debug('session failed');
 
@@ -2885,28 +2888,28 @@ class RTCSession extends EventManager {
         response: response));
   }
 
-  _onhold(String originator) {
+  void _onhold(String originator) {
     logger.debug('session onhold');
     this._setLocalMediaStatus();
     logger.debug('emit "hold"');
     this.emit(EventCallHold(session: this, originator: originator));
   }
 
-  _onunhold(String originator) {
+  void _onunhold(String originator) {
     logger.debug('session onunhold');
     this._setLocalMediaStatus();
     logger.debug('emit "unhold"');
     this.emit(EventCallUnhold(session: this, originator: originator));
   }
 
-  _onmute([bool audio, bool video]) {
+  void _onmute([bool audio, bool video]) {
     logger.debug('session onmute');
     this._setLocalMediaStatus();
     logger.debug('emit "muted"');
     this.emit(EventCallMuted(session: this, audio: audio, video: video));
   }
 
-  _onunmute([bool audio, bool video]) {
+  void _onunmute([bool audio, bool video]) {
     logger.debug('session onunmute');
     this._setLocalMediaStatus();
     logger.debug('emit "unmuted"');

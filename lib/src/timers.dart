@@ -32,6 +32,6 @@ Timer setInterval(fn, interval) {
   });
 }
 
-clearInterval(Timer timer) {
+void clearInterval(Timer timer) {
   if (timer != null) timer.cancel();
 }

@@ -14,7 +14,6 @@ analyzer:
     curly_braces_in_flow_control_structures: ignore
     unnecessary_null_in_if_null_operators: ignore
     prefer_contains: ignore
-    missing_return: ignore
     override_on_non_overriding_getter: ignore
     override_on_non_overriding_field: ignore
     override_on_non_overriding_method: ignore

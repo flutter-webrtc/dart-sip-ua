@@ -87,7 +87,7 @@ IncomingMessage parseMessage(String data, UA ua) {
     if (contentLength is String) {
       contentLength = int.tryParse(contentLength) ?? 0;
     }
-        if(contentLength > 0) {
+    if (contentLength > 0) {
       var encoded = utf8.encode(data);
       List<int> content = encoded.sublist(bodyStart, bodyStart + contentLength);
       message.body = utf8.decode(content);
@@ -102,7 +102,7 @@ IncomingMessage parseMessage(String data, UA ua) {
 /**
  * Extract and parse every header of a SIP message.
  */
-getHeader(String data, int headerStart) {
+int getHeader(String data, int headerStart) {
   // 'start' position of the header.
   int start = headerStart;
   // 'end' position of the header.
@@ -140,7 +140,7 @@ getHeader(String data, int headerStart) {
   return end;
 }
 
-parseHeader(IncomingMessage message, data, headerStart, headerEnd) {
+dynamic parseHeader(IncomingMessage message, data, headerStart, headerEnd) {
   var parsed;
   var hcolonIndex = data.indexOf(':', headerStart);
   var headerName = data.substring(headerStart, hcolonIndex).trim();

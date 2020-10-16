@@ -87,14 +87,14 @@ class Registrator {
 
   get transport => this._transport;
 
-  setExtraHeaders(extraHeaders) {
+  void setExtraHeaders(extraHeaders) {
     if (extraHeaders is! List) {
       extraHeaders = [];
     }
     this._extraHeaders = extraHeaders;
   }
 
-  setExtraContactParams(extraContactParams) {
+  void setExtraContactParams(extraContactParams) {
     if (extraContactParams is! Map) {
       extraContactParams = {};
     }
@@ -110,7 +110,7 @@ class Registrator {
     });
   }
 
-  setExtraContactUriParams(extraContactUriParams) {
+  void setExtraContactUriParams(extraContactUriParams) {
     if (extraContactUriParams is! Map) {
       extraContactUriParams = {};
     }
@@ -125,7 +125,7 @@ class Registrator {
     this._contact = contact.toString();
   }
 
-  register() {
+  void register() {
     if (this._registering) {
       logger.debug('Register request in progress...');
       return;
@@ -283,7 +283,7 @@ class Registrator {
     request_sender.send();
   }
 
-  unregister(unregister_all) {
+  void unregister(unregister_all) {
     if (this._registered == null) {
       logger.debug('already unregistered');
 
@@ -354,13 +354,13 @@ class Registrator {
     request_sender.send();
   }
 
-  close() {
+  void close() {
     if (this._registered) {
       this.unregister(false);
     }
   }
 
-  onTransportClosed() {
+  void onTransportClosed() {
     this._registering = false;
     if (this._registrationTimer != null) {
       clearTimeout(this._registrationTimer);
@@ -373,7 +373,7 @@ class Registrator {
     }
   }
 
-  _registrationFailure(response, cause) {
+  void _registrationFailure(response, cause) {
     this._registering = false;
     this._ua.registrationFailed(response: response, cause: cause);
 
@@ -383,7 +383,7 @@ class Registrator {
     }
   }
 
-  _unregistered([response, cause]) {
+  void _unregistered([response, cause]) {
     this._registering = false;
     this._registered = false;
     this._ua.unregistered(response: response, cause: cause);

@@ -30,7 +30,7 @@ IncomingMessage message;
 UA ua;
 Transport transport;
 
-sanityCheck(IncomingMessage m, UA u, Transport t) {
+bool sanityCheck(IncomingMessage m, UA u, Transport t) {
   message = m;
   ua = u;
   transport = t;
@@ -79,15 +79,17 @@ sanityCheck(IncomingMessage m, UA u, Transport t) {
  */
 
 // Sanity Check functions for requests.
-rfc3261_8_2_2_1() {
+bool rfc3261_8_2_2_1() {
   if (message.s('to').uri.scheme != 'sip') {
     reply(416);
 
     return false;
   }
+
+  return true;
 }
 
-rfc3261_16_3_4() {
+bool rfc3261_16_3_4() {
   if (message.to_tag == null) {
     if (message.call_id.substring(0, 5) == ua.configuration.jssip_id) {
       reply(482);
@@ -95,9 +97,10 @@ rfc3261_16_3_4() {
       return false;
     }
   }
+  return true;
 }
 
-rfc3261_18_3_request() {
+bool rfc3261_18_3_request() {
   var len = Utils.str_utf8_length(message.body);
   var contentLength = message.getHeader('content-length');
 
@@ -110,9 +113,11 @@ rfc3261_18_3_request() {
 
     return false;
   }
+
+  return true;
 }
 
-rfc3261_8_2_2_2() {
+bool rfc3261_8_2_2_2() {
   var fromTag = message.from_tag;
   var call_id = message.call_id;
   var cseq = message.cseq;
@@ -168,19 +173,22 @@ rfc3261_8_2_2_2() {
       }
     });
   }
+
+  return true;
 }
 
 // Sanity Check functions for responses.
-rfc3261_8_1_3_3() {
+bool rfc3261_8_1_3_3() {
   if (message.getHeaders('via').length > 1) {
     logger.debug(
         'more than one Via header field present in the response, dropping the response');
 
     return false;
   }
+  return true;
 }
 
-rfc3261_18_3_response() {
+bool rfc3261_18_3_response() {
   var len = Utils.str_utf8_length(message.body);
   var contentLength = message.getHeader('content-length');
 
@@ -194,10 +202,12 @@ rfc3261_18_3_response() {
 
     return false;
   }
+
+  return true;
 }
 
 // Sanity Check functions for requests and responses.
-minimumHeaders() {
+bool minimumHeaders() {
   var mandatoryHeaders = ['from', 'to', 'call_id', 'cseq', 'via'];
 
   for (var header in mandatoryHeaders) {
@@ -208,10 +218,12 @@ minimumHeaders() {
       return false;
     }
   }
+
+  return true;
 }
 
 // Reply.
-reply(status_code) {
+void reply(status_code) {
   var vias = message.getHeaders('via');
 
   var to;

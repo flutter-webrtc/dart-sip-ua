@@ -32,12 +32,12 @@ class NonInviteClientTransaction extends TransactionBase {
     this.ua.newTransaction(this);
   }
 
-  stateChanged(state) {
+  void stateChanged(state) {
     this.state = state;
     this.emit(EventStateChanged());
   }
 
-  send() {
+  void send() {
     this.stateChanged(TransactionState.TRYING);
     this.F = setTimeout(() {
       this.timer_F();
@@ -48,7 +48,7 @@ class NonInviteClientTransaction extends TransactionBase {
     }
   }
 
-  onTransportError() {
+  void onTransportError() {
     logger.debug('transport error occurred, deleting transaction ${this.id}');
     clearTimeout(this.F);
     clearTimeout(this.K);
@@ -57,14 +57,14 @@ class NonInviteClientTransaction extends TransactionBase {
     this.eventHandlers.emit(EventOnTransportError());
   }
 
-  timer_F() {
+  void timer_F() {
     logger.debug('Timer F expired for transaction ${this.id}');
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
     this.eventHandlers.emit(EventOnRequestTimeout());
   }
 
-  timer_K() {
+  void timer_K() {
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
   }

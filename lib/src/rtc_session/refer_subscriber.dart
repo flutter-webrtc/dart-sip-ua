@@ -1,3 +1,5 @@
+import 'package:sip_ua/src/rtc_session.dart';
+
 import '../../sip_ua.dart';
 import '../constants.dart' as DartSIP_C;
 import '../constants.dart';
@@ -9,14 +11,13 @@ import '../logger.dart';
 
 class ReferSubscriber extends EventManager {
   var _id = null;
-  var _session = null;
-  final logger = Log();
+  RTCSession _session = null;
 
   ReferSubscriber(this._session);
 
   get id => this._id;
 
-  sendRefer(target, options) {
+  void sendRefer(target, options) {
     logger.debug('sendRefer()');
 
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
@@ -72,7 +73,7 @@ class ReferSubscriber extends EventManager {
     this._id = request.cseq;
   }
 
-  receiveNotify(request) {
+  void receiveNotify(request) {
     logger.debug('receiveNotify()');
 
     if (request.body == null) {
@@ -104,7 +105,7 @@ class ReferSubscriber extends EventManager {
     }
   }
 
-  _requestSucceeded(response) {
+  void _requestSucceeded(response) {
     logger.debug('REFER succeeded');
 
     logger.debug('emit "requestSucceeded"');
@@ -112,7 +113,7 @@ class ReferSubscriber extends EventManager {
     this.emit(EventReferRequestSucceeded(response: response));
   }
 
-  _requestFailed(response, cause) {
+  void _requestFailed(response, cause) {
     logger.debug('REFER failed');
 
     logger.debug('emit "requestFailed"');

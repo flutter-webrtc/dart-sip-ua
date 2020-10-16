@@ -9,39 +9,39 @@ import 'grammar.dart';
 import 'uri.dart';
 import 'constants.dart' as DartSIP_C;
 
-test100(statusCode) {
+bool test100(String statusCode) {
   return statusCode.contains(new RegExp(r'^100$'));
 }
 
-test1XX(statusCode) {
+bool test1XX(String statusCode) {
   return statusCode.contains(new RegExp(r'^1[0-9]{2}$'));
 }
 
-test2XX(statusCode) {
+bool test2XX(String statusCode) {
   return statusCode.contains(new RegExp(r'^2[0-9]{2}$'));
 }
 
 class Math {
   static final _random = DartMath.Random();
-  static floor(num) {
+  static num floor(num) {
     return num.floor();
   }
 
-  static abs(num) {
+  static num abs(num) {
     return num.abs();
   }
 
-  static randomDouble() => _random.nextDouble();
-  static random() => _random.nextInt(0x7FFFFFFF);
-  static pow(a, b) {
+  static double randomDouble() => _random.nextDouble();
+  static int random() => _random.nextInt(0x7FFFFFFF);
+  static num pow(a, b) {
     return DartMath.pow(a, b);
   }
 }
 
-str_utf8_length(string) => unescape(encodeURIComponent(string)).length;
+int str_utf8_length(string) => unescape(encodeURIComponent(string)).length;
 
 // Used by 'hasMethods'.
-isFunction(fn) {
+bool isFunction(fn) {
   if (fn != null) {
     return (fn is Function);
   } else {
@@ -49,7 +49,7 @@ isFunction(fn) {
   }
 }
 
-isString(str) {
+bool isString(str) {
   if (str != null) {
     return (str is String);
   } else {
@@ -57,19 +57,19 @@ isString(str) {
   }
 }
 
-isNaN(input) {
+bool isNaN(input) {
   return input.isNaN;
 }
 
-parseInt(input, radix) {
+int parseInt(input, radix) {
   return int.tryParse(input, radix: radix) ?? null;
 }
 
-parseFloat(input) {
+double parseFloat(input) {
   return double.tryParse(input) ?? null;
 }
 
-decodeURIComponent(str) {
+String decodeURIComponent(str) {
   try {
     return Uri.decodeComponent(str);
   } catch (_) {
@@ -77,22 +77,22 @@ decodeURIComponent(str) {
   }
 }
 
-encodeURIComponent(str) {
+String encodeURIComponent(str) {
   return Uri.encodeComponent(str);
 }
 
-unescape(str) {
+String unescape(String str) {
   //TODO:  ???
   return str;
 }
 
-isDecimal(input) =>
+bool isDecimal(input) =>
     input != null &&
     ((input is num && !isNaN(input)) ||
         (input is! num &&
             (parseFloat(input) != null || parseInt(input, 10) != null)));
 
-isEmpty(value) {
+bool isEmpty(value) {
   return (value == null ||
       value == '' ||
       value == null ||
@@ -107,9 +107,9 @@ String createRandomToken(size, {base = 32}) {
 
 String newTag() => createRandomToken(10);
 
-newUUID() => new Uuid().v4();
+String newUUID() => new Uuid().v4();
 
-hostType(host) {
+dynamic hostType(host) {
   if (host == null) {
     return null;
   } else {
@@ -126,7 +126,7 @@ hostType(host) {
 *
 * Used by 'normalizeTarget'.
 */
-escapeUser(user) => encodeURIComponent(decodeURIComponent(user))
+String escapeUser(user) => encodeURIComponent(decodeURIComponent(user))
     .replaceAll(new RegExp(r'%3A', caseSensitive: false), ':')
     .replaceAll(new RegExp(r'%2B', caseSensitive: false), '+')
     .replaceAll(new RegExp(r'%3F', caseSensitive: false), '?')
@@ -139,7 +139,7 @@ escapeUser(user) => encodeURIComponent(decodeURIComponent(user))
 * Detects the domain part (if given) and properly hex-escapes the user portion.
 * If the user portion has only 'tel' number symbols the user portion is clean of 'tel' visual separators.
 */
-normalizeTarget(target, [domain]) {
+URI normalizeTarget(target, [domain]) {
   // If no target is given then raise an error.
   if (target == null) {
     return null;
@@ -192,7 +192,7 @@ normalizeTarget(target, [domain]) {
   }
 }
 
-headerize(String string) {
+String headerize(String string) {
   var exceptions = {
     'Call-Id': 'Call-ID',
     'Cseq': 'CSeq',
@@ -219,7 +219,7 @@ headerize(String string) {
   return hname;
 }
 
-sipErrorCause(statusCode) {
+String sipErrorCause(statusCode) {
   var reason = DartSIP_C.Causes.SIP_FAILURE_CODE;
   DartSIP_C.SIP_ERROR_CAUSES.forEach((key, value) {
     if (value.contains(statusCode)) {
@@ -229,21 +229,10 @@ sipErrorCause(statusCode) {
   return reason;
 }
 
-/**
-* Generate a random Test-Net IP (https://tools.ietf.org/html/rfc5735)
-*/
-getRandomTestNetIP() {
-  getOctet(from, to) {
-    return num.parse(Math.floor(Math.random() * (to - from + 1)) + from);
-  }
-
-  return '192.0.2.' + getOctet(1, 254).toString();
-}
-
-calculateMD5(string) {
+String calculateMD5(string) {
   return md5.convert(utf8.encode(string)).toString();
 }
 
-cloneArray(array) {
+List cloneArray(array) {
   return (array != null && array is List) ? array.sublist(0) : [];
 }

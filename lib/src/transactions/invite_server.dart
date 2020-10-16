@@ -32,12 +32,12 @@ class InviteServerTransaction extends TransactionBase {
     request.reply(100);
   }
 
-  stateChanged(state) {
+  void stateChanged(state) {
     this.state = state;
     this.emit(EventStateChanged());
   }
 
-  timer_H() {
+  void timer_H() {
     logger.debug('Timer H expired for transaction ${this.id}');
 
     if (this.state == TransactionState.COMPLETED) {
@@ -48,12 +48,12 @@ class InviteServerTransaction extends TransactionBase {
     this.ua.destroyTransaction(this);
   }
 
-  timer_I() {
+  void timer_I() {
     this.stateChanged(TransactionState.TERMINATED);
   }
 
   // RFC 6026 7.1.
-  timer_L() {
+  void timer_L() {
     logger.debug('Timer L expired for transaction ${this.id}');
 
     if (this.state == TransactionState.ACCEPTED) {
@@ -62,7 +62,7 @@ class InviteServerTransaction extends TransactionBase {
     }
   }
 
-  onTransportError() {
+  void onTransportError() {
     if (this.transportError == null) {
       this.transportError = true;
 
@@ -82,13 +82,14 @@ class InviteServerTransaction extends TransactionBase {
     }
   }
 
-  resend_provisional() {
+  void resend_provisional() {
     if (!this.transport.send(this.last_response)) {
       this.onTransportError();
     }
   }
 
   // INVITE Server Transaction RFC 3261 17.2.1.
+  @override
   void receiveResponse(int status_code, IncomingMessage response,
       [void Function() onSuccess, void Function() onFailure]) {
     if (status_code >= 100 && status_code <= 199) {

@@ -247,7 +247,7 @@ class Checks {
 
 final checks = new Checks();
 
-load(dst, src) {
+void load(dst, src) {
   try {
     // Check Mandatory parameters.
     checks.mandatory.forEach((parameter, fun) {

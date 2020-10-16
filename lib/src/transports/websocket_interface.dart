@@ -15,8 +15,7 @@ class WebSocketInterface implements Socket {
   String _url;
   String _sip_uri;
   String _via_transport;
-  String _websocket_protocol = 'sip';
-  bool _allowBadCertificate = false;
+  final String _websocket_protocol = 'sip';
   WebSocketImpl _ws;
   var _closed = false;
   var _connected = false;
@@ -54,20 +53,21 @@ class WebSocketInterface implements Socket {
   }
 
   @override
-  get via_transport => this._via_transport;
+  String get via_transport => this._via_transport;
 
-  set via_transport(value) {
+  @override
+  set via_transport(String value) {
     this._via_transport = value.toUpperCase();
   }
 
   @override
-  get sip_uri => this._sip_uri;
+  String get sip_uri => this._sip_uri;
 
   @override
-  get url => this._url;
+  String get url => this._url;
 
   @override
-  connect() async {
+  void connect() async {
     logger.debug('connect()');
     if (this.isConnected()) {
       logger.debug('WebSocket ${this._url} is already connected');
@@ -111,7 +111,7 @@ class WebSocketInterface implements Socket {
   }
 
   @override
-  disconnect() {
+  void disconnect() {
     logger.debug('disconnect()');
     if (this._closed) return;
     // Don't wait for the WebSocket 'close' event, do it now.

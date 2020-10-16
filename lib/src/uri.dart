@@ -20,7 +20,7 @@ class URI {
     * Parse the given string and returns a DartSIP.URI instance or null if
     * it is an invalid URI.
     */
-  static parse(uri) {
+  static dynamic parse(uri) {
     try {
       return Grammar.parse(uri, 'SIP_URI');
     } catch (_) {
@@ -86,17 +86,18 @@ class URI {
         value == 0 ? value : (value != null) ? Utils.parseInt(value, 10) : null;
   }
 
-  setParam(key, value) {
+  void setParam(key, value) {
     if (key != null) {
       this._parameters[key.toLowerCase()] =
           (value == null) ? null : value.toString();
     }
   }
 
-  getParam(key) {
+  dynamic getParam(key) {
     if (key != null) {
       return this._parameters[key.toLowerCase()];
     }
+    return null;
   }
 
   bool hasParam(key) {
@@ -106,7 +107,7 @@ class URI {
     return false;
   }
 
-  deleteParam(parameter) {
+  dynamic deleteParam(parameter) {
     parameter = parameter.toLowerCase();
     if (this._parameters.containsKey(parameter)) {
       var value = this._parameters[parameter];
@@ -115,41 +116,44 @@ class URI {
     }
   }
 
-  clearParams() {
+  void clearParams() {
     this._parameters = {};
   }
 
-  setHeader(name, value) {
+  void setHeader(name, value) {
     this._headers[Utils.headerize(name)] = (value is List) ? value : [value];
   }
 
-  getHeader(name) {
+  dynamic getHeader(name) {
     if (name != null) {
       return this._headers[Utils.headerize(name)];
     }
+    null;
   }
 
-  hasHeader(name) {
+  bool hasHeader(name) {
     if (name != null) {
       return (this._headers.containsKey(Utils.headerize(name)) && true) ||
           false;
     }
+    return false;
   }
 
-  deleteHeader(header) {
+  dynamic deleteHeader(header) {
     header = Utils.headerize(header);
     if (this._headers.containsKey(header)) {
       var value = this._headers[header];
       this._headers.remove(header);
       return value;
     }
+    return null;
   }
 
-  clearHeaders() {
+  void clearHeaders() {
     this._headers = {};
   }
 
-  clone() {
+  URI clone() {
     return new URI(
         this.scheme,
         this.user,
@@ -159,7 +163,7 @@ class URI {
         decoder.convert(encoder.convert(this._headers)));
   }
 
-  toString() {
+  String toString() {
     var headers = [];
 
     var uri = '${this._scheme}:';
@@ -193,7 +197,7 @@ class URI {
     return uri;
   }
 
-  toAor({show_port = false}) {
+  String toAor({show_port = false}) {
     var aor = '${this._scheme}:';
 
     if (this._user != null) {

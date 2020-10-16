@@ -19,7 +19,7 @@ class DTMF extends EventManager {
   var _session;
   var _direction;
   var _tone;
-  var _duration;
+  int _duration;
   var _request;
   EventManager eventHandlers;
   final logger = Log();
@@ -32,13 +32,13 @@ class DTMF extends EventManager {
     this._request = null;
   }
 
-  get tone => this._tone;
+  String get tone => this._tone;
 
-  get duration => this._duration;
+  int get duration => this._duration;
 
-  get direction => this._direction;
+  String get direction => this._direction;
 
-  send(tone, options) {
+  void send(tone, options) {
     if (tone == null) {
       throw new Exceptions.TypeError('Not enough arguments');
     }
@@ -110,7 +110,7 @@ class DTMF extends EventManager {
     });
   }
 
-  init_incoming(request) {
+  void init_incoming(request) {
     var reg_tone = r'^(Signal\s*?=\s*?)([0-9A-D#*]{1})(\s)?.*';
     var reg_duration = r'^(Duration\s?=\s?)([0-9]{1,4})(\s)?.*';
 

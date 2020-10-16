@@ -5,7 +5,7 @@ var testFunctions = [
   () => test("NormalizeTarget: valid targets", () {
         var domain = 'jssip.net';
 
-        test_ok(given_data, expected) {
+        void test_ok(given_data, expected) {
           var uri = Utils.normalizeTarget(given_data, domain);
           expect(uri.toString(), expected);
         }
@@ -36,7 +36,7 @@ var testFunctions = [
   () => test("NormalizeTarget: invalid targets", () {
         var domain = 'jssip.net';
 
-        test_error(given_data) {
+        void test_error(given_data) {
           expect(Utils.normalizeTarget(given_data, domain), null);
         }
 

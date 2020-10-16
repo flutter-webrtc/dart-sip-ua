@@ -27,7 +27,7 @@ class ReferNotifier {
     this.notify(100);
   }
 
-  notify(code, [reason]) {
+  void notify(code, [reason]) {
     logger.debug('notify()');
 
     if (this._active == false) {

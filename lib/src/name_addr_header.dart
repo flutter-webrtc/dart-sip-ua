@@ -12,7 +12,7 @@ class NameAddrHeader {
    * Parse the given string and returns a NameAddrHeader instance or null if
    * it is an invalid NameAddrHeader.
    */
-  static parse(name_addr_header) {
+  static dynamic parse(name_addr_header) {
     name_addr_header = Grammar.parse(name_addr_header, 'Name_Addr_Header');
 
     if (name_addr_header != -1) {
@@ -48,14 +48,14 @@ class NameAddrHeader {
     this._display_name = (value == 0) ? '0' : value;
   }
 
-  setParam(key, value) {
+  void setParam(key, value) {
     if (key != null) {
       this._parameters[key.toLowerCase()] =
           (value == null) ? null : value.toString();
     }
   }
 
-  getParam(key) {
+  dynamic getParam(key) {
     if (key != null) {
       return this._parameters[key.toLowerCase()];
     }
@@ -68,7 +68,7 @@ class NameAddrHeader {
     return false;
   }
 
-  deleteParam(parameter) {
+  dynamic deleteParam(parameter) {
     parameter = parameter.toLowerCase();
     if (this._parameters[parameter] != null) {
       var value = this._parameters[parameter];
@@ -77,20 +77,20 @@ class NameAddrHeader {
     }
   }
 
-  clearParams() {
+  void clearParams() {
     this._parameters = {};
   }
 
-  clone() {
+  NameAddrHeader clone() {
     return new NameAddrHeader(this._uri.clone(), this._display_name,
         decoder.convert(encoder.convert(this._parameters)));
   }
 
-  _quote(str) {
+  String _quote(str) {
     return str.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   }
 
-  toString() {
+  String toString() {
     var body = (this._display_name != null && this._display_name.length > 0)
         ? '"${this._quote(this._display_name)}" '
         : '';

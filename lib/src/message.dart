@@ -14,8 +14,8 @@ import 'logger.dart';
 class Message extends EventManager {
   UA _ua;
   var _request;
-  var _closed;
-  var _direction;
+  bool _closed;
+  String _direction;
   var _local_identity;
   var _remote_identity;
   var _is_replied;
@@ -38,7 +38,7 @@ class Message extends EventManager {
     this._data = {};
   }
 
-  get direction => this._direction;
+  String get direction => this._direction;
 
   get local_identity => this._local_identity;
 
@@ -46,7 +46,7 @@ class Message extends EventManager {
 
   get data => this._data;
 
-  send(String target, String body, [Map<String, dynamic> options]) {
+  void send(String target, String body, [Map<String, dynamic> options]) {
     var originalTarget = target;
     options = options ?? {};
 
@@ -71,7 +71,7 @@ class Message extends EventManager {
     extraHeaders.add('Content-Type: $contentType');
 
     this._request = new SIPMessage.OutgoingRequest(
-      SipMethod.MESSAGE, normalized, this._ua, null, extraHeaders);
+        SipMethod.MESSAGE, normalized, this._ua, null, extraHeaders);
     if (body != null) {
       this._request.body = body;
     }
@@ -98,7 +98,7 @@ class Message extends EventManager {
     request_sender.send();
   }
 
-  init_incoming(request) {
+  void init_incoming(request) {
     this._request = request;
 
     this._newMessage('remote', request);
@@ -116,7 +116,7 @@ class Message extends EventManager {
    * Accept the incoming Message
    * Only valid for incoming Messages
    */
-  accept(options) {
+  void accept(options) {
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
     var body = options['body'];
 
@@ -137,7 +137,7 @@ class Message extends EventManager {
    * Reject the incoming Message
    * Only valid for incoming Messages
    */
-  reject(options) {
+  void reject(options) {
     var status_code = options['status_code'] ?? 480;
     var reason_phrase = options['reason_phrase'];
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
@@ -160,7 +160,7 @@ class Message extends EventManager {
     this._request.reply(status_code, reason_phrase, extraHeaders, body);
   }
 
-  _receiveResponse(response) {
+  void _receiveResponse(response) {
     if (this._closed != null) {
       return;
     }
@@ -175,7 +175,7 @@ class Message extends EventManager {
     }
   }
 
-  _onRequestTimeout() {
+  void _onRequestTimeout() {
     if (this._closed != null) {
       return;
     }
@@ -183,7 +183,7 @@ class Message extends EventManager {
         'system', 408, DartSIP_C.causes.REQUEST_TIMEOUT, 'Request Timeout');
   }
 
-  _onTransportError() {
+  void _onTransportError() {
     if (this._closed != null) {
       return;
     }
@@ -191,7 +191,7 @@ class Message extends EventManager {
         'system', 500, DartSIP_C.causes.CONNECTION_ERROR, 'Transport Error');
   }
 
-  close() {
+  void close() {
     this._closed = true;
     this._ua.destroyMessage(this);
   }
@@ -200,7 +200,7 @@ class Message extends EventManager {
    * Internal Callbacks
    */
 
-  _newMessage(originator, request) {
+  void _newMessage(originator, request) {
     if (originator == 'remote') {
       this._direction = 'incoming';
       this._local_identity = request.to;
@@ -214,7 +214,7 @@ class Message extends EventManager {
     this._ua.newMessage(this, originator, request);
   }
 
-  _failed(
+  void _failed(
       String originator, int status_code, String cause, String reason_phrase) {
     logger.debug('MESSAGE failed');
     this.close();
@@ -227,7 +227,7 @@ class Message extends EventManager {
             reason_phrase: reason_phrase)));
   }
 
-  _succeeded(String originator, IncomingResponse response) {
+  void _succeeded(String originator, IncomingResponse response) {
     logger.debug('MESSAGE succeeded');
 
     this.close();

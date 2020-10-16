@@ -34,23 +34,23 @@ class DigestAuthentication {
   var _nc = 0;
   var _ncHex = '00000000';
   var _algorithm;
-  var _realm;
+  String _realm;
   var _nonce;
   var _opaque;
   var _stale;
   var _qop;
   SipMethod _method;
   var _uri;
-  var _ha1;
-  var _response;
-  Credentials _credentials;
+  String _ha1;
+  String _response;
+  final Credentials _credentials;
   final logger = new Log();
 
   DigestAuthentication(this._credentials);
 
-  get response => _response;
+  String get response => _response;
 
-  get(parameter) {
+  String get(parameter) {
     switch (parameter) {
       case 'realm':
         return this._realm;
@@ -71,7 +71,8 @@ class DigestAuthentication {
 * received in a response to that request.
 * Returns true if auth was successfully generated, false otherwise.
 */
-  authenticate(SipMethod method, Challenge challenge, [ruri, cnonce, body]) {
+  bool authenticate(SipMethod method, Challenge challenge,
+      [ruri, cnonce, body]) {
     this._algorithm = challenge.algorithm;
     this._realm = challenge.realm;
     this._nonce = challenge.nonce;
@@ -211,7 +212,7 @@ class DigestAuthentication {
 /**
 * Return the Proxy-Authorization or WWW-Authorization header value.
 */
-  toString() {
+  String toString() {
     var auth_params = [];
 
     if (this._response == null) {

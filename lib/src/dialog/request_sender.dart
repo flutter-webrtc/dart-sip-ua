@@ -33,7 +33,7 @@ class DialogRequestSender {
 
   OutgoingRequest get request => this._request;
 
-  send() {
+  void send() {
     EventManager localEventHandlers = EventManager();
     localEventHandlers.on(EventOnRequestTimeout(),
         (EventOnRequestTimeout value) {
@@ -80,7 +80,7 @@ class DialogRequestSender {
     }
   }
 
-  _receiveResponse(response) {
+  void _receiveResponse(response) {
     // RFC3261 12.2.1.2 408 or 481 is received for a request within a dialog.
     if (response.status_code == 408 || response.status_code == 481) {
       this._eventHandlers.emit(EventOnDialogError(response: response));

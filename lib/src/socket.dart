@@ -2,18 +2,19 @@ import 'grammar.dart';
 import 'utils.dart' as Utils;
 import 'transports/websocket_interface.dart';
 import 'logger.dart';
+import 'uri.dart';
 
 final logger = Log();
 
 /// Socket Interface.
 abstract class Socket {
-  get via_transport;
-  get url;
-  get sip_uri;
+  String via_transport;
+  String get url;
+  String get sip_uri;
 
-  connect();
-  disconnect();
-  send(data);
+  void connect();
+  void disconnect();
+  void send(data);
 
   void Function() onconnect;
   void Function(
@@ -22,7 +23,7 @@ abstract class Socket {
   void Function(dynamic data) ondata;
 }
 
-isSocket(socket) {
+bool isSocket(socket) {
   // Ignore if an array is given.
   if (socket is List) {
     return false;

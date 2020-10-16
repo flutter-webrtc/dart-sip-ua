@@ -28,18 +28,18 @@ class NonInviteServerTransaction extends TransactionBase {
     ua.newTransaction(this);
   }
 
-  stateChanged(state) {
+  void stateChanged(state) {
     this.state = state;
     this.emit(EventStateChanged());
   }
 
-  timer_J() {
+  void timer_J() {
     logger.debug('Timer J expired for transaction ${this.id}');
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
   }
 
-  onTransportError() {
+  void onTransportError() {
     if (this.transportError == null) {
       this.transportError = true;
 
@@ -51,7 +51,7 @@ class NonInviteServerTransaction extends TransactionBase {
     }
   }
 
-  receiveResponse(int status_code, IncomingMessage response,
+  void receiveResponse(int status_code, IncomingMessage response,
       [void Function() onSuccess, void Function() onFailure]) {
     if (status_code == 100) {
       /* RFC 4320 4.1

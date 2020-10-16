@@ -21,13 +21,13 @@ class Info extends EventManager {
     this._body = null;
   }
 
-  get contentType => this._contentType;
+  String get contentType => this._contentType;
 
-  get body => this._body;
+  String get body => this._body;
 
-  get direction => this._direction;
+  String get direction => this._direction;
 
-  send(contentType, body, options) {
+  void send(contentType, body, options) {
     this._direction = 'outgoing';
 
     if (contentType == null) {
@@ -74,7 +74,7 @@ class Info extends EventManager {
     });
   }
 
-  init_incoming(request) {
+  void init_incoming(request) {
     this._direction = 'incoming';
     this.request = request;
 

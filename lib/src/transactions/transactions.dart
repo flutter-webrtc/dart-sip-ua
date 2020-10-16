@@ -15,12 +15,12 @@ class TransactionBag {
     return type.toString() + ':' + id;
   }
 
-  addTransaction(TransactionBase transaction) {
+  void addTransaction(TransactionBase transaction) {
     String key = _buildKey(transaction.runtimeType, transaction.id);
     transactions[key] = transaction;
   }
 
-  removeTransaction(TransactionBase transaction) {
+  void removeTransaction(TransactionBase transaction) {
     String key = _buildKey(transaction.runtimeType, transaction.id);
     transactions.remove(key);
   }
@@ -68,7 +68,7 @@ class TransactionBag {
  *  _true_  retransmission
  *  _false_ new request
  */
-checkTransaction(TransactionBag _transactions, request) {
+bool checkTransaction(TransactionBag _transactions, request) {
   switch (request.method) {
     case SipMethod.INVITE:
       InviteServerTransaction tr = _transactions.getTransaction(

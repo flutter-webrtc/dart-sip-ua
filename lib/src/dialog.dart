@@ -29,7 +29,7 @@ class Id {
 
   Id(this.call_id, this.local_tag, this.remote_tag);
 
-  toString() {
+  String toString() {
     return this.call_id + this.local_tag + this.remote_tag;
   }
 }
@@ -38,8 +38,8 @@ class Id {
 class Dialog {
   RTCSession _owner;
   UA _ua;
-  var _uac_pending_reply;
-  var _uas_pending_reply;
+  bool _uac_pending_reply;
+  bool _uas_pending_reply;
   var _state;
   var _remote_seqnum;
   var _local_uri;
@@ -47,11 +47,11 @@ class Dialog {
   var _remote_target;
   var _route_set;
   var _ack_seqnum;
-  var _id;
-  var _local_seqnum;
+  Id _id;
+  num _local_seqnum;
   final logger = new Log();
 
-  get ua => this._ua;
+  UA get ua => this._ua;
 
   Dialog(owner, message, type, [state]) {
     state = state ?? Dialog_C.STATUS_CONFIRMED;
@@ -111,25 +111,25 @@ class Dialog {
         'new ${type} dialog created with status ${this._state == Dialog_C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
-  get id => this._id;
+  Id get id => this._id;
 
-  get local_seqnum => this._local_seqnum;
+  num get local_seqnum => this._local_seqnum;
 
-  set local_seqnum(num) {
-    this._local_seqnum = num;
+  set local_seqnum(num n) {
+    this._local_seqnum = n;
   }
 
   RTCSession get owner => this._owner;
 
-  get uac_pending_reply => this._uac_pending_reply;
+  bool get uac_pending_reply => this._uac_pending_reply;
 
-  set uac_pending_reply(pending) {
+  set uac_pending_reply(bool pending) {
     this._uac_pending_reply = pending;
   }
 
-  get uas_pending_reply => this._uas_pending_reply;
+  bool get uas_pending_reply => this._uas_pending_reply;
 
-  update(message, type) {
+  void update(message, type) {
     this._state = Dialog_C.STATUS_CONFIRMED;
 
     logger.debug('dialog ${this._id.toString()}  changed to CONFIRMED state');
@@ -140,7 +140,7 @@ class Dialog {
     }
   }
 
-  terminate() {
+  void terminate() {
     logger.debug('dialog ${this._id.toString()} deleted');
     this._ua.destroyDialog(this);
   }
@@ -167,7 +167,7 @@ class Dialog {
     return request;
   }
 
-  receiveRequest(IncomingRequest request) {
+  void receiveRequest(IncomingRequest request) {
     // Check in-dialog request.
     if (!this._checkInDialogRequest(request)) {
       return;
@@ -218,7 +218,7 @@ class Dialog {
   }
 
   // RFC 3261 12.2.2.
-  _checkInDialogRequest(SIPMessage.IncomingRequest request) {
+  bool _checkInDialogRequest(SIPMessage.IncomingRequest request) {
     if (this._remote_seqnum == null) {
       this._remote_seqnum = request.cseq;
     } else if (request.cseq < this._remote_seqnum) {
@@ -243,7 +243,7 @@ class Dialog {
       if (this._uac_pending_reply == true) {
         request.reply(491);
       } else if (this._uas_pending_reply == true) {
-        var retryAfter = (Utils.Math.randomDouble() * 10 | 0) + 1;
+        var retryAfter = ((Utils.Math.randomDouble() * 10) % 10) + 1;
         request.reply(500, null, ['Retry-After:${retryAfter}']);
         return false;
       } else {
