@@ -103,8 +103,8 @@ class UA extends EventManager {
 
     this._cache = {'credentials': {}};
 
-    this._configuration = new Settings();
-    this._dynConfiguration = new DynamicSettings();
+    this._configuration = Settings();
+    this._dynConfiguration = DynamicSettings();
     this._dialogs = {};
 
     // User actions outside any session/dialog (MESSAGE).
@@ -124,7 +124,7 @@ class UA extends EventManager {
 
     // Check configuration argument.
     if (configuration == null) {
-      throw new Exceptions.ConfigurationError('Not enough arguments');
+      throw Exceptions.ConfigurationError('Not enough arguments');
     }
 
     // Load configuration.
@@ -137,7 +137,7 @@ class UA extends EventManager {
     }
 
     // Initialize registrator.
-    this._registrator = new Registrator(this);
+    this._registrator = Registrator(this);
   }
 
   int get status => this._status;
@@ -238,7 +238,7 @@ class UA extends EventManager {
    */
   RTCSession call(target, options) {
     logger.debug('call()');
-    RTCSession session = new RTCSession(this);
+    RTCSession session = RTCSession(this);
     session.connect(target, options);
     return session;
   }
@@ -256,7 +256,7 @@ class UA extends EventManager {
   Message sendMessage(
       String target, String body, Map<String, dynamic> options) {
     logger.debug('sendMessage()');
-    var message = new Message(this);
+    var message = Message(this);
     message.send(target, body, options);
     return message;
   }
@@ -404,7 +404,7 @@ class UA extends EventManager {
   // ==================
 
   /**
-   * new Transaction
+   * Transaction
    */
   void newTransaction(TransactionBase transaction) {
     this._transactions.addTransaction(transaction);
@@ -420,7 +420,7 @@ class UA extends EventManager {
   }
 
   /**
-   * new Dialog
+   * Dialog
    */
   void newDialog(Dialog dialog) {
     this._dialogs[dialog.id.toString()] = dialog;
@@ -434,7 +434,7 @@ class UA extends EventManager {
   }
 
   /**
-   *  new Message
+   *  Message
    */
   void newMessage(Message message, String originator, dynamic request) {
     this._applicants.add(message);
@@ -450,7 +450,7 @@ class UA extends EventManager {
   }
 
   /**
-   * new RTCSession
+   * RTCSession
    */
   void newRTCSession({RTCSession session, String originator, dynamic request}) {
     this._sessions[session.id] = session;
@@ -533,13 +533,13 @@ class UA extends EventManager {
 
     // Create the server transaction.
     if (method == SipMethod.INVITE) {
-      /* eslint-disable no-new */
-      new InviteServerTransaction(this, this._transport, request);
-      /* eslint-enable no-new */
+      /* eslint-disable no-*/
+      InviteServerTransaction(this, this._transport, request);
+      /* eslint-enable no-*/
     } else if (method != SipMethod.ACK && method != SipMethod.CANCEL) {
-      /* eslint-disable no-new */
-      new NonInviteServerTransaction(this, this._transport, request);
-      /* eslint-enable no-new */
+      /* eslint-disable no-*/
+      NonInviteServerTransaction(this, this._transport, request);
+      /* eslint-enable no-*/
     }
 
     /* RFC3261 12.2.2
@@ -554,7 +554,7 @@ class UA extends EventManager {
         request.reply(405);
         return;
       }
-      var message = new Message(this);
+      var message = Message(this);
       message.init_incoming(request);
       return;
     } else if (method == SipMethod.INVITE) {
@@ -590,7 +590,7 @@ class UA extends EventManager {
                 request.reply(481);
               }
             } else {
-              session = new RTCSession(this);
+              session = RTCSession(this);
               session.init_incoming(request);
             }
           } else {
@@ -618,8 +618,8 @@ class UA extends EventManager {
            */
           break;
         case SipMethod.NOTIFY:
-          // Receive new sip event.
-          this.emit(new EventSipEvent(request: request));
+          // Receive sip event.
+          this.emit(EventSipEvent(request: request));
           request.reply(200);
           break;
         default:
@@ -728,11 +728,11 @@ class UA extends EventManager {
     hostport_params.user = null;
     this._configuration.hostport_params = hostport_params
         .toString()
-        .replaceAll(new RegExp(r'sip:', caseSensitive: false), '');
+        .replaceAll(RegExp(r'sip:', caseSensitive: false), '');
 
     // Transport.
     try {
-      this._transport = new Transport(this._configuration.sockets, {
+      this._transport = Transport(this._configuration.sockets, {
         // Recovery options.
         'max_interval': this._configuration.connection_recovery_max_interval,
         'min_interval': this._configuration.connection_recovery_min_interval
@@ -745,7 +745,7 @@ class UA extends EventManager {
       this._transport.ondata = onTransportData;
     } catch (e) {
       logger.error('Failed to _loadConfig: ${e.toString()}');
-      throw new Exceptions.ConfigurationError(
+      throw Exceptions.ConfigurationError(
           'sockets', this._configuration.sockets);
     }
 
@@ -778,14 +778,10 @@ class UA extends EventManager {
     }
     // Contact URI.
     else {
-      this._configuration.contact_uri = new URI(
-          'sip',
-          Utils.createRandomToken(8),
-          this._configuration.via_host,
-          null,
-          {'transport': 'ws'});
+      this._configuration.contact_uri = URI('sip', Utils.createRandomToken(8),
+          this._configuration.via_host, null, {'transport': 'ws'});
     }
-    this._contact = new Contact(this._configuration.contact_uri);
+    this._contact = Contact(this._configuration.contact_uri);
 
     // Seal the configuration.
     /*

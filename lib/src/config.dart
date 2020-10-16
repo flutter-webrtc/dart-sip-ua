@@ -76,7 +76,7 @@ class Checks {
           }
         }
       } else {
-        throw new Exceptions.ConfigurationError("sockets", sockets);
+        throw Exceptions.ConfigurationError("sockets", sockets);
       }
 
       dst.sockets = _sockets;
@@ -84,16 +84,16 @@ class Checks {
     'uri': (src, dst) {
       var uri = src.uri;
       if (src.uri == null && dst.uri == null) {
-        throw new Exceptions.ConfigurationError("uri", null);
+        throw Exceptions.ConfigurationError("uri", null);
       }
-      if (!uri.contains(new RegExp(r'^sip:', caseSensitive: false))) {
+      if (!uri.contains(RegExp(r'^sip:', caseSensitive: false))) {
         uri = '${DartSIP_C.SIP}:${uri}';
       }
       var parsed = URI.parse(uri);
       if (parsed == null) {
-        throw new Exceptions.ConfigurationError("uri", parsed);
+        throw Exceptions.ConfigurationError("uri", parsed);
       } else if (parsed.user == null) {
-        throw new Exceptions.ConfigurationError("uri", parsed);
+        throw Exceptions.ConfigurationError("uri", parsed);
       } else {
         dst.uri = parsed;
       }
@@ -214,7 +214,7 @@ class Checks {
       var registrar_server = src.registrar_server;
       if (registrar_server == null) return;
       if (!registrar_server
-          .contains(new RegExp(r'^sip:', caseSensitive: false))) {
+          .contains(RegExp(r'^sip:', caseSensitive: false))) {
         registrar_server = '${DartSIP_C.SIP}:${registrar_server}';
       }
       var parsed = URI.parse(registrar_server);
@@ -243,7 +243,7 @@ class Checks {
   };
 }
 
-final checks = new Checks();
+final checks = Checks();
 
 void load(dst, src) {
   try {

@@ -18,7 +18,7 @@ class Timers {
 }
 
 Timer setTimeout(fn, duration) {
-  return new Timer(new Duration(milliseconds: duration), fn);
+  return Timer(Duration(milliseconds: duration), fn);
 }
 
 clearTimeout(Timer timer) {
@@ -26,8 +26,7 @@ clearTimeout(Timer timer) {
 }
 
 Timer setInterval(fn, interval) {
-  return new Timer.periodic(new Duration(milliseconds: interval),
-      (Timer timer) {
+  return Timer.periodic(Duration(milliseconds: interval), (Timer timer) {
     fn();
   });
 }

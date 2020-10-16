@@ -36,17 +36,17 @@ bool isSocket(socket) {
   try {
     if (!Utils.isString(socket.url)) {
       logger.error('missing or invalid DartSIP.Socket url property');
-      throw new Error();
+      throw Error();
     }
 
     if (!Utils.isString(socket.via_transport)) {
       logger.error('missing or invalid DartSIP.Socket via_transport property');
-      throw new Error();
+      throw Error();
     }
 
     if (Grammar.parse(socket.sip_uri, 'SIP_URI') == -1) {
       logger.error('missing or invalid DartSIP.Socket sip_uri property');
-      throw new Error();
+      throw Error();
     }
   } catch (e) {
     return false;

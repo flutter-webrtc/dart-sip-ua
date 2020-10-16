@@ -62,9 +62,9 @@ class WebSocketImpl {
   Future<WebSocket> _connectForBadCertificate(
       String url, WebSocketSettings webSocketSettings) async {
     try {
-      var r = new Random();
+      var r = Random();
       var key = base64.encode(List<int>.generate(16, (_) => r.nextInt(255)));
-      var securityContext = new SecurityContext();
+      var securityContext = SecurityContext();
       var client = HttpClient(context: securityContext);
 
       if (webSocketSettings.userAgent != null) {

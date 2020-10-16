@@ -138,7 +138,7 @@ class Registrator {
 
     logger.warn(this._contact);
 
-    var request = new OutgoingRequest(
+    var request = OutgoingRequest(
         SipMethod.REGISTER,
         this._registrar,
         this._ua,
@@ -224,7 +224,7 @@ class Registrator {
           this._registrationTimer = setTimeout(() {
             clearTimeout(this._registrationTimer);
             this._registrationTimer = null;
-            // If there are no listeners for registrationExpiring, renew registration.
+            // If there are no listeners for registrationExpiring, reregistration.
             // If there are listeners, var the listening do the register call.
             if (!this._ua.hasListeners(EventRegistrationExpiring())) {
               this.register();
@@ -249,7 +249,7 @@ class Registrator {
           }
         } else
         // Interval too brief RFC3261 10.2.8.
-        if (status_code.contains(new RegExp(r'^423$'))) {
+        if (status_code.contains(RegExp(r'^423$'))) {
           if (event.response.hasHeader('min-expires')) {
             // Increase our registration interval to the suggested minimum.
             this._expires =
@@ -275,8 +275,7 @@ class Registrator {
       }
     });
 
-    var request_sender =
-        new RequestSender(this._ua, request, localEventHandlers);
+    var request_sender = RequestSender(this._ua, request, localEventHandlers);
 
     this._registering = true;
     request_sender.send();
@@ -308,7 +307,7 @@ class Registrator {
 
     extraHeaders.add('Expires: 0');
 
-    var request = new OutgoingRequest(
+    var request = OutgoingRequest(
         SipMethod.REGISTER,
         this._registrar,
         this._ua,
@@ -347,8 +346,7 @@ class Registrator {
       }
     });
 
-    var request_sender =
-        new RequestSender(this._ua, request, localEventHandlers);
+    var request_sender = RequestSender(this._ua, request, localEventHandlers);
 
     request_sender.send();
   }

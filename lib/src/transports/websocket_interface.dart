@@ -37,10 +37,10 @@ class WebSocketInterface implements Socket {
     var parsed_url = Grammar.parse(url, 'absoluteURI');
     if (parsed_url == -1) {
       logger.error('invalid WebSocket URI: ${url}');
-      throw new AssertionError('Invalid argument: ${url}');
+      throw AssertionError('Invalid argument: ${url}');
     } else if (parsed_url.scheme != 'wss' && parsed_url.scheme != 'ws') {
       logger.error('invalid WebSocket URI scheme: ${parsed_url.scheme}');
-      throw new AssertionError('Invalid argument: ${url}');
+      throw AssertionError('Invalid argument: ${url}');
     } else {
       var port = parsed_url.port != null ? ':${parsed_url.port}' : '';
       this._sip_uri =

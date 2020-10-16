@@ -39,7 +39,7 @@ class DTMF extends EventManager {
 
   void send(tone, options) {
     if (tone == null) {
-      throw new Exceptions.TypeError('Not enough arguments');
+      throw Exceptions.TypeError('Not enough arguments');
     }
 
     this._direction = 'outgoing';
@@ -47,7 +47,7 @@ class DTMF extends EventManager {
     // Check RTCSession Status.
     if (this._session.status != RTCSession.C.STATUS_CONFIRMED &&
         this._session.status != RTCSession.C.STATUS_WAITING_FOR_ACK) {
-      throw new Exceptions.InvalidStateError(this._session.status);
+      throw Exceptions.InvalidStateError(this._session.status);
     }
 
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
@@ -60,12 +60,12 @@ class DTMF extends EventManager {
     } else if (tone is num) {
       tone = tone.toString();
     } else {
-      throw new Exceptions.TypeError('Invalid tone: ${tone}');
+      throw Exceptions.TypeError('Invalid tone: ${tone}');
     }
 
     // Check tone value.
-    if (!tone.contains(new RegExp(r'^[0-9A-DR#*]$'))) {
-      throw new Exceptions.TypeError('Invalid tone: ${tone}');
+    if (!tone.contains(RegExp(r'^[0-9A-DR#*]$'))) {
+      throw Exceptions.TypeError('Invalid tone: ${tone}');
     } else {
       this._tone = tone;
     }
@@ -122,12 +122,12 @@ class DTMF extends EventManager {
       var body = request.body.split('\n');
 
       if (body.length >= 1) {
-        if ((body[0]).contains(new RegExp(reg_tone))) {
+        if ((body[0]).contains(RegExp(reg_tone))) {
           this._tone = body[0].replaceAll(reg_tone, '\$2');
         }
       }
       if (body.length >= 2) {
-        if ((body[1]).contains(new RegExp(reg_duration))) {
+        if ((body[1]).contains(RegExp(reg_duration))) {
           this._duration =
               Utils.parseInt(body[1].replaceAll(reg_duration, '\$2'), 10);
         }

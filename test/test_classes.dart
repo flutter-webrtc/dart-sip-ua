@@ -4,7 +4,7 @@ import 'package:sip_ua/src/name_addr_header.dart';
 
 var testFunctions = [
   () => test("Class: URI", () {
-        var uri = new URI(null, 'alice', 'jssip.net', 6060);
+        var uri = URI(null, 'alice', 'jssip.net', 6060);
 
         expect(uri.scheme, 'sip');
         expect(uri.user, 'alice');
@@ -111,8 +111,8 @@ var testFunctions = [
         expect(uri.user, 'alice');
       }),
   () => test("Class: NameAddr", () {
-        var uri = new URI('sip', 'alice', 'jssip.net');
-        var name = new NameAddrHeader(uri, 'Alice æßð');
+        var uri = URI('sip', 'alice', 'jssip.net');
+        var name = NameAddrHeader(uri, 'Alice æßð');
 
         expect(name.display_name, 'Alice æßð');
         expect(name.toString(), '"Alice æßð" <sip:alice@jssip.net>');

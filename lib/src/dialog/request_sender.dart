@@ -52,7 +52,7 @@ class DialogRequestSender {
     });
 
     var request_sender =
-        new RequestSender(this._ua, this._request, localEventHandlers);
+        RequestSender(this._ua, this._request, localEventHandlers);
 
     request_sender.send();
 

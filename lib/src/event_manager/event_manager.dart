@@ -68,7 +68,7 @@ class EventManager {
     try {
       List<dynamic> targets = listeners[runtimeType];
       if (targets == null) {
-        targets = new List<dynamic>();
+        targets = List<dynamic>();
         listeners[runtimeType] = targets;
       }
       targets.remove(listener);

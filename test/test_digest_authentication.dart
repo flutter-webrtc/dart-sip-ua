@@ -28,7 +28,7 @@ var testFunctions = [
           'qop': 'auth'
         });
 
-        var digest = new DigestAuthentication(credentials);
+        var digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri, cnonce);
 
@@ -52,7 +52,7 @@ var testFunctions = [
           'qop': null
         });
 
-        var digest = new DigestAuthentication(credentials);
+        var digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri);
 
@@ -77,7 +77,7 @@ var testFunctions = [
           'qop': 'auth'
         });
 
-        var digest = new DigestAuthentication(credentials);
+        var digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri, cnonce);
 
@@ -104,7 +104,7 @@ var testFunctions = [
           'qop': 'auth-int'
         });
 
-        var digest = new DigestAuthentication(credentials);
+        var digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri, cnonce);
 
@@ -132,7 +132,7 @@ var testFunctions = [
           'qop': 'auth-int'
         });
 
-        var digest = new DigestAuthentication(credentials);
+        var digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri, cnonce, body);
 

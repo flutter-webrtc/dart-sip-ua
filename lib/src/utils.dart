@@ -10,15 +10,15 @@ import 'uri.dart';
 import 'constants.dart' as DartSIP_C;
 
 bool test100(String statusCode) {
-  return statusCode.contains(new RegExp(r'^100$'));
+  return statusCode.contains(RegExp(r'^100$'));
 }
 
 bool test1XX(String statusCode) {
-  return statusCode.contains(new RegExp(r'^1[0-9]{2}$'));
+  return statusCode.contains(RegExp(r'^1[0-9]{2}$'));
 }
 
 bool test2XX(String statusCode) {
-  return statusCode.contains(new RegExp(r'^2[0-9]{2}$'));
+  return statusCode.contains(RegExp(r'^2[0-9]{2}$'));
 }
 
 class Math {
@@ -107,7 +107,7 @@ String createRandomToken(size, {base = 32}) {
 
 String newTag() => createRandomToken(10);
 
-String newUUID() => new Uuid().v4();
+String newUUID() => Uuid().v4();
 
 dynamic hostType(host) {
   if (host == null) {
@@ -127,10 +127,10 @@ dynamic hostType(host) {
 * Used by 'normalizeTarget'.
 */
 String escapeUser(user) => encodeURIComponent(decodeURIComponent(user))
-    .replaceAll(new RegExp(r'%3A', caseSensitive: false), ':')
-    .replaceAll(new RegExp(r'%2B', caseSensitive: false), '+')
-    .replaceAll(new RegExp(r'%3F', caseSensitive: false), '?')
-    .replaceAll(new RegExp(r'%2F', caseSensitive: false), '/');
+    .replaceAll(RegExp(r'%3A', caseSensitive: false), ':')
+    .replaceAll(RegExp(r'%2B', caseSensitive: false), '+')
+    .replaceAll(RegExp(r'%3F', caseSensitive: false), '?')
+    .replaceAll(RegExp(r'%2F', caseSensitive: false), '/');
 
 /**
 * Normalize SIP URI.
@@ -174,11 +174,11 @@ URI normalizeTarget(target, [domain]) {
 
     // Remove the URI scheme (if present).
     targetUser = targetUser.replaceAll(
-        new RegExp(r'^(sips?|tel):', caseSensitive: false), '');
+        RegExp(r'^(sips?|tel):', caseSensitive: false), '');
 
     // Remove 'tel' visual separators if the user portion just contains 'tel' number symbols.
-    if (targetUser.contains(new RegExp(r'^[-.()]*\+?[0-9\-.()]+$'))) {
-      targetUser = targetUser.replaceAll(new RegExp(r'[-.()]'), '');
+    if (targetUser.contains(RegExp(r'^[-.()]*\+?[0-9\-.()]+$'))) {
+      targetUser = targetUser.replaceAll(RegExp(r'[-.()]'), '');
     }
 
     // Build the complete SIP URI.
@@ -208,9 +208,8 @@ String headerize(String string) {
     if (part != 0) {
       hname += '-';
     }
-    hname +=
-        new String.fromCharCodes([name[part].codeUnitAt(0)]).toUpperCase() +
-            name[part].substring(1);
+    hname += String.fromCharCodes([name[part].codeUnitAt(0)]).toUpperCase() +
+        name[part].substring(1);
   }
   if (exceptions[hname] != null) {
     hname = exceptions[hname];

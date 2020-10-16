@@ -34,12 +34,12 @@ IncomingMessage parseMessage(String data, UA ua) {
 
     return null;
   } else if (parsed.status_code == null) {
-    IncomingRequest incomingRequest = new IncomingRequest(ua);
+    IncomingRequest incomingRequest = IncomingRequest(ua);
     incomingRequest.method = parsed.method;
     incomingRequest.ruri = parsed.uri;
     message = incomingRequest;
   } else {
-    message = new IncomingResponse();
+    message = IncomingResponse();
     message.status_code = parsed.status_code;
     message.reason_phrase = parsed.reason_phrase;
   }
@@ -109,7 +109,7 @@ int getHeader(String data, int headerStart) {
   int partialEnd = 0;
 
   // End of message.
-  if (data.substring(start, start + 2).contains(new RegExp(r'(^\r\n)'))) {
+  if (data.substring(start, start + 2).contains(RegExp(r'(^\r\n)'))) {
     return -2;
   }
 
@@ -125,9 +125,9 @@ int getHeader(String data, int headerStart) {
 
     if (!data
             .substring(partialEnd + 2, partialEnd + 4)
-            .contains(new RegExp(r'(^\r\n)')) &&
+            .contains(RegExp(r'(^\r\n)')) &&
         (String.fromCharCode(data.codeUnitAt(partialEnd + 2)))
-            .contains(new RegExp(r'(^\s+)'))) {
+            .contains(RegExp(r'(^\s+)'))) {
       // Not the end of the message. Continue from the next position.
       start = partialEnd + 2;
     } else {

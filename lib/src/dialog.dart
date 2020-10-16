@@ -24,7 +24,7 @@ class Id {
   var remote_tag;
 
   factory Id.fromMap(map) {
-    return new Id(map['call_id'], map['local_tag'], map['remote_tag']);
+    return Id(map['call_id'], map['local_tag'], map['remote_tag']);
   }
 
   Id(this.call_id, this.local_tag, this.remote_tag);
@@ -61,7 +61,7 @@ class Dialog {
     this._uas_pending_reply = false;
 
     if (!message.hasHeader('contact')) {
-      throw new Exceptions.TypeError(
+      throw Exceptions.TypeError(
           'unable to create a Dialog without Contact header field');
     }
 
@@ -107,7 +107,7 @@ class Dialog {
 
     this._ua.newDialog(this);
     logger.debug(
-        'new ${type} dialog created with status ${this._state == Dialog_C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
+        '${type} dialog created with status ${this._state == Dialog_C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
   Id get id => this._id;
@@ -148,7 +148,7 @@ class Dialog {
     options = options ?? {};
     var extraHeaders = Utils.cloneArray(options['extraHeaders']);
     EventManager eventHandlers =
-        options['eventHandlers'] as EventManager ?? new EventManager();
+        options['eventHandlers'] as EventManager ?? EventManager();
     var body = options['body'] ?? null;
     SIPMessage.OutgoingRequest request =
         this._createRequest(method, extraHeaders, body);
@@ -158,7 +158,7 @@ class Dialog {
       this._local_seqnum += 1;
     });
 
-    var request_sender = new DialogRequestSender(this, request, eventHandlers);
+    var request_sender = DialogRequestSender(this, request, eventHandlers);
 
     request_sender.send();
 
@@ -197,7 +197,7 @@ class Dialog {
         ? this._local_seqnum
         : this._local_seqnum += 1;
 
-    var request = new SIPMessage.OutgoingRequest(
+    var request = SIPMessage.OutgoingRequest(
         method,
         this._remote_target,
         this._ua,

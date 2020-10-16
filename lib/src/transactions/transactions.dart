@@ -53,7 +53,7 @@ class TransactionBag {
 /**
  * INVITE:
  *  _true_ if retransmission
- *  _false_ new request
+ *  _false_ request
  *
  * ACK:
  *  _true_  ACK to non2xx response
@@ -66,7 +66,7 @@ class TransactionBag {
  *
  * OTHER:
  *  _true_  retransmission
- *  _false_ new request
+ *  _false_ request
  */
 bool checkTransaction(TransactionBag _transactions, request) {
   switch (request.method) {

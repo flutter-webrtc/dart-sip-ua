@@ -10,7 +10,7 @@ class Challenge {
   var stale;
   var qop;
   factory Challenge.fromMap(Map<String, dynamic> map) {
-    return new Challenge(map['algorithm'], map['realm'], map['nonce'],
+    return Challenge(map['algorithm'], map['realm'], map['nonce'],
         map['opaque'], map['stale'], map['qop']);
   }
   Challenge(this.algorithm, this.realm, this.nonce, this.opaque, this.stale,
@@ -23,7 +23,7 @@ class Credentials {
   var realm;
   var ha1;
   factory Credentials.fromMap(Map<String, dynamic> map) {
-    return new Credentials(
+    return Credentials(
         map['username'], map['password'], map['realm'], map['ha1']);
   }
   Credentials(this.username, this.password, this.realm, this.ha1);
@@ -215,7 +215,7 @@ class DigestAuthentication {
     var auth_params = [];
 
     if (this._response == null) {
-      throw new AssertionError(
+      throw AssertionError(
           'response field does not exist, cannot generate Authorization header');
     }
 

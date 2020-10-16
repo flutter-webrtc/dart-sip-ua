@@ -60,15 +60,15 @@ class RequestSender {
 
     switch (this._method) {
       case SipMethod.INVITE:
-        this.clientTransaction = new InviteClientTransaction(
+        this.clientTransaction = InviteClientTransaction(
             this._ua, this._ua.transport, this._request, eventHandlers);
         break;
       case SipMethod.ACK:
-        this.clientTransaction = new AckClientTransaction(
+        this.clientTransaction = AckClientTransaction(
             this._ua, this._ua.transport, this._request, eventHandlers);
         break;
       default:
-        this.clientTransaction = new NonInviteClientTransaction(
+        this.clientTransaction = NonInviteClientTransaction(
             this._ua, this._ua.transport, this._request, eventHandlers);
     }
 
@@ -111,7 +111,7 @@ class RequestSender {
 
       if (!this._challenged || (!this._staled && challenge.stale == true)) {
         if (this._auth == null) {
-          this._auth = new DigestAuthentication(Credentials.fromMap({
+          this._auth = DigestAuthentication(Credentials.fromMap({
             'username': this._ua.configuration.authorization_user,
             'password': this._ua.configuration.password,
             'realm': this._ua.configuration.realm,

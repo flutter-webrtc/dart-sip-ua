@@ -144,11 +144,11 @@ class RTCSession extends EventManager {
     this._localMediaStream = null;
     this._localMediaStreamLocallyGenerated = false;
 
-    // Flag to indicate PeerConnection ready for new actions.
+    // Flag to indicate PeerConnection ready for actions.
     this._rtcReady = true;
 
     // SIP Timers.
-    this._timers = new SIPTimers();
+    this._timers = SIPTimers();
 
     // Session info.
     this._direction = null;
@@ -165,7 +165,7 @@ class RTCSession extends EventManager {
     this._remoteHold = false;
 
     // Session Timers (RFC 4028).
-    this._sessionTimers = new RFC4028Timers(
+    this._sessionTimers = RFC4028Timers(
         this._ua.configuration.session_timers,
         this._ua.configuration.session_timers_refresh_method,
         DartSIP_C.SESSION_EXPIRES,
@@ -278,25 +278,25 @@ class RTCSession extends EventManager {
 
     // Check target.
     if (target == null) {
-      throw new Exceptions.TypeError('Not enough arguments');
+      throw Exceptions.TypeError('Not enough arguments');
     }
 
     // Check Session Status.
     if (this._status != C.STATUS_NULL) {
-      throw new Exceptions.InvalidStateError(this._status);
+      throw Exceptions.InvalidStateError(this._status);
     }
 
     // Check WebRTC support.
     // TODO: change support for flutter-webrtc
     //if (RTCPeerConnection == null)
     //{
-    //  throw new Exceptions.NotSupportedError('WebRTC not supported');
+    //  throw Exceptions.NotSupportedError('WebRTC not supported');
     //}
 
     // Check target validity.
     target = this._ua.normalizeTarget(target);
     if (target == null) {
-      throw new Exceptions.TypeError('Invalid target: ${originalTarget}');
+      throw Exceptions.TypeError('Invalid target: ${originalTarget}');
     }
 
     // Session Timers.
@@ -325,8 +325,7 @@ class RTCSession extends EventManager {
 
     if (anonymous) {
       requestParams['from_display_name'] = 'Anonymous';
-      requestParams['from_uri'] =
-          new URI('sip', 'anonymous', 'anonymous.invalid');
+      requestParams['from_uri'] = URI('sip', 'anonymous', 'anonymous.invalid');
       extraHeaders.add(
           'P-Preferred-Identity: ${this._ua.configuration.uri.toString()}');
       extraHeaders.add('Privacy: id');
@@ -339,12 +338,12 @@ class RTCSession extends EventManager {
           .add('Session-Expires: ${this._sessionTimers.defaultExpires}');
     }
 
-    this._request = new InitialOutgoingInviteRequest(
+    this._request = InitialOutgoingInviteRequest(
         target, this._ua, requestParams, extraHeaders);
 
     this._id = this._request.call_id + this._from_tag;
 
-    // Create a new RTCPeerConnection instance.
+    // Create a RTCPeerConnection instance.
     await this._createRTCConnection(pcConfig, rtcConstraints);
 
     // Set internal properties.
@@ -477,13 +476,13 @@ class RTCSession extends EventManager {
 
     // Check Session Direction and Status.
     if (this._direction != 'incoming') {
-      throw new Exceptions.NotSupportedError(
+      throw Exceptions.NotSupportedError(
           '"answer" not supported for outgoing RTCSession');
     }
 
     // Check Session status.
     if (this._status != C.STATUS_WAITING_FOR_ANSWER) {
-      throw new Exceptions.InvalidStateError(this._status);
+      throw Exceptions.InvalidStateError(this._status);
     }
 
     // Session Timers.
@@ -569,7 +568,7 @@ class RTCSession extends EventManager {
       mediaConstraints['video'] = false;
     }
 
-    // Create a new RTCPeerConnection instance.
+    // Create a RTCPeerConnection instance.
     // TODO: This may throw an error, should react.
     await this._createRTCConnection(pcConfig, rtcConstraints);
 
@@ -588,7 +587,7 @@ class RTCSession extends EventManager {
             EventStream(session: this, originator: 'local', stream: stream));
       } catch (error) {
         if (this._status == C.STATUS_TERMINATED) {
-          throw new Exceptions.InvalidStateError('terminated');
+          throw Exceptions.InvalidStateError('terminated');
         }
         request.reply(480);
         this._failed(
@@ -601,12 +600,12 @@ class RTCSession extends EventManager {
             'User Denied Media Access');
         logger.error('emit "getusermediafailed" [error:${error.toString()}]');
         this.emit(EventGetUserMediaFailed(exception: error));
-        throw new Exceptions.InvalidStateError('getUserMedia() failed');
+        throw Exceptions.InvalidStateError('getUserMedia() failed');
       }
     }
 
     if (this._status == C.STATUS_TERMINATED) {
-      throw new Exceptions.InvalidStateError('terminated');
+      throw Exceptions.InvalidStateError('terminated');
     }
 
     // Attach MediaStream to RTCPeerconnection.
@@ -623,7 +622,7 @@ class RTCSession extends EventManager {
     logger.debug('emit "sdp"');
     this.emit(EventSdp(originator: 'remote', type: 'offer', sdp: request.body));
 
-    var offer = new RTCSessionDescription(request.body, 'offer');
+    var offer = RTCSessionDescription(request.body, 'offer');
     try {
       await this._connection.setRemoteDescription(offer);
     } catch (error) {
@@ -633,13 +632,13 @@ class RTCSession extends EventManager {
       logger.error(
           'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
       this.emit(EventSetRemoteDescriptionFailed(exception: error));
-      throw new Exceptions.TypeError(
+      throw Exceptions.TypeError(
           'peerconnection.setRemoteDescription() failed');
     }
 
     // Create local description.
     if (this._status == C.STATUS_TERMINATED) {
-      throw new Exceptions.InvalidStateError('terminated');
+      throw Exceptions.InvalidStateError('terminated');
     }
 
     // TODO: Is this event already useful?
@@ -655,11 +654,11 @@ class RTCSession extends EventManager {
       }
     } catch (e) {
       request.reply(500);
-      throw new Exceptions.TypeError('_createLocalDescription() failed');
+      throw Exceptions.TypeError('_createLocalDescription() failed');
     }
 
     if (this._status == C.STATUS_TERMINATED) {
-      throw new Exceptions.InvalidStateError('terminated');
+      throw Exceptions.InvalidStateError('terminated');
     }
 
     // Send reply.
@@ -700,7 +699,7 @@ class RTCSession extends EventManager {
 
     // Check Session Status.
     if (this._status == C.STATUS_TERMINATED) {
-      throw new Exceptions.InvalidStateError(this._status);
+      throw Exceptions.InvalidStateError(this._status);
     }
 
     switch (this._status) {
@@ -711,7 +710,7 @@ class RTCSession extends EventManager {
         logger.debug('canceling session');
 
         if (status_code != null && (status_code < 200 || status_code >= 700)) {
-          throw new Exceptions.TypeError('Invalid status_code: ${status_code}');
+          throw Exceptions.TypeError('Invalid status_code: ${status_code}');
         } else if (status_code != null) {
           reason_phrase = reason_phrase ?? DartSIP_C.REASON_PHRASE[status_code];
           cancel_reason = 'SIP ;cause=${status_code} ;text="${reason_phrase}"';
@@ -741,7 +740,7 @@ class RTCSession extends EventManager {
         status_code = status_code ?? 480;
 
         if (status_code < 300 || status_code >= 700) {
-          throw new Exceptions.InvalidStateError(
+          throw Exceptions.InvalidStateError(
               'Invalid status_code: ${status_code}');
         }
 
@@ -758,7 +757,7 @@ class RTCSession extends EventManager {
             options['reason_phrase'] ?? DartSIP_C.REASON_PHRASE[status_code];
 
         if (status_code != null && (status_code < 200 || status_code >= 700)) {
-          throw new Exceptions.InvalidStateError(
+          throw Exceptions.InvalidStateError(
               'Invalid status_code: ${status_code}');
         } else if (status_code != null) {
           extraHeaders
@@ -839,13 +838,13 @@ class RTCSession extends EventManager {
         options['interToneGap'] ?? RTCSession_DTMF.C.DEFAULT_INTER_TONE_GAP;
 
     if (tones == null) {
-      throw new Exceptions.TypeError('Not enough arguments');
+      throw Exceptions.TypeError('Not enough arguments');
     }
 
     // Check Session Status.
     if (this._status != C.STATUS_CONFIRMED &&
         this._status != C.STATUS_WAITING_FOR_ACK) {
-      throw new Exceptions.InvalidStateError(this._status);
+      throw Exceptions.InvalidStateError(this._status);
     }
 
     // Convert to string.
@@ -856,13 +855,13 @@ class RTCSession extends EventManager {
     // Check tones.
     if (tones == null ||
         tones is! String ||
-        !tones.contains(new RegExp(r'^[0-9A-DR#*,]+$', caseSensitive: false))) {
-      throw new Exceptions.TypeError('Invalid tones: ${tones.toString()}');
+        !tones.contains(RegExp(r'^[0-9A-DR#*,]+$', caseSensitive: false))) {
+      throw Exceptions.TypeError('Invalid tones: ${tones.toString()}');
     }
 
     // Check duration.
     if (duration != null && !Utils.isDecimal(duration)) {
-      throw new Exceptions.TypeError(
+      throw Exceptions.TypeError(
           'Invalid tone duration: ${duration.toString()}');
     } else if (duration == null) {
       duration = RTCSession_DTMF.C.DEFAULT_DURATION;
@@ -881,7 +880,7 @@ class RTCSession extends EventManager {
 
     // Check interToneGap.
     if (interToneGap != null && !Utils.isDecimal(interToneGap)) {
-      throw new Exceptions.TypeError(
+      throw Exceptions.TypeError(
           'Invalid interToneGap: ${interToneGap.toString()}');
     } else if (interToneGap == null) {
       interToneGap = RTCSession_DTMF.C.DEFAULT_INTER_TONE_GAP;
@@ -914,7 +913,7 @@ class RTCSession extends EventManager {
             return;
           }
 
-          var dtmf = new RTCSession_DTMF.DTMF(this);
+          var dtmf = RTCSession_DTMF.DTMF(this);
 
           EventManager eventHandlers = EventManager();
           eventHandlers.on(EventCallFailed(), (EventCallFailed event) {
@@ -937,10 +936,10 @@ class RTCSession extends EventManager {
     // Check Session Status.
     if (this._status != C.STATUS_CONFIRMED &&
         this._status != C.STATUS_WAITING_FOR_ACK) {
-      throw new Exceptions.InvalidStateError(this._status);
+      throw Exceptions.InvalidStateError(this._status);
     }
 
-    var info = new RTCSession_Info.Info(this);
+    var info = RTCSession_Info.Info(this);
 
     info.send(contentType, body, options);
   }
@@ -1176,10 +1175,10 @@ class RTCSession extends EventManager {
     // Check target validity.
     target = this._ua.normalizeTarget(target);
     if (target == null) {
-      throw new Exceptions.TypeError('Invalid target: ${originalTarget}');
+      throw Exceptions.TypeError('Invalid target: ${originalTarget}');
     }
 
-    var referSubscriber = new ReferSubscriber(this);
+    var referSubscriber = ReferSubscriber(this);
 
     referSubscriber.sendRefer(target, options);
 
@@ -1260,7 +1259,7 @@ class RTCSession extends EventManager {
             this.emit(EventSdp(
                 originator: 'remote', type: 'answer', sdp: request.body));
 
-            var answer = new RTCSessionDescription(request.body, 'answer');
+            var answer = RTCSessionDescription(request.body, 'answer');
             try {
               await this._connection.setRemoteDescription(answer);
             } catch (error) {
@@ -1320,11 +1319,11 @@ class RTCSession extends EventManager {
               this._status == C.STATUS_CONFIRMED) {
             var contentType = request.getHeader('content-type');
             if (contentType != null &&
-                contentType.contains(new RegExp(r'^application\/dtmf-relay',
+                contentType.contains(RegExp(r'^application\/dtmf-relay',
                     caseSensitive: false))) {
-              new RTCSession_DTMF.DTMF(this).init_incoming(request);
+              RTCSession_DTMF.DTMF(this).init_incoming(request);
             } else if (contentType != null) {
-              new RTCSession_Info.Info(this).init_incoming(request);
+              RTCSession_Info.Info(this).init_incoming(request);
             } else {
               request.reply(415);
             }
@@ -1577,10 +1576,10 @@ class RTCSession extends EventManager {
     logger.debug('createLocalDescription()');
 
     Completer<RTCSessionDescription> completer =
-        new Completer<RTCSessionDescription>();
+        Completer<RTCSessionDescription>();
 
     if (type != 'offer' && type != 'answer') {
-      completer.completeError(new Exceptions.TypeError(
+      completer.completeError(Exceptions.TypeError(
           'createLocalDescription() | invalid type "${type}"'));
     }
 
@@ -1685,7 +1684,7 @@ class RTCSession extends EventManager {
         return true;
       } else {
         try {
-          early_dialog = new Dialog(this, message, type, Dialog_C.STATUS_EARLY);
+          early_dialog = Dialog(this, message, type, Dialog_C.STATUS_EARLY);
         } catch (error) {
           logger.debug(error);
           this._failed('remote', message, null, null, 500,
@@ -1711,7 +1710,7 @@ class RTCSession extends EventManager {
 
       try {
         // Otherwise, create a _confirmed_ dialog.
-        this._dialog = new Dialog(this, message, type);
+        this._dialog = Dialog(this, message, type);
         return true;
       } catch (error) {
         logger.debug(error.toString());
@@ -1741,7 +1740,7 @@ class RTCSession extends EventManager {
       }
 
       if (status_code < 300 || status_code >= 700) {
-        throw new Exceptions.TypeError('Invalid status_code: ${status_code}');
+        throw Exceptions.TypeError('Invalid status_code: ${status_code}');
       }
 
       request.reply(status_code, reason_phrase, extraHeaders);
@@ -1831,7 +1830,7 @@ class RTCSession extends EventManager {
       }
 
       if (status_code < 300 || status_code >= 700) {
-        throw new Exceptions.TypeError('Invalid status_code: ${status_code}');
+        throw Exceptions.TypeError('Invalid status_code: ${status_code}');
       }
 
       request.reply(status_code, reason_phrase, extraHeaders);
@@ -1903,10 +1902,10 @@ class RTCSession extends EventManager {
     logger.debug('emit "sdp"');
     this.emit(EventSdp(originator: 'remote', type: 'offer', sdp: request.body));
 
-    var offer = new RTCSessionDescription(request.body, 'offer');
+    var offer = RTCSessionDescription(request.body, 'offer');
 
     if (this._status == C.STATUS_TERMINATED) {
-      throw new Exceptions.InvalidStateError('terminated');
+      throw Exceptions.InvalidStateError('terminated');
     }
     try {
       await this._connection.setRemoteDescription(offer);
@@ -1917,12 +1916,12 @@ class RTCSession extends EventManager {
 
       this.emit(EventSetRemoteDescriptionFailed(exception: error));
 
-      throw new Exceptions.TypeError(
+      throw Exceptions.TypeError(
           'peerconnection.setRemoteDescription() failed');
     }
 
     if (this._status == C.STATUS_TERMINATED) {
-      throw new Exceptions.InvalidStateError('terminated');
+      throw Exceptions.InvalidStateError('terminated');
     }
 
     if (this._remoteHold == true && hold == false) {
@@ -1936,7 +1935,7 @@ class RTCSession extends EventManager {
     // Create local description.
 
     if (this._status == C.STATUS_TERMINATED) {
-      throw new Exceptions.InvalidStateError('terminated');
+      throw Exceptions.InvalidStateError('terminated');
     }
 
     try {
@@ -1944,7 +1943,7 @@ class RTCSession extends EventManager {
           ._createLocalDescription('answer', this._rtcAnswerConstraints);
     } catch (_) {
       request.reply(500);
-      throw new Exceptions.TypeError('_createLocalDescription() failed');
+      throw Exceptions.TypeError('_createLocalDescription() failed');
     }
   }
 
@@ -1970,7 +1969,7 @@ class RTCSession extends EventManager {
     // Reply before the transaction timer expires.
     request.reply(202);
 
-    var notifier = new ReferNotifier(this, request.cseq);
+    var notifier = ReferNotifier(this, request.cseq);
 
     var accept2 = (initCallback, options) {
       initCallback = (initCallback is Function) ? initCallback : null;
@@ -1980,7 +1979,7 @@ class RTCSession extends EventManager {
         return false;
       }
 
-      RTCSession session = new RTCSession(this._ua);
+      RTCSession session = RTCSession(this._ua);
 
       session.on(EventCallProgress(), (EventCallProgress event) {
         notifier.notify(
@@ -2088,9 +2087,9 @@ class RTCSession extends EventManager {
         return false;
       }
 
-      RTCSession session = new RTCSession(this._ua);
+      RTCSession session = RTCSession(this._ua);
 
-      // Terminate the current session when the new one is confirmed.
+      // Terminate the current session when the one is confirmed.
       session.on(EventCallConfirmed(), (EventCallConfirmed data) {
         this.terminate();
       });
@@ -2138,7 +2137,7 @@ class RTCSession extends EventManager {
     });
 
     var request_sender =
-        new RequestSender(this._ua, this._request, localEventHandlers);
+        RequestSender(this._ua, this._request, localEventHandlers);
 
     // This Promise is resolved within the next iteration, so the app has now
     // a chance to set events such as 'peerconnection' and 'connecting'.
@@ -2156,7 +2155,7 @@ class RTCSession extends EventManager {
             EventStream(session: this, originator: 'local', stream: stream));
       } catch (error) {
         if (this._status == C.STATUS_TERMINATED) {
-          throw new Exceptions.InvalidStateError('terminated');
+          throw Exceptions.InvalidStateError('terminated');
         }
         this._failed(
             'local',
@@ -2173,7 +2172,7 @@ class RTCSession extends EventManager {
     }
 
     if (this._status == C.STATUS_TERMINATED) {
-      throw new Exceptions.InvalidStateError('terminated');
+      throw Exceptions.InvalidStateError('terminated');
     }
 
     this._localMediaStream = stream;
@@ -2188,7 +2187,7 @@ class RTCSession extends EventManager {
       var desc =
           await this._createLocalDescription('offer', rtcOfferConstraints);
       if (this._is_canceled || this._status == C.STATUS_TERMINATED) {
-        throw new Exceptions.InvalidStateError('terminated');
+        throw Exceptions.InvalidStateError('terminated');
       }
 
       this._request.body = desc.sdp;
@@ -2231,7 +2230,7 @@ class RTCSession extends EventManager {
       } else {
         // If not, send an ACK  and terminate.
         try {
-          Dialog dialog = new Dialog(this, response, 'UAC');
+          Dialog dialog = Dialog(this, response, 'UAC');
         } catch (error) {
           logger.debug(error);
           return;
@@ -2289,7 +2288,7 @@ class RTCSession extends EventManager {
       this.emit(
           EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      var answer = new RTCSessionDescription(response.body, 'answer');
+      var answer = RTCSessionDescription(response.body, 'answer');
 
       try {
         this._connection.setRemoteDescription(answer);
@@ -2318,7 +2317,7 @@ class RTCSession extends EventManager {
       this.emit(
           EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      var answer = new RTCSessionDescription(response.body, 'answer');
+      var answer = RTCSessionDescription(response.body, 'answer');
 
       // Be ready for 200 with SDP after a 180/183 with SDP.
       // We created a SDP 'answer' for it, so check the current signaling state.
@@ -2419,7 +2418,7 @@ class RTCSession extends EventManager {
       this.emit(
           EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      var answer = new RTCSessionDescription(response.body, 'answer');
+      var answer = RTCSessionDescription(response.body, 'answer');
 
       try {
         await this._connection.setRemoteDescription(answer);
@@ -2523,7 +2522,7 @@ class RTCSession extends EventManager {
         this.emit(
             EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-        var answer = new RTCSessionDescription(response.body, 'answer');
+        var answer = RTCSessionDescription(response.body, 'answer');
 
         try {
           await this._connection.setRemoteDescription(answer);
@@ -2838,7 +2837,7 @@ class RTCSession extends EventManager {
 
   void _accepted(originator, [message]) {
     logger.debug('session accepted');
-    this._start_time = new DateTime.now();
+    this._start_time = DateTime.now();
     logger.debug('emit "accepted"');
     this.emit(EventCallAccepted(
         session: this, originator: originator, response: message));
@@ -2854,7 +2853,7 @@ class RTCSession extends EventManager {
 
   void _ended(originator, IncomingRequest request, ErrorCause cause) {
     logger.debug('session ended');
-    this._end_time = new DateTime.now();
+    this._end_time = DateTime.now();
     this._close();
     logger.debug('emit "ended"');
     this.emit(EventCallEnded(

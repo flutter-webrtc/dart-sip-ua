@@ -30,13 +30,13 @@ class Info extends EventManager {
     this._direction = 'outgoing';
 
     if (contentType == null) {
-      throw new Exceptions.TypeError('Not enough arguments');
+      throw Exceptions.TypeError('Not enough arguments');
     }
 
     // Check RTCSession Status.
     if (this._session.status != RTCSession.C.STATUS_CONFIRMED &&
         this._session.status != RTCSession.C.STATUS_WAITING_FOR_ACK) {
-      throw new Exceptions.InvalidStateError(this._session.status);
+      throw Exceptions.InvalidStateError(this._session.status);
     }
 
     this._contentType = contentType;

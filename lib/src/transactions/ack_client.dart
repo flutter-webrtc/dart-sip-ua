@@ -7,7 +7,7 @@ import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import 'transaction_base.dart';
 
-final act_logger = new Log();
+final act_logger = Log();
 
 class AckClientTransaction extends TransactionBase {
   var eventHandlers;

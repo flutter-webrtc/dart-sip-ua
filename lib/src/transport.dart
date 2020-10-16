@@ -66,7 +66,7 @@ class Transport {
     this.close_requested = false;
 
     if (sockets == null) {
-      throw new Exceptions.TypeError(
+      throw Exceptions.TypeError(
           'Invalid argument.' + ' null \'sockets\' argument');
     }
 
@@ -76,12 +76,12 @@ class Transport {
 
     sockets.forEach((socket) {
       if (!Socket.isSocket(socket)) {
-        throw new Exceptions.TypeError(
+        throw Exceptions.TypeError(
             'Invalid argument.' + ' invalid \'DartSIP.Socket\' instance');
       }
 
       if (socket.weight != null && socket.weight is! num) {
-        throw new Exceptions.TypeError(
+        throw Exceptions.TypeError(
             'Invalid argument.' + ' \'weight\' attribute is not a number');
       }
 
@@ -297,7 +297,7 @@ class Transport {
     // Binary message.
     else if (data is! String) {
       try {
-        data = new String.fromCharCodes(data);
+        data = String.fromCharCodes(data);
       } catch (evt) {
         logger.debug(
             'received binary message [${data.runtimeType}]failed to be converted into string,' +

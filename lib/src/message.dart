@@ -50,13 +50,13 @@ class Message extends EventManager {
     options = options ?? {};
 
     if (target == null || body == null) {
-      throw new Exceptions.TypeError('Not enough arguments');
+      throw Exceptions.TypeError('Not enough arguments');
     }
 
     // Check target validity.
     var normalized = this._ua.normalizeTarget(target);
     if (normalized == null) {
-      throw new Exceptions.TypeError('Invalid target: ${originalTarget}');
+      throw Exceptions.TypeError('Invalid target: ${originalTarget}');
     }
 
     // Get call options.
@@ -69,7 +69,7 @@ class Message extends EventManager {
 
     extraHeaders.add('Content-Type: $contentType');
 
-    this._request = new SIPMessage.OutgoingRequest(
+    this._request = SIPMessage.OutgoingRequest(
         SipMethod.MESSAGE, normalized, this._ua, null, extraHeaders);
     if (body != null) {
       this._request.body = body;
@@ -90,7 +90,7 @@ class Message extends EventManager {
     });
 
     var request_sender =
-        new RequestSender(this._ua, this._request, localEventHandlers);
+        RequestSender(this._ua, this._request, localEventHandlers);
 
     this._newMessage('local', this._request);
 
@@ -120,12 +120,12 @@ class Message extends EventManager {
     var body = options['body'];
 
     if (this._direction != 'incoming') {
-      throw new Exceptions.NotSupportedError(
+      throw Exceptions.NotSupportedError(
           '"accept" not supported for outgoing Message');
     }
 
     if (this._is_replied != null) {
-      throw new AssertionError('incoming Message already replied');
+      throw AssertionError('incoming Message already replied');
     }
 
     this._is_replied = true;
@@ -143,16 +143,16 @@ class Message extends EventManager {
     var body = options['body'];
 
     if (this._direction != 'incoming') {
-      throw new Exceptions.NotSupportedError(
+      throw Exceptions.NotSupportedError(
           '"reject" not supported for outgoing Message');
     }
 
     if (this._is_replied != null) {
-      throw new AssertionError('incoming Message already replied');
+      throw AssertionError('incoming Message already replied');
     }
 
     if (status_code < 300 || status_code >= 700) {
-      throw new Exceptions.TypeError('Invalid status_code: $status_code');
+      throw Exceptions.TypeError('Invalid status_code: $status_code');
     }
 
     this._is_replied = true;

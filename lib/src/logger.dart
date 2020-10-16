@@ -150,7 +150,7 @@ class MyLogPrinter extends LogPrinter {
 }
 
 class AnsiColor {
-  /// ANSI Control Sequence Introducer, signals the terminal for new settings.
+  /// ANSI Control Sequence Introducer, signals the terminal for settings.
   static const ansiEsc = '\x1B[';
 
   /// Reset all colors and options for current SGRs to terminal defaults.

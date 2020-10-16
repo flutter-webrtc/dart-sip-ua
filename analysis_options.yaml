@@ -2,8 +2,6 @@ include: package:pedantic/analysis_options.yaml
 
 analyzer:
   errors:
-    unused_local_variable: ignore
-    unnecessary_new: ignore
     slash_for_doc_comments: ignore
     library_prefixes: ignore
     unused_field: ignore

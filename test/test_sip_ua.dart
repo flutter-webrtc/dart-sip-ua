@@ -9,14 +9,14 @@ import 'package:sip_ua/src/event_manager/event_manager.dart';
 var ua;
 void main() {
   test("WebSocket: EchoTest", () async {
-    var completer = new Completer();
-    var configuration = new config.Settings();
-    configuration.sockets = [new WebSocketInterface('ws://127.0.0.1:5070/sip')];
+    var completer = Completer();
+    var configuration = config.Settings();
+    configuration.sockets = [WebSocketInterface('ws://127.0.0.1:5070/sip')];
     configuration.authorization_user = '100';
     configuration.password = '100';
     configuration.uri = 'sip:100@127.0.0.1';
     try {
-      ua = new UA(configuration);
+      ua = UA(configuration);
       ua.on(EventSocketConnecting(), (EventSocketConnecting data) {
         print('connecting => ' + data.toString());
       });

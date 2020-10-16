@@ -3,8 +3,8 @@ import 'uri.dart';
 import 'grammar.dart';
 
 class NameAddrHeader {
-  final JsonDecoder decoder = new JsonDecoder();
-  final JsonEncoder encoder = new JsonEncoder();
+  final JsonDecoder decoder = JsonDecoder();
+  final JsonEncoder encoder = JsonEncoder();
   URI _uri;
   Map<String, dynamic> _parameters;
   String _display_name;
@@ -25,7 +25,7 @@ class NameAddrHeader {
   NameAddrHeader(uri, display_name, [parameters]) {
     // Checks.
     if (uri == null || uri is! URI) {
-      throw new AssertionError('missing or invalid "uri" parameter');
+      throw AssertionError('missing or invalid "uri" parameter');
     }
 
     // Initialize parameters.
@@ -82,7 +82,7 @@ class NameAddrHeader {
   }
 
   NameAddrHeader clone() {
-    return new NameAddrHeader(this._uri.clone(), this._display_name,
+    return NameAddrHeader(this._uri.clone(), this._display_name,
         decoder.convert(encoder.convert(this._parameters)));
   }
 

@@ -14,8 +14,8 @@ import 'utils.dart' as Utils;
  *
  */
 class URI {
-  final JsonDecoder decoder = new JsonDecoder();
-  final JsonEncoder encoder = new JsonEncoder();
+  final JsonDecoder decoder = JsonDecoder();
+  final JsonEncoder encoder = JsonEncoder();
   /**
     * Parse the given string and returns a DartSIP.URI instance or null if
     * it is an invalid URI.
@@ -38,7 +38,7 @@ class URI {
   URI(scheme, user, host, [port, parameters, headers]) {
     // Checks.
     if (host == null) {
-      throw new AssertionError('missing or invalid "host" parameter');
+      throw AssertionError('missing or invalid "host" parameter');
     }
 
     // Initialize parameters.
@@ -154,7 +154,7 @@ class URI {
   }
 
   URI clone() {
-    return new URI(
+    return URI(
         this.scheme,
         this.user,
         this.host,

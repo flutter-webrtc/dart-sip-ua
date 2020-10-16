@@ -41,8 +41,7 @@ class OutgoingRequest {
   OutgoingRequest(SipMethod method, ruri, UA ua, [params, extraHeaders, body]) {
     // Mandatory parameters check.
     if (method == null || ruri == null || ua == null) {
-      throw new Exceptions.TypeError(
-          'OutgoingRequest: ctor parameters invalid!');
+      throw Exceptions.TypeError('OutgoingRequest: ctor parameters invalid!');
     }
 
     params = params ?? {};
@@ -75,7 +74,7 @@ class OutgoingRequest {
     var to_params = params['to_tag'] != null ? {'tag': params['to_tag']} : null;
     var to_display_name = params['to_display_name'];
 
-    this.to = new NameAddrHeader(to_uri, to_display_name, to_params);
+    this.to = NameAddrHeader(to_uri, to_display_name, to_params);
     this.setHeader('to', this.to.toString());
 
     // From.
@@ -91,7 +90,7 @@ class OutgoingRequest {
       display_name = null;
     }
 
-    this.from = new NameAddrHeader(from_uri, display_name, from_params);
+    this.from = NameAddrHeader(from_uri, display_name, from_params);
     this.setHeader('from', this.from.toString());
 
     // Call-ID.
@@ -116,7 +115,7 @@ class OutgoingRequest {
    */
   void setHeader(name, value) {
     // Remove the header from extraHeaders if present.
-    var regexp = new RegExp('^\\s*${name}\\s*:', caseSensitive: false);
+    var regexp = RegExp('^\\s*${name}\\s*:', caseSensitive: false);
 
     for (var idx = 0; idx < this.extraHeaders.length; idx++) {
       if (regexp.hasMatch(this.extraHeaders[idx])) {
@@ -140,7 +139,7 @@ class OutgoingRequest {
         return headers[0];
       }
     } else {
-      var regexp = new RegExp('^\\s*${name}\\s*:', caseSensitive: false);
+      var regexp = RegExp('^\\s*${name}\\s*:', caseSensitive: false);
       for (var header in this.extraHeaders) {
         if (regexp.hasMatch(header)) {
           return header.substring(header.indexOf(':') + 1).trim();
@@ -167,7 +166,7 @@ class OutgoingRequest {
 
       return result;
     } else {
-      var regexp = new RegExp('^\\s*${name}\\s*:', caseSensitive: false);
+      var regexp = RegExp('^\\s*${name}\\s*:', caseSensitive: false);
 
       for (var header in this.extraHeaders) {
         if (regexp.hasMatch(header)) {
@@ -188,7 +187,7 @@ class OutgoingRequest {
     if (this.headers[Utils.headerize(name)]) {
       return true;
     } else {
-      var regexp = new RegExp('^\\s*${name}\\s*:', caseSensitive: false);
+      var regexp = RegExp('^\\s*${name}\\s*:', caseSensitive: false);
 
       for (var header in this.extraHeaders) {
         if (regexp.hasMatch(header)) {
@@ -284,7 +283,7 @@ class OutgoingRequest {
   }
 
   OutgoingRequest clone() {
-    var request = new OutgoingRequest(this.method, this.ruri, this.ua);
+    var request = OutgoingRequest(this.method, this.ruri, this.ua);
 
     this.headers.forEach((name, value) {
       request.headers[name] = this.headers[name];
@@ -312,10 +311,10 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
   }
 
   InitialOutgoingInviteRequest clone() {
-    var request = new InitialOutgoingInviteRequest(this.ruri, this.ua);
+    var request = InitialOutgoingInviteRequest(this.ruri, this.ua);
 
     this.headers.forEach((name, value) {
-      request.headers[name] = new List.from(this.headers[name]);
+      request.headers[name] = List.from(this.headers[name]);
     });
 
     request.body = this.body;
@@ -543,9 +542,9 @@ class IncomingRequest extends IncomingMessage {
 
     // Validate code and reason values.
     if (code == null || (code < 100 || code > 699)) {
-      throw new Exceptions.TypeError('Invalid status_code: ${code}');
+      throw Exceptions.TypeError('Invalid status_code: ${code}');
     } else if (reason != null && reason is! String) {
-      throw new Exceptions.TypeError('Invalid reason_phrase: ${reason}');
+      throw Exceptions.TypeError('Invalid reason_phrase: ${reason}');
     }
 
     reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
@@ -651,9 +650,9 @@ class IncomingRequest extends IncomingMessage {
 
     // Validate code and reason values.
     if (code == null || (code < 100 || code > 699)) {
-      throw new Exceptions.TypeError('Invalid status_code: ${code}');
+      throw Exceptions.TypeError('Invalid status_code: ${code}');
     } else if (reason != null && reason is! String) {
-      throw new Exceptions.TypeError('Invalid reason_phrase: ${reason}');
+      throw Exceptions.TypeError('Invalid reason_phrase: ${reason}');
     }
 
     reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';

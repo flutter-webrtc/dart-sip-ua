@@ -92,8 +92,8 @@ class InviteClientTransaction extends TransactionBase {
   }
 
   void sendACK(response) {
-    var ack = new SIPMessage.OutgoingRequest(
-        SipMethod.ACK, this.request.ruri, this.ua, {
+    var ack =
+        SIPMessage.OutgoingRequest(SipMethod.ACK, this.request.ruri, this.ua, {
       'route_set': this.request.getHeaders('route'),
       'call_id': this.request.getHeader('call-id'),
       'cseq': this.request.cseq
@@ -116,7 +116,7 @@ class InviteClientTransaction extends TransactionBase {
       return;
     }
 
-    var cancel = new SIPMessage.OutgoingRequest(
+    var cancel = SIPMessage.OutgoingRequest(
         SipMethod.CANCEL, this.request.ruri, this.ua, {
       'route_set': this.request.getHeaders('route'),
       'call_id': this.request.getHeader('call-id'),

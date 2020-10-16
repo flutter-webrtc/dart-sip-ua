@@ -7,7 +7,7 @@ import 'package:sip_ua/src/transport.dart';
 
 var testFunctions = [
   () => test("WebSocket: EchoTest", () async {
-        var completer = new Completer();
+        var completer = Completer();
         HttpServer.bind('127.0.0.1', 4040).then((server) async {
           try {
             await for (var req in server) {
@@ -28,7 +28,7 @@ var testFunctions = [
         });
 
         WebSocketInterface client =
-            new WebSocketInterface('ws://127.0.0.1:4040/sip');
+            WebSocketInterface('ws://127.0.0.1:4040/sip');
 
         expect(client.url, 'ws://127.0.0.1:4040/sip');
         expect(client.via_transport, 'WS');
@@ -46,16 +46,17 @@ var testFunctions = [
           client.disconnect();
           completer.complete();
         };
-        client.ondisconnect =
-            (WebSocketInterface socket, bool error, int closeCode, String reason) {
-          print('ondisconnect => error $error [$closeCode] ${reason.toString()}');
+        client.ondisconnect = (WebSocketInterface socket, bool error,
+            int closeCode, String reason) {
+          print(
+              'ondisconnect => error $error [$closeCode] ${reason.toString()}');
           expect(client.isConnected(), false);
         };
         client.connect();
         return completer;
       }),
   () => test("WebSocket: EchoTest", () async {
-        var completer = new Completer();
+        var completer = Completer();
         HttpServer.bind('127.0.0.1', 4041).then((server) async {
           try {
             await for (var req in server) {
@@ -75,8 +76,8 @@ var testFunctions = [
           }
         });
         WebSocketInterface socket =
-            new WebSocketInterface('ws://127.0.0.1:4041/sip');
-        Transport trasnport = new Transport(socket);
+            WebSocketInterface('ws://127.0.0.1:4041/sip');
+        Transport trasnport = Transport(socket);
 
         trasnport.onconnecting = (socket, attempt) {
           expect(trasnport.isConnecting(), true);

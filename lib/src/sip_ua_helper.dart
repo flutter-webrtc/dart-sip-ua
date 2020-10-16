@@ -87,7 +87,7 @@ class SIPUAHelper extends EventManager {
   void start(UaSettings uaSettings) async {
     if (_ua != null) {
       logger.warn(
-          'UA instance already exist!, stopping UA and creating a new one...');
+          'UA instance already exist!, stopping UA and creating a one...');
       _ua.stop();
     }
 
@@ -169,8 +169,8 @@ class SIPUAHelper extends EventManager {
         logger.debug('newMessage => ' + event.toString());
         //Only notify incoming message to listener
         if (event.message.direction == 'incoming') {
-          SIPMessageRequest message = new SIPMessageRequest(
-              event.message, event.originator, event.request);
+          SIPMessageRequest message =
+              SIPMessageRequest(event.message, event.originator, event.request);
           _notifyNewMessageListeners(message);
         }
       });
@@ -259,7 +259,7 @@ class SIPUAHelper extends EventManager {
           refer, CallState(CallStateEnum.REFER, refer: refer));
       //Always accept.
       refer.accept((session) {
-        logger.debug('New session initialized.');
+        logger.debug('session initialized.');
       }, _options(true));
     });
 
@@ -527,7 +527,7 @@ abstract class SipUaHelperListener {
   void transportStateChanged(TransportState state);
   void registrationStateChanged(RegistrationState state);
   void callStateChanged(Call call, CallState state);
-  //For SIP new messaga coming
+  //For SIP messaga coming
   void onNewMessage(SIPMessageRequest msg);
 }
 
