@@ -9,8 +9,6 @@ import 'utils.dart' as Utils;
 import 'transports/websocket_interface.dart';
 import 'logger.dart';
 
-final logger = Log();
-
 // Default settings.
 class Settings {
   // SIP authentication.

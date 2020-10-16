@@ -14,7 +14,6 @@ class WebSocketImpl {
   OnOpenCallback onOpen;
   OnMessageCallback onMessage;
   OnCloseCallback onClose;
-  final logger = Log();
 
   WebSocketImpl(this._url);
 

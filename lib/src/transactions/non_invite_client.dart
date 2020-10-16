@@ -9,8 +9,6 @@ import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import 'transaction_base.dart';
 
-final logger = new Log();
-
 class NonInviteClientTransaction extends TransactionBase {
   EventManager eventHandlers;
   var F, K;

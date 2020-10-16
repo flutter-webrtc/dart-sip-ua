@@ -35,7 +35,6 @@ class Registrator {
   var _contact;
   var _extraHeaders;
   var _extraContactParams;
-  final logger = Log();
 
   Registrator(UA ua, [Transport transport]) {
     var reg_id = 1; // Force reg_id to 1.

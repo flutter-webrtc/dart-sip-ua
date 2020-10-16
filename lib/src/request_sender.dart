@@ -23,7 +23,6 @@ class RequestSender {
   var _challenged;
   var _staled;
   TransactionBase clientTransaction;
-  final logger = new Log();
 
   RequestSender(UA ua, request, EventManager eventHandlers) {
     this._ua = ua;

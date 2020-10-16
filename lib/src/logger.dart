@@ -4,6 +4,8 @@ import 'package:logger/logger.dart';
 import 'enum_helper.dart';
 import 'stack_trace_nj.dart';
 
+final logger = Log();
+
 class Log extends Logger {
   static Log _self;
   static String _localPath;

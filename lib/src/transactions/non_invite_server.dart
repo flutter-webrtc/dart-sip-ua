@@ -9,8 +9,6 @@ import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import 'transaction_base.dart';
 
-final logger = new Log();
-
 class NonInviteServerTransaction extends TransactionBase {
   var transportError;
   var J;

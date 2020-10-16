@@ -12,7 +12,6 @@ class Info extends EventManager {
   var _contentType;
   var _body;
   var request;
-  final logger = Log();
 
   Info(session) {
     this._session = session;

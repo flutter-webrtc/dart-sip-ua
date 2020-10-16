@@ -42,7 +42,6 @@ class Transport {
   var recover_attempts;
   var recovery_timer;
   var close_requested;
-  final logger = Log();
 
   void Function(WebSocketInterface socket, int attempts) onconnecting;
   void Function(WebSocketInterface socket, ErrorCause cause) ondisconnect;

@@ -9,8 +9,6 @@ import 'logger.dart';
 import 'transactions/invite_server.dart';
 import 'transactions/non_invite_server.dart';
 
-final logger = Log();
-
 // Checks for requests and responses.
 const all = [minimumHeaders];
 

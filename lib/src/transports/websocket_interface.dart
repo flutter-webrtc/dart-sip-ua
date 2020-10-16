@@ -22,7 +22,6 @@ class WebSocketInterface implements Socket {
   var weight;
   WebSocketSettings _webSocketSettings;
 
-  final logger = Log();
   @override
   void Function() onconnect;
   @override

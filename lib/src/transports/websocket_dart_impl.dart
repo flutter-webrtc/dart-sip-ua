@@ -14,7 +14,7 @@ typedef void OnOpenCallback();
 class WebSocketImpl {
   final String _url;
   WebSocket _socket;
-  final logger = Log();
+
   OnOpenCallback onOpen;
   OnMessageCallback onMessage;
   OnCloseCallback onClose;

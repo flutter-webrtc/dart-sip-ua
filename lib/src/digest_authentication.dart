@@ -44,7 +44,6 @@ class DigestAuthentication {
   String _ha1;
   String _response;
   final Credentials _credentials;
-  final logger = new Log();
 
   DigestAuthentication(this._credentials);
 

@@ -97,7 +97,6 @@ class UA extends EventManager {
   var _data;
   var _closeTimer;
   Registrator _registrator;
-  final logger = new Log();
 
   UA(Settings configuration) {
     logger.debug('new() [configuration:${configuration.toString()}]');

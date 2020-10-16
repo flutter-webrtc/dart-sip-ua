@@ -4,8 +4,6 @@ import 'transports/websocket_interface.dart';
 import 'logger.dart';
 import 'uri.dart';
 
-final logger = Log();
-
 /// Socket Interface.
 abstract class Socket {
   String via_transport;

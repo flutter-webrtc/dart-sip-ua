@@ -11,8 +11,6 @@ import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import 'transaction_base.dart';
 
-final logger = new Log();
-
 class InviteClientTransaction extends TransactionBase {
   var eventHandlers;
 

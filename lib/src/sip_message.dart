@@ -14,8 +14,6 @@ import 'grammar_parser.dart';
 import 'logger.dart';
 import 'transactions/transaction_base.dart';
 
-final logger = Log();
-
 /**
  * -param {String} method request method
  * -param {String} ruri request uri

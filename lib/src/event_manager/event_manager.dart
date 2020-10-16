@@ -32,7 +32,6 @@ import '../logger.dart';
 ///  -- do something here
 /// });
 class EventManager {
-  final logger = new Log();
   Map<Type, List<dynamic>> listeners = Map();
 
   /// returns true if there are any listeners associated with the EventType for this instance of EventManager

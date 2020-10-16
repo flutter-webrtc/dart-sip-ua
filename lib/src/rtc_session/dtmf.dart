@@ -22,7 +22,6 @@ class DTMF extends EventManager {
   int _duration;
   var _request;
   EventManager eventHandlers;
-  final logger = Log();
 
   DTMF(session) {
     this._session = session;

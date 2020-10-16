@@ -15,7 +15,6 @@ class ReferNotifier {
   var _id;
   var _expires;
   var _active;
-  final logger = Log();
 
   ReferNotifier(session, id, [expires]) {
     this._session = session;

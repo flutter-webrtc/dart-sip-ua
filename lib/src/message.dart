@@ -20,7 +20,6 @@ class Message extends EventManager {
   var _remote_identity;
   var _is_replied;
   var _data;
-  final logger = new Log();
 
   Message(UA ua) {
     this._ua = ua;

@@ -5,8 +5,6 @@ import 'sip_message.dart';
 import 'ua.dart';
 import 'logger.dart';
 
-final logger = new Log();
-
 /**
  * Parse SIP Message
  */

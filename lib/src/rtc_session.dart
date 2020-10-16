@@ -106,8 +106,6 @@ class RTCSession extends EventManager {
   String _tones;
   Future<void> dtmfFuture = (Completer<void>()..complete(1)).future;
 
-  final logger = new Log();
-
   Function(IncomingRequest) receiveRequest;
 
   RTCSession(UA ua) {

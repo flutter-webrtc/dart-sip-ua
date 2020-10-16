@@ -49,7 +49,6 @@ class Dialog {
   var _ack_seqnum;
   Id _id;
   num _local_seqnum;
-  final logger = new Log();
 
   UA get ua => this._ua;
 
