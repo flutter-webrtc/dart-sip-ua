@@ -37,11 +37,17 @@ A dart-lang version of the SIP UA stack, ported from [JsSIP](https://github.com/
 ## Quickstart
 
 Run example:
- [dart-sip-ua-example](https://github.com/flutter-webrtc/dart-sip-ua/blob/master/example/README.md)
+
+- [dart-sip-ua-example](https://github.com/flutter-webrtc/dart-sip-ua/blob/master/example/README.md)
+- or add your example.
 
 Register with SIP server:
 
 - [Asterisk](https://github.com/flutter-webrtc/dockers/tree/main/asterisk)
+- FreeSWITCH
+- OpenSIPS
+- Kamailio
+- or add your server example.
 
 ## NOTE
 Thanks to the original authors of [JsSIP](https://github.com/versatica/JsSIP) for providing the JS version, which makes it possible to port the [dart-lang](https://dart.dev).
