@@ -12,54 +12,54 @@ import 'logger.dart';
 // Default settings.
 class Settings {
   // SIP authentication.
-  var authorization_user = null;
-  var password = null;
-  var realm = null;
-  var ha1 = null;
+  String authorization_user;
+  String password;
+  String realm;
+  String ha1;
 
   // SIP account.
-  var display_name = null;
-  var uri = null;
-  var contact_uri = null;
-  var user_agent = DartSIP_C.USER_AGENT;
+  String display_name;
+  dynamic uri;
+  dynamic contact_uri;
+  String user_agent = DartSIP_C.USER_AGENT;
 
   // SIP instance id (GRUU).
-  var instance_id = null;
+  String instance_id = null;
 
   // Preloaded SIP Route header field.
-  var use_preloaded_route = false;
+  bool use_preloaded_route = false;
 
   // Session parameters.
-  var session_timers = true;
+  bool session_timers = true;
   SipMethod session_timers_refresh_method = SipMethod.UPDATE;
-  var no_answer_timeout = 60;
+  int no_answer_timeout = 60;
 
   // Registration parameters.
-  var register = true;
-  var register_expires = 600;
-  var registrar_server = null;
-  var register_extra_contact_uri_params = null;
+  bool register = true;
+  int register_expires = 600;
+  dynamic registrar_server;
+  Map<String, dynamic> register_extra_contact_uri_params;
 
   // Connection options.
-  List<WebSocketInterface> sockets = null;
-  var connection_recovery_max_interval = 30;
-  var connection_recovery_min_interval = 2;
+  List<WebSocketInterface> sockets = <WebSocketInterface>[];
+  int connection_recovery_max_interval = 30;
+  int connection_recovery_min_interval = 2;
 
   /*
    * Host address.
    * Value to be set in Via sent_by and host part of Contact FQDN.
   */
-  var via_host = '${Utils.createRandomToken(12)}.invalid';
+  String via_host = '${Utils.createRandomToken(12)}.invalid';
 
   // DartSIP ID
-  var jssip_id = null;
+  String jssip_id;
 
-  var hostport_params = null;
+  String hostport_params;
 }
 
 // Configuration checks.
 class Checks {
-  var mandatory = {
+  Map<String, Null Function(Settings src, Settings dst)> mandatory = {
     'sockets': (Settings src, Settings dst) {
       List<WebSocketInterface> sockets = src.sockets;
       /* Allow defining sockets parameter as:
@@ -68,7 +68,7 @@ class Checks {
        *  List of Objects: [{socket: socket1, weight:1}, {socket: Socket2, weight:0}]
        *  List of Objects and Socket: [{socket: socket1}, socket2]
        */
-      List<WebSocketInterface> _sockets = [];
+      List<WebSocketInterface> _sockets = <WebSocketInterface>[];
       if (sockets is List && sockets.length > 0) {
         for (var socket in sockets) {
           if (Socket.isSocket(socket)) {
@@ -213,8 +213,7 @@ class Checks {
     'registrar_server': (src, dst) {
       var registrar_server = src.registrar_server;
       if (registrar_server == null) return;
-      if (!registrar_server
-          .contains(RegExp(r'^sip:', caseSensitive: false))) {
+      if (!registrar_server.contains(RegExp(r'^sip:', caseSensitive: false))) {
         registrar_server = '${DartSIP_C.SIP}:${registrar_server}';
       }
       var parsed = URI.parse(registrar_server);
@@ -243,18 +242,18 @@ class Checks {
   };
 }
 
-final checks = Checks();
+final Checks checks = Checks();
 
 void load(dst, src) {
   try {
     // Check Mandatory parameters.
-    checks.mandatory.forEach((parameter, fun) {
+    checks.mandatory.forEach((String parameter, fun) {
       logger.info('Check mandatory parameter => ${parameter}.');
       fun(src, dst);
     });
 
     // Check Optional parameters.
-    checks.optional.forEach((parameter, fun) {
+    checks.optional.forEach((String parameter, fun) {
       logger.debug('Check optional parameter => ${parameter}.');
       fun(src, dst);
     });

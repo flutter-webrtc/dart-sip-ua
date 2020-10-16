@@ -17,8 +17,6 @@ class SIPUAHelper extends EventManager {
   UA _ua;
   Settings _settings;
   UaSettings _uaSettings;
-  @override
-  final Log logger = Log();
   final Map<String, Call> _calls = {};
 
   RegistrationState _registerState =

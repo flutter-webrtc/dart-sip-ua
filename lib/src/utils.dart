@@ -38,7 +38,8 @@ class Math {
   }
 }
 
-int str_utf8_length(string) => unescape(encodeURIComponent(string)).length;
+int str_utf8_length(String string) =>
+    unescape(encodeURIComponent(string)).length;
 
 // Used by 'hasMethods'.
 bool isFunction(fn) {
@@ -57,19 +58,19 @@ bool isString(str) {
   }
 }
 
-bool isNaN(input) {
+bool isNaN(dynamic input) {
   return input.isNaN;
 }
 
-int parseInt(input, radix) {
+int parseInt(String input, int radix) {
   return int.tryParse(input, radix: radix) ?? null;
 }
 
-double parseFloat(input) {
+double parseFloat(String input) {
   return double.tryParse(input) ?? null;
 }
 
-String decodeURIComponent(str) {
+String decodeURIComponent(String str) {
   try {
     return Uri.decodeComponent(str);
   } catch (_) {
@@ -77,7 +78,7 @@ String decodeURIComponent(str) {
   }
 }
 
-String encodeURIComponent(str) {
+String encodeURIComponent(String str) {
   return Uri.encodeComponent(str);
 }
 
@@ -86,13 +87,13 @@ String unescape(String str) {
   return str;
 }
 
-bool isDecimal(input) =>
+bool isDecimal(dynamic input) =>
     input != null &&
     ((input is num && !isNaN(input)) ||
         (input is! num &&
             (parseFloat(input) != null || parseInt(input, 10) != null)));
 
-bool isEmpty(value) {
+bool isEmpty(dynamic value) {
   return (value == null ||
       value == '' ||
       value == null ||
@@ -101,7 +102,7 @@ bool isEmpty(value) {
 }
 
 // Used by 'newTag'.
-String createRandomToken(size, {base = 32}) {
+String createRandomToken(int size, {int base = 32}) {
   return randomAlphaNumeric(size).toLowerCase();
 }
 
@@ -109,13 +110,13 @@ String newTag() => createRandomToken(10);
 
 String newUUID() => Uuid().v4();
 
-dynamic hostType(host) {
+dynamic hostType(String host) {
   if (host == null) {
     return null;
   } else {
-    host = Grammar.parse(host, 'host');
-    if (host != -1) {
-      return host['host_type'];
+    var res = Grammar.parse(host, 'host');
+    if (res != -1) {
+      return res['host_type'];
     }
   }
 }
@@ -139,7 +140,7 @@ String escapeUser(user) => encodeURIComponent(decodeURIComponent(user))
 * Detects the domain part (if given) and properly hex-escapes the user portion.
 * If the user portion has only 'tel' number symbols the user portion is clean of 'tel' visual separators.
 */
-URI normalizeTarget(target, [domain]) {
+URI normalizeTarget(dynamic target, [String domain]) {
   // If no target is given then raise an error.
   if (target == null) {
     return null;
@@ -218,7 +219,7 @@ String headerize(String string) {
   return hname;
 }
 
-String sipErrorCause(statusCode) {
+String sipErrorCause(dynamic statusCode) {
   var reason = DartSIP_C.Causes.SIP_FAILURE_CODE;
   DartSIP_C.SIP_ERROR_CAUSES.forEach((key, value) {
     if (value.contains(statusCode)) {
@@ -228,10 +229,10 @@ String sipErrorCause(statusCode) {
   return reason;
 }
 
-String calculateMD5(string) {
+String calculateMD5(String string) {
   return md5.convert(utf8.encode(string)).toString();
 }
 
-List cloneArray(array) {
-  return (array != null && array is List) ? array.sublist(0) : [];
+List<dynamic> cloneArray(List<dynamic> array) {
+  return (array != null && array is List) ? array.sublist(0) : <dynamic>[];
 }

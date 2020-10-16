@@ -14,13 +14,13 @@ import 'utils.dart' as Utils;
  *
  */
 class URI {
-  final JsonDecoder decoder = JsonDecoder();
-  final JsonEncoder encoder = JsonEncoder();
+  final JsonDecoder _decoder = JsonDecoder();
+  final JsonEncoder _encoder = JsonEncoder();
   /**
     * Parse the given string and returns a DartSIP.URI instance or null if
     * it is an invalid URI.
     */
-  static dynamic parse(uri) {
+  static dynamic parse(String uri) {
     try {
       return Grammar.parse(uri, 'SIP_URI');
     } catch (_) {
@@ -28,163 +28,170 @@ class URI {
     }
   }
 
-  var _scheme;
-  var _parameters;
-  var _headers;
-  var _user;
-  var _host;
-  var _port;
+  String _scheme;
+  Map<dynamic, dynamic> _parameters;
+  Map<dynamic, dynamic> _headers;
+  String _user;
+  String _host;
+  int _port;
 
-  URI(scheme, user, host, [port, parameters, headers]) {
+  URI(String scheme, String user, String host,
+      [int port,
+      Map<dynamic, dynamic> parameters,
+      Map<dynamic, dynamic> headers]) {
     // Checks.
     if (host == null) {
       throw AssertionError('missing or invalid "host" parameter');
     }
 
     // Initialize parameters.
-    this._parameters = {};
-    this._headers = {};
-    this._scheme = scheme ?? DartSIP_C.SIP;
-    this._user = user;
-    this._host = host.toLowerCase();
-    this._port = port;
+    _parameters = parameters ?? {};
+    _headers = headers ?? {};
+    _scheme = scheme ?? DartSIP_C.SIP;
+    _user = user;
+    _host = host.toLowerCase();
+    _port = port;
 
     if (parameters != null) {
-      parameters.forEach((param, value) {
-        this.setParam(param, value);
+      parameters.forEach((dynamic param, dynamic value) {
+        setParam(param, value);
       });
     }
     if (headers != null) {
-      headers.forEach((header, value) {
-        this.setHeader(header, value);
+      headers.forEach((dynamic header, dynamic value) {
+        setHeader(header, value);
       });
     }
   }
 
-  String get scheme => this._scheme;
+  String get scheme => _scheme;
 
   set scheme(String value) {
-    this._scheme = value.toLowerCase();
+    _scheme = value.toLowerCase();
   }
 
-  String get user => this._user;
+  String get user => _user;
 
   set user(String value) {
-    this._user = value;
+    _user = value;
   }
 
-  String get host => this._host;
+  String get host => _host;
 
   set host(String value) {
-    this._host = value.toLowerCase();
+    _host = value.toLowerCase();
   }
 
-  int get port => this._port;
+  int get port => _port;
 
   set port(int value) {
-    this._port =
-        value == 0 ? value : (value != null) ? Utils.parseInt(value, 10) : null;
+    _port = value == 0
+        ? value
+        : (value != null)
+            ? Utils.parseInt(value.toString(), 10)
+            : null;
   }
 
-  void setParam(key, value) {
+  void setParam(String key, dynamic value) {
     if (key != null) {
-      this._parameters[key.toLowerCase()] =
+      _parameters[key.toLowerCase()] =
           (value == null) ? null : value.toString();
     }
   }
 
-  dynamic getParam(key) {
+  dynamic getParam(String key) {
     if (key != null) {
-      return this._parameters[key.toLowerCase()];
+      return _parameters[key.toLowerCase()];
     }
     return null;
   }
 
-  bool hasParam(key) {
+  bool hasParam(String key) {
     if (key != null) {
-      return (this._parameters.containsKey(key.toLowerCase()) && true) || false;
+      return (_parameters.containsKey(key.toLowerCase()) && true) || false;
     }
     return false;
   }
 
-  dynamic deleteParam(parameter) {
+  dynamic deleteParam(String parameter) {
     parameter = parameter.toLowerCase();
-    if (this._parameters.containsKey(parameter)) {
-      var value = this._parameters[parameter];
-      this._parameters.remove(parameter);
+    if (_parameters.containsKey(parameter)) {
+      dynamic value = _parameters[parameter];
+      _parameters.remove(parameter);
       return value;
     }
   }
 
   void clearParams() {
-    this._parameters = {};
+    _parameters = {};
   }
 
-  void setHeader(name, value) {
-    this._headers[Utils.headerize(name)] = (value is List) ? value : [value];
+  void setHeader(String name, dynamic value) {
+    _headers[Utils.headerize(name)] =
+        (value is List) ? value : <dynamic>[value];
   }
 
-  dynamic getHeader(name) {
+  dynamic getHeader(String name) {
     if (name != null) {
-      return this._headers[Utils.headerize(name)];
+      return _headers[Utils.headerize(name)];
     }
     null;
   }
 
-  bool hasHeader(name) {
+  bool hasHeader(String name) {
     if (name != null) {
-      return (this._headers.containsKey(Utils.headerize(name)) && true) ||
-          false;
+      return (_headers.containsKey(Utils.headerize(name)) && true) || false;
     }
     return false;
   }
 
-  dynamic deleteHeader(header) {
+  dynamic deleteHeader(String header) {
     header = Utils.headerize(header);
-    if (this._headers.containsKey(header)) {
-      var value = this._headers[header];
-      this._headers.remove(header);
+    if (_headers.containsKey(header)) {
+      dynamic value = _headers[header];
+      _headers.remove(header);
       return value;
     }
     return null;
   }
 
   void clearHeaders() {
-    this._headers = {};
+    _headers = {};
   }
 
   URI clone() {
     return URI(
-        this.scheme,
-        this.user,
-        this.host,
-        this.port,
-        decoder.convert(encoder.convert(this._parameters)),
-        decoder.convert(encoder.convert(this._headers)));
+        scheme,
+        user,
+        host,
+        port,
+        _decoder.convert(_encoder.convert(_parameters)),
+        _decoder.convert(_encoder.convert(_headers)));
   }
 
+  @override
   String toString() {
     var headers = [];
 
-    var uri = '${this._scheme}:';
+    var uri = '${_scheme}:';
 
-    if (this.user != null) {
-      uri += '${Utils.escapeUser(this.user)}@';
+    if (user != null) {
+      uri += '${Utils.escapeUser(user)}@';
     }
-    uri += this.host;
-    if (this.port != null || this.port == 0) {
-      uri += ':${this.port.toString()}';
+    uri += host;
+    if (port != null || port == 0) {
+      uri += ':${port.toString()}';
     }
 
-    this._parameters.forEach((key, parameter) {
+    _parameters.forEach((dynamic key, dynamic parameter) {
       uri += ';${key}';
-      if (this._parameters[key] != null) {
-        uri += '=${this._parameters[key].toString()}';
+      if (_parameters[key] != null) {
+        uri += '=${_parameters[key].toString()}';
       }
     });
 
-    this._headers.forEach((key, header) {
-      var hdrs = this._headers[key];
+    _headers.forEach((key, header) {
+      var hdrs = _headers[key];
       hdrs.forEach((item) {
         headers.add('${Utils.headerize(key)}=${item.toString()}');
       });
@@ -197,15 +204,15 @@ class URI {
     return uri;
   }
 
-  String toAor({show_port = false}) {
-    var aor = '${this._scheme}:';
+  String toAor({bool show_port = false}) {
+    var aor = '${_scheme}:';
 
-    if (this._user != null) {
-      aor += '${Utils.escapeUser(this._user)}@';
+    if (_user != null) {
+      aor += '${Utils.escapeUser(_user)}@';
     }
-    aor += this._host;
-    if (show_port && (this._port != null || this._port == 0)) {
-      aor += ':${this._port}';
+    aor += _host;
+    if (show_port && (_port != null || _port == 0)) {
+      aor += ':${_port}';
     }
 
     return aor;

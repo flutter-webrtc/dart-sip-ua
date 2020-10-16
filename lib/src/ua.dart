@@ -29,14 +29,14 @@ import 'transactions/transaction_base.dart';
 
 class C {
   // UA status codes.
-  static const STATUS_INIT = 0;
-  static const STATUS_READY = 1;
-  static const STATUS_USER_CLOSED = 2;
-  static const STATUS_NOT_READY = 3;
+  static const int STATUS_INIT = 0;
+  static const int STATUS_READY = 1;
+  static const int STATUS_USER_CLOSED = 2;
+  static const int STATUS_NOT_READY = 3;
 
   // UA error codes.
-  static const CONFIGURATION_ERROR = 1;
-  static const NETWORK_ERROR = 2;
+  static const int CONFIGURATION_ERROR = 1;
+  static const int NETWORK_ERROR = 2;
 }
 
 class window {

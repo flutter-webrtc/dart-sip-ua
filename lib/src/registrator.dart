@@ -1,6 +1,7 @@
 import '../sip_ua.dart';
 import 'constants.dart';
 import 'constants.dart' as DartSIP_C;
+import 'name_addr_header.dart';
 import 'request_sender.dart';
 
 import 'sip_message.dart';
@@ -114,7 +115,8 @@ class Registrator {
       extraContactUriParams = {};
     }
 
-    var contact = Grammar.parse(this._contact, 'Contact')[0]['parsed'];
+    NameAddrHeader contact =
+        Grammar.parse(this._contact, 'Contact')[0]['parsed'];
     contact.uri.clearParams();
 
     extraContactUriParams.forEach((param_key, param_value) {

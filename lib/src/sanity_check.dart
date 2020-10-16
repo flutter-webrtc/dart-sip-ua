@@ -138,9 +138,9 @@ bool rfc3261_8_2_2_2() {
     // Otherwise check whether it is a merged request.
     else {
       ua.transactions.getAll(InviteServerTransaction).forEach((tr) {
-        if (tr.request.from_tag == fromTag &&
-            tr.request.call_id == call_id &&
-            tr.request.cseq == cseq) {
+        if (tr._request.from_tag == fromTag &&
+            tr._request.call_id == call_id &&
+            tr._request.cseq == cseq) {
           reply(482);
 
           return false;
@@ -163,9 +163,9 @@ bool rfc3261_8_2_2_2() {
   // Otherwise check whether it is a merged request.
   else {
     ua.transactions.getAll(NonInviteServerTransaction).forEach((tr) {
-      if (tr.request.from_tag == fromTag &&
-          tr.request.call_id == call_id &&
-          tr.request.cseq == cseq) {
+      if (tr._request.from_tag == fromTag &&
+          tr._request.call_id == call_id &&
+          tr._request.cseq == cseq) {
         reply(482);
         return false;
       }

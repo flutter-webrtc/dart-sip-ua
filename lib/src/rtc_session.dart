@@ -29,16 +29,16 @@ import 'transactions/transaction_base.dart';
 
 class C {
   // RTCSession states.
-  static const STATUS_NULL = 0;
-  static const STATUS_INVITE_SENT = 1;
-  static const STATUS_1XX_RECEIVED = 2;
-  static const STATUS_INVITE_RECEIVED = 3;
-  static const STATUS_WAITING_FOR_ANSWER = 4;
-  static const STATUS_ANSWERED = 5;
-  static const STATUS_WAITING_FOR_ACK = 6;
-  static const STATUS_CANCELED = 7;
-  static const STATUS_TERMINATED = 8;
-  static const STATUS_CONFIRMED = 9;
+  static const int STATUS_NULL = 0;
+  static const int STATUS_INVITE_SENT = 1;
+  static const int STATUS_1XX_RECEIVED = 2;
+  static const int STATUS_INVITE_RECEIVED = 3;
+  static const int STATUS_WAITING_FOR_ANSWER = 4;
+  static const int STATUS_ANSWERED = 5;
+  static const int STATUS_WAITING_FOR_ACK = 6;
+  static const int STATUS_CANCELED = 7;
+  static const int STATUS_TERMINATED = 8;
+  static const int STATUS_CONFIRMED = 9;
 }
 
 /**
@@ -82,7 +82,7 @@ class RTCSession extends EventManager {
   bool _is_canceled;
   RFC4028Timers _sessionTimers;
   var _cancel_reason;
-  var _status;
+  int _status;
   Dialog _dialog;
   RTCPeerConnection _connection;
   var _iceGatheringState;
@@ -214,7 +214,7 @@ class RTCSession extends EventManager {
     this._data = _data;
   }
 
-  get status => this._status;
+  int get status => this._status;
 
   bool isInProgress() {
     switch (this._status) {
