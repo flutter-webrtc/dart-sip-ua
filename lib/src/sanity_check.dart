@@ -10,10 +10,10 @@ import 'transactions/invite_server.dart';
 import 'transactions/non_invite_server.dart';
 
 // Checks for requests and responses.
-const all = [minimumHeaders];
+const List<bool Function()> all = [minimumHeaders];
 
 // Checks for requests.
-const requests = [
+const List<bool Function()> requests = [
   rfc3261_8_2_2_1,
   rfc3261_16_3_4,
   rfc3261_18_3_request,
@@ -21,7 +21,10 @@ const requests = [
 ];
 
 // Checks for responses.
-const responses = [rfc3261_8_1_3_3, rfc3261_18_3_response];
+const List<bool Function()> responses = [
+  rfc3261_8_1_3_3,
+  rfc3261_18_3_response
+];
 
 // local variables.
 IncomingMessage message;

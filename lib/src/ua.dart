@@ -96,7 +96,7 @@ class UA extends EventManager {
   TransactionBag _transactions = TransactionBag();
   var _data;
   var _closeTimer;
-  Registrator _registrator;
+  dynamic _registrator;
 
   UA(Settings configuration) {
     logger.debug('new() [configuration:${configuration.toString()}]');
@@ -506,7 +506,7 @@ class UA extends EventManager {
    * Request reception
    */
   void receiveRequest(IncomingRequest request) {
-    SipMethod method = request.method;
+    var method = request.method;
 
     // Check that request URI points to us.
     if (request.ruri.user != this._configuration.uri.user &&
@@ -550,7 +550,7 @@ class UA extends EventManager {
     if (method == SipMethod.OPTIONS) {
       request.reply(200);
     } else if (method == SipMethod.MESSAGE) {
-      if (!this.hasListeners(EventNewMessage())) {
+      if (!hasListeners(EventNewMessage())) {
         request.reply(405);
         return;
       }

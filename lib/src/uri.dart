@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'grammar.dart';
 import 'constants.dart' as DartSIP_C;
-import 'utils.dart' as Utils;
+import 'utils.dart' as utils;
+import 'utils.dart';
 
 /**
  * -param {String} [scheme]
@@ -14,8 +15,6 @@ import 'utils.dart' as Utils;
  *
  */
 class URI {
-  final JsonDecoder _decoder = JsonDecoder();
-  final JsonEncoder _encoder = JsonEncoder();
   /**
     * Parse the given string and returns a DartSIP.URI instance or null if
     * it is an invalid URI.
@@ -88,7 +87,7 @@ class URI {
     _port = value == 0
         ? value
         : (value != null)
-            ? Utils.parseInt(value.toString(), 10)
+            ? utils.parseInt(value.toString(), 10)
             : null;
   }
 
@@ -127,26 +126,26 @@ class URI {
   }
 
   void setHeader(String name, dynamic value) {
-    _headers[Utils.headerize(name)] =
+    _headers[utils.headerize(name)] =
         (value is List) ? value : <dynamic>[value];
   }
 
   dynamic getHeader(String name) {
     if (name != null) {
-      return _headers[Utils.headerize(name)];
+      return _headers[utils.headerize(name)];
     }
     null;
   }
 
   bool hasHeader(String name) {
     if (name != null) {
-      return (_headers.containsKey(Utils.headerize(name)) && true) || false;
+      return (_headers.containsKey(utils.headerize(name)) && true) || false;
     }
     return false;
   }
 
   dynamic deleteHeader(String header) {
-    header = Utils.headerize(header);
+    header = utils.headerize(header);
     if (_headers.containsKey(header)) {
       dynamic value = _headers[header];
       _headers.remove(header);
@@ -165,8 +164,8 @@ class URI {
         user,
         host,
         port,
-        _decoder.convert(_encoder.convert(_parameters)),
-        _decoder.convert(_encoder.convert(_headers)));
+        decoder.convert(encoder.convert(_parameters)),
+        decoder.convert(encoder.convert(_headers)));
   }
 
   @override
@@ -176,7 +175,7 @@ class URI {
     var uri = '${_scheme}:';
 
     if (user != null) {
-      uri += '${Utils.escapeUser(user)}@';
+      uri += '${utils.escapeUser(user)}@';
     }
     uri += host;
     if (port != null || port == 0) {
@@ -193,7 +192,7 @@ class URI {
     _headers.forEach((key, header) {
       var hdrs = _headers[key];
       hdrs.forEach((item) {
-        headers.add('${Utils.headerize(key)}=${item.toString()}');
+        headers.add('${utils.headerize(key)}=${item.toString()}');
       });
     });
 
@@ -208,7 +207,7 @@ class URI {
     var aor = '${_scheme}:';
 
     if (_user != null) {
-      aor += '${Utils.escapeUser(_user)}@';
+      aor += '${utils.escapeUser(_user)}@';
     }
     aor += _host;
     if (show_port && (_port != null || _port == 0)) {

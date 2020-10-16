@@ -11,12 +11,11 @@ import '../logger.dart';
 import '../rtc_session.dart' as rtc;
 
 class ReferSubscriber extends EventManager {
-  String _id;
+  int _id;
   final rtc.RTCSession _session;
-
   ReferSubscriber(this._session);
 
-  String get id => _id;
+  int get id => _id;
 
   void sendRefer(target, options) {
     logger.debug('sendRefer()');
@@ -51,7 +50,7 @@ class ReferSubscriber extends EventManager {
     extraHeaders.add(referredBy);
     extraHeaders.add('Contact: ${_session.contact}');
 
-    EventManager handlers = EventManager();
+    var handlers = EventManager();
     handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
       _requestSucceeded(event.response);
     });

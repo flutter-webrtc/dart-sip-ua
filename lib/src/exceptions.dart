@@ -1,7 +1,6 @@
-import 'dart:convert';
+import 'utils.dart';
 
 class ErrorImpl extends Error {
-  final JsonEncoder encoder = JsonEncoder();
   var code;
   var name;
   var parameter;

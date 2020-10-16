@@ -1,14 +1,15 @@
-import "dart:core" as core show StackTrace;
-import "dart:core";
+import 'dart:core' as core show StackTrace;
+import 'dart:core';
 import 'dart:io';
 import 'package:path/path.dart';
 
 class StackTraceNJ implements core.StackTrace {
-  static final stackTraceRegex = RegExp(r'#[0-9]+[\s]+(.+) \(([^\s]+)\)');
+  static final RegExp stackTraceRegex =
+      RegExp(r'#[0-9]+[\s]+(.+) \(([^\s]+)\)');
   final core.StackTrace stackTrace;
 
   final String workingDirectory;
-  int _skipFrames;
+  final int _skipFrames;
 
   List<Stackframe> _frames;
 

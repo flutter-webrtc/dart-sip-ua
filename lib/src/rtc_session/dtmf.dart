@@ -2,6 +2,7 @@ import '../../sip_ua.dart';
 import '../constants.dart';
 import '../exceptions.dart' as Exceptions;
 import '../rtc_session.dart' as rtc;
+import '../sip_message.dart';
 import '../utils.dart' as Utils;
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
@@ -20,7 +21,7 @@ class DTMF extends EventManager {
   String _direction;
   String _tone;
   int _duration;
-  String _request;
+  IncomingRequest _request;
   EventManager _eventHandlers;
 
   DTMF(this._session);
@@ -75,7 +76,7 @@ class DTMF extends EventManager {
 
     _session.newDTMF('local', this, _request);
 
-    EventManager handlers = EventManager();
+    var handlers = EventManager();
     handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
       emit(EventSucceeded(originator: 'remote', response: event.response));
     });
@@ -102,7 +103,7 @@ class DTMF extends EventManager {
     });
   }
 
-  void init_incoming(request) {
+  void init_incoming(IncomingRequest request) {
     var reg_tone = r'^(Signal\s*?=\s*?)([0-9A-D#*]{1})(\s)?.*';
     var reg_duration = r'^(Duration\s?=\s?)([0-9]{1,4})(\s)?.*';
 
@@ -112,7 +113,7 @@ class DTMF extends EventManager {
     request.reply(200);
 
     if (request.body != null) {
-      String body = request.body.split('\n');
+      var body = request.body.split('\n');
 
       if (body.length >= 1) {
         if ((body[0]).contains(RegExp(reg_tone))) {

@@ -12,7 +12,7 @@ abstract class Socket {
 
   void connect();
   void disconnect();
-  void send(data);
+  void send(dynamic data);
 
   void Function() onconnect;
   void Function(
@@ -21,7 +21,7 @@ abstract class Socket {
   void Function(dynamic data) ondata;
 }
 
-bool isSocket(socket) {
+bool isSocket(dynamic socket) {
   // Ignore if an array is given.
   if (socket is List) {
     return false;
@@ -52,14 +52,18 @@ bool isSocket(socket) {
     return false;
   }
 
-  if (socket is! Socket) return false;
+  if (socket is! Socket) {
+    return false;
+  }
 
   // Check Methods.
   if (socket.connect == null || socket.connect is! Function)
     return false;
   else if (socket.disconnect == null || socket.disconnect is! Function)
     return false;
-  else if (socket.send == null || socket.send is! Function) return false;
+  else if (socket.send == null || socket.send is! Function) {
+    return false;
+  }
 
   return true;
 }

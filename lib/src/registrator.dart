@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../sip_ua.dart';
 import 'constants.dart';
 import 'constants.dart' as DartSIP_C;
@@ -8,185 +10,185 @@ import 'sip_message.dart';
 import 'timers.dart';
 import 'transport.dart';
 import 'ua.dart';
-import 'utils.dart' as Utils;
+import 'uri.dart';
+import 'utils.dart' as utils;
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
 import 'grammar.dart';
 import 'logger.dart';
 
-const MIN_REGISTER_EXPIRES = 10; // In seconds.
+const int MIN_REGISTER_EXPIRES = 10; // In seconds.
 
 class UnHandledResponse {
-  var status_code;
-  var reason_phrase;
+  int status_code;
+  String reason_phrase;
   UnHandledResponse(this.status_code, this.reason_phrase);
 }
 
 class Registrator {
   UA _ua;
   Transport _transport;
-  var _registrar;
-  var _expires;
-  var _call_id;
-  var _cseq;
-  var _to_uri;
-  var _registrationTimer;
-  var _registering;
-  var _registered;
-  var _contact;
-  var _extraHeaders;
-  var _extraContactParams;
+  URI _registrar;
+  int _expires;
+  String _call_id;
+  int _cseq;
+  URI _to_uri;
+  Timer _registrationTimer;
+  bool _registering;
+  bool _registered;
+  String _contact;
+  List<String> _extraHeaders;
+  String _extraContactParams;
 
   Registrator(UA ua, [Transport transport]) {
     var reg_id = 1; // Force reg_id to 1.
 
-    this._ua = ua;
-    this._transport = transport;
+    _ua = ua;
+    _transport = transport;
 
-    this._registrar = ua.configuration.registrar_server;
-    this._expires = ua.configuration.register_expires;
+    _registrar = ua.configuration.registrar_server;
+    _expires = ua.configuration.register_expires;
 
     // Call-ID and CSeq values RFC3261 10.2.
-    this._call_id = Utils.createRandomToken(22);
-    this._cseq = 0;
+    _call_id = utils.createRandomToken(22);
+    _cseq = 0;
 
-    this._to_uri = ua.configuration.uri;
+    _to_uri = ua.configuration.uri;
 
-    this._registrationTimer = null;
+    _registrationTimer = null;
 
     // Ongoing Register request.
-    this._registering = false;
+    _registering = false;
 
     // Set status.
-    this._registered = false;
+    _registered = false;
 
     // Contact header.
-    this._contact = this._ua.contact.toString();
+    _contact = _ua.contact.toString();
 
     // Sip.ice media feature tag (RFC 5768).
-    this._contact += ';+sip.ice';
+    _contact += ';+sip.ice';
 
     // Custom headers for REGISTER and un-REGISTER.
-    this._extraHeaders = [];
+    _extraHeaders = <String>[];
 
     // Custom Contact header params for REGISTER and un-REGISTER.
-    this._extraContactParams = '';
+    _extraContactParams = '';
 
     // Custom Contact URI params for REGISTER and un-REGISTER.
-    this.setExtraContactUriParams(
+    setExtraContactUriParams(
         ua.configuration.register_extra_contact_uri_params);
 
     if (reg_id != null) {
-      this._contact += ';reg-id=${reg_id}';
-      this._contact +=
-          ';+sip.instance="<urn:uuid:${this._ua.configuration.instance_id}>"';
+      _contact += ';reg-id=${reg_id}';
+      _contact +=
+          ';+sip.instance="<urn:uuid:${_ua.configuration.instance_id}>"';
     }
   }
 
-  get registered => this._registered;
+  bool get registered => _registered;
 
-  get transport => this._transport;
+  Transport get transport => _transport;
 
-  void setExtraHeaders(extraHeaders) {
+  void setExtraHeaders(List<String> extraHeaders) {
     if (extraHeaders is! List) {
-      extraHeaders = [];
+      extraHeaders = <String>[];
     }
-    this._extraHeaders = extraHeaders;
+    _extraHeaders = extraHeaders;
   }
 
-  void setExtraContactParams(extraContactParams) {
+  void setExtraContactParams(Map<String, dynamic> extraContactParams) {
     if (extraContactParams is! Map) {
-      extraContactParams = {};
+      extraContactParams = <String, dynamic>{};
     }
 
     // Reset it.
-    this._extraContactParams = '';
+    _extraContactParams = '';
 
     extraContactParams.forEach((param_key, param_value) {
-      this._extraContactParams += (';${param_key}');
+      _extraContactParams += (';${param_key}');
       if (param_value != null) {
-        this._extraContactParams += ('=${param_value}');
+        _extraContactParams += ('=${param_value}');
       }
     });
   }
 
-  void setExtraContactUriParams(extraContactUriParams) {
+  void setExtraContactUriParams(Map<String, dynamic> extraContactUriParams) {
     if (extraContactUriParams is! Map) {
-      extraContactUriParams = {};
+      extraContactUriParams = <String, dynamic>{};
     }
 
-    NameAddrHeader contact =
-        Grammar.parse(this._contact, 'Contact')[0]['parsed'];
+    NameAddrHeader contact = Grammar.parse(_contact, 'Contact')[0]['parsed'];
     contact.uri.clearParams();
 
-    extraContactUriParams.forEach((param_key, param_value) {
+    extraContactUriParams.forEach((String param_key, dynamic param_value) {
       contact.uri.setParam(param_key, param_value);
     });
 
-    this._contact = contact.toString();
+    _contact = contact.toString();
   }
 
   void register() {
-    if (this._registering) {
+    if (_registering) {
       logger.debug('Register request in progress...');
       return;
     }
 
-    var extraHeaders = List.from(_extraHeaders ?? []);
+    var extraHeaders = List<String>.from(_extraHeaders ?? []);
 
-    extraHeaders.add(
-        'Contact: ${this._contact};expires=${this._expires}${this._extraContactParams}');
-    extraHeaders.add('Expires: ${this._expires}');
+    extraHeaders
+        .add('Contact: ${_contact};expires=${_expires}${_extraContactParams}');
+    extraHeaders.add('Expires: ${_expires}');
 
-    logger.warn(this._contact);
+    logger.warn(_contact);
 
     var request = OutgoingRequest(
         SipMethod.REGISTER,
-        this._registrar,
-        this._ua,
-        {
-          'to_uri': this._to_uri,
-          'call_id': this._call_id,
-          'cseq': (this._cseq += 1)
+        _registrar,
+        _ua,
+        <String, dynamic>{
+          'to_uri': _to_uri,
+          'call_id': _call_id,
+          'cseq': (_cseq += 1)
         },
         extraHeaders);
 
-    EventManager localEventHandlers = EventManager();
+    var localEventHandlers = EventManager();
     localEventHandlers.on(EventOnRequestTimeout(),
         (EventOnRequestTimeout value) {
-      this._registrationFailure(
+      _registrationFailure(
           UnHandledResponse(408, DartSIP_C.causes.REQUEST_TIMEOUT),
           DartSIP_C.causes.REQUEST_TIMEOUT);
     });
     localEventHandlers.on(EventOnTransportError(),
         (EventOnTransportError value) {
-      this._registrationFailure(
+      _registrationFailure(
           UnHandledResponse(500, DartSIP_C.causes.CONNECTION_ERROR),
           DartSIP_C.causes.CONNECTION_ERROR);
     });
     localEventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated value) {
-      this._cseq += 1;
+      _cseq += 1;
     });
     localEventHandlers.on(EventOnReceiveResponse(),
         (EventOnReceiveResponse event) {
       {
         // Discard responses to older REGISTER/un-REGISTER requests.
-        if (event.response.cseq != this._cseq) {
+        if (event.response.cseq != _cseq) {
           return;
         }
 
         // Clear registration timer.
-        if (this._registrationTimer != null) {
-          clearTimeout(this._registrationTimer);
-          this._registrationTimer = null;
+        if (_registrationTimer != null) {
+          clearTimeout(_registrationTimer);
+          _registrationTimer = null;
         }
 
-        String status_code = event.response.status_code.toString();
+        var status_code = event.response.status_code.toString();
 
-        if (Utils.test1XX(status_code)) {
+        if (utils.test1XX(status_code)) {
           // Ignore provisional responses.
-        } else if (Utils.test2XX(status_code)) {
-          this._registering = false;
+        } else if (utils.test2XX(status_code)) {
+          _registering = false;
 
           if (!event.response.hasHeader('Contact')) {
             logger.debug(
@@ -200,7 +202,7 @@ class Registrator {
           });
           // Get the Contact pointing to us and update the expires value accordingly.
           var contact = contacts.firstWhere(
-              (element) => (element.uri.user == this._ua.contact.uri.user));
+              (element) => (element.uri.user == _ua.contact.uri.user));
 
           if (contact == null) {
             logger.debug('no Contact header pointing to us, response ignored');
@@ -213,178 +215,173 @@ class Registrator {
             expires = event.response.getHeader('expires');
           }
 
-          if (expires == null) {
-            expires = this._expires;
-          }
+          expires ??= _expires;
 
           expires = num.tryParse(expires) ?? 0;
 
-          if (expires < MIN_REGISTER_EXPIRES) expires = MIN_REGISTER_EXPIRES;
+          if (expires < MIN_REGISTER_EXPIRES) {
+            expires = MIN_REGISTER_EXPIRES;
+          }
 
           // Re-Register or emit an event before the expiration interval has elapsed.
           // For that, decrease the expires value. ie: 3 seconds.
-          this._registrationTimer = setTimeout(() {
-            clearTimeout(this._registrationTimer);
-            this._registrationTimer = null;
+          _registrationTimer = setTimeout(() {
+            clearTimeout(_registrationTimer);
+            _registrationTimer = null;
             // If there are no listeners for registrationExpiring, reregistration.
             // If there are listeners, var the listening do the register call.
-            if (!this._ua.hasListeners(EventRegistrationExpiring())) {
-              this.register();
+            if (!_ua.hasListeners(EventRegistrationExpiring())) {
+              register();
             } else {
-              this._ua.emit(EventRegistrationExpiring());
+              _ua.emit(EventRegistrationExpiring());
             }
           }, (expires * 1000) - 5000);
 
           // Save gruu values.
           if (contact.hasParam('temp-gruu')) {
-            this._ua.contact.temp_gruu =
+            _ua.contact.temp_gruu =
                 contact.getParam('temp-gruu').replaceAll('"', '');
           }
           if (contact.hasParam('pub-gruu')) {
-            this._ua.contact.pub_gruu =
+            _ua.contact.pub_gruu =
                 contact.getParam('pub-gruu').replaceAll('"', '');
           }
 
-          if (!this._registered) {
-            this._registered = true;
-            this._ua.registered(response: event.response);
+          if (!_registered) {
+            _registered = true;
+            _ua.registered(response: event.response);
           }
         } else
         // Interval too brief RFC3261 10.2.8.
         if (status_code.contains(RegExp(r'^423$'))) {
           if (event.response.hasHeader('min-expires')) {
             // Increase our registration interval to the suggested minimum.
-            this._expires =
+            _expires =
                 num.tryParse(event.response.getHeader('min-expires')) ?? 0;
 
-            if (this._expires < MIN_REGISTER_EXPIRES)
-              this._expires = MIN_REGISTER_EXPIRES;
+            if (_expires < MIN_REGISTER_EXPIRES)
+              _expires = MIN_REGISTER_EXPIRES;
 
             // Attempt the registration again immediately.
-            this.register();
+            register();
           } else {
             // This response MUST contain a Min-Expires header field.
             logger.debug(
                 '423 response received for REGISTER without Min-Expires');
 
-            this._registrationFailure(
+            _registrationFailure(
                 event.response, DartSIP_C.causes.SIP_FAILURE_CODE);
           }
         } else {
-          var cause = Utils.sipErrorCause(event.response.status_code);
-          this._registrationFailure(event.response, cause);
+          var cause = utils.sipErrorCause(event.response.status_code);
+          _registrationFailure(event.response, cause);
         }
       }
     });
 
-    var request_sender = RequestSender(this._ua, request, localEventHandlers);
+    var request_sender = RequestSender(_ua, request, localEventHandlers);
 
-    this._registering = true;
+    _registering = true;
     request_sender.send();
   }
 
   void unregister(unregister_all) {
-    if (this._registered == null) {
+    if (_registered == null) {
       logger.debug('already unregistered');
 
       return;
     }
 
-    this._registered = false;
+    _registered = false;
 
     // Clear the registration timer.
-    if (this._registrationTimer != null) {
-      clearTimeout(this._registrationTimer);
-      this._registrationTimer = null;
+    if (_registrationTimer != null) {
+      clearTimeout(_registrationTimer);
+      _registrationTimer = null;
     }
 
     var extraHeaders = List.from(_extraHeaders ?? []);
 
     if (unregister_all) {
-      extraHeaders.add('Contact: *${this._extraContactParams}');
+      extraHeaders.add('Contact: *${_extraContactParams}');
     } else {
-      extraHeaders.add(
-          'Contact: ${this._contact};expires=0${this._extraContactParams}');
+      extraHeaders.add('Contact: ${_contact};expires=0${_extraContactParams}');
     }
 
     extraHeaders.add('Expires: 0');
 
     var request = OutgoingRequest(
         SipMethod.REGISTER,
-        this._registrar,
-        this._ua,
-        {
-          'to_uri': this._to_uri,
-          'call_id': this._call_id,
-          'cseq': (this._cseq += 1)
-        },
+        _registrar,
+        _ua,
+        {'to_uri': _to_uri, 'call_id': _call_id, 'cseq': (_cseq += 1)},
         extraHeaders);
 
     EventManager localEventHandlers = EventManager();
     localEventHandlers.on(EventOnRequestTimeout(),
         (EventOnRequestTimeout value) {
-      this._unregistered(null, DartSIP_C.causes.REQUEST_TIMEOUT);
+      _unregistered(null, DartSIP_C.causes.REQUEST_TIMEOUT);
     });
     localEventHandlers.on(EventOnTransportError(),
         (EventOnTransportError value) {
-      this._unregistered(null, DartSIP_C.causes.CONNECTION_ERROR);
+      _unregistered(null, DartSIP_C.causes.CONNECTION_ERROR);
     });
     localEventHandlers.on(EventOnAuthenticated(),
         (EventOnAuthenticated response) {
       // Increase the CSeq on authentication.
 
-      this._cseq += 1;
+      _cseq += 1;
     });
     localEventHandlers.on(EventOnReceiveResponse(),
         (EventOnReceiveResponse event) {
-      String status_code = event.response.status_code.toString();
-      if (Utils.test2XX(status_code)) {
-        this._unregistered(event.response);
-      } else if (Utils.test1XX(status_code)) {
+      var status_code = event.response.status_code.toString();
+      if (utils.test2XX(status_code)) {
+        _unregistered(event.response);
+      } else if (utils.test1XX(status_code)) {
         // Ignore provisional responses.
       } else {
-        var cause = Utils.sipErrorCause(event.response.status_code);
-        this._unregistered(event.response, cause);
+        var cause = utils.sipErrorCause(event.response.status_code);
+        _unregistered(event.response, cause);
       }
     });
 
-    var request_sender = RequestSender(this._ua, request, localEventHandlers);
+    var request_sender = RequestSender(_ua, request, localEventHandlers);
 
     request_sender.send();
   }
 
   void close() {
-    if (this._registered) {
-      this.unregister(false);
+    if (_registered) {
+      unregister(false);
     }
   }
 
   void onTransportClosed() {
-    this._registering = false;
-    if (this._registrationTimer != null) {
-      clearTimeout(this._registrationTimer);
-      this._registrationTimer = null;
+    _registering = false;
+    if (_registrationTimer != null) {
+      clearTimeout(_registrationTimer);
+      _registrationTimer = null;
     }
 
-    if (this._registered) {
-      this._registered = false;
-      this._ua.unregistered();
+    if (_registered) {
+      _registered = false;
+      _ua.unregistered();
     }
   }
 
   void _registrationFailure(response, cause) {
-    this._registering = false;
-    this._ua.registrationFailed(response: response, cause: cause);
+    _registering = false;
+    _ua.registrationFailed(response: response, cause: cause);
 
-    if (this._registered) {
-      this._registered = false;
-      this._ua.unregistered(response: response, cause: cause);
+    if (_registered) {
+      _registered = false;
+      _ua.unregistered(response: response, cause: cause);
     }
   }
 
   void _unregistered([response, cause]) {
-    this._registering = false;
-    this._registered = false;
-    this._ua.unregistered(response: response, cause: cause);
+    _registering = false;
+    _registered = false;
+    _ua.unregistered(response: response, cause: cause);
   }
 }

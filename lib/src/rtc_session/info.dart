@@ -3,7 +3,7 @@ import 'package:sip_ua/src/sip_message.dart';
 import '../constants.dart';
 import '../exceptions.dart' as Exceptions;
 import '../rtc_session.dart' as rtc;
-import '../utils.dart' as Utils;
+import '../utils.dart' as utils;
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
@@ -39,13 +39,13 @@ class Info extends EventManager {
     _contentType = contentType;
     _body = body;
 
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var extraHeaders = utils.cloneArray(options['extraHeaders']);
 
     extraHeaders.add('Content-Type: ${contentType}');
 
     _session.newInfo('local', this, _request);
 
-    EventManager handlers = EventManager();
+    var handlers = EventManager();
     handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
       emit(EventSucceeded(originator: 'remote', response: event.response));
     });

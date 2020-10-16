@@ -19,7 +19,9 @@ class DialogRequestSender {
   EventManager _eventHandlers;
   bool _reattempt;
   Timer _reattemptTimer;
-  var _request_sender;
+  RequestSender _request_sender;
+
+  RequestSender get request_sender => _request_sender;
 
   DialogRequestSender(
       Dialog dialog, OutgoingRequest request, EventManager eventHandlers) {
@@ -35,7 +37,7 @@ class DialogRequestSender {
   OutgoingRequest get request => _request;
 
   void send() {
-    EventManager localEventHandlers = EventManager();
+    var localEventHandlers = EventManager();
     localEventHandlers.on(EventOnRequestTimeout(),
         (EventOnRequestTimeout value) {
       _eventHandlers.emit(EventOnRequestTimeout());
@@ -52,7 +54,7 @@ class DialogRequestSender {
       _receiveResponse(event.response);
     });
 
-    var request_sender = RequestSender(_ua, _request, localEventHandlers);
+    _request_sender = RequestSender(_ua, _request, localEventHandlers);
 
     request_sender.send();
 

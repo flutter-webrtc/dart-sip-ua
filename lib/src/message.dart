@@ -1,3 +1,5 @@
+import 'package:sip_ua/src/name_addr_header.dart';
+
 import '../sip_ua.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
@@ -16,8 +18,8 @@ class Message extends EventManager {
   var _request;
   bool _closed;
   String _direction;
-  var _local_identity;
-  var _remote_identity;
+  NameAddrHeader _local_identity;
+  NameAddrHeader _remote_identity;
   var _is_replied;
   var _data;
 

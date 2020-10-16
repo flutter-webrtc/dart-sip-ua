@@ -9,6 +9,9 @@ import 'grammar.dart';
 import 'uri.dart';
 import 'constants.dart' as DartSIP_C;
 
+final JsonDecoder decoder = JsonDecoder();
+final JsonEncoder encoder = JsonEncoder();
+
 bool test100(String statusCode) {
   return statusCode.contains(RegExp(r'^100$'));
 }
@@ -22,18 +25,18 @@ bool test2XX(String statusCode) {
 }
 
 class Math {
-  static final _random = DartMath.Random();
-  static num floor(num) {
-    return num.floor();
+  static final DartMath.Random _random = DartMath.Random();
+  static num floor(num n) {
+    return n.floor();
   }
 
-  static num abs(num) {
-    return num.abs();
+  static num abs(num n) {
+    return n.abs();
   }
 
   static double randomDouble() => _random.nextDouble();
   static int random() => _random.nextInt(0x7FFFFFFF);
-  static num pow(a, b) {
+  static num pow(num a, num b) {
     return DartMath.pow(a, b);
   }
 }
@@ -42,7 +45,7 @@ int str_utf8_length(String string) =>
     unescape(encodeURIComponent(string)).length;
 
 // Used by 'hasMethods'.
-bool isFunction(fn) {
+bool isFunction(dynamic fn) {
   if (fn != null) {
     return (fn is Function);
   } else {
@@ -50,7 +53,7 @@ bool isFunction(fn) {
   }
 }
 
-bool isString(str) {
+bool isString(dynamic str) {
   if (str != null) {
     return (str is String);
   } else {
@@ -114,7 +117,7 @@ dynamic hostType(String host) {
   if (host == null) {
     return null;
   } else {
-    var res = Grammar.parse(host, 'host');
+    dynamic res = Grammar.parse(host, 'host');
     if (res != -1) {
       return res['host_type'];
     }
@@ -127,7 +130,7 @@ dynamic hostType(String host) {
 *
 * Used by 'normalizeTarget'.
 */
-String escapeUser(user) => encodeURIComponent(decodeURIComponent(user))
+String escapeUser(String user) => encodeURIComponent(decodeURIComponent(user))
     .replaceAll(RegExp(r'%3A', caseSensitive: false), ':')
     .replaceAll(RegExp(r'%2B', caseSensitive: false), '+')
     .replaceAll(RegExp(r'%3F', caseSensitive: false), '?')
@@ -186,8 +189,7 @@ URI normalizeTarget(dynamic target, [String domain]) {
     target = DartSIP_C.SIP + ':' + escapeUser(targetUser) + '@' + targetDomain;
 
     // Finally parse the resulting URI.
-    var uri = URI.parse(target);
-    return uri;
+    return URI.parse(target);
   } else {
     return null;
   }
@@ -221,7 +223,7 @@ String headerize(String string) {
 
 String sipErrorCause(dynamic statusCode) {
   var reason = DartSIP_C.Causes.SIP_FAILURE_CODE;
-  DartSIP_C.SIP_ERROR_CAUSES.forEach((key, value) {
+  DartSIP_C.SIP_ERROR_CAUSES.forEach((String key, List<int> value) {
     if (value.contains(statusCode)) {
       reason = key;
     }

@@ -17,7 +17,7 @@ class SIPUAHelper extends EventManager {
   UA _ua;
   Settings _settings;
   UaSettings _uaSettings;
-  final Map<String, Call> _calls = {};
+  final Map<String, Call> _calls = <String, Call>{};
 
   RegistrationState _registerState =
       RegistrationState(state: RegistrationStateEnum.NONE);
@@ -323,13 +323,13 @@ class SIPUAHelper extends EventManager {
   }
 
   void _notifyTransportStateListeners(TransportState state) {
-    _sipUaHelperListeners.forEach((listener) {
+    _sipUaHelperListeners.forEach((SipUaHelperListener listener) {
       listener.transportStateChanged(state);
     });
   }
 
   void _notifyRegsistrationStateListeners(RegistrationState state) {
-    _sipUaHelperListeners.forEach((listener) {
+    _sipUaHelperListeners.forEach((SipUaHelperListener listener) {
       listener.registrationStateChanged(state);
     });
   }
@@ -341,13 +341,13 @@ class SIPUAHelper extends EventManager {
       return;
     }
     call.state = state.state;
-    _sipUaHelperListeners.forEach((listener) {
+    _sipUaHelperListeners.forEach((SipUaHelperListener listener) {
       listener.callStateChanged(call, state);
     });
   }
 
   void _notifyNewMessageListeners(SIPMessageRequest msg) {
-    _sipUaHelperListeners.forEach((listener) {
+    _sipUaHelperListeners.forEach((SipUaHelperListener listener) {
       listener.onNewMessage(msg);
     });
   }

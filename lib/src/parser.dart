@@ -152,7 +152,6 @@ dynamic parseHeader(IncomingMessage message, data, headerStart, headerEnd) {
       if (message.getHeaders('via').length == 1) {
         parsed = message.parseHeader('Via');
         if (parsed != null) {
-          message.via = parsed;
           message.via_branch = parsed.branch;
         }
       } else {

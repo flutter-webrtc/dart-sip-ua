@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'uri.dart';
 import 'grammar.dart';
+import 'utils.dart';
 
 class NameAddrHeader {
-  final JsonDecoder decoder = JsonDecoder();
-  final JsonEncoder encoder = JsonEncoder();
   URI _uri;
   Map<String, dynamic> _parameters;
   String _display_name;
