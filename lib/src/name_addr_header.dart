@@ -12,7 +12,7 @@ class NameAddrHeader {
 
     // Initialize parameters.
     _uri = uri;
-    _parameters = {};
+    _parameters = <dynamic, dynamic>{};
     _display_name = display_name;
 
     if (parameters != null) {
@@ -75,7 +75,7 @@ class NameAddrHeader {
   }
 
   void clearParams() {
-    _parameters = {};
+    _parameters = <dynamic, dynamic>{};
   }
 
   NameAddrHeader clone() {
@@ -95,7 +95,7 @@ class NameAddrHeader {
 
     body += '<${_uri.toString()}>';
 
-    _parameters.forEach((key, value) {
+    _parameters.forEach((dynamic key, dynamic value) {
       if (_parameters.containsKey(key)) {
         body += ';$key';
         if (value != null) {

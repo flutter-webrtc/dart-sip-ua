@@ -48,7 +48,7 @@ int str_utf8_length(String string) =>
 // Used by 'hasMethods'.
 bool isFunction(dynamic fn) {
   if (fn != null) {
-    return (fn is Function);
+    return fn is Function;
   } else {
     return false;
   }
@@ -56,7 +56,7 @@ bool isFunction(dynamic fn) {
 
 bool isString(dynamic str) {
   if (str != null) {
-    return (str is String);
+    return str is String;
   } else {
     return false;
   }
@@ -87,7 +87,7 @@ String encodeURIComponent(String str) {
 }
 
 String unescape(String str) {
-  //TODO:  ???
+  // TODO(cloudwebrtc):  ???
   return str;
 }
 
@@ -98,11 +98,11 @@ bool isDecimal(dynamic input) =>
             (parseFloat(input) != null || parseInt(input, 10) != null)));
 
 bool isEmpty(dynamic value) {
-  return (value == null ||
+  return value == null ||
       value == '' ||
       value == null ||
       (value is List && value.isEmpty) ||
-      (value is num && isNaN(value)));
+      (value is num && isNaN(value));
 }
 
 // Used by 'newTag'.
@@ -197,7 +197,7 @@ URI normalizeTarget(dynamic target, [String domain]) {
 }
 
 String headerize(String str) {
-  Map<String, String> exceptions = {
+  Map<String, String> exceptions = <String, String>{
     'Call-Id': 'Call-ID',
     'Cseq': 'CSeq',
     'Www-Authenticate': 'WWW-Authenticate'

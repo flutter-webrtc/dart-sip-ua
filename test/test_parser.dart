@@ -3,7 +3,7 @@ import 'package:sip_ua/src/grammar.dart';
 import 'package:sip_ua/src/uri.dart';
 import 'package:sip_ua/src/name_addr_header.dart';
 
-var testFunctions = [
+List<void Function()> testFunctions = <void Function()>[
   () => test("Parser: Host => [ domain, ipv4, ipv6 ].", () {
         var data = Grammar.parse('www.google.com', 'host');
         expect(data['host_type'], 'domain');
@@ -249,7 +249,7 @@ var testFunctions = [
         expect(session_expires.expires, 210);
         expect(session_expires.refresher, 'uas');
       }),
-  () => test("Parser: Reason.", () {
+  () => test('Parser: Reason.', () {
         var data, reason;
 
         data = 'SIP  ; cause = 488 ; text = "Wrong SDP"';
@@ -271,7 +271,7 @@ var testFunctions = [
         expect(reason.text, null);
         expect(reason.params['lala'], 'foo');
       }),
-  () => test("Parser: Refer-To.", () {
+  () => test('Parser: Refer-To.', () {
         var data, parsed;
 
         data = 'sip:alice@versatica.com';
@@ -294,7 +294,7 @@ var testFunctions = [
         expect(parsed.uri.host, 'versatica.com');
         expect(parsed.uri.hasHeader('Accept-Contact'), true);
       }),
-  () => test("Parser: Replaces.", () {
+  () => test('Parser: Replaces.', () {
         var parsed;
         var data = '5t2gpbrbi72v79p1i8mr;to-tag=03aq91cl9n;from-tag=kun98clbf7';
 
@@ -321,5 +321,5 @@ var testFunctions = [
 ];
 
 void main() {
-  testFunctions.forEach((func) => func());
+  testFunctions.forEach((Function func) => func());
 }

@@ -11,10 +11,10 @@ void main() async {
 class TestWebsocket2 {
   bool connected = false;
   WebSocket ws;
-  Completer completer;
+  Completer<String> completer;
   int ctr = 1;
 
-  Completer finished = Completer<String>();
+  Completer<String> finished = Completer<String>();
 
   void send() {
     String message = 'A' * ctr;
@@ -34,7 +34,7 @@ class TestWebsocket2 {
     ws = await WebSocket.connect(url);
     connected = true;
     ws.listen((dynamic data) {
-      this._onMessage(data as String);
+      _onMessage(data as String);
     }, onDone: () {
       print('Closed by server [${ws.closeCode}, ${ws.closeReason}]!');
       connected = false;
@@ -43,7 +43,7 @@ class TestWebsocket2 {
   }
 
   void _onMessage(String data) {
-    print('Received data of size ${data.length} expected ${ctr}');
+    print('Received data of size ${data.length} expected $ctr');
     if (data.length != ctr) {
       finished.complete();
     }

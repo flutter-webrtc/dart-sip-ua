@@ -20,7 +20,7 @@ IncomingMessage parseMessage(String data, UA ua) {
 
   // Parse first line. Check if it is a Request or a Reply.
   String firstLine = data.substring(0, headerEnd);
-  var parsed;
+  dynamic parsed;
   try {
     parsed = Grammar.parse(firstLine, 'Request_Response');
   } catch (FormatException) {
@@ -30,7 +30,7 @@ IncomingMessage parseMessage(String data, UA ua) {
 
   if (parsed == -1) {
     logger.error(
-        'parseMessage() | error parsing first line of SIP message: "${firstLine}"');
+        'parseMessage() | error parsing first line of SIP message: "$firstLine"');
 
     return null;
   } else if (parsed.status_code == null) {
@@ -45,7 +45,7 @@ IncomingMessage parseMessage(String data, UA ua) {
   }
 
   message.data = data;
-  var headerStart = headerEnd + 2;
+  int headerStart = headerEnd + 2;
 
   /* Loop over every line in data. Detect the end of each header and parse
   * it or simply add to the headers collection.
@@ -80,13 +80,13 @@ IncomingMessage parseMessage(String data, UA ua) {
    * beyond the end of the body, they MUST be discarded.
    */
   if (message.hasHeader('content-length')) {
-    var contentLength = message.getHeader('content-length');
+    dynamic contentLength = message.getHeader('content-length');
 
     if (contentLength is String) {
       contentLength = int.tryParse(contentLength) ?? 0;
     }
     if (contentLength > 0) {
-      var encoded = utf8.encode(data);
+      List<int> encoded = utf8.encode(data);
       List<int> content = encoded.sublist(bodyStart, bodyStart + contentLength);
       message.body = utf8.decode(content);
     }
@@ -126,7 +126,7 @@ int getHeader(String data, int headerStart) {
     if (!data
             .substring(partialEnd + 2, partialEnd + 4)
             .contains(RegExp(r'(^\r\n)')) &&
-        (String.fromCharCode(data.codeUnitAt(partialEnd + 2)))
+        String.fromCharCode(data.codeUnitAt(partialEnd + 2))
             .contains(RegExp(r'(^\s+)'))) {
       // Not the end of the message. Continue from the next position.
       start = partialEnd + 2;
@@ -138,11 +138,12 @@ int getHeader(String data, int headerStart) {
   return end;
 }
 
-dynamic parseHeader(IncomingMessage message, data, headerStart, headerEnd) {
-  var parsed;
-  var hcolonIndex = data.indexOf(':', headerStart);
-  var headerName = data.substring(headerStart, hcolonIndex).trim();
-  var headerValue = data.substring(hcolonIndex + 1, headerEnd).trim();
+dynamic parseHeader(
+    IncomingMessage message, String data, int headerStart, int headerEnd) {
+  dynamic parsed;
+  int hcolonIndex = data.indexOf(':', headerStart);
+  String headerName = data.substring(headerStart, hcolonIndex).trim();
+  String headerValue = data.substring(hcolonIndex + 1, headerEnd).trim();
 
   // If header-field is well-known, parse it.
   switch (headerName.toLowerCase()) {
@@ -182,7 +183,7 @@ dynamic parseHeader(IncomingMessage message, data, headerStart, headerEnd) {
       if (parsed == -1) {
         parsed = null;
       } else {
-        for (var header in parsed) {
+        for (Map<String, dynamic> header in parsed) {
           message.addHeader('record-route', header['raw']);
           message.headers['Record-Route']
                   [message.getHeaders('record-route').length - 1]['parsed'] =
@@ -205,7 +206,7 @@ dynamic parseHeader(IncomingMessage message, data, headerStart, headerEnd) {
       if (parsed == -1) {
         parsed = null;
       } else {
-        for (var header in parsed) {
+        for (Map<String, dynamic> header in parsed) {
           message.addHeader('contact', header['raw']);
           message.headers['Contact'][message.getHeaders('contact').length - 1]
               ['parsed'] = header['parsed'];
@@ -283,7 +284,7 @@ dynamic parseHeader(IncomingMessage message, data, headerStart, headerEnd) {
   }
 
   if (parsed == null) {
-    return {'error': 'error parsing header "${headerName}"'};
+    return <String, dynamic>{'error': 'error parsing header "$headerName"'};
   } else {
     return true;
   }

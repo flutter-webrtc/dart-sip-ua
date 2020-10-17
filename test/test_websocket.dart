@@ -5,16 +5,16 @@ import 'package:test/test.dart';
 import 'package:sip_ua/src/transports/websocket_interface.dart';
 import 'package:sip_ua/src/transport.dart';
 
-var testFunctions = [
+List<void Function()> testFunctions = <void Function()>[
   () => test(' WebSocket: EchoTest', () async {
-        var completer = Completer();
-        HttpServer.bind('127.0.0.1', 4040).then((server) async {
+        Completer<void> completer = Completer<void>();
+        HttpServer.bind('127.0.0.1', 4040).then((HttpServer server) async {
           try {
-            await for (var req in server) {
+            await for (HttpRequest req in server) {
               if (req.uri.path == '/sip') {
                 // Upgrade a HttpRequest to a WebSocket connection.
-                var socket = await WebSocketTransformer.upgrade(req);
-                socket.listen((msg) {
+                WebSocket socket = await WebSocketTransformer.upgrade(req);
+                socket.listen((dynamic msg) {
                   socket.add(msg);
                   expect(msg, 'message');
                   socket.close();
@@ -40,7 +40,7 @@ var testFunctions = [
           client.send('message');
           expect(client.isConnected(), true);
         };
-        client.ondata = (data) async {
+        client.ondata = (dynamic data) async {
           print('ondata => $data');
           expect(data, 'message');
           client.disconnect();
@@ -56,14 +56,14 @@ var testFunctions = [
         return completer;
       }),
   () => test(' WebSocket: EchoTest', () async {
-        var completer = Completer();
-        HttpServer.bind('127.0.0.1', 4041).then((server) async {
+        Completer<void> completer = Completer<void>();
+        HttpServer.bind('127.0.0.1', 4041).then((HttpServer server) async {
           try {
-            await for (var req in server) {
+            await for (HttpRequest req in server) {
               if (req.uri.path == '/sip') {
                 // Upgrade a HttpRequest to a WebSocket connection.
-                var socket = await WebSocketTransformer.upgrade(req);
-                socket.listen((msg) {
+                WebSocket socket = await WebSocketTransformer.upgrade(req);
+                socket.listen((dynamic msg) {
                   socket.add(msg);
                   expect(msg, 'message');
                   socket.close();
@@ -79,11 +79,11 @@ var testFunctions = [
             WebSocketInterface('ws://127.0.0.1:4041/sip');
         Transport trasnport = Transport(socket);
 
-        trasnport.onconnecting = (socket, attempt) {
+        trasnport.onconnecting = (WebSocketInterface socket, int attempt) {
           expect(trasnport.isConnecting(), true);
         };
 
-        trasnport.onconnect = (socket) {
+        trasnport.onconnect = (Transport socket) {
           expect(trasnport.isConnected(), true);
           trasnport.send('message');
         };
@@ -93,7 +93,7 @@ var testFunctions = [
           trasnport.disconnect();
         };
 
-        trasnport.ondisconnect = (socket, ErrorCause cause) {
+        trasnport.ondisconnect = (WebSocketInterface socket, ErrorCause cause) {
           expect(trasnport.isConnected(), false);
           completer.complete();
         };
@@ -105,5 +105,5 @@ var testFunctions = [
 ];
 
 void main() {
-  testFunctions.forEach((func) => func());
+  testFunctions.forEach((Function func) => func());
 }
