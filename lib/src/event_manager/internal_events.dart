@@ -1,16 +1,10 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-import 'events.dart';
-import '../../sip_ua.dart';
-import '../name_addr_header.dart';
-import '../message.dart';
-import '../rtc_session.dart';
 import '../rtc_session/dtmf.dart';
 import '../rtc_session/info.dart';
 import '../sip_message.dart';
-import '../transport.dart';
-import '../transports/websocket_interface.dart';
 import '../transactions/transaction_base.dart';
+import 'events.dart';
 
 class EventStateChanged extends EventType {}
 

@@ -1,9 +1,9 @@
 import 'dart:convert' show utf8;
-import '../sip_ua.dart';
+
 import 'grammar.dart';
+import 'logger.dart';
 import 'sip_message.dart';
 import 'ua.dart';
-import 'logger.dart';
 
 /**
  * Parse SIP Message

@@ -1,8 +1,7 @@
-import '../../sip_ua.dart';
+import '../event_manager/event_manager.dart';
 import '../sip_message.dart';
 import '../transport.dart';
 import '../ua.dart';
-import '../event_manager/event_manager.dart';
 
 enum TransactionState {
   // Transaction states.

@@ -1,21 +1,19 @@
 import 'dart:async';
 
-import '../sip_ua.dart';
 import 'constants.dart';
 import 'constants.dart' as DartSIP_C;
+import 'event_manager/event_manager.dart';
+import 'event_manager/internal_events.dart';
+import 'grammar.dart';
+import 'logger.dart';
 import 'name_addr_header.dart';
 import 'request_sender.dart';
-
 import 'sip_message.dart';
 import 'timers.dart';
 import 'transport.dart';
 import 'ua.dart';
 import 'uri.dart';
 import 'utils.dart' as utils;
-import 'event_manager/event_manager.dart';
-import 'event_manager/internal_events.dart';
-import 'grammar.dart';
-import 'logger.dart';
 
 const int MIN_REGISTER_EXPIRES = 10; // In seconds.
 
@@ -108,7 +106,7 @@ class Registrator {
     extraContactParams.forEach((param_key, param_value) {
       _extraContactParams += (';${param_key}');
       if (param_value != null) {
-        _extraContactParams += ('=${param_value}');
+        _extraContactParams += ('=$param_value');
       }
     });
   }

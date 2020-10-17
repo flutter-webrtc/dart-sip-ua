@@ -1,33 +1,31 @@
 import 'dart:async';
 
-import '../sip_ua.dart';
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'dialog.dart';
-import 'exceptions.dart' as Exceptions;
-import 'message.dart';
-import 'parser.dart' as Parser;
-import 'rtc_session.dart';
-import 'registrator.dart';
-import 'sip_message.dart';
-import 'timers.dart';
-import 'transport.dart';
-import 'uri.dart';
-import 'utils.dart' as Utils;
-import 'transports/websocket_interface.dart';
-
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
+import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
+import 'message.dart';
+import 'parser.dart' as Parser;
+import 'registrator.dart';
+import 'rtc_session.dart';
 import 'sanity_check.dart';
-import 'transactions/transactions.dart';
+import 'sip_message.dart';
+import 'timers.dart';
 import 'transactions/invite_client.dart';
 import 'transactions/invite_server.dart';
 import 'transactions/non_invite_client.dart';
 import 'transactions/non_invite_server.dart';
 import 'transactions/transaction_base.dart';
+import 'transactions/transactions.dart';
+import 'transport.dart';
+import 'transports/websocket_interface.dart';
+import 'uri.dart';
+import 'utils.dart' as Utils;
 
 class C {
   // UA status codes.

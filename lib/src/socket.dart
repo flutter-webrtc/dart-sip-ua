@@ -1,8 +1,7 @@
 import 'grammar.dart';
-import 'utils.dart' as Utils;
-import 'transports/websocket_interface.dart';
 import 'logger.dart';
-import 'uri.dart';
+import 'transports/websocket_interface.dart';
+import 'utils.dart' as Utils;
 
 /// Socket Interface.
 abstract class Socket {

@@ -3,29 +3,27 @@ import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
-import '../sip_ua.dart';
 import 'constants.dart';
 import 'constants.dart' as DartSIP_C;
 import 'dialog.dart';
+import 'event_manager/event_manager.dart';
+import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
+import 'logger.dart';
 import 'name_addr_header.dart';
+import 'request_sender.dart';
 import 'rtc_session/dtmf.dart' as RTCSession_DTMF;
 import 'rtc_session/dtmf.dart';
 import 'rtc_session/info.dart' as RTCSession_Info;
 import 'rtc_session/info.dart';
 import 'rtc_session/refer_notifier.dart';
 import 'rtc_session/refer_subscriber.dart';
-import 'request_sender.dart';
 import 'sip_message.dart';
-
 import 'timers.dart';
+import 'transactions/transaction_base.dart';
 import 'ua.dart';
 import 'uri.dart';
 import 'utils.dart' as utils;
-import 'event_manager/event_manager.dart';
-import 'event_manager/internal_events.dart';
-import 'logger.dart';
-import 'transactions/transaction_base.dart';
 
 class C {
   // RTCSession states.

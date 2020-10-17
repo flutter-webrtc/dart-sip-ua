@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:sip_ua/src/event_manager/events.dart';
 
 import 'exceptions.dart' as Exceptions;
-import 'socket.dart' as Socket;
-import 'timers.dart';
-import 'utils.dart';
-import 'transports/websocket_interface.dart';
 import 'logger.dart';
+import 'socket.dart' as Socket;
 import 'stack_trace_nj.dart';
+import 'timers.dart';
+import 'transports/websocket_interface.dart';
+import 'utils.dart';
 
 /**
  * Constants

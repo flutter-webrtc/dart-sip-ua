@@ -1,12 +1,11 @@
 import 'package:sip_ua/src/sip_message.dart';
 
 import '../constants.dart';
+import '../event_manager/event_manager.dart';
+import '../event_manager/internal_events.dart';
 import '../exceptions.dart' as Exceptions;
 import '../rtc_session.dart' as rtc;
 import '../utils.dart' as utils;
-import '../event_manager/event_manager.dart';
-import '../event_manager/internal_events.dart';
-import '../logger.dart';
 
 class Info extends EventManager {
   final rtc.RTCSession _session;

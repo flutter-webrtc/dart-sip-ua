@@ -1,13 +1,12 @@
-import '../sip_ua.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
+import 'logger.dart';
 import 'sip_message.dart';
+import 'transactions/invite_server.dart';
+import 'transactions/non_invite_server.dart';
 import 'transport.dart';
 import 'ua.dart';
 import 'utils.dart' as Utils;
-import 'logger.dart';
-import 'transactions/invite_server.dart';
-import 'transactions/non_invite_server.dart';
 
 // Checks for requests and responses.
 const List<bool Function()> all = [minimumHeaders];

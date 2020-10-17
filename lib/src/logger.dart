@@ -7,36 +7,9 @@ import 'stack_trace_nj.dart';
 final Log logger = Log();
 
 class Log extends Logger {
-  static Log _self;
-  static String _localPath;
-  static Level _loggingLevel = Level.debug;
-
   Log();
-
-  static set loggingLevel(Level loggingLevel) => _loggingLevel = loggingLevel;
-
   Log._internal(String currentWorkingDirectory)
       : super(printer: MyLogPrinter(currentWorkingDirectory));
-
-  void debug(String message, [dynamic error, StackTrace stackTrace]) {
-    autoInit();
-    Log.d(message, error, stackTrace);
-  }
-
-  void info(String message, [dynamic error, StackTrace stackTrace]) {
-    autoInit();
-    Log.i(message, error, stackTrace);
-  }
-
-  void warn(String message, [dynamic error, StackTrace stackTrace]) {
-    autoInit();
-    Log.w(message, error, stackTrace);
-  }
-
-  void error(String message, [dynamic error, StackTrace stackTrace]) {
-    autoInit();
-    Log.e(message, error, stackTrace);
-  }
 
   factory Log.d(String message, [dynamic error, StackTrace stackTrace]) {
     autoInit();
@@ -62,6 +35,31 @@ class Log extends Logger {
     return _self;
   }
 
+  static Log _self;
+  static String _localPath;
+  static Level _loggingLevel = Level.debug;
+  static set loggingLevel(Level loggingLevel) => _loggingLevel = loggingLevel;
+
+  void debug(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.d(message, error, stackTrace);
+  }
+
+  void info(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.i(message, error, stackTrace);
+  }
+
+  void warn(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.w(message, error, stackTrace);
+  }
+
+  void error(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.e(message, error, stackTrace);
+  }
+
   static void autoInit() {
     if (_self == null) {
       init('.');
@@ -82,6 +80,8 @@ class Log extends Logger {
 }
 
 class MyLogPrinter extends LogPrinter {
+  MyLogPrinter(this.currentWorkingDirectory);
+
   static final Map<Level, AnsiColor> levelColors = {
     Level.verbose: AnsiColor.fg(AnsiColor.grey(0.5)),
     Level.debug: AnsiColor.none(),
@@ -93,8 +93,6 @@ class MyLogPrinter extends LogPrinter {
   bool colors = true;
 
   String currentWorkingDirectory;
-
-  MyLogPrinter(this.currentWorkingDirectory);
 
   @override
   List<String> log(LogEvent event) {
@@ -130,7 +128,7 @@ class MyLogPrinter extends LogPrinter {
     if (event.stackTrace != null) {
       if (event.stackTrace.runtimeType == StackTraceNJ) {
         StackTraceNJ st = event.stackTrace as StackTraceNJ;
-        print(color('${st}'));
+        print(color('$st'));
       } else {
         print(color('${event.stackTrace}'));
       }
@@ -149,16 +147,6 @@ class MyLogPrinter extends LogPrinter {
 }
 
 class AnsiColor {
-  /// ANSI Control Sequence Introducer, signals the terminal for settings.
-  static const String ansiEsc = '\x1B[';
-
-  /// Reset all colors and options for current SGRs to terminal defaults.
-  static const String ansiDefault = '${ansiEsc}0m';
-
-  final int fg;
-  final int bg;
-  final bool color;
-
   AnsiColor.none()
       : fg = null,
         bg = null,
@@ -172,6 +160,15 @@ class AnsiColor {
       : fg = null,
         color = true;
 
+  /// ANSI Control Sequence Introducer, signals the terminal for settings.
+  static const String ansiEsc = '\x1B[';
+
+  /// Reset all colors and options for current SGRs to terminal defaults.
+  static const String ansiDefault = '${ansiEsc}0m';
+
+  final int fg;
+  final int bg;
+  final bool color;
   @override
   String toString() {
     if (fg != null) {

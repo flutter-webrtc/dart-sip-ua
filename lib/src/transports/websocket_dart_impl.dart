@@ -1,11 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:convert';
-import 'dart:async';
+
 import 'package:sip_ua/src/sip_ua_helper.dart';
 
 import '../logger.dart';
-import '../grammar.dart';
 
 typedef OnMessageCallback = void Function(dynamic msg);
 typedef OnCloseCallback = void Function(int code, String reason);

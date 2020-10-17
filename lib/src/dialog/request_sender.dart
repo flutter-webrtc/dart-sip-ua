@@ -1,16 +1,15 @@
 import 'dart:async';
 
-import '../../sip_ua.dart';
 import '../constants.dart';
 import '../dialog.dart';
-import '../rtc_session.dart' as RTCSession;
-import '../request_sender.dart';
-import '../sip_message.dart';
-import '../timers.dart';
-import '../ua.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
+import '../request_sender.dart';
+import '../rtc_session.dart' as RTCSession;
+import '../sip_message.dart';
+import '../timers.dart';
 import '../transactions/transaction_base.dart';
+import '../ua.dart';
 
 class DialogRequestSender {
   Dialog _dialog;

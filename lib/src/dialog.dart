@@ -1,17 +1,16 @@
-import '../sip_ua.dart';
 import 'constants.dart';
 import 'dialog/request_sender.dart';
+import 'event_manager/event_manager.dart';
+import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
+import 'logger.dart';
 import 'rtc_session.dart';
 import 'sip_message.dart' as SIPMessage;
 import 'sip_message.dart';
+import 'transactions/transaction_base.dart';
 import 'ua.dart';
 import 'uri.dart';
 import 'utils.dart' as Utils;
-import 'event_manager/event_manager.dart';
-import 'event_manager/internal_events.dart';
-import 'logger.dart';
-import 'transactions/transaction_base.dart';
 
 class Dialog_C {
   // Dialog states.
@@ -188,7 +187,7 @@ class Dialog {
 
   // RFC 3261 12.2.1.1.
   SIPMessage.OutgoingRequest _createRequest(
-      SipMethod method, extraHeaders, body) {
+      SipMethod method, extraHeaders, String body) {
     extraHeaders = Utils.cloneArray(extraHeaders);
 
     _local_seqnum ??= Utils.Math.floor(Utils.Math.randomDouble() * 10000);

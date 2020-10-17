@@ -1,15 +1,10 @@
-import 'dart:async';
-import 'dart:convert';
 import 'package:sip_ua/sip_ua.dart';
 
+import '../grammar.dart';
+import '../logger.dart';
+import '../socket.dart';
 import 'websocket_dart_impl.dart'
     if (dart.library.js) 'websocket_web_impl.dart';
-import 'dart:math';
-
-import '../grammar.dart';
-import '../socket.dart';
-import '../timers.dart';
-import '../logger.dart';
 
 class WebSocketInterface implements Socket {
   String _url;

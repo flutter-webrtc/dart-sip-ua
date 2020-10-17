@@ -1,16 +1,15 @@
-import '../sip_ua.dart';
 import 'constants.dart';
 import 'digest_authentication.dart';
-import 'sip_message.dart';
-import 'ua.dart' as UAC;
-import 'ua.dart';
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
 import 'logger.dart';
+import 'sip_message.dart';
 import 'transactions/ack_client.dart';
 import 'transactions/invite_client.dart';
 import 'transactions/non_invite_client.dart';
 import 'transactions/transaction_base.dart';
+import 'ua.dart' as UAC;
+import 'ua.dart';
 
 // Default event handlers.
 

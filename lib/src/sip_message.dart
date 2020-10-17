@@ -1,20 +1,19 @@
 import 'dart:convert' show utf8;
-import 'package:flutter_webrtc/flutter_webrtc.dart';
+
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 import 'package:sip_ua/src/transactions/transaction_base.dart';
 
-import '../sip_ua.dart';
 import 'constants.dart';
 import 'constants.dart' as DartSIP_C;
 import 'exceptions.dart' as Exceptions;
 import 'grammar.dart';
+import 'grammar_parser.dart';
+import 'logger.dart';
 import 'name_addr_header.dart';
 import 'transport.dart';
 import 'ua.dart';
 import 'uri.dart';
 import 'utils.dart' as Utils;
-import 'grammar_parser.dart';
-import 'logger.dart';
 
 /**
  * -param {String} method request method

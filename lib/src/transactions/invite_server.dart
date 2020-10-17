@@ -1,11 +1,9 @@
-import '../../sip_ua.dart';
+import '../event_manager/internal_events.dart';
+import '../logger.dart';
 import '../sip_message.dart';
 import '../timers.dart';
 import '../transport.dart';
 import '../ua.dart';
-import '../event_manager/event_manager.dart';
-import '../event_manager/internal_events.dart';
-import '../logger.dart';
 import 'transaction_base.dart';
 
 class InviteServerTransaction extends TransactionBase {

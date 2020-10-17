@@ -1,17 +1,16 @@
 import 'package:sip_ua/src/name_addr_header.dart';
 
-import '../sip_ua.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
+import 'event_manager/event_manager.dart';
+import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
+import 'logger.dart';
 import 'request_sender.dart';
 import 'sip_message.dart' as SIPMessage;
 import 'sip_message.dart';
 import 'ua.dart';
 import 'utils.dart' as Utils;
-import 'event_manager/event_manager.dart';
-import 'event_manager/internal_events.dart';
-import 'logger.dart';
 
 class Message extends EventManager {
   UA _ua;

@@ -1,35 +1,37 @@
 import 'constants.dart';
-import 'utils.dart' as Utils;
 import 'logger.dart';
+import 'utils.dart' as utils;
 
 class Challenge {
+  Challenge(this.algorithm, this.realm, this.nonce, this.opaque, this.stale,
+      this.qop);
+  factory Challenge.fromMap(Map<String, dynamic> map) {
+    return Challenge(map['algorithm'], map['realm'], map['nonce'],
+        map['opaque'], map['stale'], map['qop']);
+  }
   String algorithm;
   String realm;
   String nonce;
   String opaque;
   bool stale;
   List<dynamic> qop;
-  factory Challenge.fromMap(Map<String, dynamic> map) {
-    return Challenge(map['algorithm'], map['realm'], map['nonce'],
-        map['opaque'], map['stale'], map['qop']);
-  }
-  Challenge(this.algorithm, this.realm, this.nonce, this.opaque, this.stale,
-      this.qop);
 }
 
 class Credentials {
-  String username;
-  String password;
-  String realm;
-  String ha1;
+  Credentials(this.username, this.password, this.realm, this.ha1);
   factory Credentials.fromMap(Map<String, dynamic> map) {
     return Credentials(
         map['username'], map['password'], map['realm'], map['ha1']);
   }
-  Credentials(this.username, this.password, this.realm, this.ha1);
+  String username;
+  String password;
+  String realm;
+  String ha1;
 }
 
 class DigestAuthentication {
+  DigestAuthentication(this._credentials);
+
   String _cnonce;
   int _nc = 0;
   String _ncHex = '00000000';
@@ -44,9 +46,6 @@ class DigestAuthentication {
   String _ha1;
   String _response;
   final Credentials _credentials;
-
-  DigestAuthentication(this._credentials);
-
   String get response => _response;
 
   String get(String parameter) {
@@ -116,7 +115,7 @@ class DigestAuthentication {
       // If the realm does not match the stored realm we cannot authenticate.
       if (_credentials.realm != _realm) {
         logger.error(
-            'authenticate() | no plain SIP password, and stored "realm" does not match the given "realm", cannot authenticate [stored:"${_credentials.realm}", given:"${_realm}"]');
+            'authenticate() | no plain SIP password, and stored "realm" does not match the given "realm", cannot authenticate [stored:"${_credentials.realm}", given:"$_realm"]');
 
         return false;
       }
@@ -143,9 +142,9 @@ class DigestAuthentication {
 
     _method = method;
     _uri = ruri ?? '';
-    _cnonce = cnonce ?? Utils.createRandomToken(12);
+    _cnonce = cnonce ?? utils.createRandomToken(12);
     _nc += 1;
-    var hex = _nc.toRadixString(16);
+    String hex = _nc.toRadixString(16);
 
     _ncHex = '00000000'.substring(0, 8 - hex.length) + hex;
 
@@ -160,47 +159,47 @@ class DigestAuthentication {
     // If we have plain SIP password then regenerate ha1.
     if (_credentials.password != null) {
       // HA1 = MD5(A1) = MD5(username:realm:password).
-      _ha1 = Utils.calculateMD5(
-          '${_credentials.username}:${_realm}:${_credentials.password}');
+      _ha1 = utils.calculateMD5(
+          '${_credentials.username}:$_realm:${_credentials.password}');
     }
     // Otherwise reuse the stored ha1.
     else {
       _ha1 = _credentials.ha1;
     }
 
-    var a2;
-    var ha2;
+    String a2;
+    String ha2;
 
     if (_qop == 'auth') {
       // HA2 = MD5(A2) = MD5(method:digestURI).
-      a2 = '${SipMethodHelper.getName(_method)}:${_uri}';
-      ha2 = Utils.calculateMD5(a2);
+      a2 = '${SipMethodHelper.getName(_method)}:$_uri';
+      ha2 = utils.calculateMD5(a2);
 
-      logger.debug('authenticate() | using qop=auth [a2:${a2}]');
+      logger.debug('authenticate() | using qop=auth [a2:$a2]');
 
       // Response = MD5(HA1:nonce:nonceCount:credentialsNonce:qop:HA2).
-      _response = Utils.calculateMD5(
-          '${_ha1}:${_nonce}:${_ncHex}:${_cnonce}:auth:${ha2}');
+      _response =
+          utils.calculateMD5('$_ha1:$_nonce:$_ncHex:$_cnonce:auth:$ha2');
     } else if (_qop == 'auth-int') {
       // HA2 = MD5(A2) = MD5(method:digestURI:MD5(entityBody)).
       a2 =
-          '${SipMethodHelper.getName(_method)}:${_uri}:${Utils.calculateMD5(body != null ? body : '')}';
-      ha2 = Utils.calculateMD5(a2);
+          '${SipMethodHelper.getName(_method)}:$_uri:${utils.calculateMD5(body ?? '')}';
+      ha2 = utils.calculateMD5(a2);
 
-      logger.debug('authenticate() | using qop=auth-int [a2:${a2}]');
+      logger.debug('authenticate() | using qop=auth-int [a2:$a2]');
 
       // Response = MD5(HA1:nonce:nonceCount:credentialsNonce:qop:HA2).
-      _response = Utils.calculateMD5(
-          '${_ha1}:${_nonce}:${_ncHex}:${_cnonce}:auth-int:${ha2}');
+      _response =
+          utils.calculateMD5('$_ha1:$_nonce:$_ncHex:$_cnonce:auth-int:$ha2');
     } else if (_qop == null) {
       // HA2 = MD5(A2) = MD5(method:digestURI).
-      a2 = '${SipMethodHelper.getName(_method)}:${_uri}';
-      ha2 = Utils.calculateMD5(a2);
+      a2 = '${SipMethodHelper.getName(_method)}:$_uri';
+      ha2 = utils.calculateMD5(a2);
 
-      logger.debug('authenticate() | using qop=null [a2:${a2}]');
+      logger.debug('authenticate() | using qop=null [a2:$a2]');
 
       // Response = MD5(HA1:nonce:HA2).
-      _response = Utils.calculateMD5('${_ha1}:${_nonce}:${ha2}');
+      _response = utils.calculateMD5('$_ha1:$_nonce:$ha2');
     }
 
     logger.debug('authenticate() | response generated');
@@ -220,19 +219,19 @@ class DigestAuthentication {
           'response field does not exist, cannot generate Authorization header');
     }
 
-    auth_params.add('algorithm=${_algorithm}');
+    auth_params.add('algorithm=$_algorithm');
     auth_params.add('username="${_credentials.username}"');
-    auth_params.add('realm="${_realm}"');
-    auth_params.add('nonce="${_nonce}"');
-    auth_params.add('uri="${_uri}"');
-    auth_params.add('response="${_response}"');
+    auth_params.add('realm="$_realm"');
+    auth_params.add('nonce="$_nonce"');
+    auth_params.add('uri="$_uri"');
+    auth_params.add('response="$_response"');
     if (_opaque != null) {
-      auth_params.add('opaque="${_opaque}"');
+      auth_params.add('opaque="$_opaque"');
     }
     if (_qop != null) {
-      auth_params.add('qop=${_qop}');
-      auth_params.add('cnonce="${_cnonce}"');
-      auth_params.add('nc=${_ncHex}');
+      auth_params.add('qop=$_qop');
+      auth_params.add('cnonce="$_cnonce"');
+      auth_params.add('nc=$_ncHex');
     }
     if (_stale != null) {
       auth_params.add('stale=${_stale ? 'true' : 'false'}');
