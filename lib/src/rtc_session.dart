@@ -21,7 +21,7 @@ import 'sip_message.dart';
 import 'timers.dart';
 import 'ua.dart';
 import 'uri.dart';
-import 'utils.dart' as Utils;
+import 'utils.dart' as utils;
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
 import 'logger.dart';
@@ -73,7 +73,7 @@ class RTCSession extends EventManager {
   Map<String, dynamic> _rtcOfferConstraints;
   Map<String, dynamic> _rtcAnswerConstraints;
   MediaStream _localMediaStream;
-  Map<String, Dialog> _data;
+  Map<String, dynamic> _data;
   Map<String, Dialog> _earlyDialogs;
   String _from_tag;
   String _to_tag;
@@ -188,13 +188,13 @@ class RTCSession extends EventManager {
    */
 
   // Expose session failed/ended causes as a property of the RTCSession instance.
-  get causes => DartSIP_C.causes;
+  Type get causes => DartSIP_C.causes;
 
   String get id => _id;
 
-  get connection => _connection;
+  RTCPeerConnection get connection => _connection;
 
-  get contact => _contact;
+  String get contact => _contact;
 
   String get direction => _direction;
 
@@ -202,16 +202,16 @@ class RTCSession extends EventManager {
 
   NameAddrHeader get remote_identity => _remote_identity;
 
-  get start_time => _start_time;
+  DateTime get start_time => _start_time;
 
-  get end_time => _end_time;
+  DateTime get end_time => _end_time;
 
-  get data => _data;
+  Map<String, dynamic> get data => _data;
 
   UA get ua => _ua;
 
-  set data(_data) {
-    _data = _data;
+  set data(Map<String, dynamic> data) {
+    _data = data;
   }
 
   int get status => _status;
@@ -258,16 +258,17 @@ class RTCSession extends EventManager {
     return {'local': _localHold, 'remote': _remoteHold};
   }
 
-  void connect(target, [Map<String, dynamic> options, initCallback]) async {
+  void connect(target,
+      [Map<String, dynamic> options, Function(RTCSession) initCallback]) async {
     logger.debug('connect()');
 
     options = options ?? {};
     var originalTarget = target;
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var extraHeaders = utils.cloneArray(options['extraHeaders']);
     Map<String, dynamic> mediaConstraints =
         options['mediaConstraints'] ?? {'audio': true, 'video': true};
-    var mediaStream = options['mediaStream'] ?? null;
+    var mediaStream = options['mediaStream'];
     Map<String, dynamic> pcConfig = options['pcConfig'] ?? {'iceServers': []};
     Map<String, dynamic> rtcConstraints = options['rtcConstraints'] ?? {};
     Map<String, dynamic> rtcOfferConstraints =
@@ -301,7 +302,7 @@ class RTCSession extends EventManager {
 
     // Session Timers.
     if (_sessionTimers.enabled) {
-      if (Utils.isDecimal(options['sessionTimersExpires'])) {
+      if (utils.isDecimal(options['sessionTimersExpires'])) {
         if (options['sessionTimersExpires'] >= DartSIP_C.MIN_SESSION_EXPIRES) {
           _sessionTimers.defaultExpires = options['sessionTimersExpires'];
         } else {
@@ -314,7 +315,7 @@ class RTCSession extends EventManager {
     addAllEventHandlers(eventHandlers);
 
     // Session parameter initialization.
-    _from_tag = Utils.newTag();
+    _from_tag = utils.newTag();
 
     // Set anonymous property.
     bool anonymous = options['anonymous'] ?? false;
@@ -387,7 +388,7 @@ class RTCSession extends EventManager {
     /* Set the to_tag before
      * replying a response code that will create a dialog.
      */
-    request.to_tag = Utils.newTag();
+    request.to_tag = utils.newTag();
 
     // An error on dialog creation will fire 'failed' event.
     if (!_createDialog(request, 'UAS', true)) {
@@ -455,7 +456,7 @@ class RTCSession extends EventManager {
   void answer(options) async {
     logger.debug('answer()');
     var request = _request;
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    var extraHeaders = utils.cloneArray(options['extraHeaders']);
     var mediaConstraints = options['mediaConstraints'] ?? {};
     var mediaStream = options['mediaStream'] ?? null;
     var pcConfig = options['pcConfig'] ?? {'iceServers': []};
@@ -486,7 +487,7 @@ class RTCSession extends EventManager {
 
     // Session Timers.
     if (_sessionTimers.enabled) {
-      if (Utils.isDecimal(options['sessionTimersExpires'])) {
+      if (utils.isDecimal(options['sessionTimersExpires'])) {
         if (options['sessionTimersExpires'] >= DartSIP_C.MIN_SESSION_EXPIRES) {
           _sessionTimers.defaultExpires = options['sessionTimersExpires'];
         } else {
@@ -620,13 +621,13 @@ class RTCSession extends EventManager {
     logger.debug('emit "sdp"');
     emit(EventSdp(originator: 'remote', type: 'offer', sdp: request.body));
 
-    var offer = RTCSessionDescription(request.body, 'offer');
+    RTCSessionDescription offer = RTCSessionDescription(request.body, 'offer');
     try {
       await _connection.setRemoteDescription(offer);
     } catch (error) {
       request.reply(488);
       _failed('system', null, null, null, 488, DartSIP_C.causes.WEBRTC_ERROR,
-          "SetRemoteDescription(offer) failed");
+          'SetRemoteDescription(offer) failed');
       logger.error(
           'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
       emit(EventSetRemoteDescriptionFailed(exception: error));
@@ -686,13 +687,13 @@ class RTCSession extends EventManager {
 
     options = options ?? {};
 
-    var cause = options['cause'] ?? DartSIP_C.causes.BYE;
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    var body = options['body'];
+    Object cause = options['cause'] ?? DartSIP_C.causes.BYE;
+    List extraHeaders = utils.cloneArray(options['extraHeaders']);
+    Object body = options['body'];
 
     var cancel_reason;
     int status_code = options['status_code'];
-    var reason_phrase = options['reason_phrase'];
+    String reason_phrase = options['reason_phrase'];
 
     // Check Session Status.
     if (_status == C.STATUS_TERMINATED) {
@@ -825,7 +826,7 @@ class RTCSession extends EventManager {
   void sendDTMF(String tones, [Map<String, dynamic> options]) {
     logger.debug('sendDTMF() | tones: ${tones.toString()}');
 
-    options = options ?? Map();
+    options = options ?? {};
 
     // sensible defaults
     var duration = options['duration'] ?? RTCSession_DTMF.C.DEFAULT_DURATION;
@@ -854,7 +855,7 @@ class RTCSession extends EventManager {
     }
 
     // Check duration.
-    if (duration != null && !Utils.isDecimal(duration)) {
+    if (duration != null && !utils.isDecimal(duration)) {
       throw Exceptions.TypeError(
           'Invalid tone duration: ${duration.toString()}');
     } else if (duration == null) {
@@ -868,12 +869,12 @@ class RTCSession extends EventManager {
           '"duration" value is greater than the maximum allowed, setting it to ${RTCSession_DTMF.C.MAX_DURATION} milliseconds');
       duration = RTCSession_DTMF.C.MAX_DURATION;
     } else {
-      duration = Utils.Math.abs(duration);
+      duration = utils.Math.abs(duration);
     }
     options['duration'] = duration;
 
     // Check interToneGap.
-    if (interToneGap != null && !Utils.isDecimal(interToneGap)) {
+    if (interToneGap != null && !utils.isDecimal(interToneGap)) {
       throw Exceptions.TypeError(
           'Invalid interToneGap: ${interToneGap.toString()}');
     } else if (interToneGap == null) {
@@ -883,7 +884,7 @@ class RTCSession extends EventManager {
           '"interToneGap" value is lower than the minimum allowed, setting it to ${RTCSession_DTMF.C.MIN_INTER_TONE_GAP} milliseconds');
       interToneGap = RTCSession_DTMF.C.MIN_INTER_TONE_GAP;
     } else {
-      interToneGap = Utils.Math.abs(interToneGap);
+      interToneGap = utils.Math.abs(interToneGap);
     }
 
     //// ***************** and follows the actual code to queue DTMF tone(s) **********************
@@ -911,7 +912,7 @@ class RTCSession extends EventManager {
 
           EventManager eventHandlers = EventManager();
           eventHandlers.on(EventCallFailed(), (EventCallFailed event) {
-            logger.error("Failed to send DTMF ${event.cause}");
+            logger.error('Failed to send DTMF ${event.cause}');
           });
 
           options['eventHandlers'] = eventHandlers;
@@ -965,7 +966,7 @@ class RTCSession extends EventManager {
   /**
    * Unmute
    */
-  void unmute([audio = true, video = true]) {
+  void unmute([bool audio = true, bool video = true]) {
     logger.debug('unmute()');
 
     var audioUnMuted = false, videoUnMuted = false;
@@ -1016,7 +1017,7 @@ class RTCSession extends EventManager {
     _localHold = true;
     _onhold('local');
 
-    var eventHandlers = EventManager();
+    EventManager eventHandlers = EventManager();
 
     eventHandlers.on(EventSucceeded(), (EventSucceeded event) {
       if (done != null) {
@@ -1067,7 +1068,7 @@ class RTCSession extends EventManager {
     _localHold = false;
     _onunhold('local');
 
-    var eventHandlers = EventManager();
+    EventManager eventHandlers = EventManager();
     eventHandlers.on(EventSucceeded(), (EventSucceeded event) {
       if (done != null) {
         done();
@@ -1102,7 +1103,7 @@ class RTCSession extends EventManager {
 
     options = options ?? {};
 
-    var rtcOfferConstraints = options['rtcOfferConstraints'] ?? null;
+    var rtcOfferConstraints = options['rtcOfferConstraints'];
 
     if (_status != C.STATUS_WAITING_FOR_ACK && _status != C.STATUS_CONFIRMED) {
       return false;
@@ -1112,7 +1113,7 @@ class RTCSession extends EventManager {
       return false;
     }
 
-    var eventHandlers = EventManager();
+    EventManager eventHandlers = EventManager();
     eventHandlers.on(EventSucceeded(), (EventSucceeded event) {
       if (done != null) {
         done();
@@ -1249,7 +1250,8 @@ class RTCSession extends EventManager {
             emit(EventSdp(
                 originator: 'remote', type: 'answer', sdp: request.body));
 
-            var answer = RTCSessionDescription(request.body, 'answer');
+            RTCSessionDescription answer =
+                RTCSessionDescription(request.body, 'answer');
             try {
               await _connection.setRemoteDescription(answer);
             } catch (error) {
@@ -1492,7 +1494,7 @@ class RTCSession extends EventManager {
    *  since it is destroyed when receiving the first 2xx answer
    */
   void _setInvite2xxTimer(request, body) {
-    var timeout = Timers.T1;
+    int timeout = Timers.T1;
 
     void invite2xxRetransmission() {
       if (_status != C.STATUS_WAITING_FOR_ACK) {
@@ -1557,7 +1559,7 @@ class RTCSession extends EventManager {
   }
 
   FutureOr<RTCSessionDescription> _createLocalDescription(
-      type, constraints) async {
+      String type, Map<String, dynamic> constraints) async {
     logger.debug('createLocalDescription()');
 
     Completer<RTCSessionDescription> completer =
@@ -1569,7 +1571,7 @@ class RTCSession extends EventManager {
     }
 
     _rtcReady = false;
-    var desc;
+    RTCSessionDescription desc;
     if (type == 'offer') {
       try {
         desc = await _connection.createOffer(constraints);
@@ -1591,21 +1593,21 @@ class RTCSession extends EventManager {
     }
 
     // Add 'pc.onicencandidate' event handler to resolve on last candidate.
-    var finished = false;
-    var ready = () async {
+    bool finished = false;
+    Future<Null> Function() ready = () async {
       _connection.onIceCandidate = null;
       _connection.onIceGatheringState = null;
       _connection.onIceConnectionState = null;
       _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateComplete;
       finished = true;
       _rtcReady = true;
-      var desc = await _connection.getLocalDescription();
+      RTCSessionDescription desc = await _connection.getLocalDescription();
       logger.debug('emit "sdp"');
       emit(EventSdp(originator: 'local', type: type, sdp: desc.sdp));
       completer.complete(desc);
     };
 
-    _connection.onIceGatheringState = (state) {
+    _connection.onIceGatheringState = (RTCIceGatheringState state) {
       _iceGatheringState = state;
       if (state == RTCIceGatheringState.RTCIceGatheringStateComplete) {
         if (!finished) {
@@ -1614,7 +1616,7 @@ class RTCSession extends EventManager {
       }
     };
 
-    _connection.onIceCandidate = (candidate) {
+    _connection.onIceCandidate = (RTCIceCandidate candidate) {
       if (candidate != null) {
         emit(EventIceCandidate(candidate, ready));
         if (!finished) {
@@ -1644,7 +1646,7 @@ class RTCSession extends EventManager {
     if (_iceGatheringState ==
         RTCIceGatheringState.RTCIceGatheringStateComplete) {
       _rtcReady = true;
-      var desc = await _connection.getLocalDescription();
+      RTCSessionDescription desc = await _connection.getLocalDescription();
       logger.debug('emit "sdp"');
       emit(EventSdp(originator: 'local', type: type, sdp: desc.sdp));
       return desc;
@@ -1656,7 +1658,7 @@ class RTCSession extends EventManager {
   /**
    * Dialog Management
    */
-  bool _createDialog(message, type, [early]) {
+  bool _createDialog(message, String type, [early]) {
     var local_tag = (type == 'UAS') ? message.to_tag : message.from_tag;
     var remote_tag = (type == 'UAS') ? message.from_tag : message.to_tag;
     var id = message.call_id + local_tag + remote_tag;
@@ -1710,14 +1712,14 @@ class RTCSession extends EventManager {
     logger.debug('receiveReinvite()');
 
     var contentType = request.getHeader('Content-Type');
-    var rejected = false;
+    bool rejected = false;
 
     bool reject(options) {
       rejected = true;
 
-      var status_code = options['status_code'] ?? 403;
-      var reason_phrase = options['reason_phrase'] ?? '';
-      var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+      int status_code = options['status_code'] ?? 403;
+      String reason_phrase = options['reason_phrase'] ?? '';
+      List<dynamic> extraHeaders = utils.cloneArray(options['extraHeaders']);
 
       if (_status != C.STATUS_CONFIRMED) {
         return false;
@@ -1805,9 +1807,9 @@ class RTCSession extends EventManager {
     bool reject(options) {
       rejected = true;
 
-      var status_code = options['status_code'] ?? 403;
-      var reason_phrase = options['reason_phrase'] ?? '';
-      var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+      int status_code = options['status_code'] ?? 403;
+      String reason_phrase = options['reason_phrase'] ?? '';
+      List<dynamic> extraHeaders = utils.cloneArray(options['extraHeaders']);
 
       if (_status != C.STATUS_CONFIRMED) {
         return false;
@@ -1823,8 +1825,8 @@ class RTCSession extends EventManager {
 
     var contentType = request.getHeader('Content-Type');
 
-    void sendAnswer(sdp) {
-      var extraHeaders = ['Contact: ${_contact}'];
+    void sendAnswer(String sdp) {
+      List<String> extraHeaders = ['Contact: ${_contact}'];
       _handleSessionTimersInIncomingRequest(request, extraHeaders);
       request.reply(200, null, extraHeaders, sdp);
     }
@@ -1850,7 +1852,7 @@ class RTCSession extends EventManager {
     }
 
     try {
-      var desc = await _processInDialogSdpOffer(request);
+      RTCSessionDescription desc = await _processInDialogSdpOffer(request);
       if (_status == C.STATUS_TERMINATED) return;
       // Send answer.
       sendAnswer(desc.sdp);
@@ -1886,7 +1888,7 @@ class RTCSession extends EventManager {
     logger.debug('emit "sdp"');
     emit(EventSdp(originator: 'remote', type: 'offer', sdp: request.body));
 
-    var offer = RTCSessionDescription(request.body, 'offer');
+    RTCSessionDescription offer = RTCSessionDescription(request.body, 'offer');
 
     if (_status == C.STATUS_TERMINATED) {
       throw Exceptions.InvalidStateError('terminated');
@@ -1984,10 +1986,10 @@ class RTCSession extends EventManager {
       });
       // Consider the Replaces header present in the Refer-To URI.
       if (request.refer_to.uri.hasHeader('replaces')) {
-        var replaces = Utils.decodeURIComponent(
-            request.refer_to.uri.getHeader('replaces'));
+        var replaces = utils
+            .decodeURIComponent(request.refer_to.uri.getHeader('replaces'));
 
-        options['extraHeaders'] = Utils.cloneArray(options['extraHeaders']);
+        options['extraHeaders'] = utils.cloneArray(options['extraHeaders']);
         options['extraHeaders'].add('Replaces: ${replaces}');
       }
       session.connect(request.refer_to.uri.toAor(), options, initCallback);
@@ -2029,7 +2031,7 @@ class RTCSession extends EventManager {
           var referSubscriber;
 
           if (request.event.params['id'] != null) {
-            id = Utils.parseInt(request.event.params['id'], 10);
+            id = utils.parseInt(request.event.params['id'], 10);
             referSubscriber = _referSubscribers[id];
           } else if (_referSubscribers.length == 1) {
             referSubscriber =
@@ -2238,10 +2240,10 @@ class RTCSession extends EventManager {
 
     var status_code = response.status_code.toString();
 
-    if (Utils.test100(status_code)) {
+    if (utils.test100(status_code)) {
       // 100 trying
       _status = C.STATUS_1XX_RECEIVED;
-    } else if (Utils.test1XX(status_code)) {
+    } else if (utils.test1XX(status_code)) {
       // 1XX
       // Do nothing with 1xx responses without To tag.
       if (response.to_tag == null) {
@@ -2267,7 +2269,8 @@ class RTCSession extends EventManager {
       logger.debug('emit "sdp"');
       emit(EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      var answer = RTCSessionDescription(response.body, 'answer');
+      RTCSessionDescription answer =
+          RTCSessionDescription(response.body, 'answer');
 
       try {
         _connection.setRemoteDescription(answer);
@@ -2276,7 +2279,7 @@ class RTCSession extends EventManager {
             'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
         emit(EventSetRemoteDescriptionFailed(exception: error));
       }
-    } else if (Utils.test2XX(status_code)) {
+    } else if (utils.test2XX(status_code)) {
       // 2XX
       _status = C.STATUS_CONFIRMED;
 
@@ -2295,7 +2298,8 @@ class RTCSession extends EventManager {
       logger.debug('emit "sdp"');
       emit(EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      var answer = RTCSessionDescription(response.body, 'answer');
+      RTCSessionDescription answer =
+          RTCSessionDescription(response.body, 'answer');
 
       // Be ready for 200 with SDP after a 180/183 with SDP.
       // We created a SDP 'answer' for it, so check the current signaling state.
@@ -2304,7 +2308,8 @@ class RTCSession extends EventManager {
           _connection.signalingState ==
               RTCSignalingState.RTCSignalingStateHaveLocalOffer) {
         try {
-          var offer = await _connection.createOffer(_rtcOfferConstraints);
+          RTCSessionDescription offer =
+              await _connection.createOffer(_rtcOfferConstraints);
           await _connection.setLocalDescription(offer);
         } catch (error) {
           _acceptAndTerminate(response, 500, error.toString());
@@ -2335,7 +2340,7 @@ class RTCSession extends EventManager {
         emit(EventSetRemoteDescriptionFailed(exception: error));
       }
     } else {
-      var cause = Utils.sipErrorCause(response.status_code);
+      String cause = utils.sipErrorCause(response.status_code);
       _failed('remote', null, null, response, response.status_code, cause,
           response.reason_phrase);
     }
@@ -2347,12 +2352,12 @@ class RTCSession extends EventManager {
   void _sendReinvite([options]) async {
     logger.debug('sendReinvite()');
 
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    List<dynamic> extraHeaders = utils.cloneArray(options['extraHeaders']);
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
     var rtcOfferConstraints =
         options['rtcOfferConstraints'] ?? _rtcOfferConstraints;
 
-    var succeeded = false;
+    bool succeeded = false;
 
     extraHeaders.add('Contact: ${_contact}');
     extraHeaders.add('Content-Type: application/sdp');
@@ -2394,7 +2399,8 @@ class RTCSession extends EventManager {
       logger.debug('emit "sdp"');
       emit(EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      var answer = RTCSessionDescription(response.body, 'answer');
+      RTCSessionDescription answer =
+          RTCSessionDescription(response.body, 'answer');
 
       try {
         await _connection.setRemoteDescription(answer);
@@ -2450,7 +2456,7 @@ class RTCSession extends EventManager {
 
     options = options ?? {};
 
-    var extraHeaders = Utils.cloneArray(options['extraHeaders'] ?? []);
+    var extraHeaders = utils.cloneArray(options['extraHeaders'] ?? []);
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
     var rtcOfferConstraints =
         options['rtcOfferConstraints'] ?? _rtcOfferConstraints ?? {};
@@ -2497,7 +2503,8 @@ class RTCSession extends EventManager {
         emit(
             EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-        var answer = RTCSessionDescription(response.body, 'answer');
+        RTCSessionDescription answer =
+            RTCSessionDescription(response.body, 'answer');
 
         try {
           await _connection.setRemoteDescription(answer);
@@ -2770,21 +2777,21 @@ class RTCSession extends EventManager {
     }
   }
 
-  void _toggleMuteAudio(mute) {
+  void _toggleMuteAudio(bool mute) {
     List<MediaStream> streams = _connection.getLocalStreams();
-    streams.forEach((stream) {
+    streams.forEach((MediaStream stream) {
       if (stream.getAudioTracks().isNotEmpty) {
-        var track = stream.getAudioTracks()[0];
+        MediaStreamTrack track = stream.getAudioTracks()[0];
         track.enabled = !mute;
       }
     });
   }
 
-  void _toggleMuteVideo(mute) {
+  void _toggleMuteVideo(bool mute) {
     List<MediaStream> streams = _connection.getLocalStreams();
-    streams.forEach((stream) {
+    streams.forEach((MediaStream stream) {
       if (stream.getVideoTracks().isNotEmpty) {
-        var track = stream.getVideoTracks()[0];
+        MediaStreamTrack track = stream.getVideoTracks()[0];
         track.enabled = !mute;
       }
     });

@@ -44,7 +44,7 @@ class RequestSender {
   * Create the client transaction and send the message.
   */
   void send() {
-    var eventHandlers = EventManager();
+    EventManager eventHandlers = EventManager();
     eventHandlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
       _eventHandlers.emit(event);
     });

@@ -36,20 +36,20 @@ bool sanityCheck(IncomingMessage m, UA u, Transport t) {
   ua = u;
   transport = t;
 
-  for (var check in all) {
+  for (bool Function() check in all) {
     if (check() == false) {
       return false;
     }
   }
 
   if (message is IncomingRequest) {
-    for (var check in requests) {
+    for (bool Function() check in requests) {
       if (check() == false) {
         return false;
       }
     }
   } else if (message is IncomingResponse) {
-    for (var check in responses) {
+    for (bool Function() check in responses) {
       if (check() == false) {
         return false;
       }
@@ -102,8 +102,8 @@ bool rfc3261_16_3_4() {
 }
 
 bool rfc3261_18_3_request() {
-  var len = Utils.str_utf8_length(message.body);
-  var contentLength = message.getHeader('content-length');
+  int len = Utils.str_utf8_length(message.body);
+  dynamic contentLength = message.getHeader('content-length');
 
   if (contentLength is String) {
     contentLength = int.tryParse(contentLength) ?? 0;
@@ -119,9 +119,9 @@ bool rfc3261_18_3_request() {
 }
 
 bool rfc3261_8_2_2_2() {
-  var fromTag = message.from_tag;
-  var call_id = message.call_id;
-  var cseq = message.cseq;
+  String fromTag = message.from_tag;
+  String call_id = message.call_id;
+  int cseq = message.cseq;
 
   // Accept any in-dialog request.
   if (message.to_tag != null) {
@@ -190,7 +190,8 @@ bool rfc3261_8_1_3_3() {
 }
 
 bool rfc3261_18_3_response() {
-  var len = Utils.str_utf8_length(message.body);
+  int len = Utils.str_utf8_length(message.body);
+  // ignore: always_specify_types
   var contentLength = message.getHeader('content-length');
 
   if (contentLength is String) {
@@ -209,9 +210,9 @@ bool rfc3261_18_3_response() {
 
 // Sanity Check functions for requests and responses.
 bool minimumHeaders() {
-  var mandatoryHeaders = ['from', 'to', 'call_id', 'cseq', 'via'];
+  List<String> mandatoryHeaders = ['from', 'to', 'call_id', 'cseq', 'via'];
 
-  for (var header in mandatoryHeaders) {
+  for (String header in mandatoryHeaders) {
     if (!message.hasHeader(header)) {
       logger.debug(
           'missing mandatory header field : ${header}, dropping the response');
@@ -224,14 +225,14 @@ bool minimumHeaders() {
 }
 
 // Reply.
-void reply(status_code) {
-  var vias = message.getHeaders('via');
+void reply(int status_code) {
+  List<dynamic> vias = message.getHeaders('via');
 
   var to;
   var response =
       'SIP/2.0 ${status_code} ${DartSIP_C.REASON_PHRASE[status_code]}\r\n';
 
-  for (var via in vias) {
+  for (dynamic via in vias) {
     response += 'Via: ${via}\r\n';
   }
 
