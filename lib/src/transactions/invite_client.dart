@@ -1,3 +1,5 @@
+import 'package:sip_ua/src/event_manager/event_manager.dart';
+
 import '../constants.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
@@ -10,11 +12,8 @@ import '../utils.dart';
 import 'transaction_base.dart';
 
 class InviteClientTransaction extends TransactionBase {
-  var eventHandlers;
-
-  var B, D, M;
-
-  InviteClientTransaction(UA ua, Transport transport, request, eventHandlers) {
+  InviteClientTransaction(
+      UA ua, Transport transport, request, EventManager eventHandlers) {
     this.id = 'z9hG4bK${Math.floor(Math.random() * 10000000)}';
     this.ua = ua;
     this.transport = transport;
@@ -22,31 +21,36 @@ class InviteClientTransaction extends TransactionBase {
     this.eventHandlers = eventHandlers;
     request.transaction = this;
 
-    var via = 'SIP/2.0/${transport.via_transport}';
+    String via = 'SIP/2.0/${transport.via_transport}';
 
-    via += ' ${ua.configuration.via_host};branch=${this.id}';
+    via += ' ${ua.configuration.via_host};branch=$id';
 
     this.request.setHeader('via', via);
 
     this.ua.newTransaction(this);
   }
+  EventManager eventHandlers;
+
+  var B, D, M;
 
   void stateChanged(TransactionState state) {
     this.state = state;
-    this.emit(EventStateChanged());
+    emit(EventStateChanged());
   }
 
+  @override
   void send() {
-    this.stateChanged(TransactionState.CALLING);
-    this.B = setTimeout(() {
-      this.timer_B();
+    stateChanged(TransactionState.CALLING);
+    B = setTimeout(() {
+      timer_B();
     }, Timers.TIMER_B);
 
-    if (!this.transport.send(this.request)) {
-      this.onTransportError();
+    if (!transport.send(request)) {
+      onTransportError();
     }
   }
 
+  @override
   void onTransportError() {
     clearTimeout(this.B);
     clearTimeout(this.D);
@@ -114,7 +118,7 @@ class InviteClientTransaction extends TransactionBase {
       return;
     }
 
-    var cancel = SIPMessage.OutgoingRequest(
+    SIPMessage.OutgoingRequest cancel = SIPMessage.OutgoingRequest(
         SipMethod.CANCEL, this.request.ruri, this.ua, {
       'route_set': this.request.getHeaders('route'),
       'call_id': this.request.getHeader('call-id'),
@@ -132,9 +136,10 @@ class InviteClientTransaction extends TransactionBase {
     this.transport.send(cancel);
   }
 
+  @override
   void receiveResponse(int status_code, IncomingMessage response,
       [void Function() onSuccess, void Function() onFailure]) {
-    var status_code = response.status_code;
+    int status_code = response.status_code;
 
     if (status_code >= 100 && status_code <= 199) {
       switch (this.state) {

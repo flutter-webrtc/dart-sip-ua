@@ -1,3 +1,5 @@
+import 'package:sip_ua/src/sip_message.dart';
+
 import '../constants.dart' as DartSIP_C;
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
@@ -8,16 +10,17 @@ import '../rtc_session.dart' as rtc;
 import '../utils.dart' as Utils;
 
 class ReferSubscriber extends EventManager {
+  ReferSubscriber(this._session);
+
   int _id;
   final rtc.RTCSession _session;
-  ReferSubscriber(this._session);
 
   int get id => _id;
 
   void sendRefer(target, options) {
     logger.debug('sendRefer()');
 
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
 
     // Set event handlers.
@@ -27,21 +30,21 @@ class ReferSubscriber extends EventManager {
     String replaces;
 
     if (options['replaces'] != null) {
-      replaces = options['replaces']._request.call_id;
-      replaces += ';to-tag=${options['replaces']._to_tag}';
-      replaces += ';from-tag=${options['replaces']._from_tag}';
+      replaces = options['replaces'].call_id;
+      replaces += ';to-tag=${options['replaces'].to_tag}';
+      replaces += ';from-tag=${options['replaces'].from_tag}';
       replaces = Utils.encodeURIComponent(replaces);
     }
 
     // Refer-To header field.
-    var referTo = 'Refer-To: <$target' +
+    String referTo = 'Refer-To: <$target' +
         (replaces != null ? '?Replaces=$replaces' : '') +
         '>';
 
     extraHeaders.add(referTo);
 
     // Referred-By header field.
-    var referredBy =
+    String referredBy =
         'Referred-By: <${_session.ua.configuration.uri.scheme}:${_session.ua.configuration.uri.user}@${_session.ua.configuration.uri.host}>';
 
     extraHeaders.add(referredBy);
@@ -64,8 +67,11 @@ class ReferSubscriber extends EventManager {
       _requestFailed(null, DartSIP_C.causes.DIALOG_ERROR);
     });
 
-    var request = _session.sendRequest(SipMethod.REFER,
-        {'extraHeaders': extraHeaders, 'eventHandlers': handlers});
+    OutgoingRequest request = _session.sendRequest(
+        SipMethod.REFER, <String, dynamic>{
+      'extraHeaders': extraHeaders,
+      'eventHandlers': handlers
+    });
 
     _id = request.cseq;
   }
@@ -78,7 +84,7 @@ class ReferSubscriber extends EventManager {
     }
 
     var status_line = request.body.trim();
-    var parsed = Grammar.parse(status_line, 'Status_Line');
+    dynamic parsed = Grammar.parse(status_line, 'Status_Line');
 
     if (parsed == -1) {
       logger.debug(
@@ -86,7 +92,7 @@ class ReferSubscriber extends EventManager {
       return;
     }
 
-    var status_code = parsed.status_code.toString();
+    String status_code = parsed.status_code.toString();
     if (Utils.test100(status_code)) {
       /// 100 Trying
       emit(EventReferTrying(request: request, status_line: status_line));

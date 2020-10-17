@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:sip_ua/src/data.dart';
+
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -48,12 +50,13 @@ class DynamicSettings {
 }
 
 class Contact {
+  Contact(this.uri);
+
   String pub_gruu;
   String temp_gruu;
   bool anonymous = false;
   bool outbound = false;
   URI uri;
-  Contact(this.uri);
 
   @override
   String toString() {
@@ -82,21 +85,6 @@ class Contact {
  * @throws {TypeError} If no configuration is given.
  */
 class UA extends EventManager {
-  Map<String, dynamic> _cache;
-  Settings _configuration;
-  DynamicSettings _dynConfiguration;
-  Map<String, Dialog> _dialogs;
-  Set<Message> _applicants;
-  Map<String, RTCSession> _sessions = <String, RTCSession>{};
-  Transport _transport;
-  Contact _contact;
-  int _status;
-  int _error;
-  TransactionBag _transactions = TransactionBag();
-  Map<String, dynamic> _data;
-  Timer _closeTimer;
-  dynamic _registrator;
-
   UA(Settings configuration) {
     logger.debug('new() [configuration:${configuration.toString()}]');
 
@@ -104,12 +92,12 @@ class UA extends EventManager {
 
     _configuration = Settings();
     _dynConfiguration = DynamicSettings();
-    _dialogs = {};
+    _dialogs = <String, Dialog>{};
 
     // User actions outside any session/dialog (MESSAGE).
-    _applicants = {};
+    _applicants = <Message>{};
 
-    _sessions = {};
+    _sessions = <String, RTCSession>{};
     _transport = null;
     _contact = null;
     _status = C.STATUS_INIT;
@@ -117,7 +105,7 @@ class UA extends EventManager {
     _transactions = TransactionBag();
 
     // Custom UA empty object for high level use.
-    _data = {};
+    _data = <String, dynamic>{};
 
     _closeTimer = null;
 
@@ -138,6 +126,21 @@ class UA extends EventManager {
     // Initialize registrator.
     _registrator = Registrator(this);
   }
+
+  Map<String, dynamic> _cache;
+  Settings _configuration;
+  DynamicSettings _dynConfiguration;
+  Map<String, Dialog> _dialogs;
+  Set<Message> _applicants;
+  Map<String, RTCSession> _sessions = <String, RTCSession>{};
+  Transport _transport;
+  Contact _contact;
+  int _status;
+  int _error;
+  TransactionBag _transactions = TransactionBag();
+  Map<String, dynamic> _data;
+  Timer _closeTimer;
+  dynamic _registrator;
 
   int get status => _status;
 
@@ -297,7 +300,7 @@ class UA extends EventManager {
     // Run  _terminate_ on every Session.
     _sessions.forEach((String key, _) {
       if (_sessions.containsKey(key)) {
-        logger.debug('closing session ${key}');
+        logger.debug('closing session $key');
         try {
           RTCSession rtcSession = _sessions[key];
           if (!rtcSession.isEnded()) {
@@ -351,7 +354,7 @@ class UA extends EventManager {
         return _configuration.ha1;
 
       default:
-        logger.error('get() | cannot get "${parameter}" parameter in runtime');
+        logger.error('get() | cannot get "$parameter" parameter in runtime');
 
         return null;
     }
@@ -390,7 +393,7 @@ class UA extends EventManager {
         }
 
       default:
-        logger.error('set() | cannot set "${parameter}" parameter in runtime');
+        logger.error('set() | cannot set "$parameter" parameter in runtime');
 
         return false;
     }
@@ -461,7 +464,7 @@ class UA extends EventManager {
    * RTCSession destroyed.
    */
   void destroyRTCSession(RTCSession session) {
-    _sessions.remove([session.id]);
+    _sessions.remove(session.id);
   }
 
   /**
@@ -505,7 +508,7 @@ class UA extends EventManager {
    * Request reception
    */
   void receiveRequest(IncomingRequest request) {
-    var method = request.method;
+    DartSIP_C.SipMethod method = request.method;
 
     // Check that request URI points to us.
     if (request.ruri.user != _configuration.uri.user &&
@@ -553,7 +556,7 @@ class UA extends EventManager {
         request.reply(405);
         return;
       }
-      var message = Message(this);
+      Message message = Message(this);
       message.init_incoming(request);
       return;
     } else if (method == SipMethod.INVITE) {
@@ -574,7 +577,7 @@ class UA extends EventManager {
         case SipMethod.INVITE:
           if (window.hasRTCPeerConnection) {
             if (request.hasHeader('replaces')) {
-              var replaces = request.replaces;
+              ParsedData replaces = request.replaces;
 
               dialog = _findDialog(
                   replaces.call_id, replaces.from_tag, replaces.to_tag);
@@ -681,7 +684,7 @@ class UA extends EventManager {
    * Get the dialog to which the request belongs to, if any.
    */
   Dialog _findDialog(String call_id, String from_tag, String to_tag) {
-    var id = call_id + from_tag + to_tag;
+    String id = call_id + from_tag + to_tag;
     Dialog dialog = _dialogs[id];
 
     if (dialog != null) {
@@ -720,7 +723,7 @@ class UA extends EventManager {
     _configuration.jssip_id = Utils.createRandomToken(5);
 
     // String containing _configuration.uri without scheme and user.
-    var hostport_params = _configuration.uri.clone();
+    URI hostport_params = _configuration.uri.clone();
 
     hostport_params.user = null;
     _configuration.hostport_params = hostport_params
@@ -729,7 +732,7 @@ class UA extends EventManager {
 
     // Transport.
     try {
-      _transport = Transport(_configuration.sockets, {
+      _transport = Transport(_configuration.sockets, <String, int>{
         // Recovery options.
         'max_interval': _configuration.connection_recovery_max_interval,
         'min_interval': _configuration.connection_recovery_min_interval
@@ -746,7 +749,7 @@ class UA extends EventManager {
     }
 
     // Remove sockets instance from configuration object.
-    //TODO:  need dispose??
+    // TODO(cloudwebrtc):  need dispose??
     _configuration.sockets = null;
 
     // Check whether authorization_user is explicitly defined.

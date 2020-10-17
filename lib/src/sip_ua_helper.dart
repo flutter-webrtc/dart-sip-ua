@@ -474,13 +474,6 @@ class Call {
 }
 
 class CallState {
-  CallStateEnum state;
-  ErrorCause cause;
-  String originator;
-  bool audio;
-  bool video;
-  MediaStream stream;
-  EventCallRefer refer;
   CallState(this.state,
       {this.originator,
       this.audio,
@@ -488,6 +481,13 @@ class CallState {
       this.stream,
       this.cause,
       this.refer});
+  CallStateEnum state;
+  ErrorCause cause;
+  String originator;
+  bool audio;
+  bool video;
+  MediaStream stream;
+  EventCallRefer refer;
 }
 
 enum RegistrationStateEnum {
@@ -498,9 +498,9 @@ enum RegistrationStateEnum {
 }
 
 class RegistrationState {
+  RegistrationState({this.state, this.cause});
   RegistrationStateEnum state;
   ErrorCause cause;
-  RegistrationState({this.state, this.cause});
 }
 
 enum TransportStateEnum {
@@ -511,16 +511,16 @@ enum TransportStateEnum {
 }
 
 class TransportState {
+  TransportState(this.state, {this.cause});
   TransportStateEnum state;
   ErrorCause cause;
-  TransportState(this.state, {this.cause});
 }
 
 class SIPMessageRequest {
+  SIPMessageRequest(this.message, this.originator, this.request);
   dynamic request;
   String originator;
   Message message;
-  SIPMessageRequest(this.message, this.originator, this.request);
 }
 
 abstract class SipUaHelperListener {

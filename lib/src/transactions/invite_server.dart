@@ -7,10 +7,6 @@ import '../ua.dart';
 import 'transaction_base.dart';
 
 class InviteServerTransaction extends TransactionBase {
-  var resendProvisionalTimer;
-  var transportError;
-  var L, H, I;
-
   InviteServerTransaction(UA ua, Transport transport, request) {
     this.id = request.via_branch;
     this.ua = ua;
@@ -27,6 +23,9 @@ class InviteServerTransaction extends TransactionBase {
 
     request.reply(100);
   }
+  var resendProvisionalTimer;
+  var transportError;
+  var L, H, I;
 
   void stateChanged(state) {
     this.state = state;
@@ -166,6 +165,6 @@ class InviteServerTransaction extends TransactionBase {
 
   @override
   void send() {
-    throw Exception("Not Implemented");
+    throw Exception('Not Implemented');
   }
 }

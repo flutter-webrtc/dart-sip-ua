@@ -4,6 +4,14 @@ import 'dart:io';
 import 'package:path/path.dart';
 
 class StackTraceNJ implements core.StackTrace {
+  /// You can suppress call frames from showing
+  /// by specifing a non-zero value for [skipFrames]
+  /// If the workingDirectory is provided we will output
+  /// a full file path to the dart library.
+  StackTraceNJ({int skipFrames = 0, this.workingDirectory})
+      : stackTrace = core.StackTrace.current,
+        _skipFrames = skipFrames + 1; // always skip ourselves.
+
   static final RegExp stackTraceRegex =
       RegExp(r'#[0-9]+[\s]+(.+) \(([^\s]+)\)');
   final core.StackTrace stackTrace;
@@ -12,14 +20,6 @@ class StackTraceNJ implements core.StackTrace {
   final int _skipFrames;
 
   List<Stackframe> _frames;
-
-  /// You can suppress call frames from showing
-  /// by specifing a non-zero value for [skipFrames]
-  /// If the workingDirectory is provided we will output
-  /// a full file path to the dart library.
-  StackTraceNJ({int skipFrames = 0, this.workingDirectory})
-      : stackTrace = core.StackTrace.current,
-        _skipFrames = skipFrames + 1; // always skip ourselves.
 
   ///
   /// Returns a File instance for the current stackframe
@@ -65,7 +65,7 @@ class StackTraceNJ implements core.StackTrace {
       } else {
         sourceFile = basename(stackFrame.sourceFile.path);
       }
-      String newLine = ('${sourceFile}:${stackFrame.lineNo}');
+      String newLine = '$sourceFile:${stackFrame.lineNo}';
 
       if (workingDirectory != null) {
         formatted.add('file:///' + workingDirectory + newLine);
@@ -147,10 +147,9 @@ class StackTraceNJ implements core.StackTrace {
 /// Holds the sourceFile name and line no.
 ///
 class Stackframe {
+  Stackframe(this.sourceFile, this.lineNo, this.column, this.details);
   final File sourceFile;
   final int lineNo;
   final int column;
   final String details;
-
-  Stackframe(this.sourceFile, this.lineNo, this.column, this.details);
 }

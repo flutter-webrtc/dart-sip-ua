@@ -9,10 +9,10 @@ import 'ua.dart';
 import 'utils.dart' as Utils;
 
 // Checks for requests and responses.
-const List<bool Function()> all = [minimumHeaders];
+const List<bool Function()> all = <bool Function()>[minimumHeaders];
 
 // Checks for requests.
-const List<bool Function()> requests = [
+const List<bool Function()> requests = <bool Function()>[
   rfc3261_8_2_2_1,
   rfc3261_16_3_4,
   rfc3261_18_3_request,
@@ -20,7 +20,7 @@ const List<bool Function()> requests = [
 ];
 
 // Checks for responses.
-const List<bool Function()> responses = [
+const List<bool Function()> responses = <bool Function()>[
   rfc3261_8_1_3_3,
   rfc3261_18_3_response
 ];
@@ -131,7 +131,7 @@ bool rfc3261_8_2_2_2() {
   if (message.method == SipMethod.INVITE) {
     // If the branch matches the key of any IST then assume it is a retransmission
     // and ignore the INVITE.
-    // TODO: we should reply the last response.
+    // TODO(cloudwebrtc): we should reply the last response.
     if (ua.transactions
             .getTransaction(InviteServerTransaction, message.via_branch) !=
         null) {
@@ -140,9 +140,9 @@ bool rfc3261_8_2_2_2() {
     // Otherwise check whether it is a merged request.
     else {
       ua.transactions.getAll(InviteServerTransaction).forEach((tr) {
-        if (tr._request.from_tag == fromTag &&
-            tr._request.call_id == call_id &&
-            tr._request.cseq == cseq) {
+        if (tr.request.from_tag == fromTag &&
+            tr.request.call_id == call_id &&
+            tr.request.cseq == cseq) {
           reply(482);
 
           return false;
@@ -155,7 +155,7 @@ bool rfc3261_8_2_2_2() {
 
   // If the branch matches the key of any NIST then assume it is a retransmission
   // and ignore the request.
-  // TODO: we should reply the last response.
+  // TODO(cloudwebrtc): we should reply the last response.
   else if (ua.transactions
           .getTransaction(NonInviteServerTransaction, message.via_branch) !=
       null) {
@@ -214,7 +214,7 @@ bool minimumHeaders() {
   for (String header in mandatoryHeaders) {
     if (!message.hasHeader(header)) {
       logger.debug(
-          'missing mandatory header field : ${header}, dropping the response');
+          'missing mandatory header field : $header, dropping the response');
 
       return false;
     }
@@ -227,12 +227,12 @@ bool minimumHeaders() {
 void reply(int status_code) {
   List<dynamic> vias = message.getHeaders('via');
 
-  var to;
-  var response =
-      'SIP/2.0 ${status_code} ${DartSIP_C.REASON_PHRASE[status_code]}\r\n';
+  dynamic to;
+  String response =
+      'SIP/2.0 $status_code ${DartSIP_C.REASON_PHRASE[status_code]}\r\n';
 
   for (dynamic via in vias) {
-    response += 'Via: ${via}\r\n';
+    response += 'Via: $via\r\n';
   }
 
   to = message.getHeader('To');
@@ -241,7 +241,7 @@ void reply(int status_code) {
     to += ';tag=${Utils.newTag()}';
   }
 
-  response += 'To: ${to}\r\n';
+  response += 'To: $to\r\n';
   response += 'From: ${message.getHeader('From')}\r\n';
   response += 'Call-ID: ${message.call_id}\r\n';
   response +=

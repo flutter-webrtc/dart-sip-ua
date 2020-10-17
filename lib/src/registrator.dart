@@ -103,10 +103,10 @@ class Registrator {
     // Reset it.
     _extraContactParams = '';
 
-    extraContactParams.forEach((param_key, param_value) {
-      _extraContactParams += (';${param_key}');
+    extraContactParams.forEach((String param_key, dynamic param_value) {
+      _extraContactParams += ';$param_key';
       if (param_value != null) {
-        _extraContactParams += ('=$param_value');
+        _extraContactParams += '=$param_value';
       }
     });
   }
@@ -147,7 +147,7 @@ class Registrator {
         <String, dynamic>{
           'to_uri': _to_uri,
           'call_id': _call_id,
-          'cseq': (_cseq += 1)
+          'cseq': _cseq += 1
         },
         extraHeaders);
 
@@ -197,7 +197,7 @@ class Registrator {
           });
           // Get the Contact pointing to us and update the expires value accordingly.
           var contact = contacts.firstWhere(
-              (element) => (element.uri.user == _ua.contact.uri.user));
+              (element) => element.uri.user == _ua.contact.uri.user);
 
           if (contact == null) {
             logger.debug('no Contact header pointing to us, response ignored');
@@ -309,7 +309,7 @@ class Registrator {
         SipMethod.REGISTER,
         _registrar,
         _ua,
-        {'to_uri': _to_uri, 'call_id': _call_id, 'cseq': (_cseq += 1)},
+        {'to_uri': _to_uri, 'call_id': _call_id, 'cseq': _cseq += 1},
         extraHeaders);
 
     EventManager handlers = EventManager();

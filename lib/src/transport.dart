@@ -245,7 +245,7 @@ class Transport {
       return;
     }
 
-    num idx = Math.floor((Math.randomDouble() * candidates.length));
+    num idx = Math.floor(Math.randomDouble() * candidates.length);
 
     socket = candidates[idx]['socket'];
   }

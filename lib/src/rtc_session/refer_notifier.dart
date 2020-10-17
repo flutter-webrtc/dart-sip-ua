@@ -12,11 +12,6 @@ class C {
 }
 
 class ReferNotifier {
-  rtc.RTCSession _session;
-  String _id;
-  int _expires;
-  bool _active;
-
   ReferNotifier(rtc.RTCSession session, String id, [int expires]) {
     _session = session;
     _id = id;
@@ -26,6 +21,11 @@ class ReferNotifier {
     // The creation of a Notifier results in an immediate NOTIFY.
     notify(100);
   }
+
+  rtc.RTCSession _session;
+  String _id;
+  int _expires;
+  bool _active;
 
   void notify(int code, [String reason]) {
     logger.debug('notify()');
@@ -41,7 +41,7 @@ class ReferNotifier {
     if (code >= 200) {
       state = 'terminated;reason=noresource';
     } else {
-      state = 'active;expires=${_expires}';
+      state = 'active;expires=$_expires';
     }
 
     EventManager handlers = EventManager();
@@ -51,13 +51,13 @@ class ReferNotifier {
     });
 
     // Put this in a try/catch block.
-    _session.sendRequest(SipMethod.NOTIFY, {
-      'extraHeaders': [
-        'Event: ${C.event_type};id=${_id}',
-        'Subscription-State: ${state}',
+    _session.sendRequest(SipMethod.NOTIFY, <String, dynamic>{
+      'extraHeaders': <String>[
+        'Event: ${C.event_type};id=$_id',
+        'Subscription-State: $state',
         'Content-Type: ${C.body_type}'
       ],
-      'body': 'SIP/2.0 ${code} ${reason}',
+      'body': 'SIP/2.0 $code $reason',
       'eventHandlers': handlers
     });
   }

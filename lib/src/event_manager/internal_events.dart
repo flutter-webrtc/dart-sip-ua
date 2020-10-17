@@ -9,120 +9,120 @@ import 'events.dart';
 class EventStateChanged extends EventType {}
 
 class EventNewTransaction extends EventType {
-  TransactionBase transaction;
   EventNewTransaction({this.transaction});
+  TransactionBase transaction;
 }
 
 class EventTransactionDestroyed extends EventType {
-  TransactionBase transaction;
   EventTransactionDestroyed({this.transaction});
+  TransactionBase transaction;
 }
 
 class EventSipEvent extends EventType {
-  IncomingRequest request;
   EventSipEvent({this.request});
+  IncomingRequest request;
 }
 
 class EventOnAuthenticated extends EventType {
-  OutgoingRequest request;
   EventOnAuthenticated({this.request});
+  OutgoingRequest request;
 }
 
 class EventSdp extends EventType {
+  EventSdp({this.originator, this.type, this.sdp});
   String originator;
   String type;
   String sdp;
-  EventSdp({this.originator, this.type, this.sdp});
 }
 
 class EventSending extends EventType {
-  OutgoingRequest request;
   EventSending({this.request});
+  OutgoingRequest request;
 }
 
 class EventSetRemoteDescriptionFailed extends EventType {
-  dynamic exception;
   EventSetRemoteDescriptionFailed({this.exception});
+  dynamic exception;
 }
 
 class EventSetLocalDescriptionFailed extends EventType {
-  dynamic exception;
   EventSetLocalDescriptionFailed({this.exception});
+  dynamic exception;
 }
 
 class EventFailedUnderScore extends EventType {
+  EventFailedUnderScore({this.originator, this.cause});
   String originator;
   ErrorCause cause;
-  EventFailedUnderScore({this.originator, this.cause});
 }
 
 class EventGetUserMediaFailed extends EventType {
-  dynamic exception;
   EventGetUserMediaFailed({this.exception});
+  dynamic exception;
 }
 
 class EventNewDTMF extends EventType {
+  EventNewDTMF({this.originator, this.request, this.dtmf});
   String originator;
   dynamic request;
   DTMF dtmf;
-  EventNewDTMF({this.originator, this.request, this.dtmf});
 }
 
 class EventNewInfo extends EventType {
+  EventNewInfo({this.originator, this.request, this.info});
   String originator;
   dynamic request;
   Info info;
-  EventNewInfo({this.originator, this.request, this.info});
 }
 
 class EventPeerConnection extends EventType {
-  RTCPeerConnection peerConnection;
   EventPeerConnection(this.peerConnection);
+  RTCPeerConnection peerConnection;
 }
 
 class EventReplaces extends EventType {
+  EventReplaces({this.request, this.accept, this.reject});
   dynamic request;
   bool Function(dynamic options) accept;
   bool Function(dynamic options) reject;
-  EventReplaces({this.request, this.accept, this.reject});
 }
 
 class EventUpdate extends EventType {
+  EventUpdate({this.request, this.callback, this.reject});
   dynamic request;
   bool Function(dynamic options) callback;
   bool Function(dynamic options) reject;
-  EventUpdate({this.request, this.callback, this.reject});
 }
 
 class EventReinvite extends EventType {
+  EventReinvite({this.request, this.callback, this.reject});
   dynamic request;
   bool Function(dynamic options) callback;
   bool Function(dynamic options) reject;
-  EventReinvite({this.request, this.callback, this.reject});
 }
 
 class EventIceCandidate extends EventType {
+  EventIceCandidate(this.candidate, this.ready);
   RTCIceCandidate candidate;
   Future<Null> Function() ready;
-  EventIceCandidate(this.candidate, this.ready);
 }
 
 class EventCreateAnswerFialed extends EventType {
-  dynamic exception;
   EventCreateAnswerFialed({this.exception});
+  dynamic exception;
 }
 
 class EventCreateOfferFailed extends EventType {
-  dynamic exception;
   EventCreateOfferFailed({this.exception});
+  dynamic exception;
 }
 
 class EventOnFialed extends EventType {}
 
 class EventSucceeded extends EventType {
+  EventSucceeded({this.response, this.originator});
   String originator;
   IncomingMessage response;
-  EventSucceeded({this.response, this.originator});
 }
 
 class EventOnTransportError extends EventType {
@@ -130,13 +130,14 @@ class EventOnTransportError extends EventType {
 }
 
 class EventOnRequestTimeout extends EventType {
-  IncomingMessage request;
   EventOnRequestTimeout({this.request});
+  IncomingMessage request;
 }
 
 class EventOnReceiveResponse extends EventType {
-  IncomingResponse response;
   EventOnReceiveResponse({this.response});
+  IncomingResponse response;
+
   @override
   void sanityCheck() {
     assert(response != null);
@@ -144,16 +145,16 @@ class EventOnReceiveResponse extends EventType {
 }
 
 class EventOnDialogError extends EventType {
-  IncomingMessage response;
   EventOnDialogError({this.response});
+  IncomingMessage response;
 }
 
 class EventOnSuccessResponse extends EventType {
-  IncomingMessage response;
   EventOnSuccessResponse({this.response});
+  IncomingMessage response;
 }
 
 class EventOnErrorResponse extends EventType {
-  IncomingMessage response;
   EventOnErrorResponse({this.response});
+  IncomingMessage response;
 }

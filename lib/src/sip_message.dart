@@ -5,6 +5,7 @@ import 'package:sip_ua/src/transactions/transaction_base.dart';
 
 import 'constants.dart';
 import 'constants.dart' as DartSIP_C;
+import 'data.dart';
 import 'exceptions.dart' as Exceptions;
 import 'grammar.dart';
 import 'grammar_parser.dart';
@@ -13,7 +14,7 @@ import 'name_addr_header.dart';
 import 'transport.dart';
 import 'ua.dart';
 import 'uri.dart';
-import 'utils.dart' as Utils;
+import 'utils.dart' as utils;
 
 /**
  * -param {String} method request method
@@ -26,19 +27,6 @@ import 'utils.dart' as Utils;
  * -param {String} [body]
  */
 class OutgoingRequest {
-  UA ua;
-  Map<String, dynamic> headers = <String, dynamic>{};
-  SipMethod method;
-  URI ruri;
-  String body;
-  List<dynamic> extraHeaders = <dynamic>[];
-  NameAddrHeader to;
-  NameAddrHeader from;
-  String call_id;
-  var cseq;
-  Map<String, dynamic> sdp;
-  var transaction;
-
   OutgoingRequest(SipMethod method, URI ruri, UA ua,
       [Map<String, dynamic> params, List<dynamic> extraHeaders, String body]) {
     // Mandatory parameters check.
@@ -52,7 +40,7 @@ class OutgoingRequest {
     this.method = method;
     this.ruri = ruri;
     this.body = body;
-    this.extraHeaders = Utils.cloneArray(extraHeaders);
+    this.extraHeaders = utils.cloneArray(extraHeaders);
 
     // Fill the Common SIP Request Headers.
 
@@ -80,7 +68,7 @@ class OutgoingRequest {
 
     // From.
     var from_uri = params['from_uri'] ?? ua.configuration.uri;
-    var from_params = {'tag': params['from_tag'] ?? Utils.newTag()};
+    var from_params = {'tag': params['from_tag'] ?? utils.newTag()};
     var display_name;
 
     if (params['from_display_name'] != null) {
@@ -96,18 +84,31 @@ class OutgoingRequest {
 
     // Call-ID.
     var call_id = params['call_id'] ??
-        (ua.configuration.jssip_id + Utils.createRandomToken(15));
+        (ua.configuration.jssip_id + utils.createRandomToken(15));
 
     this.call_id = call_id;
     this.setHeader('call-id', call_id);
 
     // CSeq.
     var cseq =
-        params['cseq'] ?? Utils.Math.floor(Utils.Math.randomDouble() * 10000);
+        params['cseq'] ?? utils.Math.floor(utils.Math.randomDouble() * 10000);
 
     this.cseq = cseq;
     this.setHeader('cseq', '${cseq} ${SipMethodHelper.getName(method)}');
   }
+
+  UA ua;
+  Map<String, dynamic> headers = <String, dynamic>{};
+  SipMethod method;
+  URI ruri;
+  String body;
+  List<dynamic> extraHeaders = <dynamic>[];
+  NameAddrHeader to;
+  NameAddrHeader from;
+  String call_id;
+  var cseq;
+  Map<String, dynamic> sdp;
+  var transaction;
 
   /**
    * Replace the the given header by the given value.
@@ -124,7 +125,7 @@ class OutgoingRequest {
       }
     }
 
-    this.headers[Utils.headerize(name)] = (value is List) ? value : [value];
+    this.headers[utils.headerize(name)] = (value is List) ? value : [value];
   }
 
   /**
@@ -133,7 +134,7 @@ class OutgoingRequest {
    * -returns {String|null} Returns the specified header, null if header doesn't exist.
    */
   dynamic getHeader(String name) {
-    var headers = this.headers[Utils.headerize(name)];
+    var headers = this.headers[utils.headerize(name)];
 
     if (headers != null) {
       if (headers[0] != null) {
@@ -157,7 +158,7 @@ class OutgoingRequest {
    * -returns {Array} Array with all the headers of the specified name.
    */
   List<dynamic> getHeaders(String name) {
-    var headers = this.headers[Utils.headerize(name)];
+    var headers = this.headers[utils.headerize(name)];
     var result = [];
 
     if (headers != null) {
@@ -185,7 +186,7 @@ class OutgoingRequest {
    * -returns {boolean} true if header with given name exists, false otherwise
    */
   bool hasHeader(String name) {
-    if (this.headers[Utils.headerize(name)]) {
+    if (this.headers[utils.headerize(name)]) {
       return true;
     } else {
       var regexp = RegExp('^\\s*${name}\\s*:', caseSensitive: false);
@@ -291,7 +292,7 @@ class OutgoingRequest {
     });
 
     request.body = this.body;
-    request.extraHeaders = Utils.cloneArray(this.extraHeaders);
+    request.extraHeaders = utils.cloneArray(this.extraHeaders);
     request.to = this.to;
     request.from = this.from;
     request.call_id = this.call_id;
@@ -319,7 +320,7 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
     });
 
     request.body = this.body;
-    request.extraHeaders = Utils.cloneArray(this.extraHeaders);
+    request.extraHeaders = utils.cloneArray(this.extraHeaders);
     request.to = this.to;
     request.from = this.from;
     request.call_id = this.call_id;
@@ -332,6 +333,21 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
 }
 
 class IncomingMessage {
+  IncomingMessage() {
+    this.data = '';
+    this.headers = null;
+    this.method = null;
+    this.via_branch = null;
+    this.call_id = null;
+    this.cseq = null;
+    this.from = null;
+    this.from_tag = null;
+    this.to = null;
+    this.to_tag = null;
+    this.body = '';
+    this.sdp = null;
+  }
+
   String data;
   Map<String, dynamic> headers;
   SipMethod method;
@@ -348,24 +364,9 @@ class IncomingMessage {
   String reason_phrase;
   int session_expires;
   String session_expires_refresher;
-  Data event;
-  dynamic replaces;
+  ParsedData event;
+  ParsedData replaces;
   dynamic refer_to;
-
-  IncomingMessage() {
-    this.data = '';
-    this.headers = null;
-    this.method = null;
-    this.via_branch = null;
-    this.call_id = null;
-    this.cseq = null;
-    this.from = null;
-    this.from_tag = null;
-    this.to = null;
-    this.to_tag = null;
-    this.body = '';
-    this.sdp = null;
-  }
 
   /**
   * Insert a header of the given name and value into the last position of the
@@ -374,7 +375,7 @@ class IncomingMessage {
   void addHeader(String name, dynamic value) {
     var header = {'raw': value};
 
-    name = Utils.headerize(name);
+    name = utils.headerize(name);
 
     if (this.headers[name] != null) {
       this.headers[name].add(header);
@@ -387,7 +388,7 @@ class IncomingMessage {
    * Get the value of the given header name at the given position.
    */
   dynamic getHeader(String name) {
-    var header = this.headers[Utils.headerize(name)];
+    var header = this.headers[utils.headerize(name)];
 
     if (header != null) {
       if (header[0] != null) {
@@ -402,7 +403,7 @@ class IncomingMessage {
    * Get the header/s of the given name.
    */
   List<dynamic> getHeaders(String name) {
-    var headers = this.headers[Utils.headerize(name)];
+    var headers = this.headers[utils.headerize(name)];
     var result = [];
 
     if (headers == null) {
@@ -420,7 +421,7 @@ class IncomingMessage {
    * Verify the existence of the given header.
    */
   bool hasHeader(String name) {
-    return this.headers.containsKey(Utils.headerize(name));
+    return this.headers.containsKey(utils.headerize(name));
   }
 
   /**
@@ -431,13 +432,13 @@ class IncomingMessage {
   *  is not present or in case of a parsing error.
   */
   dynamic parseHeader(String name, {int idx = 0}) {
-    name = Utils.headerize(name);
+    name = utils.headerize(name);
 
     if (this.headers[name] == null) {
-      logger.debug('header "${name}" not present');
+      logger.debug('header "$name" not present');
       return null;
     } else if (idx >= this.headers[name].length) {
-      logger.debug('not so many "${name}" headers present');
+      logger.debug('not so many "$name" headers present');
       return null;
     }
 
@@ -449,11 +450,10 @@ class IncomingMessage {
     }
 
     // Substitute '-' by '_' for grammar rule matching.
-    var parsed = Grammar.parse(value, name.replaceAll('-', '_'));
+    dynamic parsed = Grammar.parse(value, name.replaceAll('-', '_'));
     if (parsed == -1) {
       this.headers[name].splice(idx, 1); // delete from headers
-      logger
-          .debug('error parsing "${name}" header field with value "${value}"');
+      logger.debug('error parsing "$name" header field with value "$value"');
       return null;
     } else {
       header['parsed'] = parsed;
@@ -482,9 +482,9 @@ class IncomingMessage {
   * -param {String} value header value
   */
   void setHeader(String name, dynamic value) {
-    var header = {'raw': value};
+    Map<String, dynamic> header = <String, dynamic>{'raw': value};
 
-    this.headers[Utils.headerize(name)] = [header];
+    this.headers[utils.headerize(name)] = [header];
   }
 
   /**
@@ -552,7 +552,7 @@ class IncomingRequest extends IncomingMessage {
     }
 
     reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
-    extraHeaders = Utils.cloneArray(extraHeaders);
+    extraHeaders = utils.cloneArray(extraHeaders);
 
     var response = 'SIP/2.0 ${code} ${reason}\r\n';
 
@@ -571,7 +571,7 @@ class IncomingRequest extends IncomingMessage {
     }
 
     if (this.to_tag == null && code > 100) {
-      to += ';tag=${Utils.newTag()}';
+      to += ';tag=${utils.newTag()}';
     } else if (this.to_tag != null && !this.s('to').hasParam('tag')) {
       to += ';tag=${this.to_tag}';
     }
@@ -670,7 +670,7 @@ class IncomingRequest extends IncomingMessage {
     var to = this.getHeader('To');
 
     if (this.to_tag == null && code > 100) {
-      to += ';tag=${Utils.newTag()}';
+      to += ';tag=${utils.newTag()}';
     } else if (this.to_tag != null && !this.s('to').hasParam('tag')) {
       to += ';tag=${this.to_tag}';
     }

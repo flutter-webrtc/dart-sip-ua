@@ -13,15 +13,6 @@ import 'ua.dart';
 import 'utils.dart' as Utils;
 
 class Message extends EventManager {
-  UA _ua;
-  var _request;
-  bool _closed;
-  String _direction;
-  NameAddrHeader _local_identity;
-  NameAddrHeader _remote_identity;
-  bool _is_replied;
-  Map<String, dynamic> _data;
-
   Message(UA ua) {
     _ua = ua;
     _request = null;
@@ -38,6 +29,14 @@ class Message extends EventManager {
     _data = {};
   }
 
+  UA _ua;
+  var _request;
+  bool _closed;
+  String _direction;
+  NameAddrHeader _local_identity;
+  NameAddrHeader _remote_identity;
+  bool _is_replied;
+  Map<String, dynamic> _data;
   String get direction => _direction;
 
   NameAddrHeader get local_identity => _local_identity;
@@ -57,13 +56,13 @@ class Message extends EventManager {
     // Check target validity.
     var normalized = _ua.normalizeTarget(target);
     if (normalized == null) {
-      throw Exceptions.TypeError('Invalid target: ${originalTarget}');
+      throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
 
     // Get call options.
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
-    var contentType = options['contentType'] ?? 'text/plain';
+    String contentType = options['contentType'] ?? 'text/plain';
 
     // Set event handlers.
     addAllEventHandlers(eventHandlers);
@@ -134,10 +133,10 @@ class Message extends EventManager {
    * Only valid for incoming Messages
    */
   void reject(Map<String, dynamic> options) {
-    var status_code = options['status_code'] ?? 480;
-    var reason_phrase = options['reason_phrase'];
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    var body = options['body'];
+    int status_code = options['status_code'] ?? 480;
+    String reason_phrase = options['reason_phrase'];
+    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    String body = options['body'];
 
     if (_direction != 'incoming') {
       throw Exceptions.NotSupportedError(

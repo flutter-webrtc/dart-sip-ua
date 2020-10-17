@@ -16,14 +16,14 @@ class C {
 }
 
 class DTMF extends EventManager {
+  DTMF(this._session);
+
   final rtc.RTCSession _session;
   String _direction;
   String _tone;
   int _duration;
   IncomingRequest _request;
   EventManager _eventHandlers;
-
-  DTMF(this._session);
 
   String get tone => _tone;
 
@@ -44,7 +44,7 @@ class DTMF extends EventManager {
       throw Exceptions.InvalidStateError(_session.status);
     }
 
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
 
     _eventHandlers = options['eventHandlers'] ?? EventManager();
 
@@ -54,12 +54,12 @@ class DTMF extends EventManager {
     } else if (tone is num) {
       tone = tone.toString();
     } else {
-      throw Exceptions.TypeError('Invalid tone: ${tone}');
+      throw Exceptions.TypeError('Invalid tone: $tone');
     }
 
     // Check tone value.
     if (!tone.contains(RegExp(r'^[0-9A-DR#*]$'))) {
-      throw Exceptions.TypeError('Invalid tone: ${tone}');
+      throw Exceptions.TypeError('Invalid tone: $tone');
     } else {
       _tone = tone;
     }
@@ -69,9 +69,9 @@ class DTMF extends EventManager {
 
     extraHeaders.add('Content-Type: application/dtmf-relay');
 
-    var body = 'Signal=${_tone}\r\n';
+    String body = 'Signal=$_tone\r\n';
 
-    body += 'Duration=${_duration}';
+    body += 'Duration=$_duration';
 
     _session.newDTMF('local', this, _request);
 
@@ -95,7 +95,7 @@ class DTMF extends EventManager {
       _session.onDialogError();
     });
 
-    _session.sendRequest(SipMethod.INFO, {
+    _session.sendRequest(SipMethod.INFO, <String, dynamic>{
       'extraHeaders': extraHeaders,
       'eventHandlers': handlers,
       'body': body
@@ -103,8 +103,8 @@ class DTMF extends EventManager {
   }
 
   void init_incoming(IncomingRequest request) {
-    var reg_tone = r'^(Signal\s*?=\s*?)([0-9A-D#*]{1})(\s)?.*';
-    var reg_duration = r'^(Duration\s?=\s?)([0-9]{1,4})(\s)?.*';
+    String reg_tone = r'^(Signal\s*?=\s*?)([0-9A-D#*]{1})(\s)?.*';
+    String reg_duration = r'^(Duration\s?=\s?)([0-9]{1,4})(\s)?.*';
 
     _direction = 'incoming';
     _request = request;
@@ -112,7 +112,7 @@ class DTMF extends EventManager {
     request.reply(200);
 
     if (request.body != null) {
-      var body = request.body.split('\n');
+      List<String> body = request.body.split('\n');
 
       if (body.length >= 1) {
         if ((body[0]).contains(RegExp(reg_tone))) {

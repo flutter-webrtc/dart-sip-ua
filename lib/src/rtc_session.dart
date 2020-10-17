@@ -42,7 +42,7 @@ class C {
 /**
  * Local variables.
  */
-const holdMediaTypes = ['audio', 'video'];
+const List<String> holdMediaTypes = <String>['audio', 'video'];
 
 class SIPTimers {
   Timer ackTimer;
@@ -52,6 +52,8 @@ class SIPTimers {
 }
 
 class RFC4028Timers {
+  RFC4028Timers(this.enabled, this.refreshMethod, this.defaultExpires,
+      this.currentExpires, this.running, this.refresher, this.timer);
   bool enabled;
   SipMethod refreshMethod;
   int defaultExpires;
@@ -59,53 +61,9 @@ class RFC4028Timers {
   bool running;
   bool refresher;
   Timer timer;
-  RFC4028Timers(this.enabled, this.refreshMethod, this.defaultExpires,
-      this.currentExpires, this.running, this.refresher, this.timer);
 }
 
 class RTCSession extends EventManager {
-  String _id;
-  UA _ua;
-  dynamic _request;
-  bool _late_sdp;
-  Map<String, dynamic> _rtcOfferConstraints;
-  Map<String, dynamic> _rtcAnswerConstraints;
-  MediaStream _localMediaStream;
-  Map<String, dynamic> _data;
-  Map<String, Dialog> _earlyDialogs;
-  String _from_tag;
-  String _to_tag;
-  SIPTimers _timers;
-  bool _is_confirmed;
-  bool _is_canceled;
-  RFC4028Timers _sessionTimers;
-  String _cancel_reason;
-  int _status;
-  Dialog _dialog;
-  RTCPeerConnection _connection;
-  RTCIceGatheringState _iceGatheringState;
-  bool _localMediaStreamLocallyGenerated;
-  bool _rtcReady;
-  String _direction;
-
-  Map<int, dynamic> _referSubscribers;
-  DateTime _start_time;
-  DateTime _end_time;
-
-  bool _audioMuted;
-  bool _videoMuted;
-  bool _localHold;
-  bool _remoteHold;
-
-  NameAddrHeader _local_identity;
-  NameAddrHeader _remote_identity;
-
-  String _contact;
-  String _tones;
-  Future<void> dtmfFuture = (Completer<void>()..complete(1)).future;
-
-  Function(IncomingRequest) receiveRequest;
-
   RTCSession(UA ua) {
     logger.debug('new');
 
@@ -180,6 +138,48 @@ class RTCSession extends EventManager {
 
     receiveRequest = _receiveRequest;
   }
+
+  String _id;
+  UA _ua;
+  dynamic _request;
+  bool _late_sdp;
+  Map<String, dynamic> _rtcOfferConstraints;
+  Map<String, dynamic> _rtcAnswerConstraints;
+  MediaStream _localMediaStream;
+  Map<String, dynamic> _data;
+  Map<String, Dialog> _earlyDialogs;
+  String _from_tag;
+  String _to_tag;
+  SIPTimers _timers;
+  bool _is_confirmed;
+  bool _is_canceled;
+  RFC4028Timers _sessionTimers;
+  String _cancel_reason;
+  int _status;
+  Dialog _dialog;
+  RTCPeerConnection _connection;
+  RTCIceGatheringState _iceGatheringState;
+  bool _localMediaStreamLocallyGenerated;
+  bool _rtcReady;
+  String _direction;
+
+  Map<int, dynamic> _referSubscribers;
+  DateTime _start_time;
+  DateTime _end_time;
+
+  bool _audioMuted;
+  bool _videoMuted;
+  bool _localHold;
+  bool _remoteHold;
+
+  NameAddrHeader _local_identity;
+  NameAddrHeader _remote_identity;
+
+  String _contact;
+  String _tones;
+  Future<void> dtmfFuture = (Completer<void>()..complete()).future;
+
+  Function(IncomingRequest) receiveRequest;
 
   /**
    * User API
@@ -317,7 +317,9 @@ class RTCSession extends EventManager {
 
     // Set anonymous property.
     bool anonymous = options['anonymous'] ?? false;
-    var requestParams = <String, dynamic>{'from_tag': _from_tag};
+    Map<String, dynamic> requestParams = <String, dynamic>{
+      'from_tag': _from_tag
+    };
     _ua.contact.anonymous = anonymous;
     _ua.contact.outbound = true;
     _contact = _ua.contact.toString();
@@ -330,7 +332,7 @@ class RTCSession extends EventManager {
       extraHeaders.add('Privacy: id');
     }
 
-    extraHeaders.add('Contact: ${_contact}');
+    extraHeaders.add('Contact: $_contact');
     extraHeaders.add('Content-Type: application/sdp');
     if (_sessionTimers.enabled) {
       extraHeaders.add('Session-Expires: ${_sessionTimers.defaultExpires}');
@@ -359,7 +361,8 @@ class RTCSession extends EventManager {
         mediaConstraints, rtcOfferConstraints, mediaStream);
   }
 
-  void init_incoming(IncomingRequest request, [initCallback]) {
+  void init_incoming(IncomingRequest request,
+      [Function(RTCSession) initCallback]) {
     logger.debug('init_incoming()');
 
     var expires;
@@ -638,15 +641,14 @@ class RTCSession extends EventManager {
       throw Exceptions.InvalidStateError('terminated');
     }
 
-    // TODO: Is this event already useful?
+    // TODO(cloudwebrtc): Is this event already useful?
     _connecting(request);
-    var desc;
+    RTCSessionDescription desc;
     try {
       if (!_late_sdp) {
         desc = await _createLocalDescription('answer', rtcAnswerConstraints);
       } else {
-        desc =
-            await this._createLocalDescription('offer', _rtcOfferConstraints);
+        desc = await _createLocalDescription('offer', _rtcOfferConstraints);
       }
     } catch (e) {
       request.reply(500);
@@ -1159,15 +1161,15 @@ class RTCSession extends EventManager {
     // Check target validity.
     target = _ua.normalizeTarget(target);
     if (target == null) {
-      throw Exceptions.TypeError('Invalid target: ${originalTarget}');
+      throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
 
-    var referSubscriber = ReferSubscriber(this);
+    ReferSubscriber referSubscriber = ReferSubscriber(this);
 
     referSubscriber.sendRefer(target, options);
 
     // Store in the map.
-    var id = referSubscriber.id;
+    int id = referSubscriber.id;
 
     _referSubscribers[id] = referSubscriber;
 
@@ -1199,7 +1201,7 @@ class RTCSession extends EventManager {
   /**
    * In dialog Request Reception
    */
-  void _receiveRequest(request) async {
+  void _receiveRequest(IncomingRequest request) async {
     logger.debug('receiveRequest()');
 
     if (request.method == SipMethod.CANCEL) {
@@ -1666,7 +1668,7 @@ class RTCSession extends EventManager {
         try {
           early_dialog = Dialog(this, message, type, Dialog_C.STATUS_EARLY);
         } catch (error) {
-          logger.debug(error);
+          logger.debug('$error');
           _failed('remote', message, null, null, 500,
               DartSIP_C.causes.INTERNAL_ERROR, 'Can\'t create Early Dialog');
           return false;
@@ -1762,8 +1764,8 @@ class RTCSession extends EventManager {
       _late_sdp = true;
 
       try {
-        var desc =
-            await this._createLocalDescription('offer', _rtcOfferConstraints);
+        RTCSessionDescription desc =
+            await _createLocalDescription('offer', _rtcOfferConstraints);
         sendAnswer(desc.sdp);
       } catch (_) {
         request.reply(500);
@@ -1919,8 +1921,7 @@ class RTCSession extends EventManager {
     }
 
     try {
-      return await this
-          ._createLocalDescription('answer', _rtcAnswerConstraints);
+      return await _createLocalDescription('answer', _rtcAnswerConstraints);
     } catch (_) {
       request.reply(500);
       throw Exceptions.TypeError('_createLocalDescription() failed');
@@ -1980,7 +1981,7 @@ class RTCSession extends EventManager {
       });
       // Consider the Replaces header present in the Refer-To URI.
       if (request.refer_to.uri.hasHeader('replaces')) {
-        var replaces = utils
+        String replaces = utils
             .decodeURIComponent(request.refer_to.uri.getHeader('replaces'));
 
         options['extraHeaders'] = utils.cloneArray(options['extraHeaders']);
@@ -1990,7 +1991,7 @@ class RTCSession extends EventManager {
       return true;
     };
 
-    var reject = () {
+    Null Function() reject = () {
       notifier.notify(603);
     };
 
@@ -2696,9 +2697,9 @@ class RTCSession extends EventManager {
     }
 
     responseExtraHeaders.add(
-        'Session-Expires: ${_sessionTimers.currentExpires};refresher=${session_expires_refresher}');
+        'Session-Expires: ${_sessionTimers.currentExpires};refresher=$session_expires_refresher');
 
-    _sessionTimers.refresher = (session_expires_refresher == 'uas');
+    _sessionTimers.refresher = session_expires_refresher == 'uas';
     _runSessionTimer();
   }
 
@@ -2722,7 +2723,7 @@ class RTCSession extends EventManager {
       session_expires_refresher = 'uac';
     }
 
-    _sessionTimers.refresher = (session_expires_refresher == 'uac');
+    _sessionTimers.refresher = session_expires_refresher == 'uac';
     _runSessionTimer();
   }
 
@@ -2790,9 +2791,7 @@ class RTCSession extends EventManager {
 
   void _newRTCSession(String originator, dynamic request) {
     logger.debug('newRTCSession()');
-    this
-        ._ua
-        .newRTCSession(originator: originator, session: this, request: request);
+    _ua.newRTCSession(originator: originator, session: this, request: request);
   }
 
   void _connecting(request) {
@@ -2801,14 +2800,14 @@ class RTCSession extends EventManager {
     emit(EventCallConnecting(session: this, request: request));
   }
 
-  void _progress(originator, response) {
+  void _progress(String originator, response) {
     logger.debug('session progress');
     logger.debug('emit "progress"');
     emit(EventCallProgress(
         session: this, originator: originator, response: response));
   }
 
-  void _accepted(originator, [message]) {
+  void _accepted(String originator, [message]) {
     logger.debug('session accepted');
     _start_time = DateTime.now();
     logger.debug('emit "accepted"');
@@ -2816,14 +2815,14 @@ class RTCSession extends EventManager {
         session: this, originator: originator, response: message));
   }
 
-  void _confirmed(originator, ack) {
+  void _confirmed(String originator, ack) {
     logger.debug('session confirmed');
     _is_confirmed = true;
     logger.debug('emit "confirmed"');
     emit(EventCallConfirmed(session: this, originator: originator, ack: ack));
   }
 
-  void _ended(originator, IncomingRequest request, ErrorCause cause) {
+  void _ended(String originator, IncomingRequest request, ErrorCause cause) {
     logger.debug('session ended');
     _end_time = DateTime.now();
     _close();

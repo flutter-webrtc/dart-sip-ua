@@ -22,14 +22,14 @@ class WebSocketImpl {
     logger.info('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
       _socket = WebSocket(_url, 'sip');
-      _socket.onOpen.listen((e) {
+      _socket.onOpen.listen((Event e) {
         this?.onOpen();
       });
 
-      _socket.onMessage.listen((e) async {
+      _socket.onMessage.listen((MessageEvent e) async {
         if (e.data is Blob) {
           dynamic arrayBuffer = await JSUtils.promiseToFuture(
-              JSUtils.callMethod(e.data, 'arrayBuffer', []));
+              JSUtils.callMethod(e.data, 'arrayBuffer', <Object>[]));
           String message = String.fromCharCodes(arrayBuffer.asUint8List());
           this?.onMessage(message);
         } else {
@@ -37,7 +37,7 @@ class WebSocketImpl {
         }
       });
 
-      _socket.onClose.listen((e) {
+      _socket.onClose.listen((CloseEvent e) {
         this?.onClose(e.code, e.reason);
       });
     } catch (e) {

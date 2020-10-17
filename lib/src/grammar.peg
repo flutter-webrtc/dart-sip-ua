@@ -3,62 +3,13 @@
   import 'constants.dart';
   import 'uri.dart';
   import 'name_addr_header.dart';
+  import 'data.dart';
 
-  class Data {
-    var host;
-    var port;
-    var host_type;
-    var value;
-    String _method;
-    var reason_phrase;
-    URI uri;
-    var uri_headers;
-    var uri_params;
-    var scheme;
-    var user;
-    var sip_version;
-    var status_code;
-    var stale;
-    var algorithm;
-    var params = {};
-    var multi_header;
-    var call_id;
-    var display_name;
-    var nonce;
-    var from_tag;
-    var early_only;
-    var opaque;
-    var password;
-    var qop;
-    var protocol;
-    var realm;
-    var auth_params;
-    var cause;
-    var expires;
-    var refresher;
-    var rport;
-    var reason;
-    var retry_after;
-    var branch;
-    var maddr;
-    var ttl;
-    var received;
-    var tag;
-    var to_tag;
-    var state;
-    var event;
-    var transport;
-    var text;
-    var uuid;
-    Data();
-
-    SipMethod get method => SipMethodHelper.fromString(_method);
-  }
 }%
 
 {
   var startRule;
-  var data = Data();
+  var data = ParsedData();
 
   parseInt(str){
     return int.parse(str);
@@ -475,7 +426,7 @@ host            <- ( hostname / IPv4address / IPv6reference ) {
 ## 'hostname' grammar is relaxed from RFC 3261:
 ## 'domainlabel' and 'toplabel' can end with dash or hypen
 
-hostname        <- ( domainlabel "." )* toplabel  "." ? {
+hostname        <- ((( domainlabel "." )* toplabel  "." ?) / token ){
                   data.host = _text().toLowerCase();
                   data.host_type = 'domain';
                   var result = {};
@@ -689,8 +640,8 @@ REFERm            <- "\x52\x45\x46\x45\x52" ## REFER in caps
 
 Method            <- ( INVITEm / ACKm / OPTIONSm / BYEm / CANCELm / REGISTERm
                     / SUBSCRIBEm / NOTIFYm / REFERm / extension_method ){
-                    data._method = _text();
-                    $$ =  data._method; }
+                    data.method_str = _text();
+                    $$ =  data.method_str; }
 
 extension_method  <- token
 
@@ -1139,7 +1090,7 @@ via_received      <- "received"i EQUAL via_received: (IPv4address / IPv6address)
                       data.received = via_received; }
 
 via_branch        <- "branch"i EQUAL via_branch: token {
-                      data.branch = _text();
+                      data.branch = via_branch;
                       return data.branch;
                     }
 

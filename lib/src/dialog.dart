@@ -37,22 +37,6 @@ class Id {
 
 // RFC 3261 12.1.
 class Dialog {
-  RTCSession _owner;
-  UA _ua;
-  bool _uac_pending_reply;
-  bool _uas_pending_reply;
-  var _state;
-  var _remote_seqnum;
-  URI _local_uri;
-  URI _remote_uri;
-  var _remote_target;
-  var _route_set;
-  var _ack_seqnum;
-  Id _id;
-  num _local_seqnum;
-
-  UA get ua => _ua;
-
   Dialog(RTCSession owner, dynamic message, String type, [int state]) {
     state = state ?? Dialog_C.STATUS_CONFIRMED;
     _owner = owner;
@@ -111,6 +95,21 @@ class Dialog {
         '${type} dialog created with status ${_state == Dialog_C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
+  RTCSession _owner;
+  UA _ua;
+  bool _uac_pending_reply;
+  bool _uas_pending_reply;
+  var _state;
+  var _remote_seqnum;
+  URI _local_uri;
+  URI _remote_uri;
+  var _remote_target;
+  var _route_set;
+  var _ack_seqnum;
+  Id _id;
+  num _local_seqnum;
+
+  UA get ua => _ua;
   Id get id => _id;
 
   num get local_seqnum => _local_seqnum;

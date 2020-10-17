@@ -1,4 +1,7 @@
+import 'package:sip_ua/src/grammar_parser.dart';
+
 import 'constants.dart';
+import 'data.dart';
 import 'digest_authentication.dart';
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
@@ -78,9 +81,9 @@ class RequestSender {
   * Authenticate request if needed or pass the response back to the applicant.
   */
   void _receiveResponse(IncomingResponse response) {
-    var challenge;
-    var authorization_header_name;
-    var status_code = response.status_code;
+    ParsedData challenge;
+    String authorization_header_name;
+    int status_code = response.status_code;
 
     /*
     * Authentication
@@ -107,7 +110,7 @@ class RequestSender {
       }
 
       if (!_challenged || (!_staled && challenge.stale == true)) {
-        _auth ??= DigestAuthentication(Credentials.fromMap({
+        _auth ??= DigestAuthentication(Credentials.fromMap(<String, dynamic>{
           'username': _ua.configuration.authorization_user,
           'password': _ua.configuration.password,
           'realm': _ua.configuration.realm,
@@ -117,7 +120,7 @@ class RequestSender {
         // Verify that the challenge is really valid.
         if (!_auth.authenticate(
             _request.method,
-            Challenge.fromMap({
+            Challenge.fromMap(<String, dynamic>{
               'algorithm': challenge.algorithm,
               'realm': challenge.realm,
               'nonce': challenge.nonce,

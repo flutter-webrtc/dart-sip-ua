@@ -7,6 +7,7 @@ class Grammar {
     GrammarParser parser = GrammarParser('');
     dynamic result = parser.parse(input, startRule);
     if (!parser.success) {
+      result = parser.parse(input, startRule);
       List<ParserErrorMessage> messages = <ParserErrorMessage>[];
       for (GrammarParserError error in parser.errors()) {
         messages.add(
@@ -14,6 +15,7 @@ class Grammar {
       }
 
       List<String> strings = ParserErrorFormatter.format(parser.text, messages);
+      print('input => $input, rule => $startRule');
       print(strings.join('\n'));
       throw FormatException();
     }

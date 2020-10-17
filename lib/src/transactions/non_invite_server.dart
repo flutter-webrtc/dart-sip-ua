@@ -8,9 +8,6 @@ import '../ua.dart';
 import 'transaction_base.dart';
 
 class NonInviteServerTransaction extends TransactionBase {
-  var transportError;
-  var J;
-
   NonInviteServerTransaction(UA ua, Transport transport, request) {
     this.id = request.via_branch;
     this.ua = ua;
@@ -23,6 +20,8 @@ class NonInviteServerTransaction extends TransactionBase {
 
     ua.newTransaction(this);
   }
+  var transportError;
+  var J;
 
   void stateChanged(state) {
     this.state = state;
