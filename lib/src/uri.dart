@@ -189,9 +189,9 @@ class URI {
       }
     });
 
-    _headers.forEach((key, header) {
-      var hdrs = _headers[key];
-      hdrs.forEach((item) {
+    _headers.forEach((dynamic key, dynamic header) {
+      dynamic hdrs = _headers[key];
+      hdrs.forEach((dynamic item) {
         headers.add('${utils.headerize(key)}=${item.toString()}');
       });
     });
@@ -204,7 +204,7 @@ class URI {
   }
 
   String toAor({bool show_port = false}) {
-    var aor = '${_scheme}:';
+    String aor = '${_scheme}:';
 
     if (_user != null) {
       aor += '${utils.escapeUser(_user)}@';

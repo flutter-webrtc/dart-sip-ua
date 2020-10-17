@@ -4,12 +4,12 @@ import 'package:sip_ua/src/sip_ua_helper.dart';
 
 import '../logger.dart';
 
-typedef void OnMessageCallback(dynamic msg);
-typedef void OnCloseCallback(int code, String reason);
-typedef void OnOpenCallback();
+typedef OnMessageCallback = void Function(dynamic msg);
+typedef OnCloseCallback = void Function(int code, String reason);
+typedef OnOpenCallback = void Function();
 
 class WebSocketImpl {
-  String _url;
+  final String _url;
   WebSocket _socket;
   OnOpenCallback onOpen;
   OnMessageCallback onMessage;
@@ -45,7 +45,7 @@ class WebSocketImpl {
     }
   }
 
-  void send(data) {
+  void send(dynamic data) {
     if (_socket != null && _socket.readyState == WebSocket.OPEN) {
       _socket.send(data);
       logger.debug('send: \n\n$data');

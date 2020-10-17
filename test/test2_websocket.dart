@@ -3,7 +3,7 @@ import 'dart:io';
 
 void main() async {
   TestWebsocket2 tester = TestWebsocket2();
-  tester.connect("wss://echo.websocket.org/");
+  tester.connect('wss://echo.websocket.org/');
 
   await tester.finished.future;
 }
@@ -17,7 +17,7 @@ class TestWebsocket2 {
   Completer finished = Completer<String>();
 
   void send() {
-    String message = "A" * ctr;
+    String message = 'A' * ctr;
     ws.add(message);
     completer = Completer<String>();
     completer.future.then((dynamic t) {
@@ -43,7 +43,7 @@ class TestWebsocket2 {
   }
 
   void _onMessage(String data) {
-    print("Received data of size ${data.length} expected ${ctr}");
+    print('Received data of size ${data.length} expected ${ctr}');
     if (data.length != ctr) {
       finished.complete();
     }

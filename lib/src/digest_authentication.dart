@@ -40,7 +40,7 @@ class DigestAuthentication {
   var _stale;
   var _qop;
   SipMethod _method;
-  var _uri;
+  dynamic _uri;
   String _ha1;
   String _response;
   final Credentials _credentials;

@@ -155,9 +155,9 @@ URI normalizeTarget(dynamic target, [String domain]) {
     // - Last fragment is the desired domain.
     // - Otherwise append the given domain argument.
   } else if (target is String) {
-    var targetArray = target.split('@');
-    var targetUser;
-    var targetDomain;
+    List<String> targetArray = (target as String).split('@');
+    String targetUser;
+    String targetDomain;
 
     switch (targetArray.length) {
       case 1:
@@ -195,24 +195,25 @@ URI normalizeTarget(dynamic target, [String domain]) {
   }
 }
 
-String headerize(String string) {
-  var exceptions = {
+String headerize(String str) {
+  Map<String, String> exceptions = {
     'Call-Id': 'Call-ID',
     'Cseq': 'CSeq',
     'Www-Authenticate': 'WWW-Authenticate'
   };
 
-  var name = string.toLowerCase().replaceAll('_', '-').split('-');
-  var hname = '';
-  var parts = name.length;
-  var part;
+  List<String> names = str.toLowerCase().replaceAll('_', '-').split('-');
+  String hname = '';
+  int parts = names.length;
+  int part;
 
   for (part = 0; part < parts; part++) {
     if (part != 0) {
       hname += '-';
     }
-    hname += String.fromCharCodes([name[part].codeUnitAt(0)]).toUpperCase() +
-        name[part].substring(1);
+    hname +=
+        String.fromCharCodes(<int>[names[part].codeUnitAt(0)]).toUpperCase() +
+            names[part].substring(1);
   }
   if (exceptions[hname] != null) {
     hname = exceptions[hname];
@@ -222,7 +223,7 @@ String headerize(String string) {
 }
 
 String sipErrorCause(dynamic statusCode) {
-  var reason = DartSIP_C.Causes.SIP_FAILURE_CODE;
+  String reason = DartSIP_C.Causes.SIP_FAILURE_CODE;
   DartSIP_C.SIP_ERROR_CAUSES.forEach((String key, List<int> value) {
     if (value.contains(statusCode)) {
       reason = key;

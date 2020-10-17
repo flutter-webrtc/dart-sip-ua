@@ -258,7 +258,7 @@ class RTCSession extends EventManager {
     return {'local': _localHold, 'remote': _remoteHold};
   }
 
-  void connect(target, [options, initCallback]) async {
+  void connect(target, [Map<String, dynamic> options, initCallback]) async {
     logger.debug('connect()');
 
     options = options ?? {};

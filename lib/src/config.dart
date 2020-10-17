@@ -70,13 +70,13 @@ class Checks {
        */
       List<WebSocketInterface> _sockets = <WebSocketInterface>[];
       if (sockets is List && sockets.length > 0) {
-        for (var socket in sockets) {
+        for (WebSocketInterface socket in sockets) {
           if (Socket.isSocket(socket)) {
             _sockets.add(socket);
           }
         }
       } else {
-        throw Exceptions.ConfigurationError("sockets", sockets);
+        throw Exceptions.ConfigurationError('sockets', sockets);
       }
 
       dst.sockets = _sockets;
@@ -91,9 +91,9 @@ class Checks {
       }
       var parsed = URI.parse(uri);
       if (parsed == null) {
-        throw Exceptions.ConfigurationError("uri", parsed);
+        throw Exceptions.ConfigurationError('uri', parsed);
       } else if (parsed.user == null) {
-        throw Exceptions.ConfigurationError("uri", parsed);
+        throw Exceptions.ConfigurationError('uri', parsed);
       } else {
         dst.uri = parsed;
       }

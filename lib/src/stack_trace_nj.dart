@@ -50,8 +50,8 @@ class StackTraceNJ implements core.StackTrace {
   /// [methodCount] defaults to 10.
 
   String formatStackTrace({bool showPath = false, int methodCount = 10}) {
-    var formatted = <String>[];
-    var count = 0;
+    List<String> formatted = <String>[];
+    int count = 0;
 
     for (Stackframe stackFrame in frames) {
       // if (stackFrame.sourceFile.contains('log.dart') ||
@@ -65,10 +65,10 @@ class StackTraceNJ implements core.StackTrace {
       } else {
         sourceFile = basename(stackFrame.sourceFile.path);
       }
-      var newLine = ("${sourceFile}:${stackFrame.lineNo}");
+      String newLine = ('${sourceFile}:${stackFrame.lineNo}');
 
       if (workingDirectory != null) {
-        formatted.add("file:///" + workingDirectory + newLine);
+        formatted.add('file:///' + workingDirectory + newLine);
       } else {
         formatted.add(newLine);
       }
@@ -85,41 +85,40 @@ class StackTraceNJ implements core.StackTrace {
   }
 
   List<Stackframe> get frames {
-    if (_frames == null) {
-      _frames = _extractFrames();
-    }
+    _frames ??= _extractFrames();
     return _frames;
   }
 
+  @override
   String toString() {
     return formatStackTrace();
   }
 
   List<Stackframe> _extractFrames() {
-    var lines = stackTrace.toString().split("\n");
+    List<String> lines = stackTrace.toString().split('\n');
 
     // we don't want the call to StackTrace to be on the stack.
     int skipFrames = _skipFrames;
 
-    var stackFrames = <Stackframe>[];
-    for (var line in lines) {
+    List<Stackframe> stackFrames = <Stackframe>[];
+    for (String line in lines) {
       if (skipFrames > 0) {
         skipFrames--;
         continue;
       }
-      var match = stackTraceRegex.matchAsPrefix(line);
+      Match match = stackTraceRegex.matchAsPrefix(line);
       if (match == null) continue;
 
       // source is one of two formats
       // file:///.../squarephone_app/filename.dart:column:line
       // package:/squarephone/.path./filename.dart:column:line
       String source = match.group(2);
-      List<String> sourceParts = source.split(":");
+      List<String> sourceParts = source.split(':');
       ArgumentError.value(sourceParts.length == 4,
           "Stackframe source does not contain the expeted no of colons '$source'");
 
-      String column = "0";
-      String lineNo = "0";
+      String column = '0';
+      String lineNo = '0';
       String sourcePath = sourceParts[1];
       if (sourceParts.length > 2) {
         lineNo = sourceParts[2];
@@ -132,8 +131,8 @@ class StackTraceNJ implements core.StackTrace {
       String details = match.group(1);
 
       sourcePath = sourcePath.replaceAll('<anonymous closure>', '()');
-      sourcePath = sourcePath.replaceAll("package:", "");
-      sourcePath = sourcePath.replaceFirst("squarephone", "/lib");
+      sourcePath = sourcePath.replaceAll('package:', '');
+      sourcePath = sourcePath.replaceFirst('squarephone', '/lib');
 
       Stackframe frame = Stackframe(
           File(sourcePath), int.parse(lineNo), int.parse(column), details);

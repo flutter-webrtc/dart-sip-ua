@@ -6,7 +6,7 @@ import 'package:sip_ua/src/transports/websocket_interface.dart';
 import 'package:sip_ua/src/transport.dart';
 
 var testFunctions = [
-  () => test("WebSocket: EchoTest", () async {
+  () => test(' WebSocket: EchoTest', () async {
         var completer = Completer();
         HttpServer.bind('127.0.0.1', 4040).then((server) async {
           try {
@@ -23,7 +23,7 @@ var testFunctions = [
               }
             }
           } catch (error) {
-            print("An error occurred. $error");
+            print(' An error occurred. $error');
           }
         });
 
@@ -37,12 +37,12 @@ var testFunctions = [
 
         client.onconnect = () {
           print('connected');
-          client.send("message");
+          client.send('message');
           expect(client.isConnected(), true);
         };
         client.ondata = (data) async {
           print('ondata => $data');
-          expect(data, "message");
+          expect(data, 'message');
           client.disconnect();
           completer.complete();
         };
@@ -55,7 +55,7 @@ var testFunctions = [
         client.connect();
         return completer;
       }),
-  () => test("WebSocket: EchoTest", () async {
+  () => test(' WebSocket: EchoTest', () async {
         var completer = Completer();
         HttpServer.bind('127.0.0.1', 4041).then((server) async {
           try {
@@ -72,7 +72,7 @@ var testFunctions = [
               }
             }
           } catch (error) {
-            print("An error occurred. $error");
+            print(' An error occurred. $error');
           }
         });
         WebSocketInterface socket =
