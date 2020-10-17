@@ -19,15 +19,15 @@ class Dialog_C {
 }
 
 class Id {
-  String call_id;
-  String local_tag;
-  String remote_tag;
+  Id(this.call_id, this.local_tag, this.remote_tag);
 
   factory Id.fromMap(Map<String, dynamic> map) {
     return Id(map['call_id'], map['local_tag'], map['remote_tag']);
   }
 
-  Id(this.call_id, this.local_tag, this.remote_tag);
+  String call_id;
+  String local_tag;
+  String remote_tag;
 
   @override
   String toString() {

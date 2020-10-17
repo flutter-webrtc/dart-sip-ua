@@ -13,25 +13,6 @@ import 'utils.dart';
  *
  */
 class URI {
-  /**
-    * Parse the given string and returns a DartSIP.URI instance or null if
-    * it is an invalid URI.
-    */
-  static dynamic parse(String uri) {
-    try {
-      return Grammar.parse(uri, 'SIP_URI');
-    } catch (_) {
-      return null;
-    }
-  }
-
-  String _scheme;
-  Map<dynamic, dynamic> _parameters;
-  Map<dynamic, dynamic> _headers;
-  String _user;
-  String _host;
-  int _port;
-
   URI(String scheme, String user, String host,
       [int port,
       Map<dynamic, dynamic> parameters,
@@ -42,10 +23,10 @@ class URI {
     }
 
     // Initialize parameters.
-    _parameters = parameters ?? {};
-    _headers = headers ?? {};
+    this.user = user;
+    _parameters = parameters ?? <dynamic, dynamic>{};
+    _headers = headers ?? <dynamic, dynamic>{};
     _scheme = scheme ?? DartSIP_C.SIP;
-    _user = user;
     _host = host.toLowerCase();
     _port = port;
 
@@ -60,17 +41,28 @@ class URI {
       });
     }
   }
+  /**
+    * Parse the given string and returns a DartSIP.URI instance or null if
+    * it is an invalid URI.
+    */
+  static dynamic parse(String uri) {
+    try {
+      return Grammar.parse(uri, 'SIP_URI');
+    } catch (_) {
+      return null;
+    }
+  }
 
+  String user;
+  String _scheme;
+  Map<dynamic, dynamic> _parameters;
+  Map<dynamic, dynamic> _headers;
+  String _host;
+  int _port;
   String get scheme => _scheme;
 
   set scheme(String value) {
     _scheme = value.toLowerCase();
-  }
-
-  String get user => _user;
-
-  set user(String value) {
-    _user = value;
   }
 
   String get host => _host;
@@ -120,7 +112,7 @@ class URI {
   }
 
   void clearParams() {
-    _parameters = {};
+    _parameters = <dynamic, dynamic>{};
   }
 
   void setHeader(String name, dynamic value) {
@@ -132,7 +124,7 @@ class URI {
     if (name != null) {
       return _headers[utils.headerize(name)];
     }
-    null;
+    return null;
   }
 
   bool hasHeader(String name) {
@@ -153,7 +145,7 @@ class URI {
   }
 
   void clearHeaders() {
-    _headers = {};
+    _headers = <dynamic, dynamic>{};
   }
 
   URI clone() {
@@ -168,9 +160,9 @@ class URI {
 
   @override
   String toString() {
-    var headers = [];
+    List<String> headers = <String>[];
 
-    var uri = '${_scheme}:';
+    String uri = '$_scheme:';
 
     if (user != null) {
       uri += '${utils.escapeUser(user)}@';
@@ -181,7 +173,7 @@ class URI {
     }
 
     _parameters.forEach((dynamic key, dynamic parameter) {
-      uri += ';${key}';
+      uri += ';$key';
       if (_parameters[key] != null) {
         uri += '=${_parameters[key].toString()}';
       }
@@ -202,14 +194,14 @@ class URI {
   }
 
   String toAor({bool show_port = false}) {
-    String aor = '${_scheme}:';
+    String aor = '$_scheme:';
 
-    if (_user != null) {
-      aor += '${utils.escapeUser(_user)}@';
+    if (user != null) {
+      aor += '${utils.escapeUser(user)}@';
     }
     aor += _host;
     if (show_port && (_port != null || _port == 0)) {
-      aor += ':${_port}';
+      aor += ':$_port';
     }
 
     return aor;

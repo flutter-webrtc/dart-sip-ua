@@ -5,16 +5,16 @@ class EventRegistrationExpiring extends EventType {
 }
 
 class EventRegistered extends EventType {
-  ErrorCause cause;
   EventRegistered({this.cause});
+  ErrorCause cause;
 }
 
 class EventRegistrationFailed extends EventType {
-  ErrorCause cause;
   EventRegistrationFailed({this.cause});
+  ErrorCause cause;
 }
 
 class EventUnregister extends EventType {
-  ErrorCause cause;
   EventUnregister({this.cause});
+  ErrorCause cause;
 }

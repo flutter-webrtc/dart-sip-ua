@@ -36,15 +36,15 @@ class Causes {
   static const String RTP_TIMEOUT = 'RTP Timeout';
 }
 
-Map<String, List<int>> SIP_ERROR_CAUSES = {
-  Causes.REDIRECTED: [300, 301, 302, 305, 380],
-  Causes.BUSY: [486, 600],
-  Causes.REJECTED: [403, 603],
-  Causes.NOT_FOUND: [404, 604],
-  Causes.UNAVAILABLE: [480, 410, 408, 430],
-  Causes.ADDRESS_INCOMPLETE: [484, 424],
-  Causes.INCOMPATIBLE_SDP: [488, 606],
-  Causes.AUTHENTICATION_ERROR: [401, 407]
+Map<String, List<int>> SIP_ERROR_CAUSES = <String, List<int>>{
+  Causes.REDIRECTED: <int>[300, 301, 302, 305, 380],
+  Causes.BUSY: <int>[486, 600],
+  Causes.REJECTED: <int>[403, 603],
+  Causes.NOT_FOUND: <int>[404, 604],
+  Causes.UNAVAILABLE: <int>[480, 410, 408, 430],
+  Causes.ADDRESS_INCOMPLETE: <int>[484, 424],
+  Causes.INCOMPATIBLE_SDP: <int>[488, 606],
+  Causes.AUTHENTICATION_ERROR: <int>[401, 407]
 };
 
 class causes {
@@ -133,7 +133,7 @@ class SipMethodHelper {
    * DOC: https://www.iana.org/assignments/sip-parameters
    * Copied from https://github.com/versatica/OverSIP/blob/master/lib/oversip/sip/constants.rb#L7
    */
-Map<int, String> REASON_PHRASE = {
+Map<int, String> REASON_PHRASE = <int, String>{
   100: 'Trying',
   180: 'Ringing',
   181: 'Call Is Being Forwarded',

@@ -24,7 +24,7 @@ class C {
   static const int SOCKET_STATUS_ERROR = 1;
 
   // Recovery options.
-  static const Map<String, int> recovery_options = {
+  static const Map<String, int> recovery_options = <String, int>{
     'min_interval': 2, // minimum interval in seconds between recover attempts
     'max_interval': 30 // maximum interval in seconds between recover attempts
   };
@@ -37,19 +37,6 @@ class C {
  * @socket DartSIP::Socket instance
  */
 class Transport {
-  int status;
-  WebSocketInterface socket;
-  List<Map<String, dynamic>> _socketsMap;
-  Map<String, int> _recovery_options;
-  int _recover_attempts;
-  Timer _recovery_timer;
-  bool _close_requested;
-
-  void Function(WebSocketInterface socket, int attempts) onconnecting;
-  void Function(WebSocketInterface socket, ErrorCause cause) ondisconnect;
-  void Function(Transport transport) onconnect;
-  void Function(Transport transport, String messageData) ondata;
-
   Transport(dynamic sockets,
       [Map<String, int> recovery_options = C.recovery_options]) {
     logger.debug('new()');
@@ -69,12 +56,11 @@ class Transport {
     _close_requested = false;
 
     if (sockets == null) {
-      throw Exceptions.TypeError(
-          'Invalid argument.' + ' null \'sockets\' argument');
+      throw Exceptions.TypeError('Invalid argument. null \'sockets\' argument');
     }
 
     if (sockets is! List) {
-      sockets = [sockets];
+      sockets = <WebSocketInterface>[sockets];
     }
 
     sockets.forEach((dynamic socket) {
@@ -88,7 +74,7 @@ class Transport {
             'Invalid argument. \'weight\' attribute is not a number');
       }
 
-      _socketsMap.add({
+      _socketsMap.add(<String, dynamic>{
         'socket': socket,
         'weight': socket.weight ?? 0,
         'status': C.SOCKET_STATUS_READY
@@ -98,6 +84,19 @@ class Transport {
     // Get the socket with higher weight.
     _getSocket();
   }
+
+  int status;
+  WebSocketInterface socket;
+  List<Map<String, dynamic>> _socketsMap;
+  Map<String, int> _recovery_options;
+  int _recover_attempts;
+  Timer _recovery_timer;
+  bool _close_requested;
+
+  void Function(WebSocketInterface socket, int attempts) onconnecting;
+  void Function(WebSocketInterface socket, ErrorCause cause) ondisconnect;
+  void Function(Transport transport) onconnect;
+  void Function(Transport transport, String messageData) ondata;
 
   /**
    * Instance Methods
@@ -170,7 +169,7 @@ class Transport {
 
     if (!isConnected()) {
       logger.error(
-          'unable to send message, transport is not connected. Current state is ${status}',
+          'unable to send message, transport is not connected. Current state is $status',
           null,
           StackTraceNJ());
       return false;
@@ -206,7 +205,7 @@ class Transport {
     }
 
     logger.debug(
-        'reconnection attempt: ${_recover_attempts}. next connection attempt in ${k} seconds');
+        'reconnection attempt: $_recover_attempts. next connection attempt in $k seconds');
 
     _recovery_timer = setTimeout(() {
       if (!_close_requested && !(isConnected() || isConnecting())) {
@@ -222,7 +221,7 @@ class Transport {
    * get the next available socket with higher weight
    */
   void _getSocket() {
-    List<Map<String, dynamic>> candidates = [];
+    List<Map<String, dynamic>> candidates = <Map<String, dynamic>>[];
 
     _socketsMap.forEach((Map<String, dynamic> socket) {
       if (socket['status'] == C.SOCKET_STATUS_ERROR) {
@@ -307,12 +306,12 @@ class Transport {
         return;
       }
 
-      logger.debug('received binary message:\n\n${data}\n');
+      logger.debug('received binary message:\n\n$data\n');
     }
 
     // Text message.
     else {
-      logger.debug('received text message:\n\n${data}\n');
+      logger.debug('received text message:\n\n$data\n');
     }
 
     ondata(this, data);

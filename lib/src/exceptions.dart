@@ -16,8 +16,8 @@ class ConfigurationError extends ErrorImpl {
     this.parameter = parameter;
     this.value = value;
     message = (value == null)
-        ? 'Missing parameter: ${parameter}'
-        : 'Invalid value ${encoder.convert(value)} for parameter "${parameter}"';
+        ? 'Missing parameter: $parameter'
+        : 'Invalid value ${encoder.convert(value)} for parameter "$parameter"';
   }
 }
 

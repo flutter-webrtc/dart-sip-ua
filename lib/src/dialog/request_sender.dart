@@ -12,16 +12,6 @@ import '../transactions/transaction_base.dart';
 import '../ua.dart';
 
 class DialogRequestSender {
-  Dialog _dialog;
-  UA _ua;
-  OutgoingRequest _request;
-  EventManager _eventHandlers;
-  bool _reattempt;
-  Timer _reattemptTimer;
-  RequestSender _request_sender;
-
-  RequestSender get request_sender => _request_sender;
-
   DialogRequestSender(
       Dialog dialog, OutgoingRequest request, EventManager eventHandlers) {
     _dialog = dialog;
@@ -32,7 +22,14 @@ class DialogRequestSender {
     // RFC3261 14.1 Modifying an Existing Session. UAC Behavior.
     _reattempt = false;
   }
-
+  Dialog _dialog;
+  UA _ua;
+  OutgoingRequest _request;
+  EventManager _eventHandlers;
+  bool _reattempt;
+  Timer _reattemptTimer;
+  RequestSender _request_sender;
+  RequestSender get request_sender => _request_sender;
   OutgoingRequest get request => _request;
 
   void send() {
@@ -77,7 +74,7 @@ class DialogRequestSender {
     }
   }
 
-  void _receiveResponse(response) {
+  void _receiveResponse(IncomingResponse response) {
     // RFC3261 12.2.1.2 408 or 481 is received for a request within a dialog.
     if (response.status_code == 408 || response.status_code == 481) {
       _eventHandlers.emit(EventOnDialogError(response: response));
@@ -92,7 +89,7 @@ class DialogRequestSender {
       } else {
         _request.cseq.value = _dialog.local_seqnum += 1;
         _reattemptTimer = setTimeout(() {
-          // TODO: look at dialog state instead.
+          // TODO(cloudwebrtc): look at dialog state instead.
           if (_dialog.owner.status != RTCSession.C.STATUS_TERMINATED) {
             _reattempt = true;
             _request_sender.send();

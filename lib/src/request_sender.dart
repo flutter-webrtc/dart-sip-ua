@@ -14,15 +14,6 @@ import 'ua.dart';
 // Default event handlers.
 
 class RequestSender {
-  UA _ua;
-  EventManager _eventHandlers;
-  SipMethod _method;
-  OutgoingRequest _request;
-  DigestAuthentication _auth;
-  bool _challenged;
-  bool _staled;
-  TransactionBase clientTransaction;
-
   RequestSender(UA ua, OutgoingRequest request, EventManager eventHandlers) {
     _ua = ua;
     _eventHandlers = eventHandlers;
@@ -38,6 +29,14 @@ class RequestSender {
       _eventHandlers.emit(EventOnTransportError());
     }
   }
+  UA _ua;
+  EventManager _eventHandlers;
+  SipMethod _method;
+  OutgoingRequest _request;
+  DigestAuthentication _auth;
+  bool _challenged;
+  bool _staled;
+  TransactionBase clientTransaction;
 
   /**
   * Create the client transaction and send the message.

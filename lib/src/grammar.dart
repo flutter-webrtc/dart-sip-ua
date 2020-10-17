@@ -7,7 +7,7 @@ class Grammar {
     GrammarParser parser = GrammarParser('');
     dynamic result = parser.parse(input, startRule);
     if (!parser.success) {
-      List<ParserErrorMessage> messages = [];
+      List<ParserErrorMessage> messages = <ParserErrorMessage>[];
       for (GrammarParserError error in parser.errors()) {
         messages.add(
             ParserErrorMessage(error.message, error.start, error.position));

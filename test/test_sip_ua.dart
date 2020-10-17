@@ -11,7 +11,9 @@ void main() {
   test(' WebSocket: EchoTest', () async {
     Completer<dynamic> completer = Completer<dynamic>();
     config.Settings configuration = config.Settings();
-    configuration.sockets = [WebSocketInterface('ws://127.0.0.1:5070/sip')];
+    configuration.sockets = <WebSocketInterface>[
+      WebSocketInterface('ws://127.0.0.1:5070/sip')
+    ];
     configuration.authorization_user = '100';
     configuration.password = '100';
     configuration.uri = 'sip:100@127.0.0.1';

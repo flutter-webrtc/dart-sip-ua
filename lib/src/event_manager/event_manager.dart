@@ -30,7 +30,7 @@ class EventManager {
 
   /// returns true if there are any listeners associated with the EventType for this instance of EventManager
   bool hasListeners(EventType event) {
-    var targets = listeners[event.runtimeType];
+    List<dynamic> targets = listeners[event.runtimeType];
     if (targets != null) {
       return targets.isNotEmpty;
     }
@@ -60,7 +60,7 @@ class EventManager {
     assert(listener != null, 'Null listener');
     assert(runtimeType != null, 'Null runtimeType');
     try {
-      var targets = listeners[runtimeType];
+      List<dynamic> targets = listeners[runtimeType];
       if (targets == null) {
         targets = <dynamic>[];
         listeners[runtimeType] = targets;
@@ -83,7 +83,7 @@ class EventManager {
 
   void remove<T extends EventType>(
       T eventType, void Function(T event) listener) {
-    var targets = listeners[eventType.runtimeType];
+    List<dynamic> targets = listeners[eventType.runtimeType];
     if (targets == null) {
       return;
     }
@@ -96,11 +96,11 @@ class EventManager {
   /// send the supplied event to all of the listeners that are subscribed to that EventType
   void emit<T extends EventType>(T event) {
     event.sanityCheck();
-    var targets = listeners[event.runtimeType];
+    List<dynamic> targets = listeners[event.runtimeType];
 
     if (targets != null) {
       // avoid concurrent modification
-      var copy = List<dynamic>.from(targets);
+      List<dynamic> copy = List<dynamic>.from(targets);
 
       copy.forEach((dynamic target) {
         try {

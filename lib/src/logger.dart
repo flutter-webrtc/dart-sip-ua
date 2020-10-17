@@ -82,7 +82,7 @@ class Log extends Logger {
 class MyLogPrinter extends LogPrinter {
   MyLogPrinter(this.currentWorkingDirectory);
 
-  static final Map<Level, AnsiColor> levelColors = {
+  static final Map<Level, AnsiColor> levelColors = <Level, AnsiColor>{
     Level.verbose: AnsiColor.fg(AnsiColor.grey(0.5)),
     Level.debug: AnsiColor.none(),
     Level.info: AnsiColor.fg(12),
@@ -99,7 +99,7 @@ class MyLogPrinter extends LogPrinter {
     if (EnumHelper.getIndexOf(Level.values, Log._loggingLevel) >
         EnumHelper.getIndexOf(Level.values, event.level)) {
       // don't log events where the log level is set higher
-      return [];
+      return <String>[];
     }
     DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss.');
     DateTime now = DateTime.now();
@@ -134,7 +134,7 @@ class MyLogPrinter extends LogPrinter {
       }
     }
 
-    return [];
+    return <String>[];
   }
 
   AnsiColor _getLevelColor(Level level) {

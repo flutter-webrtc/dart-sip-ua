@@ -9,13 +9,13 @@ typedef OnCloseCallback = void Function(int code, String reason);
 typedef OnOpenCallback = void Function();
 
 class WebSocketImpl {
+  WebSocketImpl(this._url);
+
   final String _url;
   WebSocket _socket;
   OnOpenCallback onOpen;
   OnMessageCallback onMessage;
   OnCloseCallback onClose;
-
-  WebSocketImpl(this._url);
 
   void connect(
       {Iterable<String> protocols, WebSocketSettings webSocketSettings}) async {

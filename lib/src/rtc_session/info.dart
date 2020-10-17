@@ -8,13 +8,13 @@ import '../rtc_session.dart' as rtc;
 import '../utils.dart' as utils;
 
 class Info extends EventManager {
+  Info(this._session);
+
   final rtc.RTCSession _session;
   String _direction;
   String _contentType;
   String _body;
   IncomingRequest _request;
-
-  Info(this._session);
 
   String get contentType => _contentType;
 
@@ -38,9 +38,9 @@ class Info extends EventManager {
     _contentType = contentType;
     _body = body;
 
-    var extraHeaders = utils.cloneArray(options['extraHeaders']);
+    List<dynamic> extraHeaders = utils.cloneArray(options['extraHeaders']);
 
-    extraHeaders.add('Content-Type: ${contentType}');
+    extraHeaders.add('Content-Type: $contentType');
 
     _session.newInfo('local', this, _request);
 
@@ -61,7 +61,7 @@ class Info extends EventManager {
       _session.onDialogError();
     });
 
-    _session.sendRequest(SipMethod.INFO, {
+    _session.sendRequest(SipMethod.INFO, <String, dynamic>{
       'extraHeaders': extraHeaders,
       'eventHandlers': handlers,
       'body': body

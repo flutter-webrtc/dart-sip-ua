@@ -20,12 +20,13 @@ abstract class EventType {
 
 /// A general error cause class.
 class ErrorCause {
-  int status_code;
-  String cause;
-  String reason_phrase;
   ErrorCause({this.status_code, this.cause, this.reason_phrase});
   @override
   String toString() {
     return 'Code: [$status_code], Cause: $cause, Reason: $reason_phrase';
   }
+
+  int status_code;
+  String cause;
+  String reason_phrase;
 }

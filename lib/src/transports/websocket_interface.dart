@@ -7,6 +7,25 @@ import 'websocket_dart_impl.dart'
     if (dart.library.js) 'websocket_web_impl.dart';
 
 class WebSocketInterface implements Socket {
+  WebSocketInterface(String url, [WebSocketSettings webSocketSettings]) {
+    logger.debug('new() [url:' + url + ']');
+    _url = url;
+    dynamic parsed_url = Grammar.parse(url, 'absoluteURI');
+    if (parsed_url == -1) {
+      logger.error('invalid WebSocket URI: $url');
+      throw AssertionError('Invalid argument: $url');
+    } else if (parsed_url.scheme != 'wss' && parsed_url.scheme != 'ws') {
+      logger.error('invalid WebSocket URI scheme: ${parsed_url.scheme}');
+      throw AssertionError('Invalid argument: $url');
+    } else {
+      String port = parsed_url.port != null ? ':${parsed_url.port}' : '';
+      _sip_uri = 'sip:${parsed_url.host}$port;transport=${parsed_url.scheme}';
+      logger.debug('SIP URI: $_sip_uri');
+      _via_transport = parsed_url.scheme.toUpperCase();
+    }
+    _webSocketSettings = webSocketSettings ?? WebSocketSettings();
+  }
+
   String _url;
   String _sip_uri;
   String _via_transport;
@@ -26,26 +45,6 @@ class WebSocketInterface implements Socket {
       ondisconnect;
   @override
   void Function(dynamic data) ondata;
-
-  WebSocketInterface(String url, [WebSocketSettings webSocketSettings]) {
-    logger.debug('new() [url:' + url + ']');
-    _url = url;
-    dynamic parsed_url = Grammar.parse(url, 'absoluteURI');
-    if (parsed_url == -1) {
-      logger.error('invalid WebSocket URI: ${url}');
-      throw AssertionError('Invalid argument: ${url}');
-    } else if (parsed_url.scheme != 'wss' && parsed_url.scheme != 'ws') {
-      logger.error('invalid WebSocket URI scheme: ${parsed_url.scheme}');
-      throw AssertionError('Invalid argument: ${url}');
-    } else {
-      String port = parsed_url.port != null ? ':${parsed_url.port}' : '';
-      _sip_uri = 'sip:${parsed_url.host}${port};transport=${parsed_url.scheme}';
-      logger.debug('SIP URI: ${_sip_uri}');
-      _via_transport = parsed_url.scheme.toUpperCase();
-    }
-    _webSocketSettings = webSocketSettings ?? WebSocketSettings();
-  }
-
   @override
   String get via_transport => _via_transport;
 
@@ -64,16 +63,16 @@ class WebSocketInterface implements Socket {
   void connect() async {
     logger.debug('connect()');
     if (isConnected()) {
-      logger.debug('WebSocket ${_url} is already connected');
+      logger.debug('WebSocket $_url is already connected');
       return;
     } else if (isConnecting()) {
-      logger.debug('WebSocket ${_url} is connecting');
+      logger.debug('WebSocket $_url is connecting');
       return;
     }
     if (_ws != null) {
       disconnect();
     }
-    logger.debug('connecting to WebSocket ${_url}');
+    logger.debug('connecting to WebSocket $_url');
     try {
       _ws = WebSocketImpl(_url);
 
@@ -89,18 +88,18 @@ class WebSocketInterface implements Socket {
       };
 
       _ws.onClose = (int closeCode, String closeReason) {
-        logger.debug('Closed [${closeCode}, ${closeReason}]!');
+        logger.debug('Closed [$closeCode, $closeReason]!');
         _connected = false;
         _onClose(true, closeCode, closeReason);
       };
 
-      await _ws.connect(
-          protocols: [_websocket_protocol],
+      _ws.connect(
+          protocols: <String>[_websocket_protocol],
           webSocketSettings: _webSocketSettings);
     } catch (e, s) {
       Log.e(e.toString(), null, s);
       _connected = false;
-      _onError(e.toString());
+      logger.error('WebSocket $_url error: $e');
     }
   }
 
@@ -149,12 +148,12 @@ class WebSocketInterface implements Socket {
    * WebSocket Event Handlers
    */
   void _onOpen() {
-    logger.debug('WebSocket ${_url} connected');
+    logger.debug('WebSocket $_url connected');
     onconnect();
   }
 
   void _onClose(bool wasClean, int code, String reason) {
-    logger.debug('WebSocket ${_url} closed');
+    logger.debug('WebSocket $_url closed');
     if (wasClean == false) {
       logger.debug('WebSocket abrupt disconnection');
     }
@@ -170,9 +169,5 @@ class WebSocketInterface implements Socket {
         logger.debug('Received and ignored empty packet');
       }
     }
-  }
-
-  void _onError(e) {
-    logger.error('WebSocket ${_url} error: ${e}');
   }
 }
