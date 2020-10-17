@@ -50,7 +50,7 @@ class ReferSubscriber extends EventManager {
     extraHeaders.add(referredBy);
     extraHeaders.add('Contact: ${_session.contact}');
 
-    var handlers = EventManager();
+    EventManager handlers = EventManager();
     handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
       _requestSucceeded(event.response);
     });

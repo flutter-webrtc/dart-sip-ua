@@ -37,24 +37,21 @@ class DialogRequestSender {
   OutgoingRequest get request => _request;
 
   void send() {
-    var localEventHandlers = EventManager();
-    localEventHandlers.on(EventOnRequestTimeout(),
-        (EventOnRequestTimeout value) {
+    EventManager handlers = EventManager();
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
       _eventHandlers.emit(EventOnRequestTimeout());
     });
-    localEventHandlers.on(EventOnTransportError(),
-        (EventOnTransportError value) {
+    handlers.on(EventOnTransportError(), (EventOnTransportError value) {
       _eventHandlers.emit(EventOnTransportError());
     });
-    localEventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
+    handlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
       _eventHandlers.emit(EventOnAuthenticated(request: event.request));
     });
-    localEventHandlers.on(EventOnReceiveResponse(),
-        (EventOnReceiveResponse event) {
+    handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
       _receiveResponse(event.response);
     });
 
-    _request_sender = RequestSender(_ua, _request, localEventHandlers);
+    _request_sender = RequestSender(_ua, _request, handlers);
 
     request_sender.send();
 

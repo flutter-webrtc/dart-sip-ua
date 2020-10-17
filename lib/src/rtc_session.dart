@@ -910,12 +910,12 @@ class RTCSession extends EventManager {
 
           var dtmf = RTCSession_DTMF.DTMF(this);
 
-          EventManager eventHandlers = EventManager();
-          eventHandlers.on(EventCallFailed(), (EventCallFailed event) {
+          EventManager handlers = EventManager();
+          handlers.on(EventCallFailed(), (EventCallFailed event) {
             logger.error('Failed to send DTMF ${event.cause}');
           });
 
-          options['eventHandlers'] = eventHandlers;
+          options['eventHandlers'] = handlers;
 
           dtmf.send(tone, options);
           await Future.delayed(
@@ -1017,14 +1017,14 @@ class RTCSession extends EventManager {
     _localHold = true;
     _onhold('local');
 
-    EventManager eventHandlers = EventManager();
+    EventManager handlers = EventManager();
 
-    eventHandlers.on(EventSucceeded(), (EventSucceeded event) {
+    handlers.on(EventSucceeded(), (EventSucceeded event) {
       if (done != null) {
         done();
       }
     });
-    eventHandlers.on(EventCallFailed(), (EventCallFailed event) {
+    handlers.on(EventCallFailed(), (EventCallFailed event) {
       terminate({
         'cause': DartSIP_C.causes.WEBRTC_ERROR,
         'status_code': 500,
@@ -1035,14 +1035,12 @@ class RTCSession extends EventManager {
     if (options['useUpdate'] != null) {
       _sendUpdate({
         'sdpOffer': true,
-        'eventHandlers': eventHandlers,
+        'eventHandlers': handlers,
         'extraHeaders': options['extraHeaders']
       });
     } else {
-      _sendReinvite({
-        'eventHandlers': eventHandlers,
-        'extraHeaders': options['extraHeaders']
-      });
+      _sendReinvite(
+          {'eventHandlers': handlers, 'extraHeaders': options['extraHeaders']});
     }
 
     return true;
@@ -1068,13 +1066,13 @@ class RTCSession extends EventManager {
     _localHold = false;
     _onunhold('local');
 
-    EventManager eventHandlers = EventManager();
-    eventHandlers.on(EventSucceeded(), (EventSucceeded event) {
+    EventManager handlers = EventManager();
+    handlers.on(EventSucceeded(), (EventSucceeded event) {
       if (done != null) {
         done();
       }
     });
-    eventHandlers.on(EventCallFailed(), (EventCallFailed event) {
+    handlers.on(EventCallFailed(), (EventCallFailed event) {
       terminate({
         'cause': DartSIP_C.causes.WEBRTC_ERROR,
         'status_code': 500,
@@ -1085,14 +1083,12 @@ class RTCSession extends EventManager {
     if (options['useUpdate'] != null) {
       _sendUpdate({
         'sdpOffer': true,
-        'eventHandlers': eventHandlers,
+        'eventHandlers': handlers,
         'extraHeaders': options['extraHeaders']
       });
     } else {
-      _sendReinvite({
-        'eventHandlers': eventHandlers,
-        'extraHeaders': options['extraHeaders']
-      });
+      _sendReinvite(
+          {'eventHandlers': handlers, 'extraHeaders': options['extraHeaders']});
     }
 
     return true;
@@ -1113,14 +1109,14 @@ class RTCSession extends EventManager {
       return false;
     }
 
-    EventManager eventHandlers = EventManager();
-    eventHandlers.on(EventSucceeded(), (EventSucceeded event) {
+    EventManager handlers = EventManager();
+    handlers.on(EventSucceeded(), (EventSucceeded event) {
       if (done != null) {
         done();
       }
     });
 
-    eventHandlers.on(EventCallFailed(), (EventCallFailed event) {
+    handlers.on(EventCallFailed(), (EventCallFailed event) {
       terminate({
         'cause': DartSIP_C.causes.WEBRTC_ERROR,
         'status_code': 500,
@@ -1133,13 +1129,13 @@ class RTCSession extends EventManager {
     if (options['useUpdate'] != null) {
       _sendUpdate({
         'sdpOffer': true,
-        'eventHandlers': eventHandlers,
+        'eventHandlers': handlers,
         'rtcOfferConstraints': rtcOfferConstraints,
         'extraHeaders': options['extraHeaders']
       });
     } else {
       _sendReinvite({
-        'eventHandlers': eventHandlers,
+        'eventHandlers': handlers,
         'rtcOfferConstraints': rtcOfferConstraints,
         'extraHeaders': options['extraHeaders']
       });
@@ -2105,24 +2101,21 @@ class RTCSession extends EventManager {
    */
   Future<Null> _sendInitialRequest(
       mediaConstraints, rtcOfferConstraints, mediaStream) async {
-    EventManager localEventHandlers = EventManager();
-    localEventHandlers.on(EventOnRequestTimeout(),
-        (EventOnRequestTimeout value) {
+    EventManager handlers = EventManager();
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
       onRequestTimeout();
     });
-    localEventHandlers.on(EventOnTransportError(),
-        (EventOnTransportError value) {
+    handlers.on(EventOnTransportError(), (EventOnTransportError value) {
       onTransportError();
     });
-    localEventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
+    handlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
       _request = event.request;
     });
-    localEventHandlers.on(EventOnReceiveResponse(),
-        (EventOnReceiveResponse event) {
+    handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
       _receiveInviteResponse(event.response);
     });
 
-    var request_sender = RequestSender(_ua, _request, localEventHandlers);
+    var request_sender = RequestSender(_ua, _request, handlers);
 
     // This Promise is resolved within the next iteration, so the app has now
     // a chance to set events such as 'peerconnection' and 'connecting'.

@@ -185,17 +185,17 @@ class SIPUAHelper extends EventManager {
 
   Map<String, Object> _options([bool voiceonly = false]) {
     // Register callbacks to desired call events
-    EventManager eventHandlers = EventManager();
-    eventHandlers.on(EventCallConnecting(), (EventCallConnecting event) {
+    EventManager handlers = EventManager();
+    handlers.on(EventCallConnecting(), (EventCallConnecting event) {
       logger.debug('call connecting');
       _notifyCallStateListeners(event, CallState(CallStateEnum.CONNECTING));
     });
-    eventHandlers.on(EventCallProgress(), (EventCallProgress event) {
+    handlers.on(EventCallProgress(), (EventCallProgress event) {
       logger.debug('call is in progress');
       _notifyCallStateListeners(event,
           CallState(CallStateEnum.PROGRESS, originator: event.originator));
     });
-    eventHandlers.on(EventCallFailed(), (EventCallFailed event) {
+    handlers.on(EventCallFailed(), (EventCallFailed event) {
       logger.debug('call failed with cause: ' + (event.cause.toString()));
       _notifyCallStateListeners(
           event,
@@ -203,7 +203,7 @@ class SIPUAHelper extends EventManager {
               originator: event.originator, cause: event.cause));
       _calls.remove(event.id);
     });
-    eventHandlers.on(EventCallEnded(), (EventCallEnded event) {
+    handlers.on(EventCallEnded(), (EventCallEnded event) {
       logger.debug('call ended with cause: ' + (event.cause.toString()));
       _notifyCallStateListeners(
           event,
@@ -211,39 +211,39 @@ class SIPUAHelper extends EventManager {
               originator: event.originator, cause: event.cause));
       _calls.remove(event.id);
     });
-    eventHandlers.on(EventCallAccepted(), (EventCallAccepted event) {
+    handlers.on(EventCallAccepted(), (EventCallAccepted event) {
       logger.debug('call accepted');
       _notifyCallStateListeners(event, CallState(CallStateEnum.ACCEPTED));
     });
-    eventHandlers.on(EventCallConfirmed(), (EventCallConfirmed event) {
+    handlers.on(EventCallConfirmed(), (EventCallConfirmed event) {
       logger.debug('call confirmed');
       _notifyCallStateListeners(event, CallState(CallStateEnum.CONFIRMED));
     });
-    eventHandlers.on(EventCallHold(), (EventCallHold event) {
+    handlers.on(EventCallHold(), (EventCallHold event) {
       logger.debug('call hold');
       _notifyCallStateListeners(
           event, CallState(CallStateEnum.HOLD, originator: event.originator));
     });
-    eventHandlers.on(EventCallUnhold(), (EventCallUnhold event) {
+    handlers.on(EventCallUnhold(), (EventCallUnhold event) {
       logger.debug('call unhold');
       _notifyCallStateListeners(
           event, CallState(CallStateEnum.UNHOLD, originator: event.originator));
     });
-    eventHandlers.on(EventCallMuted(), (EventCallMuted event) {
+    handlers.on(EventCallMuted(), (EventCallMuted event) {
       logger.debug('call muted');
       _notifyCallStateListeners(
           event,
           CallState(CallStateEnum.MUTED,
               audio: event.audio, video: event.video));
     });
-    eventHandlers.on(EventCallUnmuted(), (EventCallUnmuted event) {
+    handlers.on(EventCallUnmuted(), (EventCallUnmuted event) {
       logger.debug('call unmuted');
       _notifyCallStateListeners(
           event,
           CallState(CallStateEnum.UNMUTED,
               audio: event.audio, video: event.video));
     });
-    eventHandlers.on(EventStream(), (EventStream event) async {
+    handlers.on(EventStream(), (EventStream event) async {
       // Wating for callscreen ready.
       Timer(Duration(milliseconds: 100), () {
         _notifyCallStateListeners(
@@ -252,7 +252,7 @@ class SIPUAHelper extends EventManager {
                 stream: event.stream, originator: event.originator));
       });
     });
-    eventHandlers.on(EventCallRefer(), (EventCallRefer refer) async {
+    handlers.on(EventCallRefer(), (EventCallRefer refer) async {
       logger.debug('Refer received, Transfer current call to => ${refer.aor}');
       _notifyCallStateListeners(
           refer, CallState(CallStateEnum.REFER, refer: refer));
@@ -263,7 +263,7 @@ class SIPUAHelper extends EventManager {
     });
 
     Map<String, Object> _defaultOptions = {
-      'eventHandlers': eventHandlers,
+      'eventHandlers': handlers,
       'pcConfig': <String, dynamic>{'iceServers': _uaSettings.iceServers},
       'mediaConstraints': {
         'audio': true,

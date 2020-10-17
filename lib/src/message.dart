@@ -77,21 +77,18 @@ class Message extends EventManager {
       _request.body = body;
     }
 
-    var localEventHandlers = EventManager();
-    localEventHandlers.on(EventOnRequestTimeout(),
-        (EventOnRequestTimeout value) {
+    EventManager handlers = EventManager();
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
       _onRequestTimeout();
     });
-    localEventHandlers.on(EventOnTransportError(),
-        (EventOnTransportError value) {
+    handlers.on(EventOnTransportError(), (EventOnTransportError value) {
       _onTransportError();
     });
-    localEventHandlers.on(EventOnReceiveResponse(),
-        (EventOnReceiveResponse event) {
+    handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
       _receiveResponse(event.response);
     });
 
-    var request_sender = RequestSender(_ua, _request, localEventHandlers);
+    RequestSender request_sender = RequestSender(_ua, _request, handlers);
 
     _newMessage('local', _request);
 

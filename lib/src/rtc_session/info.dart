@@ -45,7 +45,7 @@ class Info extends EventManager {
 
     _session.newInfo('local', this, _request);
 
-    var handlers = EventManager();
+    EventManager handlers = EventManager();
     handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
       emit(EventSucceeded(originator: 'remote', response: event.response));
     });

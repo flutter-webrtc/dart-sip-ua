@@ -153,24 +153,21 @@ class Registrator {
         },
         extraHeaders);
 
-    var localEventHandlers = EventManager();
-    localEventHandlers.on(EventOnRequestTimeout(),
-        (EventOnRequestTimeout value) {
+    EventManager handlers = EventManager();
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
       _registrationFailure(
           UnHandledResponse(408, DartSIP_C.causes.REQUEST_TIMEOUT),
           DartSIP_C.causes.REQUEST_TIMEOUT);
     });
-    localEventHandlers.on(EventOnTransportError(),
-        (EventOnTransportError value) {
+    handlers.on(EventOnTransportError(), (EventOnTransportError value) {
       _registrationFailure(
           UnHandledResponse(500, DartSIP_C.causes.CONNECTION_ERROR),
           DartSIP_C.causes.CONNECTION_ERROR);
     });
-    localEventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated value) {
+    handlers.on(EventOnAuthenticated(), (EventOnAuthenticated value) {
       _cseq += 1;
     });
-    localEventHandlers.on(EventOnReceiveResponse(),
-        (EventOnReceiveResponse event) {
+    handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
       {
         // Discard responses to older REGISTER/un-REGISTER requests.
         if (event.response.cseq != _cseq) {
@@ -279,7 +276,7 @@ class Registrator {
       }
     });
 
-    var request_sender = RequestSender(_ua, request, localEventHandlers);
+    var request_sender = RequestSender(_ua, request, handlers);
 
     _registering = true;
     request_sender.send();
@@ -317,23 +314,19 @@ class Registrator {
         {'to_uri': _to_uri, 'call_id': _call_id, 'cseq': (_cseq += 1)},
         extraHeaders);
 
-    EventManager localEventHandlers = EventManager();
-    localEventHandlers.on(EventOnRequestTimeout(),
-        (EventOnRequestTimeout value) {
+    EventManager handlers = EventManager();
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
       _unregistered(null, DartSIP_C.causes.REQUEST_TIMEOUT);
     });
-    localEventHandlers.on(EventOnTransportError(),
-        (EventOnTransportError value) {
+    handlers.on(EventOnTransportError(), (EventOnTransportError value) {
       _unregistered(null, DartSIP_C.causes.CONNECTION_ERROR);
     });
-    localEventHandlers.on(EventOnAuthenticated(),
-        (EventOnAuthenticated response) {
+    handlers.on(EventOnAuthenticated(), (EventOnAuthenticated response) {
       // Increase the CSeq on authentication.
 
       _cseq += 1;
     });
-    localEventHandlers.on(EventOnReceiveResponse(),
-        (EventOnReceiveResponse event) {
+    handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
       var status_code = event.response.status_code.toString();
       if (utils.test2XX(status_code)) {
         _unregistered(event.response);
@@ -345,7 +338,7 @@ class Registrator {
       }
     });
 
-    var request_sender = RequestSender(_ua, request, localEventHandlers);
+    var request_sender = RequestSender(_ua, request, handlers);
 
     request_sender.send();
   }

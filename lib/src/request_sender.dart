@@ -44,32 +44,32 @@ class RequestSender {
   * Create the client transaction and send the message.
   */
   void send() {
-    EventManager eventHandlers = EventManager();
-    eventHandlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
+    EventManager handlers = EventManager();
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
       _eventHandlers.emit(event);
     });
-    eventHandlers.on(EventOnTransportError(), (EventOnTransportError event) {
+    handlers.on(EventOnTransportError(), (EventOnTransportError event) {
       _eventHandlers.emit(event);
     });
-    eventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
+    handlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
       _eventHandlers.emit(event);
     });
-    eventHandlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
+    handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
       _receiveResponse(event.response);
     });
 
     switch (_method) {
       case SipMethod.INVITE:
-        clientTransaction = InviteClientTransaction(
-            _ua, _ua.transport, _request, eventHandlers);
+        clientTransaction =
+            InviteClientTransaction(_ua, _ua.transport, _request, handlers);
         break;
       case SipMethod.ACK:
         clientTransaction =
-            AckClientTransaction(_ua, _ua.transport, _request, eventHandlers);
+            AckClientTransaction(_ua, _ua.transport, _request, handlers);
         break;
       default:
-        clientTransaction = NonInviteClientTransaction(
-            _ua, _ua.transport, _request, eventHandlers);
+        clientTransaction =
+            NonInviteClientTransaction(_ua, _ua.transport, _request, handlers);
     }
 
     clientTransaction.send();
