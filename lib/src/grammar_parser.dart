@@ -13279,81 +13279,102 @@ class GrammarParser {
         while (true) {  
           $$ = _matchString(_strings74, 'rport', true);
           if (!success) break;
-          var seq = new List(2)..[0] = $$;
+          var seq = new List(3)..[0] = $$;
+          $$ = _parse_EQUAL();
+          if (!success) break;
+          seq[1] = $$;
           var testing0 = _testing;
           _testing = _cursor;
           switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
             case 0:
             case 2:
-              var ch1 = _ch, pos1 = _cursor, startPos1 = _startPos;
+              var startPos1 = _startPos;
               _startPos = _cursor;
-              while (true) {  
-                $$ = _parse_EQUAL();
-                if (!success) break;
-                var seq = new List(2)..[0] = $$;
-                switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
-                  case 0:
-                  case 2:
-                    var startPos2 = _startPos;
-                    _startPos = _cursor;
-                    var testing1 = _testing; 
-                    for (var reps = []; ; ) {
-                      _testing = _cursor;
-                      $$ = _parse_DIGIT();
-                      if (success) {  
-                        reps.add($$);
-                      } else {
-                        success = true;
-                        _testing = testing1;
-                        $$ = reps;
-                        break; 
-                      }
-                    }
-                    _startPos = startPos2;
+              switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
+                case 0:
+                case 2:
+                  var ch1 = _ch, pos1 = _cursor, startPos2 = _startPos;
+                  _startPos = _cursor;
+                  while (true) {  
+                    var testing1 = _testing;
+                    _testing = _cursor;
+                    $$ = _parse_DIGIT();
+                    success = true; 
+                    _testing = testing1;
+                    if (!success) break;
+                    var seq = new List(5)..[0] = $$;
+                    var testing2 = _testing;
+                    _testing = _cursor;
+                    $$ = _parse_DIGIT();
+                    success = true; 
+                    _testing = testing2;
+                    if (!success) break;
+                    seq[1] = $$;
+                    var testing3 = _testing;
+                    _testing = _cursor;
+                    $$ = _parse_DIGIT();
+                    success = true; 
+                    _testing = testing3;
+                    if (!success) break;
+                    seq[2] = $$;
+                    var testing4 = _testing;
+                    _testing = _cursor;
+                    $$ = _parse_DIGIT();
+                    success = true; 
+                    _testing = testing4;
+                    if (!success) break;
+                    seq[3] = $$;
+                    var testing5 = _testing;
+                    _testing = _cursor;
+                    $$ = _parse_DIGIT();
+                    success = true; 
+                    _testing = testing5;
+                    if (!success) break;
+                    seq[4] = $$;
+                    $$ = seq;
                     break;
-                  case 1:
-                    $$ = null;
-                    success = true;
-                    break;
-                }
-                if (!success && _cursor > _testing) {
-                  _failure(_expect14);
-                }
-                if (!success) break;
-                seq[1] = $$;
-                $$ = seq;
-                break;
+                  }
+                  if (!success) {
+                    _ch = ch1;
+                    _cursor = pos1;
+                  }
+                  _startPos = startPos2;
+                  break;
+                case 1:
+                  $$ = null;
+                  success = true;
+                  break;
               }
-              if (!success) {
-                _ch = ch1;
-                _cursor = pos1;
+              if (!success && _cursor > _testing) {
+                _failure(_expect14);
               }
               _startPos = startPos1;
               break;
             case 1:
               $$ = null;
-              success = false;
+              success = true;
               break;
           }
           if (!success && _cursor > _testing) {
-            _failure(_expect24);
+            _failure(_expect14);
           }
           success = true; 
           _testing = testing0;
           if (!success) break;
-          seq[1] = $$;
+          seq[2] = $$;
           $$ = seq;
           if (success) {    
             final $1 = seq[0];
             final $2 = seq[1];
+            final $3 = seq[2];
             final $start = startPos0;
             var pos0 = _startPos;
             $$ = ((offset, response_port) {
             ///CODE_START
             if(response_port != null)
-              data.rport = response_port.join('');
+              data.rport = parseInt(response_port.join('')); 
             ///CODE_END
-            })($start, $2);
+            })($start, $3);
           }
           break;
         }

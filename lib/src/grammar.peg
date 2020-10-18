@@ -1094,9 +1094,11 @@ via_branch        <- "branch"i EQUAL via_branch: token {
                       return data.branch;
                     }
 
-response_port     <- "rport"i (EQUAL response_port: (DIGIT*) )? {
+response_port     <- "rport"i EQUAL (response_port: (DIGIT ? DIGIT ? DIGIT ? DIGIT ? DIGIT ?) )? {
                       if(response_port != null)
-                        data.rport = response_port.join(''); }
+                        data.rport = parseInt(response_port.join('')); 
+                    }
+
 
 via_extension     <- generic_param
 
