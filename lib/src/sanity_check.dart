@@ -1,21 +1,18 @@
-import '../sip_ua.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
+import 'logger.dart';
 import 'sip_message.dart';
+import 'transactions/invite_server.dart';
+import 'transactions/non_invite_server.dart';
 import 'transport.dart';
 import 'ua.dart';
 import 'utils.dart' as Utils;
-import 'logger.dart';
-import 'transactions/invite_server.dart';
-import 'transactions/non_invite_server.dart';
-
-final logger = Log();
 
 // Checks for requests and responses.
-const all = [minimumHeaders];
+const List<bool Function()> all = <bool Function()>[minimumHeaders];
 
 // Checks for requests.
-const requests = [
+const List<bool Function()> requests = <bool Function()>[
   rfc3261_8_2_2_1,
   rfc3261_16_3_4,
   rfc3261_18_3_request,
@@ -23,32 +20,35 @@ const requests = [
 ];
 
 // Checks for responses.
-const responses = [rfc3261_8_1_3_3, rfc3261_18_3_response];
+const List<bool Function()> responses = <bool Function()>[
+  rfc3261_8_1_3_3,
+  rfc3261_18_3_response
+];
 
 // local variables.
 IncomingMessage message;
 UA ua;
 Transport transport;
 
-sanityCheck(IncomingMessage m, UA u, Transport t) {
+bool sanityCheck(IncomingMessage m, UA u, Transport t) {
   message = m;
   ua = u;
   transport = t;
 
-  for (var check in all) {
+  for (bool Function() check in all) {
     if (check() == false) {
       return false;
     }
   }
 
   if (message is IncomingRequest) {
-    for (var check in requests) {
+    for (bool Function() check in requests) {
       if (check() == false) {
         return false;
       }
     }
   } else if (message is IncomingResponse) {
-    for (var check in responses) {
+    for (bool Function() check in responses) {
       if (check() == false) {
         return false;
       }
@@ -79,15 +79,17 @@ sanityCheck(IncomingMessage m, UA u, Transport t) {
  */
 
 // Sanity Check functions for requests.
-rfc3261_8_2_2_1() {
+bool rfc3261_8_2_2_1() {
   if (message.s('to').uri.scheme != 'sip') {
     reply(416);
 
     return false;
   }
+
+  return true;
 }
 
-rfc3261_16_3_4() {
+bool rfc3261_16_3_4() {
   if (message.to_tag == null) {
     if (message.call_id.substring(0, 5) == ua.configuration.jssip_id) {
       reply(482);
@@ -95,11 +97,12 @@ rfc3261_16_3_4() {
       return false;
     }
   }
+  return true;
 }
 
-rfc3261_18_3_request() {
-  var len = Utils.str_utf8_length(message.body);
-  var contentLength = message.getHeader('content-length');
+bool rfc3261_18_3_request() {
+  int len = Utils.str_utf8_length(message.body);
+  dynamic contentLength = message.getHeader('content-length');
 
   if (contentLength is String) {
     contentLength = int.tryParse(contentLength) ?? 0;
@@ -110,78 +113,83 @@ rfc3261_18_3_request() {
 
     return false;
   }
+
+  return true;
 }
 
-rfc3261_8_2_2_2() {
-  var fromTag = message.from_tag;
-  var call_id = message.call_id;
-  var cseq = message.cseq;
+bool rfc3261_8_2_2_2() {
+  String fromTag = message.from_tag;
+  String call_id = message.call_id;
+  int cseq = message.cseq;
 
   // Accept any in-dialog request.
   if (message.to_tag != null) {
     return true;
   }
 
+  bool result = true;
   // INVITE request.
   if (message.method == SipMethod.INVITE) {
     // If the branch matches the key of any IST then assume it is a retransmission
     // and ignore the INVITE.
-    // TODO: we should reply the last response.
+    // TODO(cloudwebrtc): we should reply the last response.
     if (ua.transactions
             .getTransaction(InviteServerTransaction, message.via_branch) !=
         null) {
-      return false;
+      result = false;
     }
     // Otherwise check whether it is a merged request.
     else {
-      ua.transactions.getAll(InviteServerTransaction).forEach((tr) {
+      ua.transactions.getAll(InviteServerTransaction).forEach((dynamic tr) {
         if (tr.request.from_tag == fromTag &&
             tr.request.call_id == call_id &&
             tr.request.cseq == cseq) {
           reply(482);
-
-          return false;
+          result = false;
+          return;
         }
       });
     }
   }
-
   // Non INVITE request.
-
   // If the branch matches the key of any NIST then assume it is a retransmission
   // and ignore the request.
-  // TODO: we should reply the last response.
+  // TODO(cloudwebrtc): we should reply the last response.
   else if (ua.transactions
           .getTransaction(NonInviteServerTransaction, message.via_branch) !=
       null) {
-    return false;
+    result = false;
   }
-
   // Otherwise check whether it is a merged request.
   else {
-    ua.transactions.getAll(NonInviteServerTransaction).forEach((tr) {
+    ua.transactions.getAll(NonInviteServerTransaction).forEach((dynamic tr) {
       if (tr.request.from_tag == fromTag &&
           tr.request.call_id == call_id &&
           tr.request.cseq == cseq) {
         reply(482);
-        return false;
+        result = false;
+        return;
       }
     });
   }
+
+  return result;
 }
 
 // Sanity Check functions for responses.
-rfc3261_8_1_3_3() {
+bool rfc3261_8_1_3_3() {
   if (message.getHeaders('via').length > 1) {
     logger.debug(
         'more than one Via header field present in the response, dropping the response');
 
     return false;
   }
+  return true;
 }
 
-rfc3261_18_3_response() {
-  var len = Utils.str_utf8_length(message.body);
+bool rfc3261_18_3_response() {
+  int len = Utils.str_utf8_length(message.body);
+  // ignore: always_specify_types
   var contentLength = message.getHeader('content-length');
 
   if (contentLength is String) {
@@ -194,32 +202,42 @@ rfc3261_18_3_response() {
 
     return false;
   }
+
+  return true;
 }
 
 // Sanity Check functions for requests and responses.
-minimumHeaders() {
-  var mandatoryHeaders = ['from', 'to', 'call_id', 'cseq', 'via'];
+bool minimumHeaders() {
+  List<String> mandatoryHeaders = <String>[
+    'from',
+    'to',
+    'call_id',
+    'cseq',
+    'via'
+  ];
 
-  for (var header in mandatoryHeaders) {
+  for (String header in mandatoryHeaders) {
     if (!message.hasHeader(header)) {
       logger.debug(
-          'missing mandatory header field : ${header}, dropping the response');
+          'missing mandatory header field : $header, dropping the response');
 
       return false;
     }
   }
+
+  return true;
 }
 
 // Reply.
-reply(status_code) {
-  var vias = message.getHeaders('via');
+void reply(int status_code) {
+  List<dynamic> vias = message.getHeaders('via');
 
-  var to;
-  var response =
-      'SIP/2.0 ${status_code} ${DartSIP_C.REASON_PHRASE[status_code]}\r\n';
+  dynamic to;
+  String response =
+      'SIP/2.0 $status_code ${DartSIP_C.REASON_PHRASE[status_code]}\r\n';
 
-  for (var via in vias) {
-    response += 'Via: ${via}\r\n';
+  for (dynamic via in vias) {
+    response += 'Via: $via\r\n';
   }
 
   to = message.getHeader('To');
@@ -228,7 +246,7 @@ reply(status_code) {
     to += ';tag=${Utils.newTag()}';
   }
 
-  response += 'To: ${to}\r\n';
+  response += 'To: $to\r\n';
   response += 'From: ${message.getHeader('From')}\r\n';
   response += 'Call-ID: ${message.call_id}\r\n';
   response +=

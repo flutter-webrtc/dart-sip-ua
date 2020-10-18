@@ -6,20 +6,20 @@ import 'package:sip_ua/src/constants.dart';
 // Results of this tests originally obtained from RFC 2617 and:
 // 'https://pernau.at/kd/sipdigest.php'
 
-var testFunctions = [
+List<void Function()> testFunctions = <void Function()>[
   () =>
-      test("DigestAuthentication: parse no auth testrealm@host.com -RFC 2617-",
+      test('DigestAuthentication: parse no auth testrealm@host.com -RFC 2617-',
           () {
         SipMethod method = SipMethod.GET;
-        var ruri = '/dir/index.html';
-        var cnonce = '0a4f113b';
-        var credentials = Credentials.fromMap({
+        String ruri = '/dir/index.html';
+        String cnonce = '0a4f113b';
+        Credentials credentials = Credentials.fromMap(<String, dynamic>{
           'username': 'Mufasa',
           'password': 'Circle Of Life',
           'realm': 'testrealm@host.com',
           'ha1': null
         });
-        var challenge = Challenge.fromMap({
+        Challenge challenge = Challenge.fromMap(<String, dynamic>{
           'algorithm': 'MD5',
           'realm': 'testrealm@host.com',
           'nonce': 'dcd98b7102dd2f0e8b11d0f600bfb0c093',
@@ -28,7 +28,7 @@ var testFunctions = [
           'qop': 'auth'
         });
 
-        var digest = new DigestAuthentication(credentials);
+        DigestAuthentication digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri, cnonce);
 
@@ -36,14 +36,14 @@ var testFunctions = [
       }),
   () => test('DigestAuthentication: digest authenticate qop = null', () {
         SipMethod method = SipMethod.REGISTER;
-        var ruri = 'sip:testrealm@host.com';
-        var credentials = Credentials.fromMap({
+        String ruri = 'sip:testrealm@host.com';
+        Credentials credentials = Credentials.fromMap(<String, dynamic>{
           'username': 'testuser',
           'password': 'testpassword',
           'realm': 'testrealm@host.com',
           'ha1': null
         });
-        var challenge = Challenge.fromMap({
+        Challenge challenge = Challenge.fromMap(<String, dynamic>{
           'algorithm': 'MD5',
           'realm': 'testrealm@host.com',
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
@@ -52,7 +52,7 @@ var testFunctions = [
           'qop': null
         });
 
-        var digest = new DigestAuthentication(credentials);
+        DigestAuthentication digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri);
 
@@ -60,15 +60,15 @@ var testFunctions = [
       }),
   () => test('DigestAuthentication: digest authenticate qop = auth', () {
         SipMethod method = SipMethod.REGISTER;
-        var ruri = 'sip:testrealm@host.com';
-        var cnonce = '0a4f113b';
-        var credentials = Credentials.fromMap({
+        String ruri = 'sip:testrealm@host.com';
+        String cnonce = '0a4f113b';
+        Credentials credentials = Credentials.fromMap(<String, dynamic>{
           'username': 'testuser',
           'password': 'testpassword',
           'realm': 'testrealm@host.com',
           'ha1': null
         });
-        var challenge = Challenge.fromMap({
+        Challenge challenge = Challenge.fromMap(<String, dynamic>{
           'algorithm': 'MD5',
           'realm': 'testrealm@host.com',
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
@@ -77,7 +77,7 @@ var testFunctions = [
           'qop': 'auth'
         });
 
-        var digest = new DigestAuthentication(credentials);
+        DigestAuthentication digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri, cnonce);
 
@@ -87,15 +87,15 @@ var testFunctions = [
           'DigestAuthentication: digest authenticate qop = auth-int and empty body',
           () {
         SipMethod method = SipMethod.REGISTER;
-        var ruri = 'sip:testrealm@host.com';
-        var cnonce = '0a4f113b';
-        var credentials = Credentials.fromMap({
+        String ruri = 'sip:testrealm@host.com';
+        String cnonce = '0a4f113b';
+        Credentials credentials = Credentials.fromMap(<String, dynamic>{
           'username': 'testuser',
           'password': 'testpassword',
           'realm': 'testrealm@host.com',
           'ha1': null
         });
-        var challenge = Challenge.fromMap({
+        Challenge challenge = Challenge.fromMap(<String, dynamic>{
           'algorithm': 'MD5',
           'realm': 'testrealm@host.com',
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
@@ -104,7 +104,7 @@ var testFunctions = [
           'qop': 'auth-int'
         });
 
-        var digest = new DigestAuthentication(credentials);
+        DigestAuthentication digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri, cnonce);
 
@@ -114,16 +114,16 @@ var testFunctions = [
           'DigestAuthentication: digest authenticate qop = auth-int and non-empty body',
           () {
         SipMethod method = SipMethod.REGISTER;
-        var ruri = 'sip:testrealm@host.com';
-        var body = 'TEST BODY';
-        var cnonce = '0a4f113b';
-        var credentials = Credentials.fromMap({
+        String ruri = 'sip:testrealm@host.com';
+        String body = 'TEST BODY';
+        String cnonce = '0a4f113b';
+        Credentials credentials = Credentials.fromMap(<String, dynamic>{
           'username': 'testuser',
           'password': 'testpassword',
           'realm': 'testrealm@host.com',
           'ha1': null
         });
-        var challenge = Challenge.fromMap({
+        Challenge challenge = Challenge.fromMap(<String, dynamic>{
           'algorithm': 'MD5',
           'realm': 'testrealm@host.com',
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
@@ -132,7 +132,7 @@ var testFunctions = [
           'qop': 'auth-int'
         });
 
-        var digest = new DigestAuthentication(credentials);
+        DigestAuthentication digest = DigestAuthentication(credentials);
 
         digest.authenticate(method, challenge, ruri, cnonce, body);
 
@@ -141,5 +141,5 @@ var testFunctions = [
 ];
 
 void main() {
-  testFunctions.forEach((func) => func());
+  testFunctions.forEach((Function func) => func());
 }

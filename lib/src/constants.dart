@@ -1,80 +1,81 @@
-var USER_AGENT = 'dart-sip-ua v0.2.2';
+const String USER_AGENT = 'dart-sip-ua v0.2.2';
 
 // SIP scheme.
-var SIP = 'sip';
-var SIPS = 'sips';
+const String SIP = 'sip';
+const String SIPS = 'sips';
 
 // End and Failure causes.
 class Causes {
   // Generic error causes.
-  static final CONNECTION_ERROR = 'Connection Error';
-  static final REQUEST_TIMEOUT = 'Request Timeout';
-  static final SIP_FAILURE_CODE = 'SIP Failure Code';
-  static final INTERNAL_ERROR = 'Internal Error';
+  static const String CONNECTION_ERROR = 'Connection Error';
+  static const String REQUEST_TIMEOUT = 'Request Timeout';
+  static const String SIP_FAILURE_CODE = 'SIP Failure Code';
+  static const String INTERNAL_ERROR = 'Internal Error';
 
   // SIP error causes.
-  static final BUSY = 'Busy';
-  static final REJECTED = 'Rejected';
-  static final REDIRECTED = 'Redirected';
-  static final UNAVAILABLE = 'Unavailable';
-  static final NOT_FOUND = 'Not Found';
-  static final ADDRESS_INCOMPLETE = 'Address Incomplete';
-  static final INCOMPATIBLE_SDP = 'Incompatible SDP';
-  static final MISSING_SDP = 'Missing SDP';
-  static final AUTHENTICATION_ERROR = 'Authentication Error';
+  static const String BUSY = 'Busy';
+  static const String REJECTED = 'Rejected';
+  static const String REDIRECTED = 'Redirected';
+  static const String UNAVAILABLE = 'Unavailable';
+  static const String NOT_FOUND = 'Not Found';
+  static const String ADDRESS_INCOMPLETE = 'Address Incomplete';
+  static const String INCOMPATIBLE_SDP = 'Incompatible SDP';
+  static const String MISSING_SDP = 'Missing SDP';
+  static const String AUTHENTICATION_ERROR = 'Authentication Error';
 
   // Session error causes.
-  static final BYE = 'Terminated';
-  static final WEBRTC_ERROR = 'WebRTC Error';
-  static final CANCELED = 'Canceled';
-  static final NO_ANSWER = 'No Answer';
-  static final EXPIRES = 'Expires';
-  static final NO_ACK = 'No ACK';
-  static final DIALOG_ERROR = 'Dialog Error';
-  static final USER_DENIED_MEDIA_ACCESS = 'User Denied Media Access';
-  static final BAD_MEDIA_DESCRIPTION = 'Bad Media Description';
-  static final RTP_TIMEOUT = 'RTP Timeout';
+  static const String BYE = 'Terminated';
+  static const String WEBRTC_ERROR = 'WebRTC Error';
+  static const String CANCELED = 'Canceled';
+  static const String NO_ANSWER = 'No Answer';
+  static const String EXPIRES = 'Expires';
+  static const String NO_ACK = 'No ACK';
+  static const String DIALOG_ERROR = 'Dialog Error';
+  static const String USER_DENIED_MEDIA_ACCESS = 'User Denied Media Access';
+  static const String BAD_MEDIA_DESCRIPTION = 'Bad Media Description';
+  static const String RTP_TIMEOUT = 'RTP Timeout';
 }
 
-var SIP_ERROR_CAUSES = {
-  Causes.REDIRECTED: [300, 301, 302, 305, 380],
-  Causes.BUSY: [486, 600],
-  Causes.REJECTED: [403, 603],
-  Causes.NOT_FOUND: [404, 604],
-  Causes.UNAVAILABLE: [480, 410, 408, 430],
-  Causes.ADDRESS_INCOMPLETE: [484, 424],
-  Causes.INCOMPATIBLE_SDP: [488, 606],
-  Causes.AUTHENTICATION_ERROR: [401, 407]
+Map<String, List<int>> SIP_ERROR_CAUSES = <String, List<int>>{
+  Causes.REDIRECTED: <int>[300, 301, 302, 305, 380],
+  Causes.BUSY: <int>[486, 600],
+  Causes.REJECTED: <int>[403, 603],
+  Causes.NOT_FOUND: <int>[404, 604],
+  Causes.UNAVAILABLE: <int>[480, 410, 408, 430],
+  Causes.ADDRESS_INCOMPLETE: <int>[484, 424],
+  Causes.INCOMPATIBLE_SDP: <int>[488, 606],
+  Causes.AUTHENTICATION_ERROR: <int>[401, 407]
 };
 
 class causes {
-  static final CONNECTION_ERROR = Causes.CONNECTION_ERROR;
-  static final REQUEST_TIMEOUT = Causes.REQUEST_TIMEOUT;
-  static final SIP_FAILURE_CODE = Causes.SIP_FAILURE_CODE;
-  static final INTERNAL_ERROR = Causes.INTERNAL_ERROR;
+  static const String CONNECTION_ERROR = Causes.CONNECTION_ERROR;
+  static const String REQUEST_TIMEOUT = Causes.REQUEST_TIMEOUT;
+  static const String SIP_FAILURE_CODE = Causes.SIP_FAILURE_CODE;
+  static const String INTERNAL_ERROR = Causes.INTERNAL_ERROR;
 
   // SIP error causes.
-  static final BUSY = Causes.BUSY;
-  static final REJECTED = Causes.REJECTED;
-  static final REDIRECTED = Causes.REDIRECTED;
-  static final UNAVAILABLE = Causes.UNAVAILABLE;
-  static final NOT_FOUND = Causes.NOT_FOUND;
-  static final ADDRESS_INCOMPLETE = Causes.ADDRESS_INCOMPLETE;
-  static final INCOMPATIBLE_SDP = Causes.INCOMPATIBLE_SDP;
-  static final MISSING_SDP = Causes.MISSING_SDP;
-  static final AUTHENTICATION_ERROR = Causes.AUTHENTICATION_ERROR;
+  static const String BUSY = Causes.BUSY;
+  static const String REJECTED = Causes.REJECTED;
+  static const String REDIRECTED = Causes.REDIRECTED;
+  static const String UNAVAILABLE = Causes.UNAVAILABLE;
+  static const String NOT_FOUND = Causes.NOT_FOUND;
+  static const String ADDRESS_INCOMPLETE = Causes.ADDRESS_INCOMPLETE;
+  static const String INCOMPATIBLE_SDP = Causes.INCOMPATIBLE_SDP;
+  static const String MISSING_SDP = Causes.MISSING_SDP;
+  static const String AUTHENTICATION_ERROR = Causes.AUTHENTICATION_ERROR;
 
   // Session error causes.
-  static final BYE = Causes.BYE;
-  static final WEBRTC_ERROR = Causes.WEBRTC_ERROR;
-  static final CANCELED = Causes.CANCELED;
-  static final NO_ANSWER = Causes.NO_ANSWER;
-  static final EXPIRES = Causes.EXPIRES;
-  static final NO_ACK = Causes.NO_ACK;
-  static final DIALOG_ERROR = Causes.DIALOG_ERROR;
-  static final USER_DENIED_MEDIA_ACCESS = Causes.USER_DENIED_MEDIA_ACCESS;
-  static final BAD_MEDIA_DESCRIPTION = Causes.BAD_MEDIA_DESCRIPTION;
-  static final RTP_TIMEOUT = Causes.RTP_TIMEOUT;
+  static const String BYE = Causes.BYE;
+  static const String WEBRTC_ERROR = Causes.WEBRTC_ERROR;
+  static const String CANCELED = Causes.CANCELED;
+  static const String NO_ANSWER = Causes.NO_ANSWER;
+  static const String EXPIRES = Causes.EXPIRES;
+  static const String NO_ACK = Causes.NO_ACK;
+  static const String DIALOG_ERROR = Causes.DIALOG_ERROR;
+  static const String USER_DENIED_MEDIA_ACCESS =
+      Causes.USER_DENIED_MEDIA_ACCESS;
+  static const String BAD_MEDIA_DESCRIPTION = Causes.BAD_MEDIA_DESCRIPTION;
+  static const String RTP_TIMEOUT = Causes.RTP_TIMEOUT;
 }
 
 // SIP Methods.
@@ -110,7 +111,7 @@ enum SipMethod {
 
 class SipMethodHelper {
   static String getName(SipMethod method) {
-    int period = method.toString().indexOf(".");
+    int period = method.toString().indexOf('.');
     return method.toString().substring(period + 1);
   }
 
@@ -132,7 +133,7 @@ class SipMethodHelper {
    * DOC: https://www.iana.org/assignments/sip-parameters
    * Copied from https://github.com/versatica/OverSIP/blob/master/lib/oversip/sip/constants.rb#L7
    */
-var REASON_PHRASE = {
+Map<int, String> REASON_PHRASE = <int, String>{
   100: 'Trying',
   180: 'Ringing',
   181: 'Call Is Being Forwarded',
@@ -207,8 +208,9 @@ var REASON_PHRASE = {
   606: 'Not Acceptable'
 };
 
-var ALLOWED_METHODS = 'INVITE,ACK,CANCEL,BYE,UPDATE,MESSAGE,OPTIONS,REFER,INFO';
-var ACCEPTED_BODY_TYPES = 'application/sdp, application/dtmf-relay';
-var MAX_FORWARDS = 69;
-var SESSION_EXPIRES = 90;
-var MIN_SESSION_EXPIRES = 60;
+const String ALLOWED_METHODS =
+    'INVITE,ACK,CANCEL,BYE,UPDATE,MESSAGE,OPTIONS,REFER,INFO';
+const String ACCEPTED_BODY_TYPES = 'application/sdp, application/dtmf-relay';
+const int MAX_FORWARDS = 69;
+const int SESSION_EXPIRES = 90;
+const int MIN_SESSION_EXPIRES = 60;

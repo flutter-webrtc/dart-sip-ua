@@ -19,6 +19,7 @@ void main() {
 typedef PageContentBuilder = Widget Function(
     [SIPUAHelper helper, Object arguments]);
 
+// ignore: must_be_immutable
 class MyApp extends StatelessWidget {
   final SIPUAHelper _helper = SIPUAHelper();
   Map<String, PageContentBuilder> routes = {
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
         return route;
       }
     }
+    return null;
   }
 
   @override

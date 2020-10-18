@@ -5,16 +5,16 @@ import 'package:test/test.dart';
 import 'package:sip_ua/src/transports/websocket_interface.dart';
 import 'package:sip_ua/src/transport.dart';
 
-var testFunctions = [
-  () => test("WebSocket: EchoTest", () async {
-        var completer = new Completer();
-        HttpServer.bind('127.0.0.1', 4040).then((server) async {
+List<void Function()> testFunctions = <void Function()>[
+  () => test(' WebSocket: EchoTest', () async {
+        Completer<void> completer = Completer<void>();
+        HttpServer.bind('127.0.0.1', 4040).then((HttpServer server) async {
           try {
-            await for (var req in server) {
+            await for (HttpRequest req in server) {
               if (req.uri.path == '/sip') {
                 // Upgrade a HttpRequest to a WebSocket connection.
-                var socket = await WebSocketTransformer.upgrade(req);
-                socket.listen((msg) {
+                WebSocket socket = await WebSocketTransformer.upgrade(req);
+                socket.listen((dynamic msg) {
                   socket.add(msg);
                   expect(msg, 'message');
                   socket.close();
@@ -23,12 +23,12 @@ var testFunctions = [
               }
             }
           } catch (error) {
-            print("An error occurred. $error");
+            print(' An error occurred. $error');
           }
         });
 
         WebSocketInterface client =
-            new WebSocketInterface('ws://127.0.0.1:4040/sip');
+            WebSocketInterface('ws://127.0.0.1:4040/sip');
 
         expect(client.url, 'ws://127.0.0.1:4040/sip');
         expect(client.via_transport, 'WS');
@@ -37,32 +37,33 @@ var testFunctions = [
 
         client.onconnect = () {
           print('connected');
-          client.send("message");
+          client.send('message');
           expect(client.isConnected(), true);
         };
-        client.ondata = (data) async {
+        client.ondata = (dynamic data) async {
           print('ondata => $data');
-          expect(data, "message");
+          expect(data, 'message');
           client.disconnect();
           completer.complete();
         };
-        client.ondisconnect =
-            (WebSocketInterface socket, bool error, int closeCode, String reason) {
-          print('ondisconnect => error $error [$closeCode] ${reason.toString()}');
+        client.ondisconnect = (WebSocketInterface socket, bool error,
+            int closeCode, String reason) {
+          print(
+              'ondisconnect => error $error [$closeCode] ${reason.toString()}');
           expect(client.isConnected(), false);
         };
         client.connect();
         return completer;
       }),
-  () => test("WebSocket: EchoTest", () async {
-        var completer = new Completer();
-        HttpServer.bind('127.0.0.1', 4041).then((server) async {
+  () => test(' WebSocket: EchoTest', () async {
+        Completer<void> completer = Completer<void>();
+        HttpServer.bind('127.0.0.1', 4041).then((HttpServer server) async {
           try {
-            await for (var req in server) {
+            await for (HttpRequest req in server) {
               if (req.uri.path == '/sip') {
                 // Upgrade a HttpRequest to a WebSocket connection.
-                var socket = await WebSocketTransformer.upgrade(req);
-                socket.listen((msg) {
+                WebSocket socket = await WebSocketTransformer.upgrade(req);
+                socket.listen((dynamic msg) {
                   socket.add(msg);
                   expect(msg, 'message');
                   socket.close();
@@ -71,18 +72,18 @@ var testFunctions = [
               }
             }
           } catch (error) {
-            print("An error occurred. $error");
+            print(' An error occurred. $error');
           }
         });
         WebSocketInterface socket =
-            new WebSocketInterface('ws://127.0.0.1:4041/sip');
-        Transport trasnport = new Transport(socket);
+            WebSocketInterface('ws://127.0.0.1:4041/sip');
+        Transport trasnport = Transport(socket);
 
-        trasnport.onconnecting = (socket, attempt) {
+        trasnport.onconnecting = (WebSocketInterface socket, int attempt) {
           expect(trasnport.isConnecting(), true);
         };
 
-        trasnport.onconnect = (socket) {
+        trasnport.onconnect = (Transport socket) {
           expect(trasnport.isConnected(), true);
           trasnport.send('message');
         };
@@ -92,7 +93,7 @@ var testFunctions = [
           trasnport.disconnect();
         };
 
-        trasnport.ondisconnect = (socket, ErrorCause cause) {
+        trasnport.ondisconnect = (WebSocketInterface socket, ErrorCause cause) {
           expect(trasnport.isConnected(), false);
           completer.complete();
         };
@@ -104,5 +105,5 @@ var testFunctions = [
 ];
 
 void main() {
-  testFunctions.forEach((func) => func());
+  testFunctions.forEach((Function func) => func());
 }

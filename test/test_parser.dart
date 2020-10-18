@@ -3,9 +3,9 @@ import 'package:sip_ua/src/grammar.dart';
 import 'package:sip_ua/src/uri.dart';
 import 'package:sip_ua/src/name_addr_header.dart';
 
-var testFunctions = [
-  () => test("Parser: Host => [ domain, ipv4, ipv6 ].", () {
-        var data = Grammar.parse('www.google.com', 'host');
+List<void Function()> testFunctions = <void Function()>[
+  () => test('Parser: Host => [ domain, ipv4, ipv6 ].', () {
+        dynamic data = Grammar.parse('www.google.com', 'host');
         expect(data['host_type'], 'domain');
 
         data = Grammar.parse('www.163.com', 'host');
@@ -32,8 +32,8 @@ var testFunctions = [
         data = Grammar.parse('[1:0:fF::432]', 'host');
         expect(data['host_type'], 'IPv6');
       }),
-  () => test("Parser: URI.", () {
-        var uriData =
+  () => test('Parser: URI.', () {
+        String uriData =
             'siP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2';
         URI uri = URI.parse(uriData);
         print('uriData => ' + uriData);
@@ -48,8 +48,8 @@ var testFunctions = [
         expect(uri.getParam('foo'), 'ABc');
         expect(uri.getParam('baz'), null);
         expect(uri.getParam('nooo'), null);
-        expect(uri.getHeader('x-header-1'), ['AaA1', 'AAA2']);
-        expect(uri.getHeader('X-HEADER-2'), ['BbB']);
+        expect(uri.getHeader('x-header-1'), <String>['AaA1', 'AAA2']);
+        expect(uri.getHeader('X-HEADER-2'), <String>['BbB']);
         expect(uri.getHeader('nooo'), null);
         print('uri => ' + uri.toString());
         expect(uri.toString(),
@@ -60,7 +60,7 @@ var testFunctions = [
         uri.user = 'Iñaki:PASSWD';
         expect(uri.user, 'Iñaki:PASSWD');
         expect(uri.deleteParam('foo'), 'ABc');
-        expect(uri.deleteHeader('x-header-1'), ['AaA1', 'AAA2']);
+        expect(uri.deleteHeader('x-header-1'), <String>['AaA1', 'AAA2']);
         uri.deleteHeader('x-header-1');
         expect(uri.toString(),
             'sip:I%C3%B1aki:PASSWD@versatica.com:6060;transport=tcp;baz?X-Header-2=BbB');
@@ -71,49 +71,49 @@ var testFunctions = [
         expect(uri.toString(), 'sip:I%C3%B1aki:PASSWD@versatica.com');
         expect(uri.toAor(), 'sip:I%C3%B1aki:PASSWD@versatica.com');
       }),
-  () => test("Parser: NameAddr with token display_name.", () {
-        var data =
+  () => test('Parser: NameAddr with token display_name.', () {
+        String data =
             'Foo    Foo Bar\tBaz<SIP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2>;QWE=QWE;ASd';
         NameAddrHeader name = NameAddrHeader.parse(data);
         print('name => ' + name.toString());
 
         expect(name.display_name, 'Foo Foo Bar Baz');
       }),
-  () => test("Parser: NameAddr with no space between DQUOTE and LAQUOT.", () {
-        var data =
+  () => test('Parser: NameAddr with no space between DQUOTE and LAQUOT.', () {
+        String data =
             '"Foo"<SIP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2>;QWE=QWE;ASd';
         NameAddrHeader name = NameAddrHeader.parse(data);
         print('name => ' + name.toString());
 
         expect(name.display_name, 'Foo');
       }),
-  () => test("Parser: NameAddr with no space between DQUOTE and LAQUOT", () {
-        var data =
+  () => test('Parser: NameAddr with no space between DQUOTE and LAQUOT', () {
+        String data =
             '<SIP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2>;QWE=QWE;ASd';
         NameAddrHeader name = NameAddrHeader.parse(data);
         print('name => ' + name.toString());
 
         expect(name.display_name, null);
       }),
-  () => test("Parser: NameAddr.", () {
-        var data =
-            '  "Iñaki ðđøþ foo \\"bar\\" \\\\\\\\ \\\\ \\\\d \\\\\\\\d \\\\\' \\\\\\"sdf\\\\\\""  ' +
-                '<SIP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2>;QWE=QWE;ASd';
+  () => test('Parser: NameAddr.', () {
+        String data =
+            '  "Iñaki ðđøþ foo \\"bar\\" \\\\\\\\ \\\\ \\\\d \\\\\\\\d \\\\\' \\\\\\"sdf\\\\\\""  '
+            '<SIP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2>;QWE=QWE;ASd';
         NameAddrHeader name = NameAddrHeader.parse(data);
         print('name => ' + name.toString());
         expect(name.display_name,
             'Iñaki ðđøþ foo \\"bar\\" \\\\\\\\ \\\\ \\\\d \\\\\\\\d \\\\\' \\\\\\"sdf\\\\\\"');
       }),
-  () => test("Parser: multiple Contact.", () {
-        var data =
+  () => test('Parser: multiple Contact.', () {
+        String data =
             '"Iñaki @ł€" <SIP:+1234@ALIAX.net;Transport=WS>;+sip.Instance="abCD", sip:bob@biloxi.COM;headerParam, <sip:DOMAIN.com:5>';
-        var contacts = Grammar.parse(data, 'Contact');
+        dynamic contacts = Grammar.parse(data, 'Contact');
         print('contacts => ' + contacts.toString());
 
         expect(contacts.length, 3);
-        var c1 = contacts[0]['parsed'];
-        var c2 = contacts[1]['parsed'];
-        var c3 = contacts[2]['parsed'];
+        dynamic c1 = contacts[0]['parsed'];
+        dynamic c2 = contacts[1]['parsed'];
+        dynamic c3 = contacts[2]['parsed'];
 
         // Parsed data.
         expect(c1.display_name, 'Iñaki @ł€');
@@ -174,10 +174,10 @@ var testFunctions = [
         expect(c3.toString(),
             '<sip:domain.com:5;newuriparam=zxCV>;newheaderparam=zxCV');
       }),
-  () => test("Parser: Via.", () {
-        var data =
+  () => test('Parser: Via.', () {
+        String data =
             'SIP /  3.0 \r\n / UDP [1:ab::FF]:6060 ;\r\n  BRanch=1234;Param1=Foo;paRAM2;param3=Bar';
-        var via = Grammar.parse(data, 'Via');
+        dynamic via = Grammar.parse(data, 'Via');
 
         print('via => ' + via.toString());
 
@@ -187,30 +187,30 @@ var testFunctions = [
         expect(via.host_type, 'IPv6');
         expect(via.port, 6060);
         expect(via.branch, '1234');
-        expect(via.params, {
+        expect(via.params, <String, dynamic>{
           'branch': '1234',
           'param1': 'Foo',
           'param2': null,
           'param3': 'Bar'
         });
       }),
-  () => test("Parser: CSeq.", () {
-        var data = '123456  CHICKEN';
-        var cseq = Grammar.parse(data, 'CSeq');
+  () => test('Parser: CSeq.', () {
+        String data = '123456  CHICKEN';
+        dynamic cseq = Grammar.parse(data, 'CSeq');
 
         print('cseq => ' + cseq.toString());
 
         expect(cseq.value, 123456);
         expect(cseq.method, 'CHICKEN');
       }),
-  () => test("Parser: authentication challenge.", () {
-        var data =
+  () => test('Parser: authentication challenge.', () {
+        String data =
             'Digest realm =  "[1:ABCD::abc]", nonce =  "31d0a89ed7781ce6877de5cb032bf114", qop="AUTH,autH-INt", algorithm =  md5  ,  stale =  TRUE , opaque = "00000188"';
-        var auth = Grammar.parse(data, 'challenge');
+        dynamic auth = Grammar.parse(data, 'challenge');
 
         print('auth => ' + auth.toString());
 
-        //TODO:  fix other_auth_param parse;
+        // TODO(cloudwebrtc):  fix other_auth_param parse;
 
         expect(auth.realm, '[1:ABCD::abc]');
         expect(auth.nonce, '31d0a89ed7781ce6877de5cb032bf114');
@@ -220,9 +220,9 @@ var testFunctions = [
         expect(auth.stale, true);
         expect(auth.opaque, '00000188');
       }),
-  () => test("Parser: Event.", () {
-        var data = 'Presence;Param1=QWe;paraM2';
-        var event = Grammar.parse(data, 'Event');
+  () => test('Parser: Event.', () {
+        String data = 'Presence;Param1=QWe;paraM2';
+        dynamic event = Grammar.parse(data, 'Event');
 
         print('event => ' + event.toString());
 
@@ -230,8 +230,9 @@ var testFunctions = [
         expect(event.params['param1'], 'QWe');
         expect(event.params['param2'], null);
       }),
-  () => test("Parser: Session-Expires.", () {
-        var data, session_expires;
+  () => test('Parser: Session-Expires.', () {
+        String data;
+        dynamic session_expires;
 
         data = '180;refresher=uac';
         session_expires = Grammar.parse(data, 'Session_Expires');
@@ -249,8 +250,9 @@ var testFunctions = [
         expect(session_expires.expires, 210);
         expect(session_expires.refresher, 'uas');
       }),
-  () => test("Parser: Reason.", () {
-        var data, reason;
+  () => test('Parser: Reason.', () {
+        String data;
+        dynamic reason;
 
         data = 'SIP  ; cause = 488 ; text = "Wrong SDP"';
         reason = Grammar.parse(data, 'Reason');
@@ -271,8 +273,9 @@ var testFunctions = [
         expect(reason.text, null);
         expect(reason.params['lala'], 'foo');
       }),
-  () => test("Parser: Refer-To.", () {
-        var data, parsed;
+  () => test('Parser: Refer-To.', () {
+        String data;
+        dynamic parsed;
 
         data = 'sip:alice@versatica.com';
         parsed = Grammar.parse(data, 'Refer_To');
@@ -294,9 +297,10 @@ var testFunctions = [
         expect(parsed.uri.host, 'versatica.com');
         expect(parsed.uri.hasHeader('Accept-Contact'), true);
       }),
-  () => test("Parser: Replaces.", () {
-        var parsed;
-        var data = '5t2gpbrbi72v79p1i8mr;to-tag=03aq91cl9n;from-tag=kun98clbf7';
+  () => test('Parser: Replaces.', () {
+        dynamic parsed;
+        String data =
+            '5t2gpbrbi72v79p1i8mr;to-tag=03aq91cl9n;from-tag=kun98clbf7';
 
         parsed = Grammar.parse(data, 'Replaces');
 
@@ -306,9 +310,9 @@ var testFunctions = [
         expect(parsed.to_tag, '03aq91cl9n');
         expect(parsed.from_tag, 'kun98clbf7');
       }),
-  () => test("Parser: absoluteURI.", () {
-        var parsed;
-        var data = 'ws://127.0.0.1:4040/sip';
+  () => test('Parser: absoluteURI.', () {
+        dynamic parsed;
+        String data = 'ws://127.0.0.1:4040/sip';
 
         parsed = Grammar.parse(data, 'absoluteURI');
 
@@ -321,5 +325,5 @@ var testFunctions = [
 ];
 
 void main() {
-  testFunctions.forEach((func) => func());
+  testFunctions.forEach((Function func) => func());
 }

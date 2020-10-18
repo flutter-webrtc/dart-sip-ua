@@ -2,9 +2,9 @@ import 'package:test/test.dart';
 import 'package:sip_ua/src/uri.dart';
 import 'package:sip_ua/src/name_addr_header.dart';
 
-var testFunctions = [
-  () => test("Class: URI", () {
-        var uri = new URI(null, 'alice', 'jssip.net', 6060);
+List<void Function()> testFunctions = <void Function()>[
+  () => test('Class: URI', () {
+        URI uri = URI(null, 'alice', 'jssip.net', 6060);
 
         expect(uri.scheme, 'sip');
         expect(uri.user, 'alice');
@@ -35,7 +35,7 @@ var testFunctions = [
 
         expect(() => uri.host = null, throwsNoSuchMethodError);
 
-// causes compile error with strict
+        // causes compile error with strict
         // expect(() => uri.host = {'bar': 'foo'}, throwsNoSuchMethodError);
 
         expect(uri.host, 'jssip.net');
@@ -50,11 +50,11 @@ var testFunctions = [
         uri.port = null;
         expect(uri.port, null);
 
-// causes compile error with strict
+        // causes compile error with strict
         //uri.port = 'ABCD'; // Should become null.
         //expect(uri.toString(), 'sip:alice@jssip.net');
 
-// causes compile error with strict
+        // causes compile error with strict
         //uri.port = '123'; // Should become 123.
         //expect(uri.toString(), 'sip:alice@jssip.net:123');
 
@@ -89,30 +89,30 @@ var testFunctions = [
 
         uri.setHeader('Foo', 'LALALA');
         expect(uri.hasHeader('FOO'), true);
-        expect(uri.getHeader('FOO'), ['LALALA']);
+        expect(uri.getHeader('FOO'), <String>['LALALA']);
         expect(uri.toString(), 'sip:alice@jssip.net?Foo=LALALA');
 
-        uri.setHeader('bAz', ['ABC-1', 'ABC-2']);
-        expect(uri.getHeader('baz'), ['ABC-1', 'ABC-2']);
+        uri.setHeader('bAz', <String>['ABC-1', 'ABC-2']);
+        expect(uri.getHeader('baz'), <String>['ABC-1', 'ABC-2']);
         expect(uri.toString(),
             'sip:alice@jssip.net?Foo=LALALA&Baz=ABC-1&Baz=ABC-2');
 
-        expect(uri.deleteHeader('baZ'), ['ABC-1', 'ABC-2']);
+        expect(uri.deleteHeader('baZ'), <String>['ABC-1', 'ABC-2']);
         expect(uri.deleteHeader('NOO'), null);
 
         uri.clearHeaders();
         expect(uri.toString(), 'sip:alice@jssip.net');
 
-        var uri2 = uri.clone();
+        URI uri2 = uri.clone();
 
         expect(uri2.toString(), uri.toString());
         uri2.user = 'popo';
         expect(uri2.user, 'popo');
         expect(uri.user, 'alice');
       }),
-  () => test("Class: NameAddr", () {
-        var uri = new URI('sip', 'alice', 'jssip.net');
-        var name = new NameAddrHeader(uri, 'Alice æßð');
+  () => test('Class: NameAddr', () {
+        URI uri = URI('sip', 'alice', 'jssip.net');
+        NameAddrHeader name = NameAddrHeader(uri, 'Alice æßð');
 
         expect(name.display_name, 'Alice æßð');
         expect(name.toString(), '"Alice æßð" <sip:alice@jssip.net>');
@@ -138,7 +138,7 @@ var testFunctions = [
         name.clearParams();
         expect(name.toString(), '<sip:alice@jssip.net>');
 
-        var name2 = name.clone();
+        NameAddrHeader name2 = name.clone();
 
         expect(name2.toString(), name.toString());
         name2.display_name = '@ł€';
@@ -147,5 +147,5 @@ var testFunctions = [
 ];
 
 void main() {
-  testFunctions.forEach((func) => func());
+  testFunctions.forEach((Function func) => func());
 }

@@ -1,42 +1,39 @@
-import 'dart:convert';
-import 'uri.dart';
 import 'grammar.dart';
+import 'uri.dart';
+import 'utils.dart';
 
 class NameAddrHeader {
-  final JsonDecoder decoder = new JsonDecoder();
-  final JsonEncoder encoder = new JsonEncoder();
+  NameAddrHeader(URI uri, String display_name,
+      [Map<dynamic, dynamic> parameters]) {
+    // Checks.
+    if (uri == null || uri is! URI) {
+      throw AssertionError('missing or invalid "uri" parameter');
+    }
+
+    // Initialize parameters.
+    _uri = uri;
+    _parameters = <dynamic, dynamic>{};
+    _display_name = display_name;
+
+    if (parameters != null) {
+      parameters.forEach((dynamic key, dynamic param) {
+        setParam(key, param);
+      });
+    }
+  }
   URI _uri;
-  Map<String, dynamic> _parameters;
+  Map<dynamic, dynamic> _parameters;
   String _display_name;
   /**
    * Parse the given string and returns a NameAddrHeader instance or null if
    * it is an invalid NameAddrHeader.
    */
-  static parse(name_addr_header) {
-    name_addr_header = Grammar.parse(name_addr_header, 'Name_Addr_Header');
-
-    if (name_addr_header != -1) {
-      return name_addr_header;
+  static dynamic parse(String name_addr_header) {
+    dynamic parsed = Grammar.parse(name_addr_header, 'Name_Addr_Header');
+    if (parsed != -1) {
+      return parsed;
     } else {
       return null;
-    }
-  }
-
-  NameAddrHeader(uri, display_name, [parameters]) {
-    // Checks.
-    if (uri == null || uri is! URI) {
-      throw new AssertionError('missing or invalid "uri" parameter');
-    }
-
-    // Initialize parameters.
-    this._uri = uri;
-    this._parameters = {};
-    this._display_name = display_name;
-
-    if (parameters != null) {
-      parameters.forEach((key, param) {
-        this.setParam(key, param);
-      });
     }
   }
 
@@ -45,63 +42,64 @@ class NameAddrHeader {
   String get display_name => _display_name;
 
   set display_name(dynamic value) {
-    this._display_name = (value == 0) ? '0' : value;
+    _display_name = (value == 0) ? '0' : value;
   }
 
-  setParam(key, value) {
+  void setParam(String key, dynamic value) {
     if (key != null) {
-      this._parameters[key.toLowerCase()] =
+      _parameters[key.toLowerCase()] =
           (value == null) ? null : value.toString();
     }
   }
 
-  getParam(key) {
+  dynamic getParam(String key) {
     if (key != null) {
-      return this._parameters[key.toLowerCase()];
+      return _parameters[key.toLowerCase()];
     }
   }
 
-  bool hasParam(key) {
+  bool hasParam(String key) {
     if (key != null) {
-      return this._parameters.containsKey(key.toLowerCase());
+      return _parameters.containsKey(key.toLowerCase());
     }
     return false;
   }
 
-  deleteParam(parameter) {
+  dynamic deleteParam(String parameter) {
     parameter = parameter.toLowerCase();
-    if (this._parameters[parameter] != null) {
-      var value = this._parameters[parameter];
-      this._parameters.remove(parameter);
+    if (_parameters[parameter] != null) {
+      dynamic value = _parameters[parameter];
+      _parameters.remove(parameter);
       return value;
     }
   }
 
-  clearParams() {
-    this._parameters = {};
+  void clearParams() {
+    _parameters = <dynamic, dynamic>{};
   }
 
-  clone() {
-    return new NameAddrHeader(this._uri.clone(), this._display_name,
-        decoder.convert(encoder.convert(this._parameters)));
+  NameAddrHeader clone() {
+    return NameAddrHeader(_uri.clone(), _display_name,
+        decoder.convert(encoder.convert(_parameters)));
   }
 
-  _quote(str) {
+  String _quote(String str) {
     return str.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   }
 
-  toString() {
-    var body = (this._display_name != null && this._display_name.length > 0)
-        ? '"${this._quote(this._display_name)}" '
+  @override
+  String toString() {
+    String body = (_display_name != null && _display_name.length > 0)
+        ? '"${_quote(_display_name)}" '
         : '';
 
-    body += '<${this._uri.toString()}>';
+    body += '<${_uri.toString()}>';
 
-    this._parameters.forEach((key, value) {
-      if (this._parameters.containsKey(key)) {
-        body += ';${key}';
+    _parameters.forEach((dynamic key, dynamic value) {
+      if (_parameters.containsKey(key)) {
+        body += ';$key';
         if (value != null) {
-          body += '=${value}';
+          body += '=$value';
         }
       }
     });

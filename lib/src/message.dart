@@ -1,225 +1,218 @@
-import '../sip_ua.dart';
+import 'package:sip_ua/src/name_addr_header.dart';
+
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
-import 'exceptions.dart' as Exceptions;
-import 'request_sender.dart';
-import 'sip_message.dart' as SIPMessage;
-import 'sip_message.dart';
-import 'ua.dart';
-import 'utils.dart' as Utils;
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
+import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
+import 'request_sender.dart';
+import 'sip_message.dart';
+import 'ua.dart';
+import 'uri.dart';
+import 'utils.dart' as Utils;
 
 class Message extends EventManager {
-  UA _ua;
-  var _request;
-  var _closed;
-  var _direction;
-  var _local_identity;
-  var _remote_identity;
-  var _is_replied;
-  var _data;
-  final logger = new Log();
-
   Message(UA ua) {
-    this._ua = ua;
-    this._request = null;
-    this._closed = false;
+    _ua = ua;
+    _request = null;
+    _closed = false;
 
-    this._direction = null;
-    this._local_identity = null;
-    this._remote_identity = null;
+    _direction = null;
+    _local_identity = null;
+    _remote_identity = null;
 
     // Whether an incoming message has been replied.
-    this._is_replied = false;
+    _is_replied = false;
 
     // Custom message empty object for high level use.
-    this._data = {};
+    _data = <String, dynamic>{};
   }
 
-  get direction => this._direction;
+  UA _ua;
+  dynamic _request;
+  bool _closed;
+  String _direction;
+  NameAddrHeader _local_identity;
+  NameAddrHeader _remote_identity;
+  bool _is_replied;
+  Map<String, dynamic> _data;
+  String get direction => _direction;
 
-  get local_identity => this._local_identity;
+  NameAddrHeader get local_identity => _local_identity;
 
-  get remote_identity => this._remote_identity;
+  NameAddrHeader get remote_identity => _remote_identity;
 
-  get data => this._data;
+  Map<String, dynamic> get data => _data;
 
-  send(String target, String body, [Map<String, dynamic> options]) {
-    var originalTarget = target;
-    options = options ?? {};
+  void send(String target, String body, [Map<String, dynamic> options]) {
+    String originalTarget = target;
+    options = options ?? <String, dynamic>{};
 
     if (target == null || body == null) {
-      throw new Exceptions.TypeError('Not enough arguments');
+      throw Exceptions.TypeError('Not enough arguments');
     }
 
     // Check target validity.
-    var normalized = this._ua.normalizeTarget(target);
+    URI normalized = _ua.normalizeTarget(target);
     if (normalized == null) {
-      throw new Exceptions.TypeError('Invalid target: ${originalTarget}');
+      throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
 
     // Get call options.
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
-    var contentType = options['contentType'] ?? 'text/plain';
+    String contentType = options['contentType'] ?? 'text/plain';
 
     // Set event handlers.
     addAllEventHandlers(eventHandlers);
 
     extraHeaders.add('Content-Type: $contentType');
 
-    this._request = new SIPMessage.OutgoingRequest(
-      SipMethod.MESSAGE, normalized, this._ua, null, extraHeaders);
+    _request =
+        OutgoingRequest(SipMethod.MESSAGE, normalized, _ua, null, extraHeaders);
     if (body != null) {
-      this._request.body = body;
+      _request.body = body;
     }
 
-    EventManager localEventHandlers = EventManager();
-    localEventHandlers.on(EventOnRequestTimeout(),
-        (EventOnRequestTimeout value) {
-      this._onRequestTimeout();
+    EventManager handlers = EventManager();
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
+      _onRequestTimeout();
     });
-    localEventHandlers.on(EventOnTransportError(),
-        (EventOnTransportError value) {
-      this._onTransportError();
+    handlers.on(EventOnTransportError(), (EventOnTransportError value) {
+      _onTransportError();
     });
-    localEventHandlers.on(EventOnReceiveResponse(),
-        (EventOnReceiveResponse event) {
-      this._receiveResponse(event.response);
+    handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
+      _receiveResponse(event.response);
     });
 
-    var request_sender =
-        new RequestSender(this._ua, this._request, localEventHandlers);
+    RequestSender request_sender = RequestSender(_ua, _request, handlers);
 
-    this._newMessage('local', this._request);
+    _newMessage('local', _request);
 
     request_sender.send();
   }
 
-  init_incoming(request) {
-    this._request = request;
+  void init_incoming(IncomingRequest request) {
+    _request = request;
 
-    this._newMessage('remote', request);
+    _newMessage('remote', request);
 
     // Reply with a 200 OK if the user didn't reply.
-    if (this._is_replied == null) {
-      this._is_replied = true;
+    if (_is_replied == null) {
+      _is_replied = true;
       request.reply(200);
     }
 
-    this.close();
+    close();
   }
 
   /*
    * Accept the incoming Message
    * Only valid for incoming Messages
    */
-  accept(options) {
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    var body = options['body'];
+  void accept(Map<String, dynamic> options) {
+    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    String body = options['body'];
 
-    if (this._direction != 'incoming') {
-      throw new Exceptions.NotSupportedError(
+    if (_direction != 'incoming') {
+      throw Exceptions.NotSupportedError(
           '"accept" not supported for outgoing Message');
     }
 
-    if (this._is_replied != null) {
-      throw new AssertionError('incoming Message already replied');
+    if (_is_replied != null) {
+      throw AssertionError('incoming Message already replied');
     }
 
-    this._is_replied = true;
-    this._request.reply(200, null, extraHeaders, body);
+    _is_replied = true;
+    _request.reply(200, null, extraHeaders, body);
   }
 
   /**
    * Reject the incoming Message
    * Only valid for incoming Messages
    */
-  reject(options) {
-    var status_code = options['status_code'] ?? 480;
-    var reason_phrase = options['reason_phrase'];
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    var body = options['body'];
+  void reject(Map<String, dynamic> options) {
+    int status_code = options['status_code'] ?? 480;
+    String reason_phrase = options['reason_phrase'];
+    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    String body = options['body'];
 
-    if (this._direction != 'incoming') {
-      throw new Exceptions.NotSupportedError(
+    if (_direction != 'incoming') {
+      throw Exceptions.NotSupportedError(
           '"reject" not supported for outgoing Message');
     }
 
-    if (this._is_replied != null) {
-      throw new AssertionError('incoming Message already replied');
+    if (_is_replied != null) {
+      throw AssertionError('incoming Message already replied');
     }
 
     if (status_code < 300 || status_code >= 700) {
-      throw new Exceptions.TypeError('Invalid status_code: $status_code');
+      throw Exceptions.TypeError('Invalid status_code: $status_code');
     }
 
-    this._is_replied = true;
-    this._request.reply(status_code, reason_phrase, extraHeaders, body);
+    _is_replied = true;
+    _request.reply(status_code, reason_phrase, extraHeaders, body);
   }
 
-  _receiveResponse(response) {
-    if (this._closed != null) {
+  void _receiveResponse(IncomingResponse response) {
+    if (_closed != null) {
       return;
     }
     if (RegExp(r'^1[0-9]{2}$').hasMatch(response.status_code)) {
       // Ignore provisional responses.
     } else if (RegExp(r'^2[0-9]{2}$').hasMatch(response.status_code)) {
-      this._succeeded('remote', response);
+      _succeeded('remote', response);
     } else {
-      var cause = Utils.sipErrorCause(response.status_code);
-      this._failed(
-          'remote', response.status_code, cause, response.reason_phrase);
+      String cause = Utils.sipErrorCause(response.status_code);
+      _failed('remote', response.status_code, cause, response.reason_phrase);
     }
   }
 
-  _onRequestTimeout() {
-    if (this._closed != null) {
+  void _onRequestTimeout() {
+    if (_closed != null) {
       return;
     }
-    this._failed(
-        'system', 408, DartSIP_C.causes.REQUEST_TIMEOUT, 'Request Timeout');
+    _failed('system', 408, DartSIP_C.causes.REQUEST_TIMEOUT, 'Request Timeout');
   }
 
-  _onTransportError() {
-    if (this._closed != null) {
+  void _onTransportError() {
+    if (_closed != null) {
       return;
     }
-    this._failed(
+    _failed(
         'system', 500, DartSIP_C.causes.CONNECTION_ERROR, 'Transport Error');
   }
 
-  close() {
-    this._closed = true;
-    this._ua.destroyMessage(this);
+  void close() {
+    _closed = true;
+    _ua.destroyMessage(this);
   }
 
   /**
    * Internal Callbacks
    */
 
-  _newMessage(originator, request) {
+  void _newMessage(String originator, dynamic request) {
     if (originator == 'remote') {
-      this._direction = 'incoming';
-      this._local_identity = request.to;
-      this._remote_identity = request.from;
+      _direction = 'incoming';
+      _local_identity = request.to;
+      _remote_identity = request.from;
     } else if (originator == 'local') {
-      this._direction = 'outgoing';
-      this._local_identity = request.from;
-      this._remote_identity = request.to;
+      _direction = 'outgoing';
+      _local_identity = request.from;
+      _remote_identity = request.to;
     }
 
-    this._ua.newMessage(this, originator, request);
+    _ua.newMessage(this, originator, request);
   }
 
-  _failed(
+  void _failed(
       String originator, int status_code, String cause, String reason_phrase) {
     logger.debug('MESSAGE failed');
-    this.close();
+    close();
     logger.debug('emit "failed"');
-    this.emit(EventCallFailed(
+    emit(EventCallFailed(
         originator: originator,
         cause: ErrorCause(
             cause: cause,
@@ -227,13 +220,13 @@ class Message extends EventManager {
             reason_phrase: reason_phrase)));
   }
 
-  _succeeded(String originator, IncomingResponse response) {
+  void _succeeded(String originator, IncomingResponse response) {
     logger.debug('MESSAGE succeeded');
 
-    this.close();
+    close();
 
     logger.debug('emit "succeeded"');
 
-    this.emit(EventSucceeded(originator: originator, response: response));
+    emit(EventSucceeded(originator: originator, response: response));
   }
 }

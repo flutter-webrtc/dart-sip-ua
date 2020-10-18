@@ -22,4 +22,4 @@ Since the peg tool does not support `dart 2.x`, you need to use `dart 1.24.3`.
 
 - Generate grammar parser
 
-  `./tools/generate_grammar.sh`
+  `./tool/generate_grammar.sh`

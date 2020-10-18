@@ -1,67 +1,61 @@
-import '../../sip_ua.dart';
+import 'dart:async';
+
 import '../constants.dart';
 import '../dialog.dart';
-import '../rtc_session.dart' as RTCSession;
-import '../request_sender.dart';
-import '../sip_message.dart';
-import '../timers.dart';
-import '../ua.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
+import '../request_sender.dart';
+import '../rtc_session.dart' as RTCSession;
+import '../sip_message.dart';
+import '../timers.dart';
 import '../transactions/transaction_base.dart';
+import '../ua.dart';
 
 class DialogRequestSender {
+  DialogRequestSender(
+      Dialog dialog, OutgoingRequest request, EventManager eventHandlers) {
+    _dialog = dialog;
+    _ua = dialog.ua;
+    _request = request;
+    _eventHandlers = eventHandlers;
+
+    // RFC3261 14.1 Modifying an Existing Session. UAC Behavior.
+    _reattempt = false;
+  }
   Dialog _dialog;
   UA _ua;
   OutgoingRequest _request;
   EventManager _eventHandlers;
-  var _reattempt;
-  var _reattemptTimer;
-  var _request_sender;
+  bool _reattempt;
+  Timer _reattemptTimer;
+  RequestSender _request_sender;
+  RequestSender get request_sender => _request_sender;
+  OutgoingRequest get request => _request;
 
-  DialogRequestSender(
-      Dialog dialog, OutgoingRequest request, EventManager eventHandlers) {
-    this._dialog = dialog;
-    this._ua = dialog.ua;
-    this._request = request;
-    this._eventHandlers = eventHandlers;
-
-    // RFC3261 14.1 Modifying an Existing Session. UAC Behavior.
-    this._reattempt = false;
-    this._reattemptTimer = null;
-  }
-
-  OutgoingRequest get request => this._request;
-
-  send() {
-    EventManager localEventHandlers = EventManager();
-    localEventHandlers.on(EventOnRequestTimeout(),
-        (EventOnRequestTimeout value) {
-      this._eventHandlers.emit(EventOnRequestTimeout());
+  void send() {
+    EventManager handlers = EventManager();
+    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
+      _eventHandlers.emit(EventOnRequestTimeout());
     });
-    localEventHandlers.on(EventOnTransportError(),
-        (EventOnTransportError value) {
-      this._eventHandlers.emit(EventOnTransportError());
+    handlers.on(EventOnTransportError(), (EventOnTransportError value) {
+      _eventHandlers.emit(EventOnTransportError());
     });
-    localEventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
-      this._eventHandlers.emit(EventOnAuthenticated(request: event.request));
+    handlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
+      _eventHandlers.emit(EventOnAuthenticated(request: event.request));
     });
-    localEventHandlers.on(EventOnReceiveResponse(),
-        (EventOnReceiveResponse event) {
-      this._receiveResponse(event.response);
+    handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
+      _receiveResponse(event.response);
     });
 
-    var request_sender =
-        new RequestSender(this._ua, this._request, localEventHandlers);
+    _request_sender = RequestSender(_ua, _request, handlers);
 
     request_sender.send();
 
     // RFC3261 14.2 Modifying an Existing Session -UAC BEHAVIOR-.
-    if ((this._request.method == SipMethod.INVITE ||
-            (this._request.method == SipMethod.UPDATE &&
-                this._request.body != null)) &&
+    if ((_request.method == SipMethod.INVITE ||
+            (_request.method == SipMethod.UPDATE && _request.body != null)) &&
         request_sender.clientTransaction.state != TransactionState.TERMINATED) {
-      this._dialog.uac_pending_reply = true;
+      _dialog.uac_pending_reply = true;
       EventManager eventHandlers = request_sender.clientTransaction;
       void Function(EventStateChanged data) stateChanged;
       stateChanged = (EventStateChanged data) {
@@ -72,7 +66,7 @@ class DialogRequestSender {
             request_sender.clientTransaction.state ==
                 TransactionState.TERMINATED) {
           eventHandlers.remove(EventStateChanged(), stateChanged);
-          this._dialog.uac_pending_reply = false;
+          _dialog.uac_pending_reply = false;
         }
       };
 
@@ -80,32 +74,32 @@ class DialogRequestSender {
     }
   }
 
-  _receiveResponse(response) {
+  void _receiveResponse(IncomingResponse response) {
     // RFC3261 12.2.1.2 408 or 481 is received for a request within a dialog.
     if (response.status_code == 408 || response.status_code == 481) {
-      this._eventHandlers.emit(EventOnDialogError(response: response));
+      _eventHandlers.emit(EventOnDialogError(response: response));
     } else if (response.method == SipMethod.INVITE &&
         response.status_code == 491) {
-      if (this._reattempt != null) {
+      if (_reattempt != null) {
         if (response.status_code >= 200 && response.status_code < 300) {
-          this._eventHandlers.emit(EventOnSuccessResponse(response: response));
+          _eventHandlers.emit(EventOnSuccessResponse(response: response));
         } else if (response.status_code >= 300) {
-          this._eventHandlers.emit(EventOnErrorResponse(response: response));
+          _eventHandlers.emit(EventOnErrorResponse(response: response));
         }
       } else {
-        this._request.cseq.value = this._dialog.local_seqnum += 1;
-        this._reattemptTimer = setTimeout(() {
-          // TODO: look at dialog state instead.
-          if (this._dialog.owner.status != RTCSession.C.STATUS_TERMINATED) {
-            this._reattempt = true;
-            this._request_sender.send();
+        _request.cseq = _dialog.local_seqnum += 1;
+        _reattemptTimer = setTimeout(() {
+          // TODO(cloudwebrtc): look at dialog state instead.
+          if (_dialog.owner.status != RTCSession.C.STATUS_TERMINATED) {
+            _reattempt = true;
+            _request_sender.send();
           }
         }, 1000);
       }
     } else if (response.status_code >= 200 && response.status_code < 300) {
-      this._eventHandlers.emit(EventOnSuccessResponse(response: response));
+      _eventHandlers.emit(EventOnSuccessResponse(response: response));
     } else if (response.status_code >= 300) {
-      this._eventHandlers.emit(EventOnErrorResponse(response: response));
+      _eventHandlers.emit(EventOnErrorResponse(response: response));
     }
   }
 }

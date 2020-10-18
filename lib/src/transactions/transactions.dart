@@ -1,3 +1,5 @@
+import 'package:sip_ua/src/sip_message.dart';
+
 import '../constants.dart';
 import '../timers.dart';
 import 'invite_server.dart';
@@ -5,7 +7,7 @@ import 'non_invite_server.dart';
 import 'transaction_base.dart';
 
 class TransactionBag {
-  Map<String, TransactionBase> transactions = {};
+  Map<String, TransactionBase> transactions = <String, TransactionBase>{};
 
   int countTransactions() {
     return transactions.length;
@@ -15,20 +17,20 @@ class TransactionBag {
     return type.toString() + ':' + id;
   }
 
-  addTransaction(TransactionBase transaction) {
+  void addTransaction(TransactionBase transaction) {
     String key = _buildKey(transaction.runtimeType, transaction.id);
     transactions[key] = transaction;
   }
 
-  removeTransaction(TransactionBase transaction) {
+  void removeTransaction(TransactionBase transaction) {
     String key = _buildKey(transaction.runtimeType, transaction.id);
     transactions.remove(key);
   }
 
   List<T> getAll<T>(Type type) {
-    List<T> results = [];
+    List<T> results = <T>[];
 
-    transactions.values.forEach((transaction) {
+    transactions.values.forEach((TransactionBase transaction) {
       if (transaction.runtimeType == type) {
         results.add(transaction as T);
       }
@@ -43,7 +45,7 @@ class TransactionBag {
   }
 
   List<TransactionBase> removeAll() {
-    List<TransactionBase> list = [];
+    List<TransactionBase> list = <TransactionBase>[];
     list.addAll(transactions.values);
     transactions.clear();
     return list;
@@ -53,7 +55,7 @@ class TransactionBag {
 /**
  * INVITE:
  *  _true_ if retransmission
- *  _false_ new request
+ *  _false_ request
  *
  * ACK:
  *  _true_  ACK to non2xx response
@@ -66,9 +68,9 @@ class TransactionBag {
  *
  * OTHER:
  *  _true_  retransmission
- *  _false_ new request
+ *  _false_ request
  */
-checkTransaction(TransactionBag _transactions, request) {
+bool checkTransaction(TransactionBag _transactions, IncomingRequest request) {
   switch (request.method) {
     case SipMethod.INVITE:
       InviteServerTransaction tr = _transactions.getTransaction(

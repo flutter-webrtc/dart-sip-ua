@@ -1,18 +1,12 @@
+import '../logger.dart';
 import 'events.dart';
-import 'call_events.dart';
-import 'refer_events.dart';
-import 'register_events.dart';
-import 'transport_events.dart';
-import 'message_events.dart';
 
-export 'events.dart';
 export 'call_events.dart';
+export 'events.dart';
+export 'message_events.dart';
 export 'refer_events.dart';
 export 'register_events.dart';
 export 'transport_events.dart';
-export 'message_events.dart';
-
-import '../logger.dart';
 
 /// This class serves as a Typed event bus.
 ///
@@ -32,12 +26,11 @@ import '../logger.dart';
 ///  -- do something here
 /// });
 class EventManager {
-  final logger = new Log();
-  Map<Type, List<dynamic>> listeners = Map();
+  Map<Type, List<dynamic>> listeners = <Type, List<dynamic>>{};
 
   /// returns true if there are any listeners associated with the EventType for this instance of EventManager
   bool hasListeners(EventType event) {
-    var targets = listeners[event.runtimeType];
+    List<dynamic> targets = listeners[event.runtimeType];
     if (targets != null) {
       return targets.isNotEmpty;
     }
@@ -55,8 +48,8 @@ class EventManager {
   ///  -- do something here
   /// });
   void on<T extends EventType>(T eventType, void Function(T event) listener) {
-    assert(listener != null, "Null listener");
-    assert(eventType != null, "Null eventType");
+    assert(listener != null, 'Null listener');
+    assert(eventType != null, 'Null eventType');
     _addListener(eventType.runtimeType, listener);
   }
 
@@ -64,12 +57,12 @@ class EventManager {
   /// BUT very importantly this method is private and
   /// all the methods that call it enforce the types!!!!
   void _addListener(Type runtimeType, dynamic listener) {
-    assert(listener != null, "Null listener");
-    assert(runtimeType != null, "Null runtimeType");
+    assert(listener != null, 'Null listener');
+    assert(runtimeType != null, 'Null runtimeType');
     try {
       List<dynamic> targets = listeners[runtimeType];
       if (targets == null) {
-        targets = new List<dynamic>();
+        targets = <dynamic>[];
         listeners[runtimeType] = targets;
       }
       targets.remove(listener);
@@ -81,8 +74,8 @@ class EventManager {
 
   /// add all event handlers from an other instance of EventManager to this one.
   void addAllEventHandlers(EventManager other) {
-    other.listeners.forEach((runtimeType, otherListeners) {
-      otherListeners.forEach((otherListener) {
+    other.listeners.forEach((Type runtimeType, List<dynamic> otherListeners) {
+      otherListeners.forEach((dynamic otherListener) {
         _addListener(runtimeType, otherListener);
       });
     });
@@ -96,20 +89,20 @@ class EventManager {
     }
     //    logger.warn("removing $eventType on $listener");
     if (!targets.remove(listener)) {
-      logger.warn("Failed to remove any listeners for EventType $eventType");
+      logger.warn('Failed to remove any listeners for EventType $eventType');
     }
   }
 
   /// send the supplied event to all of the listeners that are subscribed to that EventType
   void emit<T extends EventType>(T event) {
     event.sanityCheck();
-    var targets = listeners[event.runtimeType];
+    List<dynamic> targets = listeners[event.runtimeType];
 
     if (targets != null) {
       // avoid concurrent modification
-      List<dynamic> copy = List.from(targets);
+      List<dynamic> copy = List<dynamic>.from(targets);
 
-      copy.forEach((target) {
+      copy.forEach((dynamic target) {
         try {
           //   logger.warn("invoking $event on $target");
           target(event);

@@ -1,24 +1,24 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:convert';
-import 'dart:async';
+
 import 'package:sip_ua/src/sip_ua_helper.dart';
 
 import '../logger.dart';
-import '../grammar.dart';
 
-typedef void OnMessageCallback(dynamic msg);
-typedef void OnCloseCallback(int code, String reason);
-typedef void OnOpenCallback();
+typedef OnMessageCallback = void Function(dynamic msg);
+typedef OnCloseCallback = void Function(int code, String reason);
+typedef OnOpenCallback = void Function();
 
 class WebSocketImpl {
+  WebSocketImpl(this._url);
+
   final String _url;
   WebSocket _socket;
-  final logger = Log();
   OnOpenCallback onOpen;
   OnMessageCallback onMessage;
   OnCloseCallback onClose;
-  WebSocketImpl(this._url);
 
   void connect(
       {Iterable<String> protocols, WebSocketSettings webSocketSettings}) async {
@@ -33,7 +33,7 @@ class WebSocketImpl {
       }
 
       onOpen?.call();
-      _socket.listen((data) {
+      _socket.listen((dynamic data) {
         onMessage?.call(data);
       }, onDone: () {
         onClose?.call(_socket.closeCode, _socket.closeReason);
@@ -43,7 +43,7 @@ class WebSocketImpl {
     }
   }
 
-  void send(data) {
+  void send(dynamic data) {
     if (_socket != null) {
       _socket.add(data);
       logger.debug('send: \n\n$data');
@@ -62,10 +62,10 @@ class WebSocketImpl {
   Future<WebSocket> _connectForBadCertificate(
       String url, WebSocketSettings webSocketSettings) async {
     try {
-      var r = new Random();
-      var key = base64.encode(List<int>.generate(16, (_) => r.nextInt(255)));
-      var securityContext = new SecurityContext();
-      var client = HttpClient(context: securityContext);
+      Random r = Random();
+      String key = base64.encode(List<int>.generate(16, (_) => r.nextInt(255)));
+      SecurityContext securityContext = SecurityContext();
+      HttpClient client = HttpClient(context: securityContext);
 
       if (webSocketSettings.userAgent != null) {
         client.userAgent = webSocketSettings.userAgent;
@@ -77,11 +77,12 @@ class WebSocketImpl {
         return true;
       };
 
-      var parsed_uri = Uri.parse(url);
-      var uri = parsed_uri.replace(
+      Uri parsed_uri = Uri.parse(url);
+      Uri uri = parsed_uri.replace(
           scheme: parsed_uri.scheme == 'wss' ? 'https' : 'http');
 
-      var request = await client.getUrl(uri); // form the correct url here
+      HttpClientRequest request =
+          await client.getUrl(uri); // form the correct url here
       request.headers.add('Connection', 'Upgrade', preserveHeaderCase: true);
       request.headers.add('Upgrade', 'websocket', preserveHeaderCase: true);
       request.headers.add('Sec-WebSocket-Version', '13',
@@ -91,13 +92,13 @@ class WebSocketImpl {
       request.headers
           .add('Sec-WebSocket-Protocol', 'sip', preserveHeaderCase: true);
 
-      webSocketSettings.extraHeaders.forEach((key, value) {
+      webSocketSettings.extraHeaders.forEach((String key, dynamic value) {
         request.headers.add(key, value, preserveHeaderCase: true);
       });
 
-      var response = await request.close();
-      var socket = await response.detachSocket();
-      var webSocket = WebSocket.fromUpgradedSocket(
+      HttpClientResponse response = await request.close();
+      Socket socket = await response.detachSocket();
+      WebSocket webSocket = WebSocket.fromUpgradedSocket(
         socket,
         protocol: 'sip',
         serverSide: false,

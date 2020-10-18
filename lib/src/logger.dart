@@ -4,38 +4,12 @@ import 'package:logger/logger.dart';
 import 'enum_helper.dart';
 import 'stack_trace_nj.dart';
 
+final Log logger = Log();
+
 class Log extends Logger {
-  static Log _self;
-  static String _localPath;
-
-  static Level _loggingLevel = Level.debug;
-
   Log();
-
-  static set loggingLevel(Level loggingLevel) => _loggingLevel = loggingLevel;
-
   Log._internal(String currentWorkingDirectory)
       : super(printer: MyLogPrinter(currentWorkingDirectory));
-
-  void debug(String message, [dynamic error, StackTrace stackTrace]) {
-    autoInit();
-    Log.d(message, error, stackTrace);
-  }
-
-  void info(String message, [dynamic error, StackTrace stackTrace]) {
-    autoInit();
-    Log.i(message, error, stackTrace);
-  }
-
-  void warn(String message, [dynamic error, StackTrace stackTrace]) {
-    autoInit();
-    Log.w(message, error, stackTrace);
-  }
-
-  void error(String message, [dynamic error, StackTrace stackTrace]) {
-    autoInit();
-    Log.e(message, error, stackTrace);
-  }
 
   factory Log.d(String message, [dynamic error, StackTrace stackTrace]) {
     autoInit();
@@ -61,9 +35,34 @@ class Log extends Logger {
     return _self;
   }
 
+  static Log _self;
+  static String _localPath;
+  static Level _loggingLevel = Level.debug;
+  static set loggingLevel(Level loggingLevel) => _loggingLevel = loggingLevel;
+
+  void debug(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.d(message, error, stackTrace);
+  }
+
+  void info(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.i(message, error, stackTrace);
+  }
+
+  void warn(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.w(message, error, stackTrace);
+  }
+
+  void error(String message, [dynamic error, StackTrace stackTrace]) {
+    autoInit();
+    Log.e(message, error, stackTrace);
+  }
+
   static void autoInit() {
     if (_self == null) {
-      init(".");
+      init('.');
     }
   }
 
@@ -74,14 +73,16 @@ class Log extends Logger {
 
     for (Stackframe frame in frames.frames) {
       _localPath = frame.sourceFile.path
-          .substring(frame.sourceFile.path.lastIndexOf("/"));
+          .substring(frame.sourceFile.path.lastIndexOf('/'));
       break;
     }
   }
 }
 
 class MyLogPrinter extends LogPrinter {
-  static final Map<Level, AnsiColor> levelColors = {
+  MyLogPrinter(this.currentWorkingDirectory);
+
+  static final Map<Level, AnsiColor> levelColors = <Level, AnsiColor>{
     Level.verbose: AnsiColor.fg(AnsiColor.grey(0.5)),
     Level.debug: AnsiColor.none(),
     Level.info: AnsiColor.fg(12),
@@ -93,49 +94,47 @@ class MyLogPrinter extends LogPrinter {
 
   String currentWorkingDirectory;
 
-  MyLogPrinter(this.currentWorkingDirectory);
-
   @override
   List<String> log(LogEvent event) {
     if (EnumHelper.getIndexOf(Level.values, Log._loggingLevel) >
         EnumHelper.getIndexOf(Level.values, event.level)) {
       // don't log events where the log level is set higher
-      return [];
+      return <String>[];
     }
-    var formatter = DateFormat('yyyy-MM-dd HH:mm:ss.');
-    var now = DateTime.now();
-    var formattedDate = formatter.format(now) + now.millisecond.toString();
+    DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss.');
+    DateTime now = DateTime.now();
+    String formattedDate = formatter.format(now) + now.millisecond.toString();
 
-    var color = _getLevelColor(event.level);
+    AnsiColor color = _getLevelColor(event.level);
 
     StackTraceNJ frames = StackTraceNJ();
     int i = 0;
     int depth = 0;
     for (Stackframe frame in frames.frames) {
       i++;
-      var path2 = frame.sourceFile.path;
-      if (!path2.contains(Log._localPath) && !path2.contains("logger.dart")) {
+      String path2 = frame.sourceFile.path;
+      if (!path2.contains(Log._localPath) && !path2.contains('logger.dart')) {
         depth = i - 1;
         break;
       }
     }
 
     print(color(
-        "[$formattedDate] ${event.level} ${StackTraceNJ(skipFrames: depth).formatStackTrace(methodCount: 1)} ::: ${event.message}"));
+        '[$formattedDate] ${event.level} ${StackTraceNJ(skipFrames: depth).formatStackTrace(methodCount: 1)} ::: ${event.message}'));
     if (event.error != null) {
-      print("${event.error}");
+      print('${event.error}');
     }
 
     if (event.stackTrace != null) {
       if (event.stackTrace.runtimeType == StackTraceNJ) {
-        var st = event.stackTrace as StackTraceNJ;
-        print(color("${st}"));
+        StackTraceNJ st = event.stackTrace as StackTraceNJ;
+        print(color('$st'));
       } else {
-        print(color("${event.stackTrace}"));
+        print(color('${event.stackTrace}'));
       }
     }
 
-    return [];
+    return <String>[];
   }
 
   AnsiColor _getLevelColor(Level level) {
@@ -148,16 +147,6 @@ class MyLogPrinter extends LogPrinter {
 }
 
 class AnsiColor {
-  /// ANSI Control Sequence Introducer, signals the terminal for new settings.
-  static const ansiEsc = '\x1B[';
-
-  /// Reset all colors and options for current SGRs to terminal defaults.
-  static const ansiDefault = "${ansiEsc}0m";
-
-  final int fg;
-  final int bg;
-  final bool color;
-
   AnsiColor.none()
       : fg = null,
         bg = null,
@@ -171,19 +160,30 @@ class AnsiColor {
       : fg = null,
         color = true;
 
+  /// ANSI Control Sequence Introducer, signals the terminal for settings.
+  static const String ansiEsc = '\x1B[';
+
+  /// Reset all colors and options for current SGRs to terminal defaults.
+  static const String ansiDefault = '${ansiEsc}0m';
+
+  final int fg;
+  final int bg;
+  final bool color;
+
+  @override
   String toString() {
     if (fg != null) {
-      return "${ansiEsc}38;5;${fg}m";
+      return '${ansiEsc}38;5;${fg}m';
     } else if (bg != null) {
-      return "${ansiEsc}48;5;${bg}m";
+      return '${ansiEsc}48;5;${bg}m';
     } else {
-      return "";
+      return '';
     }
   }
 
   String call(String msg) {
     if (color) {
-      return "${this}$msg$ansiDefault";
+      return '${this}$msg$ansiDefault';
     } else {
       return msg;
     }
@@ -194,10 +194,10 @@ class AnsiColor {
   AnsiColor toBg() => AnsiColor.bg(fg);
 
   /// Defaults the terminal's foreground color without altering the background.
-  String get resetForeground => color ? "${ansiEsc}39m" : "";
+  String get resetForeground => color ? '${ansiEsc}39m' : '';
 
   /// Defaults the terminal's background color without altering the foreground.
-  String get resetBackground => color ? "${ansiEsc}49m" : "";
+  String get resetBackground => color ? '${ansiEsc}49m' : '';
 
   static int grey(double level) => 232 + (level.clamp(0.0, 1.0) * 23).round();
 }

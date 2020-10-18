@@ -3,72 +3,23 @@
   import 'constants.dart';
   import 'uri.dart';
   import 'name_addr_header.dart';
+  import 'data.dart';
 
-  class Data {
-    var host;
-    var port;
-    var host_type;
-    var value;
-    String _method;
-    var reason_phrase;
-    URI uri;
-    var uri_headers;
-    var uri_params;
-    var scheme;
-    var user;
-    var sip_version;
-    var status_code;
-    var stale;
-    var algorithm;
-    var params = {};
-    var multi_header;
-    var call_id;
-    var display_name;
-    var nonce;
-    var from_tag;
-    var early_only;
-    var opaque;
-    var password;
-    var qop;
-    var protocol;
-    var realm;
-    var auth_params;
-    var cause;
-    var expires;
-    var refresher;
-    var rport;
-    var reason;
-    var retry_after;
-    var branch;
-    var maddr;
-    var ttl;
-    var received;
-    var tag;
-    var to_tag;
-    var state;
-    var event;
-    var transport;
-    var text;
-    var uuid;
-    Data();
-
-    SipMethod get method => SipMethodHelper.fromString(_method);
-  }
 }%
 
 {
   var startRule;
-  var data = Data();
+  var data = ParsedData();
 
-  parseInt(str){
+  int parseInt(str){
     return int.parse(str);
   }
 
-  parseFloat(str){
+  double parseFloat(str){
     return double.parse(str);
   }
 
-  decodeURIComponent(str){
+  String decodeURIComponent(str){
     return Uri.decodeComponent(str);
   }
 
@@ -301,7 +252,7 @@
         "early_flag": _parse_early_flag
       };
       if (input == null) {
-        throw new ArgumentError('text: $input');
+        throw ArgumentError('text: $input');
       }
       _input = _toCodePoints(input);
       _inputLen = _input.length;
@@ -309,7 +260,7 @@
 
       if (startRule != null) {
           if (parseFunctions[startRule] == null) {
-            throw new ArgumentError("Invalid rule name: " + startRule + ".");
+            throw ArgumentError("Invalid rule name: " + startRule + ".");
           }
         } else {
           startRule = "CRLF";
@@ -417,7 +368,7 @@ quoted_pair <- "\\" ( [\x00-\x09] / [\x0B-\x0C] / [\x0E-\x7F] )
 
 SIP_URI_noparams  <- uri_scheme ":"  userinfo? hostport {
                     try {
-                        data.uri = new URI(data.scheme, data.user, data.host, data.port);
+                        data.uri = URI(data.scheme, data.user, data.host, data.port);
                         data.scheme = null;
                         data.user = null;
                         data.host = null;
@@ -430,7 +381,7 @@ SIP_URI_noparams  <- uri_scheme ":"  userinfo? hostport {
 SIP_URI         <- uri_scheme ":" userinfo? hostport uri_parameters headers? {
                     var header;
                     try {
-                        data.uri = new URI(data.scheme, data.user, data.host, data.port, data.uri_params, data.uri_headers);
+                        data.uri = URI(data.scheme, data.user, data.host, data.port, data.uri_params, data.uri_headers);
                         data.scheme = null;
                         data.user = null;
                         data.host = null;
@@ -475,7 +426,7 @@ host            <- ( hostname / IPv4address / IPv6reference ) {
 ## 'hostname' grammar is relaxed from RFC 3261:
 ## 'domainlabel' and 'toplabel' can end with dash or hypen
 
-hostname        <- ( domainlabel "." )* toplabel  "." ? {
+hostname        <- ((( domainlabel "." )* toplabel  "." ?) / token ){
                   data.host = _text().toLowerCase();
                   data.host_type = 'domain';
                   var result = {};
@@ -689,8 +640,8 @@ REFERm            <- "\x52\x45\x46\x45\x52" ## REFER in caps
 
 Method            <- ( INVITEm / ACKm / OPTIONSm / BYEm / CANCELm / REGISTERm
                     / SUBSCRIBEm / NOTIFYm / REFERm / extension_method ){
-                    data._method = _text();
-                    $$ =  data._method; }
+                    data.method_str = _text();
+                    $$ =  data.method_str; }
 
 extension_method  <- token
 
@@ -749,7 +700,7 @@ contact_param       <- (addr_spec / name_addr) (SEMI contact_params)* {
                         var header;
                         if(data.multi_header == null) data.multi_header = [];
                         try {
-                          header = new NameAddrHeader(data.uri, data.display_name, data.params);
+                          header = NameAddrHeader(data.uri, data.display_name, data.params);
                           data.uri = null;
                           data.display_name = null;
                           data.params = null;
@@ -874,7 +825,7 @@ m_value             <- token / quoted_string
 CSeq          <- CSeq_value LWS CSeq_method {return data;}
 
 CSeq_value    <- cseq_value: DIGIT + {
-                  data.value=parseInt(cseq_value.join('')); }
+                  data.cseq = parseInt(cseq_value.join('')); }
 
 CSeq_method   <- Method
 
@@ -900,7 +851,7 @@ event_param       <- generic_param
 From        <- ( addr_spec / name_addr ) ( SEMI from_param )* {
                 var tag = data.tag;
                 try {
-                  $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
+                  $$ = NameAddrHeader(data.uri, data.display_name, data.params);
                   if (tag != null) {$$.setParam('tag',tag);}
                 } catch(e) {
                   $$ == -1;
@@ -925,7 +876,7 @@ Min_Expires  <- min_expires: delta_seconds {data = min_expires; }
 
 Name_Addr_Header <-  ( display_name )* LAQUOT SIP_URI RAQUOT ( SEMI generic_param )* {
                       try {
-                        $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
+                        $$ = NameAddrHeader(data.uri, data.display_name, data.params);
                       } catch(e) {
                         $$ == -1;
                       }}
@@ -1011,7 +962,7 @@ rec_route     <- (name_addr ( SEMI rr_param )*) {
                   var header;
                   if(data.multi_header == null) data.multi_header = [];
                   try {
-                    header = new NameAddrHeader(data.uri, data.display_name, data.params);
+                    header = NameAddrHeader(data.uri, data.display_name, data.params);
                     data.uri = null;
                     data.display_name = null;
                     data.params = null;
@@ -1111,7 +1062,7 @@ Supported  <- ( option_tag (COMMA option_tag)* )?
 To         <- ( addr_spec / name_addr ) ( SEMI to_param )* {
               var tag = data.tag;
               try {
-                $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
+                $$ = NameAddrHeader(data.uri, data.display_name, data.params);
                 if (tag != null) {$$.setParam('tag',tag);}
               } catch(e) {
                 $$ = -1;
@@ -1139,7 +1090,7 @@ via_received      <- "received"i EQUAL via_received: (IPv4address / IPv6address)
                       data.received = via_received; }
 
 via_branch        <- "branch"i EQUAL via_branch: token {
-                      data.branch = _text();
+                      data.branch = via_branch;
                       return data.branch;
                     }
 
@@ -1220,7 +1171,7 @@ hex12         <- hex4 hex4 hex4
 
 Refer_To        <- ( addr_spec / name_addr ) ( SEMI generic_param )* {
                 try {
-                  $$ = new NameAddrHeader(data.uri, data.display_name, data.params);
+                  $$ = NameAddrHeader(data.uri, data.display_name, data.params);
                 } catch(e) {
                   $$ = -1;
                 }}

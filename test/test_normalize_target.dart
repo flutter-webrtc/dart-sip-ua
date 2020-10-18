@@ -1,12 +1,13 @@
+import 'package:sip_ua/src/uri.dart';
 import 'package:test/test.dart';
 import 'package:sip_ua/src/utils.dart' as Utils;
 
-var testFunctions = [
-  () => test("NormalizeTarget: valid targets", () {
-        var domain = 'jssip.net';
+List<void Function()> testFunctions = <void Function()>[
+  () => test('NormalizeTarget: valid targets', () {
+        String domain = 'jssip.net';
 
-        test_ok(given_data, expected) {
-          var uri = Utils.normalizeTarget(given_data, domain);
+        void test_ok(dynamic given_data, dynamic expected) {
+          URI uri = Utils.normalizeTarget(given_data, domain);
           expect(uri.toString(), expected);
         }
 
@@ -33,10 +34,10 @@ var testFunctions = [
         test_ok('+123.456.78-9', 'sip:+123456789@jssip.net');
         test_ok('+ALICE-123.456.78-9', 'sip:+ALICE-123.456.78-9@jssip.net');
       }),
-  () => test("NormalizeTarget: invalid targets", () {
-        var domain = 'jssip.net';
+  () => test('NormalizeTarget: invalid targets', () {
+        String domain = 'jssip.net';
 
-        test_error(given_data) {
+        void test_error(dynamic given_data) {
           expect(Utils.normalizeTarget(given_data, domain), null);
         }
 
@@ -53,5 +54,5 @@ var testFunctions = [
 ];
 
 void main() {
-  testFunctions.forEach((func) => func());
+  testFunctions.forEach((Function func) => func());
 }

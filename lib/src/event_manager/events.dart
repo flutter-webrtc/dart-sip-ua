@@ -1,7 +1,7 @@
 /// each EventType class can implement this method and the EventManager will call it before
 /// delivering an event, thus ensuring good quality events with a fail early approach.
 abstract class EventType {
-  sanityCheck() {}
+  void sanityCheck() {}
 }
 
 /// All of the following Event classes are named exactly the same as the strings that the old code used
@@ -20,12 +20,13 @@ abstract class EventType {
 
 /// A general error cause class.
 class ErrorCause {
-  int status_code;
-  String cause;
-  String reason_phrase;
   ErrorCause({this.status_code, this.cause, this.reason_phrase});
   @override
   String toString() {
     return 'Code: [$status_code], Cause: $cause, Reason: $reason_phrase';
   }
+
+  int status_code;
+  String cause;
+  String reason_phrase;
 }

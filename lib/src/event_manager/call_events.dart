@@ -1,19 +1,20 @@
-import 'events.dart';
-import '../sip_message.dart';
-import '../rtc_session.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
+import '../rtc_session.dart';
+import '../sip_message.dart';
+import 'events.dart';
+
 class CallEvent extends EventType {
+  CallEvent(this.session);
   RTCSession session;
   String get id => session.id;
-  CallEvent(this.session);
 }
 
 class EventNewRTCSession extends CallEvent {
-  String originator;
-  dynamic request;
   EventNewRTCSession({RTCSession session, String originator, dynamic request})
       : super(session);
+  String originator;
+  dynamic request;
 }
 
 class EventCallConnecting extends CallEvent {
@@ -21,64 +22,59 @@ class EventCallConnecting extends CallEvent {
 }
 
 class EventCallEnded extends CallEvent {
-  String originator;
-  ErrorCause cause;
-  IncomingRequest request;
   EventCallEnded(
       {RTCSession session, this.originator, this.cause, this.request})
       : super(session);
+  String originator;
+  ErrorCause cause;
+  IncomingRequest request;
 }
 
 class EventCallProgress extends CallEvent {
-  String originator;
-  dynamic response;
   EventCallProgress({RTCSession session, this.originator, this.response})
       : super(session);
+  String originator;
+  dynamic response;
 }
 
 class EventCallConfirmed extends CallEvent {
-  String originator;
-  dynamic ack;
   EventCallConfirmed({RTCSession session, this.originator, this.ack})
       : super(session);
+  String originator;
+  dynamic ack;
 }
 
 class EventCallHold extends CallEvent {
-  String originator;
   EventCallHold({RTCSession session, this.originator}) : super(session);
+  String originator;
 }
 
 class EventCallUnhold extends CallEvent {
-  String originator;
   EventCallUnhold({RTCSession session, String originator}) : super(session);
+  String originator;
 }
 
 class EventCallMuted extends CallEvent {
+  EventCallMuted({RTCSession session, this.audio, this.video}) : super(session);
   bool audio;
   bool video;
-  EventCallMuted({RTCSession session, this.audio, this.video}) : super(session);
 }
 
 class EventCallUnmuted extends CallEvent {
-  bool audio;
-  bool video;
   EventCallUnmuted({RTCSession session, this.audio, this.video})
       : super(session);
+  bool audio;
+  bool video;
 }
 
 class EventCallAccepted extends CallEvent {
-  String originator;
-  dynamic response;
   EventCallAccepted({RTCSession session, this.originator, this.response})
       : super(session);
+  String originator;
+  dynamic response;
 }
 
 class EventCallFailed extends CallEvent {
-  dynamic response;
-  String originator;
-  ErrorCause cause;
-  dynamic request;
-  String status_line;
   EventCallFailed(
       {RTCSession session,
       String state,
@@ -89,23 +85,28 @@ class EventCallFailed extends CallEvent {
       this.request,
       this.status_line})
       : super(session);
+  dynamic response;
+  String originator;
+  ErrorCause cause;
+  dynamic request;
+  String status_line;
 }
 
 class EventStream extends CallEvent {
-  String originator;
-  MediaStream stream;
   EventStream({RTCSession session, this.originator, this.stream})
       : super(session);
+  String originator;
+  MediaStream stream;
 }
 
 class EventCallRefer extends CallEvent {
-  String aor;
-
-  /// bool Function({Function initCallback, dynamic options}) accept;
-  dynamic accept;
-
-  /// bool Function(dynamic options) reject;
-  dynamic reject;
   EventCallRefer({RTCSession session, this.aor, this.accept, this.reject})
       : super(session);
+  String aor;
+
+  //bool Function([Function initCallback, dynamic options]) accept;
+  dynamic accept;
+
+  //bool Function([dynamic options]) reject;
+  dynamic reject;
 }
