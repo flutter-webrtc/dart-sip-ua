@@ -2,7 +2,7 @@
 
 FLUTTER_APP_FOLDER=$(cd `dirname $0`/../; pwd)
 FLUTTER_APP_ORG=com.github.cloudwebrtc
-FLUTTER_APP_PROJECT_NAME=sip_ua_example
+FLUTTER_APP_PROJECT_NAME=dart_sip_ua_example
 CMD=$1
 
 function cleanup() {
@@ -37,7 +37,7 @@ function add_permission_label() {
     echo ""
     echo "Add permission labels to AndroidManifest.xml."
     echo ""
-    python add-line.py -i ../android/app/build.gradle -s 'minSdkVersion 16' -t 'minSdkVersion 18' -r
+    python add-line.py -i ../android/app/build.gradle -s 'minSdkVersion 16' -t 'minSdkVersion 21' -r
     python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.CAMERA" />'
     python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.RECORD_AUDIO" />'
     python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.WAKE_LOCK" />'

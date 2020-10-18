@@ -35,9 +35,10 @@ linter:
     - prefer_single_quotes
     - prefer_generic_function_type_aliases
     - prefer_final_fields
-  
+
 analyzer:
   errors:
+    constant_identifier_names: ignore
     always_put_control_body_on_new_line: ignore
     argument_type_not_assignable: ignore
     omit_local_variable_types: ignore
