@@ -1,5 +1,15 @@
 # Changelog
 
+--------------------------------------------
+[0.3.0] - 2020.10.18
+
+* Upgrade flutter_webrtc to 0.4.0
+* Get more pub points (#138)
+* Fix Uri.parse
+* Force use case sensitivity in Websocket Upgrade to be compatible with old SIP servers
+* Expose Register Expires setting and if Register at all (Thanks ghenry@SureVoIP)
+* extraContactUriParams now working and tested against OpenSIPS 3.1 that has RFC8599 support (Thanks ghenry@SureVoIP)
+
 [0.2.4] - 2020.08.25
 
 * Add missing key field `Sec-WebSocket-Protocol`.

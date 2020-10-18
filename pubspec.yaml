@@ -1,5 +1,5 @@
 name: sip_ua
-version: 0.2.4
+version: 0.3.0
 description: A dart-lang version of the SIP UA stack.
 homepage: https://github.com/cloudwebrtc/dart-sip-ua
 environment:
