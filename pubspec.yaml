@@ -1,6 +1,6 @@
 name: sip_ua
 version: 0.3.0
-description: A dart-lang version of the SIP UA stack.
+description: A SIP UA stack for Flutter/Dart, based on flutter-webrtc, support iOS/Android/Destkop/Web.
 homepage: https://github.com/cloudwebrtc/dart-sip-ua
 environment:
   sdk: ">=2.2.0 <3.0.0"
