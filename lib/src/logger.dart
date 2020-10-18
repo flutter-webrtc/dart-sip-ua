@@ -169,6 +169,7 @@ class AnsiColor {
   final int fg;
   final int bg;
   final bool color;
+
   @override
   String toString() {
     if (fg != null) {

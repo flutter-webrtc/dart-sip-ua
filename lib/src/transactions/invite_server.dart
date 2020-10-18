@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import '../sip_message.dart';
@@ -25,7 +27,7 @@ class InviteServerTransaction extends TransactionBase {
   }
   var resendProvisionalTimer;
   var transportError;
-  var L, H, I;
+  Timer L, H, I;
 
   void stateChanged(state) {
     this.state = state;

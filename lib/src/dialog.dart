@@ -92,7 +92,7 @@ class Dialog {
 
     _ua.newDialog(this);
     logger.debug(
-        '${type} dialog created with status ${_state == Dialog_C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
+        '$type dialog created with status ${_state == Dialog_C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
   RTCSession _owner;
@@ -241,7 +241,7 @@ class Dialog {
         request.reply(491);
       } else if (_uas_pending_reply == true) {
         var retryAfter = ((Utils.Math.randomDouble() * 10) % 10) + 1;
-        request.reply(500, null, ['Retry-After:${retryAfter}']);
+        request.reply(500, null, ['Retry-After:$retryAfter']);
         return false;
       } else {
         _uas_pending_reply = true;

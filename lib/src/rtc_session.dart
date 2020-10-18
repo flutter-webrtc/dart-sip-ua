@@ -295,7 +295,7 @@ class RTCSession extends EventManager {
     // Check target validity.
     target = _ua.normalizeTarget(target);
     if (target == null) {
-      throw Exceptions.TypeError('Invalid target: ${originalTarget}');
+      throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
 
     // Session Timers.
@@ -444,7 +444,7 @@ class RTCSession extends EventManager {
     }
 
     // Reply 180.
-    request.reply(180, null, ['Contact: ${_contact}']);
+    request.reply(180, null, ['Contact: $_contact']);
 
     // Fire 'progress' event.
     // TODO: Document that 'response' field in 'progress' event is null for incoming calls.
@@ -507,7 +507,7 @@ class RTCSession extends EventManager {
     }
 
     clearTimeout(_timers.userNoAnswerTimer);
-    extraHeaders.insert(0, 'Contact: ${_contact}');
+    extraHeaders.insert(0, 'Contact: $_contact');
 
     // Determine incoming media from incoming SDP offer (if any).
     var sdp = request.parseSDP();
@@ -708,10 +708,10 @@ class RTCSession extends EventManager {
         logger.debug('canceling session');
 
         if (status_code != null && (status_code < 200 || status_code >= 700)) {
-          throw Exceptions.TypeError('Invalid status_code: ${status_code}');
+          throw Exceptions.TypeError('Invalid status_code: $status_code');
         } else if (status_code != null) {
           reason_phrase = reason_phrase ?? DartSIP_C.REASON_PHRASE[status_code];
-          cancel_reason = 'SIP ;cause=${status_code} ;text="${reason_phrase}"';
+          cancel_reason = 'SIP ;cause=$status_code ;text="$reason_phrase"';
         }
 
         // Check Session Status.
@@ -738,7 +738,7 @@ class RTCSession extends EventManager {
 
         if (status_code < 300 || status_code >= 700) {
           throw Exceptions.InvalidStateError(
-              'Invalid status_code: ${status_code}');
+              'Invalid status_code: $status_code');
         }
 
         _request.reply(status_code, reason_phrase, extraHeaders, body);
@@ -755,10 +755,10 @@ class RTCSession extends EventManager {
 
         if (status_code != null && (status_code < 200 || status_code >= 700)) {
           throw Exceptions.InvalidStateError(
-              'Invalid status_code: ${status_code}');
+              'Invalid status_code: $status_code');
         } else if (status_code != null) {
           extraHeaders
-              .add('Reason: SIP ;case=${status_code}; text="${reason_phrase}"');
+              .add('Reason: SIP ;case=$status_code; text="$reason_phrase"');
         }
 
         /* RFC 3261 section 15 (Terminating a session):
@@ -1496,7 +1496,7 @@ class RTCSession extends EventManager {
       if (_status != C.STATUS_WAITING_FOR_ACK) {
         return;
       }
-      request.reply(200, null, ['Contact: ${_contact}'], body);
+      request.reply(200, null, ['Contact: $_contact'], body);
       if (timeout < Timers.T2) {
         timeout = timeout * 2;
         if (timeout > Timers.T2) {
@@ -1563,7 +1563,7 @@ class RTCSession extends EventManager {
 
     if (type != 'offer' && type != 'answer') {
       completer.completeError(Exceptions.TypeError(
-          'createLocalDescription() | invalid type "${type}"'));
+          'createLocalDescription() | invalid type "$type"'));
     }
 
     _rtcReady = false;
@@ -1722,7 +1722,7 @@ class RTCSession extends EventManager {
       }
 
       if (status_code < 300 || status_code >= 700) {
-        throw Exceptions.TypeError('Invalid status_code: ${status_code}');
+        throw Exceptions.TypeError('Invalid status_code: $status_code');
       }
 
       request.reply(status_code, reason_phrase, extraHeaders);
@@ -1739,7 +1739,7 @@ class RTCSession extends EventManager {
     _late_sdp = false;
 
     void sendAnswer(String sdp) async {
-      var extraHeaders = ['Contact: ${_contact}'];
+      var extraHeaders = ['Contact: $_contact'];
 
       _handleSessionTimersInIncomingRequest(request, extraHeaders);
 
@@ -1812,7 +1812,7 @@ class RTCSession extends EventManager {
       }
 
       if (status_code < 300 || status_code >= 700) {
-        throw Exceptions.TypeError('Invalid status_code: ${status_code}');
+        throw Exceptions.TypeError('Invalid status_code: $status_code');
       }
 
       request.reply(status_code, reason_phrase, extraHeaders);
@@ -1822,7 +1822,7 @@ class RTCSession extends EventManager {
     var contentType = request.getHeader('Content-Type');
 
     void sendAnswer(String sdp) {
-      List<String> extraHeaders = ['Contact: ${_contact}'];
+      List<String> extraHeaders = ['Contact: $_contact'];
       _handleSessionTimersInIncomingRequest(request, extraHeaders);
       request.reply(200, null, extraHeaders, sdp);
     }
@@ -1985,7 +1985,7 @@ class RTCSession extends EventManager {
             .decodeURIComponent(request.refer_to.uri.getHeader('replaces'));
 
         options['extraHeaders'] = utils.cloneArray(options['extraHeaders']);
-        options['extraHeaders'].add('Replaces: ${replaces}');
+        options['extraHeaders'].add('Replaces: $replaces');
       }
       session.connect(request.refer_to.uri.toAor(), options, initCallback);
       return true;
@@ -2351,7 +2351,7 @@ class RTCSession extends EventManager {
 
     bool succeeded = false;
 
-    extraHeaders.add('Contact: ${_contact}');
+    extraHeaders.add('Contact: $_contact');
     extraHeaders.add('Content-Type: application/sdp');
 
     // Session Timers.
@@ -2456,7 +2456,7 @@ class RTCSession extends EventManager {
 
     var succeeded = false;
 
-    extraHeaders.add('Contact: ${_contact}');
+    extraHeaders.add('Contact: $_contact');
 
     // Session Timers.
     if (_sessionTimers.running) {
@@ -2584,7 +2584,7 @@ class RTCSession extends EventManager {
       reason_phrase =
           reason_phrase ?? DartSIP_C.REASON_PHRASE[status_code] ?? '';
       extraHeaders
-          .add('Reason: SIP ;cause=${status_code}; text="${reason_phrase}"');
+          .add('Reason: SIP ;cause=$status_code; text="$reason_phrase"');
     }
 
     // An error on dialog creation will fire 'failed' event.

@@ -61,3 +61,4 @@ analyzer:
 
   exclude:
     - lib/src/grammar_parser.dart
+    - tool/*

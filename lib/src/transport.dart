@@ -176,7 +176,7 @@ class Transport {
     }
 
     String message = data.toString();
-    //logger.debug('sending message:\n\n${message}\n');
+    //logger.debug('sending message:\n\n$message\n');
     return socket.send(message);
   }
 

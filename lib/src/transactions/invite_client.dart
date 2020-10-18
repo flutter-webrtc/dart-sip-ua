@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sip_ua/src/event_manager/event_manager.dart';
 
 import '../constants.dart';
@@ -18,7 +20,7 @@ class InviteClientTransaction extends TransactionBase {
     this.ua = ua;
     this.transport = transport;
     this.request = request;
-    this.eventHandlers = eventHandlers;
+    this._eventHandlers = eventHandlers;
     request.transaction = this;
 
     String via = 'SIP/2.0/${transport.via_transport}';
@@ -29,9 +31,9 @@ class InviteClientTransaction extends TransactionBase {
 
     this.ua.newTransaction(this);
   }
-  EventManager eventHandlers;
+  EventManager _eventHandlers;
 
-  var B, D, M;
+  Timer B, D, M;
 
   void stateChanged(TransactionState state) {
     this.state = state;
@@ -58,7 +60,7 @@ class InviteClientTransaction extends TransactionBase {
 
     if (this.state != TransactionState.ACCEPTED) {
       logger.debug('transport error occurred, deleting transaction ${this.id}');
-      this.eventHandlers.emit(EventOnTransportError());
+      this._eventHandlers.emit(EventOnTransportError());
     }
 
     this.stateChanged(TransactionState.TERMINATED);
@@ -82,7 +84,7 @@ class InviteClientTransaction extends TransactionBase {
     if (this.state == TransactionState.CALLING) {
       this.stateChanged(TransactionState.TERMINATED);
       this.ua.destroyTransaction(this);
-      this.eventHandlers.emit(EventOnRequestTimeout());
+      this._eventHandlers.emit(EventOnRequestTimeout());
     }
   }
 
@@ -94,7 +96,7 @@ class InviteClientTransaction extends TransactionBase {
   }
 
   void sendACK(response) {
-    var ack =
+    SIPMessage.OutgoingRequest ack =
         SIPMessage.OutgoingRequest(SipMethod.ACK, this.request.ruri, this.ua, {
       'route_set': this.request.getHeaders('route'),
       'call_id': this.request.getHeader('call-id'),
@@ -112,7 +114,7 @@ class InviteClientTransaction extends TransactionBase {
     this.transport.send(ack);
   }
 
-  void cancel(reason) {
+  void cancel(String reason) {
     // Send only if a provisional response (>100) has been received.
     if (this.state != TransactionState.PROCEEDING) {
       return;
@@ -145,10 +147,10 @@ class InviteClientTransaction extends TransactionBase {
       switch (this.state) {
         case TransactionState.CALLING:
           this.stateChanged(TransactionState.PROCEEDING);
-          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
+          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         case TransactionState.PROCEEDING:
-          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
+          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         default:
           break;
@@ -161,10 +163,10 @@ class InviteClientTransaction extends TransactionBase {
           this.M = setTimeout(() {
             this.timer_M();
           }, Timers.TIMER_M);
-          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
+          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         case TransactionState.ACCEPTED:
-          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
+          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         default:
           break;
@@ -175,7 +177,7 @@ class InviteClientTransaction extends TransactionBase {
         case TransactionState.PROCEEDING:
           this.stateChanged(TransactionState.COMPLETED);
           this.sendACK(response);
-          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
+          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         case TransactionState.COMPLETED:
           this.sendACK(response);

@@ -20,7 +20,7 @@ abstract class TransactionBase extends EventManager {
   Transport transport;
   TransactionState state;
   IncomingMessage last_response;
-  var request;
+  dynamic request;
   void onTransportError();
 
   void send();

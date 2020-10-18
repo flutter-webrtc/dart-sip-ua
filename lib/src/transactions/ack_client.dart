@@ -12,7 +12,7 @@ class AckClientTransaction extends TransactionBase {
     this.id = 'z9hG4bK${Math.floor(Math.random() * 10000000)}';
     this.transport = transport;
     this.request = request;
-    this.eventHandlers = eventHandlers;
+    this._eventHandlers = eventHandlers;
 
     var via = 'SIP/2.0/${transport.via_transport}';
 
@@ -21,7 +21,7 @@ class AckClientTransaction extends TransactionBase {
     this.request.setHeader('via', via);
   }
 
-  var eventHandlers;
+  EventManager _eventHandlers;
 
   @override
   void send() {
@@ -33,6 +33,6 @@ class AckClientTransaction extends TransactionBase {
   @override
   void onTransportError() {
     logger.debug('transport error occurred for transaction ${this.id}');
-    this.eventHandlers.emit(EventOnTransportError());
+    this._eventHandlers.emit(EventOnTransportError());
   }
 }

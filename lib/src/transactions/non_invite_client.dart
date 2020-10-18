@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
@@ -9,16 +11,13 @@ import '../utils.dart';
 import 'transaction_base.dart';
 
 class NonInviteClientTransaction extends TransactionBase {
-  EventManager eventHandlers;
-  var F, K;
-
   NonInviteClientTransaction(
-      UA ua, Transport transport, request, eventHandlers) {
+      UA ua, Transport transport, request, EventManager eventHandlers) {
     this.id = 'z9hG4bK${Math.floor(Math.random())}';
     this.ua = ua;
     this.transport = transport;
     this.request = request;
-    this.eventHandlers = eventHandlers;
+    this._eventHandlers = eventHandlers;
 
     var via = 'SIP/2.0/${transport.via_transport}';
 
@@ -28,6 +27,9 @@ class NonInviteClientTransaction extends TransactionBase {
 
     this.ua.newTransaction(this);
   }
+
+  EventManager _eventHandlers;
+  Timer F, K;
 
   void stateChanged(state) {
     this.state = state;
@@ -51,14 +53,14 @@ class NonInviteClientTransaction extends TransactionBase {
     clearTimeout(this.K);
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
-    this.eventHandlers.emit(EventOnTransportError());
+    this._eventHandlers.emit(EventOnTransportError());
   }
 
   void timer_F() {
     logger.debug('Timer F expired for transaction ${this.id}');
     this.stateChanged(TransactionState.TERMINATED);
     this.ua.destroyTransaction(this);
-    this.eventHandlers.emit(EventOnRequestTimeout());
+    this._eventHandlers.emit(EventOnRequestTimeout());
   }
 
   void timer_K() {
@@ -73,7 +75,7 @@ class NonInviteClientTransaction extends TransactionBase {
         case TransactionState.TRYING:
         case TransactionState.PROCEEDING:
           this.stateChanged(TransactionState.PROCEEDING);
-          this.eventHandlers.emit(EventOnReceiveResponse(response: response));
+          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         default:
           break;
@@ -86,9 +88,11 @@ class NonInviteClientTransaction extends TransactionBase {
           clearTimeout(this.F);
 
           if (status_code == 408) {
-            this.eventHandlers.emit(EventOnRequestTimeout());
+            this._eventHandlers.emit(EventOnRequestTimeout());
           } else {
-            this.eventHandlers.emit(EventOnReceiveResponse(response: response));
+            this
+                ._eventHandlers
+                .emit(EventOnReceiveResponse(response: response));
           }
 
           this.K = setTimeout(() {

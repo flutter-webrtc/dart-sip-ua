@@ -15,6 +15,10 @@ import 'transports/websocket_interface.dart';
 import 'ua.dart';
 
 class SIPUAHelper extends EventManager {
+  SIPUAHelper() {
+    Log.loggingLevel = Level.debug;
+  }
+
   UA _ua;
   Settings _settings;
   UaSettings _uaSettings;
@@ -22,10 +26,6 @@ class SIPUAHelper extends EventManager {
 
   RegistrationState _registerState =
       RegistrationState(state: RegistrationStateEnum.NONE);
-
-  SIPUAHelper() {
-    Log.loggingLevel = Level.debug;
-  }
 
   set loggingLevel(Level loggingLevel) => Log.loggingLevel = loggingLevel;
 
@@ -572,8 +572,8 @@ class UaSettings {
   String ha1;
   String displayName;
 
-  List<Map<String, String>> iceServers = [
-    {'url': 'stun:stun.l.google.com:19302'},
+  List<Map<String, String>> iceServers = <Map<String, String>>[
+    <String, String>{'url': 'stun:stun.l.google.com:19302'},
 // turn server configuration example.
 //    {
 //      'url': 'turn:123.45.67.89:3478',

@@ -703,7 +703,7 @@ class UA extends EventManager {
   void _loadConfig(Settings configuration) {
     // Check and load the given configuration.
     try {
-      config.load(_configuration, configuration);
+      config.load(configuration, _configuration);
     } catch (e) {
       throw e;
     }
@@ -779,52 +779,6 @@ class UA extends EventManager {
           _configuration.via_host, null, <dynamic, dynamic>{'transport': 'ws'});
     }
     _contact = Contact(_configuration.contact_uri);
-
-    // Seal the configuration.
-    /*
-    var writable_parameters = [
-      'password',
-      'realm',
-      'ha1',
-      'display_name',
-      'register'
-    ];
-    for (var parameter in _configuration) {
-      if (_configuration.containsKey(parameter)) {
-        if (writable_parameters.indexOf(parameter) != -1) {
-          _configuration[parameter] = {
-            'writable': true,
-            'configurable': false
-          };
-        } else {
-          _configuration[parameter] = {
-            'writable': false,
-            'configurable': false
-          };
-        }
-      }
-    }
-
-    logger.debug('configuration parameters after validation:');
-    for (var parameter in _configuration) {
-      // Only show the user user configurable parameters.
-      if (config.settings.containsKey(parameter)) {
-        switch (parameter) {
-          case 'uri':
-          case 'registrar_server':
-            logger.debug('- ${parameter}: ${_configuration[parameter]}');
-            break;
-          case 'password':
-          case 'ha1':
-            logger.debug('- ${parameter}: NOT SHOWN');
-            break;
-          default:
-            logger.debug(
-                '- ${parameter}: ${JSON.stringify(_configuration[parameter])}');
-        }
-      }
-    }
-  */
     return;
   }
 

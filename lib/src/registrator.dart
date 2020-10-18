@@ -78,7 +78,7 @@ class Registrator {
         ua.configuration.register_extra_contact_uri_params);
 
     if (reg_id != null) {
-      _contact += ';reg-id=${reg_id}';
+      _contact += ';reg-id=$reg_id';
       _contact +=
           ';+sip.instance="<urn:uuid:${_ua.configuration.instance_id}>"';
     }
@@ -135,8 +135,8 @@ class Registrator {
     var extraHeaders = List<String>.from(_extraHeaders ?? []);
 
     extraHeaders
-        .add('Contact: ${_contact};expires=${_expires}${_extraContactParams}');
-    extraHeaders.add('Expires: ${_expires}');
+        .add('Contact: $_contact;expires=$_expires$_extraContactParams');
+    extraHeaders.add('Expires: $_expires');
 
     logger.warn(_contact);
 
@@ -298,9 +298,9 @@ class Registrator {
     var extraHeaders = List.from(_extraHeaders ?? []);
 
     if (unregister_all) {
-      extraHeaders.add('Contact: *${_extraContactParams}');
+      extraHeaders.add('Contact: *$_extraContactParams');
     } else {
-      extraHeaders.add('Contact: ${_contact};expires=0${_extraContactParams}');
+      extraHeaders.add('Contact: $_contact;expires=0$_extraContactParams');
     }
 
     extraHeaders.add('Expires: 0');

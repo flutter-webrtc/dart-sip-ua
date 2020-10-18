@@ -58,7 +58,8 @@ class Settings {
 
 // Configuration checks.
 class Checks {
-  Map<String, Null Function(Settings src, Settings dst)> mandatory = {
+  Map<String, Null Function(Settings src, Settings dst)> mandatory =
+      <String, Null Function(Settings src, Settings dst)>{
     'sockets': (Settings src, Settings dst) {
       List<WebSocketInterface> sockets = src.sockets;
       /* Allow defining sockets parameter as:
@@ -67,28 +68,28 @@ class Checks {
        *  List of Objects: [{socket: socket1, weight:1}, {socket: Socket2, weight:0}]
        *  List of Objects and Socket: [{socket: socket1}, socket2]
        */
-      List<WebSocketInterface> _sockets = <WebSocketInterface>[];
+      List<WebSocketInterface> copy = <WebSocketInterface>[];
       if (sockets is List && sockets.length > 0) {
         for (WebSocketInterface socket in sockets) {
           if (Socket.isSocket(socket)) {
-            _sockets.add(socket);
+            copy.add(socket);
           }
         }
       } else {
         throw Exceptions.ConfigurationError('sockets', sockets);
       }
 
-      dst.sockets = _sockets;
+      dst.sockets = copy;
     },
-    'uri': (src, dst) {
-      var uri = src.uri;
+    'uri': (Settings src, Settings dst) {
+      dynamic uri = src.uri;
       if (src.uri == null && dst.uri == null) {
-        throw Exceptions.ConfigurationError("uri", null);
+        throw Exceptions.ConfigurationError('uri', null);
       }
       if (!uri.contains(RegExp(r'^sip:', caseSensitive: false))) {
-        uri = '${DartSIP_C.SIP}:${uri}';
+        uri = '${DartSIP_C.SIP}:$uri';
       }
-      var parsed = URI.parse(uri);
+      dynamic parsed = URI.parse(uri);
       if (parsed == null) {
         throw Exceptions.ConfigurationError('uri', parsed);
       } else if (parsed.user == null) {
@@ -98,59 +99,60 @@ class Checks {
       }
     }
   };
-  var optional = {
-    'authorization_user': (src, dst) {
-      var authorization_user = src.authorization_user;
+  Map<String, Null Function(Settings src, Settings dst)> optional =
+      <String, Null Function(Settings src, Settings dst)>{
+    'authorization_user': (Settings src, Settings dst) {
+      String authorization_user = src.authorization_user;
       if (authorization_user == null) return;
-      if (Grammar.parse('"${authorization_user}"', 'quoted_string') == -1) {
+      if (Grammar.parse('"$authorization_user"', 'quoted_string') == -1) {
         return;
       } else {
         dst.authorization_user = authorization_user;
       }
     },
-    'user_agent': (src, dst) {
-      var user_agent = src.user_agent;
+    'user_agent': (Settings src, Settings dst) {
+      String user_agent = src.user_agent;
       if (user_agent == null) return;
       if (user_agent is String) {
         dst.user_agent = user_agent;
       }
     },
-    'connection_recovery_max_interval': (src, dst) {
-      var connection_recovery_max_interval =
+    'connection_recovery_max_interval': (Settings src, Settings dst) {
+      int connection_recovery_max_interval =
           src.connection_recovery_max_interval;
       if (connection_recovery_max_interval == null) return;
       if (connection_recovery_max_interval > 0) {
         dst.connection_recovery_max_interval = connection_recovery_max_interval;
       }
     },
-    'connection_recovery_min_interval': (src, dst) {
-      var connection_recovery_min_interval =
+    'connection_recovery_min_interval': (Settings src, Settings dst) {
+      int connection_recovery_min_interval =
           src.connection_recovery_min_interval;
       if (connection_recovery_min_interval == null) return;
       if (connection_recovery_min_interval > 0) {
         dst.connection_recovery_min_interval = connection_recovery_min_interval;
       }
     },
-    'contact_uri': (src, dst) {
-      var contact_uri = src.contact_uri;
+    'contact_uri': (Settings src, Settings dst) {
+      dynamic contact_uri = src.contact_uri;
       if (contact_uri == null) return;
       if (contact_uri is String) {
-        var uri = Grammar.parse(contact_uri, 'SIP_URI');
+        dynamic uri = Grammar.parse(contact_uri, 'SIP_URI');
         if (uri != -1) {
           dst.contact_uri = uri;
         }
       }
     },
-    'display_name': (src, dst) {
-      var display_name = src.display_name;
+    'display_name': (Settings src, Settings dst) {
+      String display_name = src.display_name;
       if (display_name == null) return;
       dst.display_name = display_name;
     },
-    'instance_id': (src, dst) {
-      var instance_id = src.instance_id;
+    'instance_id': (Settings src, Settings dst) {
+      String instance_id = src.instance_id;
       if (instance_id == null) return;
       if (instance_id.contains(RegExp(r'^uuid:', caseSensitive: false))) {
-        instance_id = instance_id.substr(5);
+        instance_id = instance_id.substring(5);
       }
       if (Grammar.parse(instance_id, 'uuid') == -1) {
         return;
@@ -158,72 +160,70 @@ class Checks {
         dst.instance_id = instance_id;
       }
     },
-    'no_answer_timeout': (src, dst) {
-      var no_answer_timeout = src.no_answer_timeout;
+    'no_answer_timeout': (Settings src, Settings dst) {
+      int no_answer_timeout = src.no_answer_timeout;
       if (no_answer_timeout == null) return;
       if (no_answer_timeout > 0) {
         dst.no_answer_timeout = no_answer_timeout;
       }
     },
-    'session_timers': (src, dst) {
-      var session_timers = src.session_timers;
+    'session_timers': (Settings src, Settings dst) {
+      bool session_timers = src.session_timers;
       if (session_timers == null) return;
       if (session_timers is bool) {
         dst.session_timers = session_timers;
       }
     },
-    'session_timers_refresh_method': (src, dst) {
-      Settings srcSettings = src as Settings;
-      Settings dstSettings = dst as Settings;
-      SipMethod method = srcSettings.session_timers_refresh_method;
+    'session_timers_refresh_method': (Settings src, Settings dst) {
+      SipMethod method = src.session_timers_refresh_method;
       if (method == SipMethod.INVITE || method == SipMethod.UPDATE) {
-        dstSettings.session_timers_refresh_method = method;
+        dst.session_timers_refresh_method = method;
       }
     },
-    'password': (src, dst) {
-      var password = src.password;
+    'password': (Settings src, Settings dst) {
+      String password = src.password;
       if (password == null) return;
       dst.password = password.toString();
     },
-    'realm': (src, dst) {
-      var realm = src.realm;
+    'realm': (Settings src, Settings dst) {
+      String realm = src.realm;
       if (realm == null) return;
       dst.realm = realm.toString();
     },
-    'ha1': (src, dst) {
-      var ha1 = src.ha1;
+    'ha1': (Settings src, Settings dst) {
+      String ha1 = src.ha1;
       if (ha1 == null) return;
       dst.ha1 = ha1.toString();
     },
-    'register': (src, dst) {
-      var register = src.register;
+    'register': (Settings src, Settings dst) {
+      bool register = src.register;
       if (register == null) return;
       if (register is bool) {
         dst.register = register;
       }
     },
-    'register_expires': (src, dst) {
-      var register_expires = src.register_expires;
+    'register_expires': (Settings src, Settings dst) {
+      int register_expires = src.register_expires;
       if (register_expires == null) return;
       if (register_expires > 0) {
         dst.register_expires = register_expires;
       }
     },
-    'registrar_server': (src, dst) {
-      var registrar_server = src.registrar_server;
+    'registrar_server': (Settings src, Settings dst) {
+      dynamic registrar_server = src.registrar_server;
       if (registrar_server == null) return;
       if (!registrar_server.contains(RegExp(r'^sip:', caseSensitive: false))) {
-        registrar_server = '${DartSIP_C.SIP}:${registrar_server}';
+        registrar_server = '${DartSIP_C.SIP}:$registrar_server';
       }
-      var parsed = URI.parse(registrar_server);
+      dynamic parsed = URI.parse(registrar_server);
       if (parsed == null || parsed.user != null) {
         return;
       } else {
         dst.registrar_server = parsed;
       }
     },
-    'register_extra_contact_uri_params': (src, dst) {
-      var register_extra_contact_uri_params =
+    'register_extra_contact_uri_params': (Settings src, Settings dst) {
+      Map<String, dynamic> register_extra_contact_uri_params =
           src.register_extra_contact_uri_params;
       if (register_extra_contact_uri_params == null) return;
       if (register_extra_contact_uri_params is Map<String, dynamic>) {
@@ -231,8 +231,8 @@ class Checks {
             register_extra_contact_uri_params;
       }
     },
-    'use_preloaded_route': (src, dst) {
-      var use_preloaded_route = src.use_preloaded_route;
+    'use_preloaded_route': (Settings src, Settings dst) {
+      bool use_preloaded_route = src.use_preloaded_route;
       if (use_preloaded_route == null) return;
       if (use_preloaded_route is bool) {
         dst.use_preloaded_route = use_preloaded_route;
@@ -243,17 +243,19 @@ class Checks {
 
 final Checks checks = Checks();
 
-void load(dst, src) {
+void load(Settings src, Settings dst) {
   try {
     // Check Mandatory parameters.
-    checks.mandatory.forEach((String parameter, fun) {
-      logger.info('Check mandatory parameter => ${parameter}.');
+    checks.mandatory
+        .forEach((String parameter, Null Function(Settings, Settings) fun) {
+      logger.info('Check mandatory parameter => $parameter.');
       fun(src, dst);
     });
 
     // Check Optional parameters.
-    checks.optional.forEach((String parameter, fun) {
-      logger.debug('Check optional parameter => ${parameter}.');
+    checks.optional
+        .forEach((String parameter, Null Function(Settings, Settings) fun) {
+      logger.debug('Check optional parameter => $parameter.');
       fun(src, dst);
     });
   } catch (e) {

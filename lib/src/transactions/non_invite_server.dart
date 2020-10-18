@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sip_ua/src/sip_message.dart';
 
 import '../event_manager/internal_events.dart';
@@ -20,10 +22,10 @@ class NonInviteServerTransaction extends TransactionBase {
 
     ua.newTransaction(this);
   }
-  var transportError;
-  var J;
+  bool transportError;
+  Timer J;
 
-  void stateChanged(state) {
+  void stateChanged(TransactionState state) {
     this.state = state;
     this.emit(EventStateChanged());
   }
@@ -34,6 +36,7 @@ class NonInviteServerTransaction extends TransactionBase {
     this.ua.destroyTransaction(this);
   }
 
+  @override
   void onTransportError() {
     if (this.transportError == null) {
       this.transportError = true;
@@ -46,6 +49,7 @@ class NonInviteServerTransaction extends TransactionBase {
     }
   }
 
+  @override
   void receiveResponse(int status_code, IncomingMessage response,
       [void Function() onSuccess, void Function() onFailure]) {
     if (status_code == 100) {
@@ -103,6 +107,6 @@ class NonInviteServerTransaction extends TransactionBase {
 
   @override
   void send() {
-    throw Exception("Not Implemented");
+    throw Exception('Not Implemented');
   }
 }

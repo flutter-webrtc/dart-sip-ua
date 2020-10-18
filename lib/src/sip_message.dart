@@ -94,7 +94,7 @@ class OutgoingRequest {
         params['cseq'] ?? utils.Math.floor(utils.Math.randomDouble() * 10000);
 
     this.cseq = cseq;
-    this.setHeader('cseq', '${cseq} ${SipMethodHelper.getName(method)}');
+    this.setHeader('cseq', '$cseq ${SipMethodHelper.getName(method)}');
   }
 
   UA ua;
@@ -117,7 +117,7 @@ class OutgoingRequest {
    */
   void setHeader(String name, dynamic value) {
     // Remove the header from extraHeaders if present.
-    var regexp = RegExp('^\\s*${name}\\s*:', caseSensitive: false);
+    RegExp regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
 
     for (var idx = 0; idx < this.extraHeaders.length; idx++) {
       if (regexp.hasMatch(this.extraHeaders[idx])) {
@@ -141,7 +141,7 @@ class OutgoingRequest {
         return headers[0];
       }
     } else {
-      var regexp = RegExp('^\\s*${name}\\s*:', caseSensitive: false);
+      var regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
       for (var header in this.extraHeaders) {
         if (regexp.hasMatch(header)) {
           return header.substring(header.indexOf(':') + 1).trim();
@@ -168,7 +168,7 @@ class OutgoingRequest {
 
       return result;
     } else {
-      var regexp = RegExp('^\\s*${name}\\s*:', caseSensitive: false);
+      var regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
 
       for (var header in this.extraHeaders) {
         if (regexp.hasMatch(header)) {
@@ -189,7 +189,7 @@ class OutgoingRequest {
     if (this.headers[utils.headerize(name)]) {
       return true;
     } else {
-      var regexp = RegExp('^\\s*${name}\\s*:', caseSensitive: false);
+      var regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
 
       for (var header in this.extraHeaders) {
         if (regexp.hasMatch(header)) {
@@ -268,14 +268,14 @@ class OutgoingRequest {
     // Allow.
     msg += 'Allow: ${DartSIP_C.ALLOWED_METHODS}\r\n';
     msg += 'Supported: ${supported.join(',')}\r\n';
-    msg += 'User-Agent: ${userAgent}\r\n';
+    msg += 'User-Agent: $userAgent\r\n';
 
     if (this.body != null) {
       logger.debug("Outgoing Message: " + this.body);
       //Here we should calculate the real content length for UTF8
       var encoded = utf8.encode(this.body);
       var length = encoded.length;
-      msg += 'Content-Length: ${length}\r\n\r\n';
+      msg += 'Content-Length: $length\r\n\r\n';
       msg += this.body;
     } else {
       msg += 'Content-Length: 0\r\n\r\n';
@@ -546,28 +546,28 @@ class IncomingRequest extends IncomingMessage {
 
     // Validate code and reason values.
     if (code == null || (code < 100 || code > 699)) {
-      throw Exceptions.TypeError('Invalid status_code: ${code}');
+      throw Exceptions.TypeError('Invalid status_code: $code');
     } else if (reason != null && reason is! String) {
-      throw Exceptions.TypeError('Invalid reason_phrase: ${reason}');
+      throw Exceptions.TypeError('Invalid reason_phrase: $reason');
     }
 
     reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
     extraHeaders = utils.cloneArray(extraHeaders);
 
-    var response = 'SIP/2.0 ${code} ${reason}\r\n';
+    var response = 'SIP/2.0 $code $reason\r\n';
 
     if (this.method == SipMethod.INVITE && code > 100 && code <= 200) {
       var headers = this.getHeaders('record-route');
 
       for (var header in headers) {
-        response += 'Record-Route: ${header}\r\n';
+        response += 'Record-Route: $header\r\n';
       }
     }
 
     var vias = this.getHeaders('via');
 
     for (var via in vias) {
-      response += 'Via: ${via}\r\n';
+      response += 'Via: $via\r\n';
     }
 
     if (this.to_tag == null && code > 100) {
@@ -576,7 +576,7 @@ class IncomingRequest extends IncomingMessage {
       to += ';tag=${this.to_tag}';
     }
 
-    response += 'To: ${to}\r\n';
+    response += 'To: $to\r\n';
     response += 'From: ${this.getHeader('From')}\r\n';
     response += 'Call-ID: ${this.call_id}\r\n';
     response +=
@@ -654,17 +654,17 @@ class IncomingRequest extends IncomingMessage {
 
     // Validate code and reason values.
     if (code == null || (code < 100 || code > 699)) {
-      throw Exceptions.TypeError('Invalid status_code: ${code}');
+      throw Exceptions.TypeError('Invalid status_code: $code');
     } else if (reason != null && reason is! String) {
-      throw Exceptions.TypeError('Invalid reason_phrase: ${reason}');
+      throw Exceptions.TypeError('Invalid reason_phrase: $reason');
     }
 
     reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
 
-    var response = 'SIP/2.0 ${code} ${reason}\r\n';
+    var response = 'SIP/2.0 $code $reason\r\n';
 
     for (var via in vias) {
-      response += 'Via: ${via}\r\n';
+      response += 'Via: $via\r\n';
     }
 
     var to = this.getHeader('To');
@@ -675,7 +675,7 @@ class IncomingRequest extends IncomingMessage {
       to += ';tag=${this.to_tag}';
     }
 
-    response += 'To: ${to}\r\n';
+    response += 'To: $to\r\n';
     response += 'From: ${this.getHeader('From')}\r\n';
     response += 'Call-ID: ${this.call_id}\r\n';
     response +=
