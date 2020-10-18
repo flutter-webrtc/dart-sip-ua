@@ -1,6 +1,10 @@
 # Changelog
 
 --------------------------------------------
+[0.3.1] - 2020.10.18
+
+* fix rport in Via parser.
+
 [0.3.0] - 2020.10.18
 
 * Upgrade flutter_webrtc to 0.4.0
