@@ -76,7 +76,7 @@ class ReferSubscriber extends EventManager {
     _id = request.cseq;
   }
 
-  void receiveNotify(request) {
+  void receiveNotify(IncomingRequest request) {
     logger.debug('receiveNotify()');
 
     if (request.body == null) {
@@ -108,7 +108,7 @@ class ReferSubscriber extends EventManager {
     }
   }
 
-  void _requestSucceeded(response) {
+  void _requestSucceeded(IncomingMessage response) {
     logger.debug('REFER succeeded');
 
     logger.debug('emit "requestSucceeded"');
@@ -116,7 +116,7 @@ class ReferSubscriber extends EventManager {
     emit(EventReferRequestSucceeded(response: response));
   }
 
-  void _requestFailed(response, cause) {
+  void _requestFailed(IncomingMessage response, ErrorCause cause) {
     logger.debug('REFER failed');
 
     logger.debug('emit "requestFailed"');

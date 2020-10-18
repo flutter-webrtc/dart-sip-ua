@@ -10,15 +10,16 @@ import '../ua.dart';
 import 'transaction_base.dart';
 
 class NonInviteServerTransaction extends TransactionBase {
-  NonInviteServerTransaction(UA ua, Transport transport, request) {
-    this.id = request.via_branch;
+  NonInviteServerTransaction(
+      UA ua, Transport transport, IncomingRequest request) {
+    id = request.via_branch;
     this.ua = ua;
     this.transport = transport;
     this.request = request;
-    this.last_response = IncomingMessage();
+    last_response = IncomingMessage();
     request.server_transaction = this;
 
-    this.state = TransactionState.TRYING;
+    state = TransactionState.TRYING;
 
     ua.newTransaction(this);
   }
@@ -27,25 +28,25 @@ class NonInviteServerTransaction extends TransactionBase {
 
   void stateChanged(TransactionState state) {
     this.state = state;
-    this.emit(EventStateChanged());
+    emit(EventStateChanged());
   }
 
   void timer_J() {
-    logger.debug('Timer J expired for transaction ${this.id}');
-    this.stateChanged(TransactionState.TERMINATED);
-    this.ua.destroyTransaction(this);
+    logger.debug('Timer J expired for transaction $id');
+    stateChanged(TransactionState.TERMINATED);
+    ua.destroyTransaction(this);
   }
 
   @override
   void onTransportError() {
-    if (this.transportError == null) {
-      this.transportError = true;
+    if (transportError == null) {
+      transportError = true;
 
-      logger.debug('transport error occurred, deleting transaction ${this.id}');
+      logger.debug('transport error occurred, deleting transaction $id');
 
-      clearTimeout(this.J);
-      this.stateChanged(TransactionState.TERMINATED);
-      this.ua.destroyTransaction(this);
+      clearTimeout(J);
+      stateChanged(TransactionState.TERMINATED);
+      ua.destroyTransaction(this);
     }
   }
 
@@ -58,17 +59,17 @@ class NonInviteServerTransaction extends TransactionBase {
        * send any provisional response with a
        * Status-Code other than 100 to a non-INVITE request.'
        */
-      switch (this.state) {
+      switch (state) {
         case TransactionState.TRYING:
-          this.stateChanged(TransactionState.PROCEEDING);
-          if (!this.transport.send(response)) {
-            this.onTransportError();
+          stateChanged(TransactionState.PROCEEDING);
+          if (!transport.send(response)) {
+            onTransportError();
           }
           break;
         case TransactionState.PROCEEDING:
-          this.last_response = response;
-          if (!this.transport.send(response)) {
-            this.onTransportError();
+          last_response = response;
+          if (!transport.send(response)) {
+            onTransportError();
             if (onFailure != null) {
               onFailure();
             }
@@ -80,16 +81,16 @@ class NonInviteServerTransaction extends TransactionBase {
           break;
       }
     } else if (status_code >= 200 && status_code <= 699) {
-      switch (this.state) {
+      switch (state) {
         case TransactionState.TRYING:
         case TransactionState.PROCEEDING:
-          this.stateChanged(TransactionState.COMPLETED);
-          this.last_response = response;
-          this.J = setTimeout(() {
-            this.timer_J();
+          stateChanged(TransactionState.COMPLETED);
+          last_response = response;
+          J = setTimeout(() {
+            timer_J();
           }, Timers.TIMER_J);
-          if (!this.transport.send(response)) {
-            this.onTransportError();
+          if (!transport.send(response)) {
+            onTransportError();
             if (onFailure != null) {
               onFailure();
             }

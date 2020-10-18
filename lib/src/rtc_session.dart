@@ -464,11 +464,11 @@ class RTCSession extends EventManager {
     var rtcConstraints = options['rtcConstraints'] ?? {};
     var rtcAnswerConstraints = options['rtcAnswerConstraints'] ?? {};
 
-    var tracks;
-    var peerHasAudioLine = false;
-    var peerHasVideoLine = false;
-    var peerOffersFullAudio = false;
-    var peerOffersFullVideo = false;
+    List<MediaStreamTrack> tracks;
+    bool peerHasAudioLine = false;
+    bool peerHasVideoLine = false;
+    bool peerOffersFullAudio = false;
+    bool peerOffersFullVideo = false;
 
     _rtcAnswerConstraints = rtcAnswerConstraints;
     _rtcOfferConstraints = options['rtcOfferConstraints'] ?? null;
@@ -570,10 +570,10 @@ class RTCSession extends EventManager {
     }
 
     // Create a RTCPeerConnection instance.
-    // TODO: This may throw an error, should react.
+    // TODO(cloudwebrtc): This may throw an error, should react.
     await _createRTCConnection(pcConfig, rtcConstraints);
 
-    var stream;
+    MediaStream stream;
     // A local MediaStream is given, use it.
     if (mediaStream != null) {
       stream = mediaStream;
@@ -688,7 +688,7 @@ class RTCSession extends EventManager {
     options = options ?? {};
 
     Object cause = options['cause'] ?? DartSIP_C.causes.BYE;
-    List extraHeaders = utils.cloneArray(options['extraHeaders']);
+    List<dynamic> extraHeaders = utils.cloneArray(options['extraHeaders']);
     Object body = options['body'];
 
     var cancel_reason;
@@ -941,7 +941,7 @@ class RTCSession extends EventManager {
   /**
    * Mute
    */
-  void mute([audio = true, video = true]) {
+  void mute([bool audio = true, bool video = true]) {
     logger.debug('mute()');
 
     var audioMuted = false, videoMuted = false;
@@ -969,7 +969,7 @@ class RTCSession extends EventManager {
   void unmute([bool audio = true, bool video = true]) {
     logger.debug('unmute()');
 
-    var audioUnMuted = false, videoUnMuted = false;
+    bool audioUnMuted = false, videoUnMuted = false;
 
     if (_audioMuted == true && audio) {
       audioUnMuted = true;
@@ -1147,7 +1147,7 @@ class RTCSession extends EventManager {
   /**
    * Refer
    */
-  ReferSubscriber refer(target, [Map<String, dynamic> options]) {
+  ReferSubscriber refer(dynamic target, [Map<String, dynamic> options]) {
     logger.debug('refer()');
 
     options = options ?? {};
@@ -2012,7 +2012,7 @@ class RTCSession extends EventManager {
   /**
    * In dialog Notify Reception
    */
-  void _receiveNotify(request) {
+  void _receiveNotify(IncomingRequest request) {
     logger.debug('receiveNotify()');
 
     if (request.event == null) {
@@ -2099,7 +2099,7 @@ class RTCSession extends EventManager {
    * Initial Request Sender
    */
   Future<Null> _sendInitialRequest(
-      mediaConstraints, rtcOfferConstraints, mediaStream) async {
+      mediaConstraints, rtcOfferConstraints, MediaStream mediaStream) async {
     EventManager handlers = EventManager();
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
       onRequestTimeout();
@@ -2114,11 +2114,11 @@ class RTCSession extends EventManager {
       _receiveInviteResponse(event.response);
     });
 
-    var request_sender = RequestSender(_ua, _request, handlers);
+    RequestSender request_sender = RequestSender(_ua, _request, handlers);
 
     // This Promise is resolved within the next iteration, so the app has now
     // a chance to set events such as 'peerconnection' and 'connecting'.
-    var stream;
+    MediaStream stream;
     // A stream is given, var the app set events such as 'peerconnection' and 'connecting'.
     if (mediaStream != null) {
       stream = mediaStream;
@@ -2157,7 +2157,7 @@ class RTCSession extends EventManager {
       _connection.addStream(stream);
     }
 
-    // TODO: should this be triggered here?
+    // TODO(cloudwebrtc): should this be triggered here?
     _connecting(_request);
     try {
       var desc = await _createLocalDescription('offer', rtcOfferConstraints);
@@ -2205,6 +2205,7 @@ class RTCSession extends EventManager {
       } else {
         // If not, send an ACK  and terminate.
         try {
+          // ignore: unused_local_variable
           Dialog dialog = Dialog(this, response, 'UAC');
         } catch (error) {
           logger.debug(error);
@@ -2230,7 +2231,7 @@ class RTCSession extends EventManager {
       return;
     }
 
-    var status_code = response.status_code.toString();
+    String status_code = response.status_code.toString();
 
     if (utils.test100(status_code)) {
       // 100 trying
@@ -2406,8 +2407,9 @@ class RTCSession extends EventManager {
     }
 
     try {
-      var desc = await _createLocalDescription('offer', rtcOfferConstraints);
-      var sdp = _mangleOffer(desc.sdp);
+      RTCSessionDescription desc =
+          await _createLocalDescription('offer', rtcOfferConstraints);
+      String sdp = _mangleOffer(desc.sdp);
       logger.debug('emit "sdp"');
       emit(EventSdp(originator: 'local', type: 'offer', sdp: sdp));
 
@@ -2454,7 +2456,7 @@ class RTCSession extends EventManager {
         options['rtcOfferConstraints'] ?? _rtcOfferConstraints ?? {};
     var sdpOffer = options['sdpOffer'] ?? false;
 
-    var succeeded = false;
+    bool succeeded = false;
 
     extraHeaders.add('Contact: $_contact');
 
@@ -2575,7 +2577,8 @@ class RTCSession extends EventManager {
     }
   }
 
-  void _acceptAndTerminate(response, [status_code, reason_phrase]) async {
+  void _acceptAndTerminate(response,
+      [int status_code, String reason_phrase]) async {
     logger.debug('acceptAndTerminate()');
 
     var extraHeaders = [];
@@ -2654,7 +2657,7 @@ class RTCSession extends EventManager {
   }
 
   void _setLocalMediaStatus() {
-    var enableAudio = true, enableVideo = true;
+    bool enableAudio = true, enableVideo = true;
 
     if (_localHold || _remoteHold) {
       enableAudio = false;
@@ -2684,7 +2687,7 @@ class RTCSession extends EventManager {
       return;
     }
 
-    var session_expires_refresher;
+    String session_expires_refresher;
 
     if (request.session_expires != null &&
         request.session_expires > 0 &&
@@ -2712,7 +2715,7 @@ class RTCSession extends EventManager {
       return;
     }
 
-    var session_expires_refresher;
+    String session_expires_refresher;
 
     if (response.session_expires != 0 &&
         response.session_expires >= DartSIP_C.MIN_SESSION_EXPIRES) {
@@ -2728,7 +2731,7 @@ class RTCSession extends EventManager {
   }
 
   void _runSessionTimer() {
-    var expires = _sessionTimers.currentExpires;
+    int expires = _sessionTimers.currentExpires;
 
     _sessionTimers.running = true;
 

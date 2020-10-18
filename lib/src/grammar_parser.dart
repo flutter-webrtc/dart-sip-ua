@@ -1266,7 +1266,7 @@ class GrammarParser {
           var pos0 = _startPos;
           $$ = ((offset, cseq_value) {
           ///CODE_START
-          data.value=parseInt(cseq_value.join(''));
+          data.cseq = parseInt(cseq_value.join(''));
           ///CODE_END
           })($start, $1);
         }
@@ -19848,15 +19848,15 @@ class GrammarParser {
   var startRule; 
   var data = ParsedData(); 
    
-  parseInt(str){ 
+  int parseInt(str){ 
     return int.parse(str); 
   } 
    
-  parseFloat(str){ 
+  double parseFloat(str){ 
     return double.parse(str); 
   } 
    
-  decodeURIComponent(str){ 
+  String decodeURIComponent(str){ 
     return Uri.decodeComponent(str); 
   } 
    

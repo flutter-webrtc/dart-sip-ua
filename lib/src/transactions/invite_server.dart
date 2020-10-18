@@ -9,79 +9,80 @@ import '../ua.dart';
 import 'transaction_base.dart';
 
 class InviteServerTransaction extends TransactionBase {
-  InviteServerTransaction(UA ua, Transport transport, request) {
-    this.id = request.via_branch;
+  InviteServerTransaction(UA ua, Transport transport, IncomingRequest request) {
+    id = request.via_branch;
     this.ua = ua;
     this.transport = transport;
     this.request = request;
-    this.last_response = IncomingMessage();
+    last_response = IncomingMessage();
     request.server_transaction = this;
 
-    this.state = TransactionState.PROCEEDING;
+    state = TransactionState.PROCEEDING;
 
     ua.newTransaction(this);
 
-    this.resendProvisionalTimer = null;
+    _resendProvisionalTimer = null;
 
     request.reply(100);
   }
-  var resendProvisionalTimer;
-  var transportError;
+  Timer _resendProvisionalTimer;
+  bool transportError;
   Timer L, H, I;
 
-  void stateChanged(state) {
+  void stateChanged(TransactionState state) {
     this.state = state;
-    this.emit(EventStateChanged());
+    emit(EventStateChanged());
   }
 
   void timer_H() {
-    logger.debug('Timer H expired for transaction ${this.id}');
+    logger.debug('Timer H expired for transaction $id');
 
-    if (this.state == TransactionState.COMPLETED) {
+    if (state == TransactionState.COMPLETED) {
       logger.debug('ACK not received, dialog will be terminated');
     }
 
-    this.stateChanged(TransactionState.TERMINATED);
-    this.ua.destroyTransaction(this);
+    stateChanged(TransactionState.TERMINATED);
+    ua.destroyTransaction(this);
   }
 
   void timer_I() {
-    this.stateChanged(TransactionState.TERMINATED);
+    stateChanged(TransactionState.TERMINATED);
   }
 
   // RFC 6026 7.1.
   void timer_L() {
-    logger.debug('Timer L expired for transaction ${this.id}');
+    logger.debug('Timer L expired for transaction $id');
 
-    if (this.state == TransactionState.ACCEPTED) {
-      this.stateChanged(TransactionState.TERMINATED);
-      this.ua.destroyTransaction(this);
+    if (state == TransactionState.ACCEPTED) {
+      stateChanged(TransactionState.TERMINATED);
+      ua.destroyTransaction(this);
     }
   }
 
+  @override
   void onTransportError() {
-    if (this.transportError == null) {
-      this.transportError = true;
+    if (transportError == null) {
+      transportError = true;
 
-      logger.debug('transport error occurred, deleting transaction ${this.id}');
+      logger.debug('transport error occurred, deleting transaction $id');
 
-      if (this.resendProvisionalTimer != null) {
-        clearInterval(this.resendProvisionalTimer);
-        this.resendProvisionalTimer = null;
+      if (_resendProvisionalTimer != null) {
+        clearInterval(_resendProvisionalTimer);
+        _resendProvisionalTimer = null;
       }
 
-      clearTimeout(this.L);
-      clearTimeout(this.H);
-      clearTimeout(this.I);
+      clearTimeout(L);
+      clearTimeout(H);
+      clearTimeout(I);
 
-      this.stateChanged(TransactionState.TERMINATED);
-      this.ua.destroyTransaction(this);
+      stateChanged(TransactionState.TERMINATED);
+      ua.destroyTransaction(this);
     }
   }
 
   void resend_provisional() {
-    if (!this.transport.send(this.last_response)) {
-      this.onTransportError();
+    if (!transport.send(last_response)) {
+      onTransportError();
     }
   }
 
@@ -90,12 +91,12 @@ class InviteServerTransaction extends TransactionBase {
   void receiveResponse(int status_code, IncomingMessage response,
       [void Function() onSuccess, void Function() onFailure]) {
     if (status_code >= 100 && status_code <= 199) {
-      switch (this.state) {
+      switch (state) {
         case TransactionState.PROCEEDING:
-          if (!this.transport.send(response)) {
-            this.onTransportError();
+          if (!transport.send(response)) {
+            onTransportError();
           }
-          this.last_response = response;
+          last_response = response;
           break;
         default:
           break;
@@ -104,31 +105,29 @@ class InviteServerTransaction extends TransactionBase {
 
     if (status_code > 100 &&
         status_code <= 199 &&
-        this.state == TransactionState.PROCEEDING) {
+        state == TransactionState.PROCEEDING) {
       // Trigger the resendProvisionalTimer only for the first non 100 provisional response.
-      if (this.resendProvisionalTimer == null) {
-        this.resendProvisionalTimer = setInterval(() {
-          this.resend_provisional();
-        }, Timers.PROVISIONAL_RESPONSE_INTERVAL);
-      }
+      _resendProvisionalTimer ??= setInterval(() {
+        resend_provisional();
+      }, Timers.PROVISIONAL_RESPONSE_INTERVAL);
     } else if (status_code >= 200 && status_code <= 299) {
-      if (this.state == TransactionState.PROCEEDING) {
-        this.stateChanged(TransactionState.ACCEPTED);
-        this.last_response = response;
-        this.L = setTimeout(() {
-          this.timer_L();
+      if (state == TransactionState.PROCEEDING) {
+        stateChanged(TransactionState.ACCEPTED);
+        last_response = response;
+        L = setTimeout(() {
+          timer_L();
         }, Timers.TIMER_L);
 
-        if (this.resendProvisionalTimer != null) {
-          clearInterval(this.resendProvisionalTimer);
-          this.resendProvisionalTimer = null;
+        if (_resendProvisionalTimer != null) {
+          clearInterval(_resendProvisionalTimer);
+          _resendProvisionalTimer = null;
         }
       }
       /* falls through */
-      if (this.state == TransactionState.ACCEPTED) {
-        // Note that this point will be reached for proceeding this.state also.
-        if (!this.transport.send(response)) {
-          this.onTransportError();
+      if (state == TransactionState.ACCEPTED) {
+        // Note that this point will be reached for proceeding state also.
+        if (!transport.send(response)) {
+          onTransportError();
           if (onFailure != null) {
             onFailure();
           }
@@ -137,22 +136,22 @@ class InviteServerTransaction extends TransactionBase {
         }
       }
     } else if (status_code >= 300 && status_code <= 699) {
-      switch (this.state) {
+      switch (state) {
         case TransactionState.PROCEEDING:
-          if (this.resendProvisionalTimer != null) {
-            clearInterval(this.resendProvisionalTimer);
-            this.resendProvisionalTimer = null;
+          if (_resendProvisionalTimer != null) {
+            clearInterval(_resendProvisionalTimer);
+            _resendProvisionalTimer = null;
           }
 
-          if (!this.transport.send(response)) {
-            this.onTransportError();
+          if (!transport.send(response)) {
+            onTransportError();
             if (onFailure != null) {
               onFailure();
             }
           } else {
-            this.stateChanged(TransactionState.COMPLETED);
-            this.H = setTimeout(() {
-              this.timer_H();
+            stateChanged(TransactionState.COMPLETED);
+            H = setTimeout(() {
+              timer_H();
             }, Timers.TIMER_H);
             if (onSuccess != null) {
               onSuccess();

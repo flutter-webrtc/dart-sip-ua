@@ -47,7 +47,7 @@ class SIPUAHelper extends EventManager {
 
   void stop() async {
     if (_ua != null) {
-      await _ua.stop();
+      _ua.stop();
     } else {
       Log.w('ERROR: stop called but not started, call start first.');
     }
@@ -262,15 +262,15 @@ class SIPUAHelper extends EventManager {
       }, _options(true));
     });
 
-    Map<String, Object> _defaultOptions = {
+    Map<String, Object> _defaultOptions = <String, dynamic>{
       'eventHandlers': handlers,
       'pcConfig': <String, dynamic>{'iceServers': _uaSettings.iceServers},
-      'mediaConstraints': {
+      'mediaConstraints': <String, dynamic>{
         'audio': true,
         'video': voiceonly
             ? false
-            : {
-                'mandatory': {
+            : <String, dynamic>{
+                'mandatory': <String, dynamic>{
                   'minWidth': '640',
                   'minHeight': '480',
                   'minFrameRate': '30',
@@ -279,24 +279,24 @@ class SIPUAHelper extends EventManager {
                 'optional': <dynamic>[],
               }
       },
-      'rtcOfferConstraints': {
-        'mandatory': {
+      'rtcOfferConstraints': <String, dynamic>{
+        'mandatory': <String, dynamic>{
           'OfferToReceiveAudio': true,
           'OfferToReceiveVideo': !voiceonly,
         },
         'optional': <dynamic>[],
       },
-      'rtcAnswerConstraints': {
-        'mandatory': {
+      'rtcAnswerConstraints': <String, dynamic>{
+        'mandatory': <String, dynamic>{
           'OfferToReceiveAudio': true,
           'OfferToReceiveVideo': true,
         },
         'optional': <dynamic>[],
       },
-      'rtcConstraints': {
+      'rtcConstraints': <String, dynamic>{
         'mandatory': <dynamic, dynamic>{},
         'optional': <Map<String, dynamic>>[
-          {'DtlsSrtpKeyAgreement': true},
+          <String, dynamic>{'DtlsSrtpKeyAgreement': true},
         ],
       },
       'sessionTimersExpires': 120
@@ -373,18 +373,11 @@ enum CallStateEnum {
 }
 
 class Call {
+  Call(this._id, this._session, this.state);
   final String _id;
-  CallStateEnum _stateEnum;
   final RTCSession _session;
-  Call(this._id, this._session, this._stateEnum);
-
-  set state(CallStateEnum state) {
-    _stateEnum = state;
-  }
-
-  CallStateEnum get state => _stateEnum;
-
   String get id => _id;
+  CallStateEnum state;
 
   void answer(Map<String, Object> options) {
     assert(_session != null, 'ERROR(answer): rtc session is invalid!');
@@ -535,12 +528,12 @@ class RegisterParams {
   /// Allow extra headers and Contact Params to be sent on REGISTER
   /// Mainly used for RFC8599 Support
   /// https://github.com/cloudwebrtc/dart-sip-ua/issues/89
-  Map<String, dynamic> extraContactUriParams = {};
+  Map<String, dynamic> extraContactUriParams = <String, dynamic>{};
 }
 
 class WebSocketSettings {
   /// Add additional HTTP headers, such as:'Origin','Host' or others
-  Map<String, dynamic> extraHeaders = {};
+  Map<String, dynamic> extraHeaders = <String, dynamic>{};
 
   /// `User Agent` field for dart http client.
   String userAgent;

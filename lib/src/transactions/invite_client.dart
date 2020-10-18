@@ -5,7 +5,6 @@ import 'package:sip_ua/src/event_manager/event_manager.dart';
 import '../constants.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
-import '../sip_message.dart' as SIPMessage;
 import '../sip_message.dart';
 import '../timers.dart';
 import '../transport.dart';
@@ -14,13 +13,13 @@ import '../utils.dart';
 import 'transaction_base.dart';
 
 class InviteClientTransaction extends TransactionBase {
-  InviteClientTransaction(
-      UA ua, Transport transport, request, EventManager eventHandlers) {
-    this.id = 'z9hG4bK${Math.floor(Math.random() * 10000000)}';
+  InviteClientTransaction(UA ua, Transport transport, OutgoingRequest request,
+      EventManager eventHandlers) {
+    id = 'z9hG4bK${Math.floor(Math.random() * 10000000)}';
     this.ua = ua;
     this.transport = transport;
     this.request = request;
-    this._eventHandlers = eventHandlers;
+    _eventHandlers = eventHandlers;
     request.transaction = this;
 
     String via = 'SIP/2.0/${transport.via_transport}';
@@ -54,88 +53,88 @@ class InviteClientTransaction extends TransactionBase {
 
   @override
   void onTransportError() {
-    clearTimeout(this.B);
-    clearTimeout(this.D);
-    clearTimeout(this.M);
+    clearTimeout(B);
+    clearTimeout(D);
+    clearTimeout(M);
 
-    if (this.state != TransactionState.ACCEPTED) {
-      logger.debug('transport error occurred, deleting transaction ${this.id}');
-      this._eventHandlers.emit(EventOnTransportError());
+    if (state != TransactionState.ACCEPTED) {
+      logger.debug('transport error occurred, deleting transaction $id');
+      _eventHandlers.emit(EventOnTransportError());
     }
 
-    this.stateChanged(TransactionState.TERMINATED);
-    this.ua.destroyTransaction(this);
+    stateChanged(TransactionState.TERMINATED);
+    ua.destroyTransaction(this);
   }
 
   // RFC 6026 7.2.
   void timer_M() {
-    logger.debug('Timer M expired for transaction ${this.id}');
+    logger.debug('Timer M expired for transaction $id');
 
-    if (this.state == TransactionState.ACCEPTED) {
-      clearTimeout(this.B);
-      this.stateChanged(TransactionState.TERMINATED);
-      this.ua.destroyTransaction(this);
+    if (state == TransactionState.ACCEPTED) {
+      clearTimeout(B);
+      stateChanged(TransactionState.TERMINATED);
+      ua.destroyTransaction(this);
     }
   }
 
   // RFC 3261 17.1.1.
   void timer_B() {
-    logger.debug('Timer B expired for transaction ${this.id}');
-    if (this.state == TransactionState.CALLING) {
-      this.stateChanged(TransactionState.TERMINATED);
-      this.ua.destroyTransaction(this);
-      this._eventHandlers.emit(EventOnRequestTimeout());
+    logger.debug('Timer B expired for transaction $id');
+    if (state == TransactionState.CALLING) {
+      stateChanged(TransactionState.TERMINATED);
+      ua.destroyTransaction(this);
+      _eventHandlers.emit(EventOnRequestTimeout());
     }
   }
 
   void timer_D() {
-    logger.debug('Timer D expired for transaction ${this.id}');
-    clearTimeout(this.B);
-    this.stateChanged(TransactionState.TERMINATED);
-    this.ua.destroyTransaction(this);
+    logger.debug('Timer D expired for transaction $id');
+    clearTimeout(B);
+    stateChanged(TransactionState.TERMINATED);
+    ua.destroyTransaction(this);
   }
 
-  void sendACK(response) {
-    SIPMessage.OutgoingRequest ack =
-        SIPMessage.OutgoingRequest(SipMethod.ACK, this.request.ruri, this.ua, {
-      'route_set': this.request.getHeaders('route'),
-      'call_id': this.request.getHeader('call-id'),
-      'cseq': this.request.cseq
+  void sendACK(IncomingMessage response) {
+    OutgoingRequest ack =
+        OutgoingRequest(SipMethod.ACK, request.ruri, ua, <String, dynamic>{
+      'route_set': request.getHeaders('route'),
+      'call_id': request.getHeader('call-id'),
+      'cseq': request.cseq
     });
 
-    ack.setHeader('from', this.request.getHeader('from'));
-    ack.setHeader('via', this.request.getHeader('via'));
+    ack.setHeader('from', request.getHeader('from'));
+    ack.setHeader('via', request.getHeader('via'));
     ack.setHeader('to', response.getHeader('to'));
 
-    this.D = setTimeout(() {
-      this.timer_D();
+    D = setTimeout(() {
+      timer_D();
     }, Timers.TIMER_D);
 
-    this.transport.send(ack);
+    transport.send(ack);
   }
 
   void cancel(String reason) {
     // Send only if a provisional response (>100) has been received.
-    if (this.state != TransactionState.PROCEEDING) {
+    if (state != TransactionState.PROCEEDING) {
       return;
     }
 
-    SIPMessage.OutgoingRequest cancel = SIPMessage.OutgoingRequest(
-        SipMethod.CANCEL, this.request.ruri, this.ua, {
-      'route_set': this.request.getHeaders('route'),
-      'call_id': this.request.getHeader('call-id'),
-      'cseq': this.request.cseq
+    OutgoingRequest cancel =
+        OutgoingRequest(SipMethod.CANCEL, request.ruri, ua, <String, dynamic>{
+      'route_set': request.getHeaders('route'),
+      'call_id': request.getHeader('call-id'),
+      'cseq': request.cseq
     });
 
-    cancel.setHeader('from', this.request.getHeader('from'));
-    cancel.setHeader('via', this.request.getHeader('via'));
-    cancel.setHeader('to', this.request.getHeader('to'));
+    cancel.setHeader('from', request.getHeader('from'));
+    cancel.setHeader('via', request.getHeader('via'));
+    cancel.setHeader('to', request.getHeader('to'));
 
     if (reason != null) {
       cancel.setHeader('reason', reason);
     }
 
-    this.transport.send(cancel);
+    transport.send(cancel);
   }
 
   @override
@@ -144,43 +143,43 @@ class InviteClientTransaction extends TransactionBase {
     int status_code = response.status_code;
 
     if (status_code >= 100 && status_code <= 199) {
-      switch (this.state) {
+      switch (state) {
         case TransactionState.CALLING:
-          this.stateChanged(TransactionState.PROCEEDING);
-          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
+          stateChanged(TransactionState.PROCEEDING);
+          _eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         case TransactionState.PROCEEDING:
-          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
+          _eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         default:
           break;
       }
     } else if (status_code >= 200 && status_code <= 299) {
-      switch (this.state) {
+      switch (state) {
         case TransactionState.CALLING:
         case TransactionState.PROCEEDING:
-          this.stateChanged(TransactionState.ACCEPTED);
-          this.M = setTimeout(() {
-            this.timer_M();
+          stateChanged(TransactionState.ACCEPTED);
+          M = setTimeout(() {
+            timer_M();
           }, Timers.TIMER_M);
-          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
+          _eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         case TransactionState.ACCEPTED:
-          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
+          _eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         default:
           break;
       }
     } else if (status_code >= 300 && status_code <= 699) {
-      switch (this.state) {
+      switch (state) {
         case TransactionState.CALLING:
         case TransactionState.PROCEEDING:
-          this.stateChanged(TransactionState.COMPLETED);
-          this.sendACK(response);
-          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
+          stateChanged(TransactionState.COMPLETED);
+          sendACK(response);
+          _eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         case TransactionState.COMPLETED:
-          this.sendACK(response);
+          sendACK(response);
           break;
         default:
           break;

@@ -227,7 +227,7 @@ dynamic parseHeader(
       message.setHeader('cseq', headerValue);
       parsed = message.parseHeader('cseq');
       if (parsed != null) {
-        message.cseq = parsed.value;
+        message.cseq = parsed.cseq;
       }
       if (message is IncomingResponse) {
         message.method = parsed.method;

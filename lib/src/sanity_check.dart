@@ -209,7 +209,13 @@ bool rfc3261_18_3_response() {
 
 // Sanity Check functions for requests and responses.
 bool minimumHeaders() {
-  List<String> mandatoryHeaders = ['from', 'to', 'call_id', 'cseq', 'via'];
+  List<String> mandatoryHeaders = <String>[
+    'from',
+    'to',
+    'call_id',
+    'cseq',
+    'via'
+  ];
 
   for (String header in mandatoryHeaders) {
     if (!message.hasHeader(header)) {

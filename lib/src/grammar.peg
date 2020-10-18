@@ -11,15 +11,15 @@
   var startRule;
   var data = ParsedData();
 
-  parseInt(str){
+  int parseInt(str){
     return int.parse(str);
   }
 
-  parseFloat(str){
+  double parseFloat(str){
     return double.parse(str);
   }
 
-  decodeURIComponent(str){
+  String decodeURIComponent(str){
     return Uri.decodeComponent(str);
   }
 
@@ -825,7 +825,7 @@ m_value             <- token / quoted_string
 CSeq          <- CSeq_value LWS CSeq_method {return data;}
 
 CSeq_value    <- cseq_value: DIGIT + {
-                  data.value=parseInt(cseq_value.join('')); }
+                  data.cseq = parseInt(cseq_value.join('')); }
 
 CSeq_method   <- Method
 

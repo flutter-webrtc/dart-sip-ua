@@ -56,7 +56,7 @@ class Dialog {
           : Dialog_C.STATUS_CONFIRMED;
     }
 
-    var contact = message.parseHeader('contact');
+    dynamic contact = message.parseHeader('contact');
 
     // RFC 3261 12.1.1.
     if (type == 'UAS') {
@@ -99,13 +99,13 @@ class Dialog {
   UA _ua;
   bool _uac_pending_reply;
   bool _uas_pending_reply;
-  var _state;
-  var _remote_seqnum;
+  int _state;
+  int _remote_seqnum;
   URI _local_uri;
   URI _remote_uri;
   var _remote_target;
   var _route_set;
-  var _ack_seqnum;
+  int _ack_seqnum;
   Id _id;
   num _local_seqnum;
 

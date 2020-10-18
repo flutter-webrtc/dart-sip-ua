@@ -11,92 +11,93 @@ import '../utils.dart';
 import 'transaction_base.dart';
 
 class NonInviteClientTransaction extends TransactionBase {
-  NonInviteClientTransaction(
-      UA ua, Transport transport, request, EventManager eventHandlers) {
-    this.id = 'z9hG4bK${Math.floor(Math.random())}';
+  NonInviteClientTransaction(UA ua, Transport transport,
+      OutgoingRequest request, EventManager eventHandlers) {
+    id = 'z9hG4bK${Math.floor(Math.random())}';
     this.ua = ua;
     this.transport = transport;
     this.request = request;
-    this._eventHandlers = eventHandlers;
+    _eventHandlers = eventHandlers;
 
-    var via = 'SIP/2.0/${transport.via_transport}';
+    String via = 'SIP/2.0/${transport.via_transport}';
 
-    via += ' ${ua.configuration.via_host};branch=${this.id}';
+    via += ' ${ua.configuration.via_host};branch=$id';
 
-    this.request.setHeader('via', via);
+    request.setHeader('via', via);
 
-    this.ua.newTransaction(this);
+    ua.newTransaction(this);
   }
 
   EventManager _eventHandlers;
   Timer F, K;
 
-  void stateChanged(state) {
+  void stateChanged(TransactionState state) {
     this.state = state;
-    this.emit(EventStateChanged());
+    emit(EventStateChanged());
   }
 
+  @override
   void send() {
-    this.stateChanged(TransactionState.TRYING);
-    this.F = setTimeout(() {
-      this.timer_F();
+    stateChanged(TransactionState.TRYING);
+    F = setTimeout(() {
+      timer_F();
     }, Timers.TIMER_F);
 
-    if (!this.transport.send(this.request)) {
-      this.onTransportError();
+    if (!transport.send(request)) {
+      onTransportError();
     }
   }
 
+  @override
   void onTransportError() {
-    logger.debug('transport error occurred, deleting transaction ${this.id}');
-    clearTimeout(this.F);
-    clearTimeout(this.K);
-    this.stateChanged(TransactionState.TERMINATED);
-    this.ua.destroyTransaction(this);
-    this._eventHandlers.emit(EventOnTransportError());
+    logger.debug('transport error occurred, deleting transaction $id');
+    clearTimeout(F);
+    clearTimeout(K);
+    stateChanged(TransactionState.TERMINATED);
+    ua.destroyTransaction(this);
+    _eventHandlers.emit(EventOnTransportError());
   }
 
   void timer_F() {
-    logger.debug('Timer F expired for transaction ${this.id}');
-    this.stateChanged(TransactionState.TERMINATED);
-    this.ua.destroyTransaction(this);
-    this._eventHandlers.emit(EventOnRequestTimeout());
+    logger.debug('Timer F expired for transaction $id');
+    stateChanged(TransactionState.TERMINATED);
+    ua.destroyTransaction(this);
+    _eventHandlers.emit(EventOnRequestTimeout());
   }
 
   void timer_K() {
-    this.stateChanged(TransactionState.TERMINATED);
-    this.ua.destroyTransaction(this);
+    stateChanged(TransactionState.TERMINATED);
+    ua.destroyTransaction(this);
   }
 
+  @override
   void receiveResponse(int status_code, IncomingMessage response,
       [void Function() onSuccess, void Function() onFailure]) {
     if (status_code < 200) {
-      switch (this.state) {
+      switch (state) {
         case TransactionState.TRYING:
         case TransactionState.PROCEEDING:
-          this.stateChanged(TransactionState.PROCEEDING);
-          this._eventHandlers.emit(EventOnReceiveResponse(response: response));
+          stateChanged(TransactionState.PROCEEDING);
+          _eventHandlers.emit(EventOnReceiveResponse(response: response));
           break;
         default:
           break;
       }
     } else {
-      switch (this.state) {
+      switch (state) {
         case TransactionState.TRYING:
         case TransactionState.PROCEEDING:
-          this.stateChanged(TransactionState.COMPLETED);
-          clearTimeout(this.F);
+          stateChanged(TransactionState.COMPLETED);
+          clearTimeout(F);
 
           if (status_code == 408) {
-            this._eventHandlers.emit(EventOnRequestTimeout());
+            _eventHandlers.emit(EventOnRequestTimeout());
           } else {
-            this
-                ._eventHandlers
-                .emit(EventOnReceiveResponse(response: response));
+            _eventHandlers.emit(EventOnReceiveResponse(response: response));
           }
 
-          this.K = setTimeout(() {
-            this.timer_K();
+          K = setTimeout(() {
+            timer_K();
           }, Timers.TIMER_K);
           break;
         case TransactionState.COMPLETED:
