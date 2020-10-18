@@ -56,7 +56,7 @@ Thanks to the original authors of [JsSIP](https://github.com/versatica/JsSIP) fo
 - [Saúl Ibarra Corretgé](https://github.com/saghul)
 
 ## Sponsors
-The first version was sponsored by Suretec Systems Ltd. T/A [SureVoIP](http://www.surevoip.co.uk).
+The first version was sponsored by Suretec Systems Ltd. T/A [SureVoIP](https://www.surevoip.co.uk).
 
 ## Contributing
 The project is inseparable from the contributors of the community.
