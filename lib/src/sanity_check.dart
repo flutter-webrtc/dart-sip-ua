@@ -127,6 +127,7 @@ bool rfc3261_8_2_2_2() {
     return true;
   }
 
+  bool result = true;
   // INVITE request.
   if (message.method == SipMethod.INVITE) {
     // If the branch matches the key of any IST then assume it is a retransmission
@@ -135,46 +136,44 @@ bool rfc3261_8_2_2_2() {
     if (ua.transactions
             .getTransaction(InviteServerTransaction, message.via_branch) !=
         null) {
-      return false;
+      result = false;
     }
     // Otherwise check whether it is a merged request.
     else {
-      ua.transactions.getAll(InviteServerTransaction).forEach((tr) {
+      ua.transactions.getAll(InviteServerTransaction).forEach((dynamic tr) {
         if (tr.request.from_tag == fromTag &&
             tr.request.call_id == call_id &&
             tr.request.cseq == cseq) {
           reply(482);
-
-          return false;
+          result = false;
+          return;
         }
       });
     }
   }
-
   // Non INVITE request.
-
   // If the branch matches the key of any NIST then assume it is a retransmission
   // and ignore the request.
   // TODO(cloudwebrtc): we should reply the last response.
   else if (ua.transactions
           .getTransaction(NonInviteServerTransaction, message.via_branch) !=
       null) {
-    return false;
+    result = false;
   }
-
   // Otherwise check whether it is a merged request.
   else {
-    ua.transactions.getAll(NonInviteServerTransaction).forEach((tr) {
-      if (tr._request.from_tag == fromTag &&
-          tr._request.call_id == call_id &&
-          tr._request.cseq == cseq) {
+    ua.transactions.getAll(NonInviteServerTransaction).forEach((dynamic tr) {
+      if (tr.request.from_tag == fromTag &&
+          tr.request.call_id == call_id &&
+          tr.request.cseq == cseq) {
         reply(482);
-        return false;
+        result = false;
+        return;
       }
     });
   }
 
-  return true;
+  return result;
 }
 
 // Sanity Check functions for responses.

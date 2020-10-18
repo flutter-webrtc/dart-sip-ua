@@ -257,7 +257,7 @@ class SIPUAHelper extends EventManager {
       _notifyCallStateListeners(
           refer, CallState(CallStateEnum.REFER, refer: refer));
       //Always accept.
-      refer.accept((session) {
+      refer.accept((RTCSession session) {
         logger.debug('session initialized.');
       }, _options(true));
     });

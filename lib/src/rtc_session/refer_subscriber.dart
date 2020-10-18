@@ -7,6 +7,7 @@ import '../event_manager/internal_events.dart';
 import '../grammar.dart';
 import '../logger.dart';
 import '../rtc_session.dart' as rtc;
+import '../uri.dart';
 import '../utils.dart' as Utils;
 
 class ReferSubscriber extends EventManager {
@@ -17,7 +18,7 @@ class ReferSubscriber extends EventManager {
 
   int get id => _id;
 
-  void sendRefer(target, options) {
+  void sendRefer(URI target, Map<String, dynamic> options) {
     logger.debug('sendRefer()');
 
     List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
@@ -83,7 +84,7 @@ class ReferSubscriber extends EventManager {
       return;
     }
 
-    var status_line = request.body.trim();
+    String status_line = request.body.trim();
     dynamic parsed = Grammar.parse(status_line, 'Status_Line');
 
     if (parsed == -1) {
@@ -116,7 +117,7 @@ class ReferSubscriber extends EventManager {
     emit(EventReferRequestSucceeded(response: response));
   }
 
-  void _requestFailed(IncomingMessage response, ErrorCause cause) {
+  void _requestFailed(IncomingMessage response, dynamic cause) {
     logger.debug('REFER failed');
 
     logger.debug('emit "requestFailed"');

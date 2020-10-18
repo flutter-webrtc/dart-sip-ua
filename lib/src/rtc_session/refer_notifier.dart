@@ -12,7 +12,7 @@ class C {
 }
 
 class ReferNotifier {
-  ReferNotifier(rtc.RTCSession session, String id, [int expires]) {
+  ReferNotifier(rtc.RTCSession session, int id, [int expires]) {
     _session = session;
     _id = id;
     _expires = expires ?? C.expires;
@@ -23,7 +23,7 @@ class ReferNotifier {
   }
 
   rtc.RTCSession _session;
-  String _id;
+  int _id;
   int _expires;
   bool _active;
 

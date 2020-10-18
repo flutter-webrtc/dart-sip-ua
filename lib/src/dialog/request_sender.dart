@@ -87,7 +87,7 @@ class DialogRequestSender {
           _eventHandlers.emit(EventOnErrorResponse(response: response));
         }
       } else {
-        _request.cseq.value = _dialog.local_seqnum += 1;
+        _request.cseq = _dialog.local_seqnum += 1;
         _reattemptTimer = setTimeout(() {
           // TODO(cloudwebrtc): look at dialog state instead.
           if (_dialog.owner.status != RTCSession.C.STATUS_TERMINATED) {

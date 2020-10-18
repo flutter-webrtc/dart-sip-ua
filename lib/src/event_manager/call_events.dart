@@ -104,9 +104,9 @@ class EventCallRefer extends CallEvent {
       : super(session);
   String aor;
 
-  /// bool Function({Function initCallback, dynamic options}) accept;
+  //bool Function([Function initCallback, dynamic options]) accept;
   dynamic accept;
 
-  /// bool Function(dynamic options) reject;
+  //bool Function([dynamic options]) reject;
   dynamic reject;
 }

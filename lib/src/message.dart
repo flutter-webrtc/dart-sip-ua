@@ -7,9 +7,9 @@ import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
 import 'request_sender.dart';
-import 'sip_message.dart' as SIPMessage;
 import 'sip_message.dart';
 import 'ua.dart';
+import 'uri.dart';
 import 'utils.dart' as Utils;
 
 class Message extends EventManager {
@@ -26,11 +26,11 @@ class Message extends EventManager {
     _is_replied = false;
 
     // Custom message empty object for high level use.
-    _data = {};
+    _data = <String, dynamic>{};
   }
 
   UA _ua;
-  var _request;
+  dynamic _request;
   bool _closed;
   String _direction;
   NameAddrHeader _local_identity;
@@ -46,15 +46,15 @@ class Message extends EventManager {
   Map<String, dynamic> get data => _data;
 
   void send(String target, String body, [Map<String, dynamic> options]) {
-    var originalTarget = target;
-    options = options ?? {};
+    String originalTarget = target;
+    options = options ?? <String, dynamic>{};
 
     if (target == null || body == null) {
       throw Exceptions.TypeError('Not enough arguments');
     }
 
     // Check target validity.
-    var normalized = _ua.normalizeTarget(target);
+    URI normalized = _ua.normalizeTarget(target);
     if (normalized == null) {
       throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
@@ -69,8 +69,8 @@ class Message extends EventManager {
 
     extraHeaders.add('Content-Type: $contentType');
 
-    _request = SIPMessage.OutgoingRequest(
-        SipMethod.MESSAGE, normalized, _ua, null, extraHeaders);
+    _request =
+        OutgoingRequest(SipMethod.MESSAGE, normalized, _ua, null, extraHeaders);
     if (body != null) {
       _request.body = body;
     }
@@ -93,7 +93,7 @@ class Message extends EventManager {
     request_sender.send();
   }
 
-  void init_incoming(request) {
+  void init_incoming(IncomingRequest request) {
     _request = request;
 
     _newMessage('remote', request);
@@ -112,8 +112,8 @@ class Message extends EventManager {
    * Only valid for incoming Messages
    */
   void accept(Map<String, dynamic> options) {
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    var body = options['body'];
+    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    String body = options['body'];
 
     if (_direction != 'incoming') {
       throw Exceptions.NotSupportedError(
@@ -155,7 +155,7 @@ class Message extends EventManager {
     _request.reply(status_code, reason_phrase, extraHeaders, body);
   }
 
-  void _receiveResponse(response) {
+  void _receiveResponse(IncomingResponse response) {
     if (_closed != null) {
       return;
     }
@@ -164,7 +164,7 @@ class Message extends EventManager {
     } else if (RegExp(r'^2[0-9]{2}$').hasMatch(response.status_code)) {
       _succeeded('remote', response);
     } else {
-      var cause = Utils.sipErrorCause(response.status_code);
+      String cause = Utils.sipErrorCause(response.status_code);
       _failed('remote', response.status_code, cause, response.reason_phrase);
     }
   }
@@ -193,7 +193,7 @@ class Message extends EventManager {
    * Internal Callbacks
    */
 
-  void _newMessage(String originator, request) {
+  void _newMessage(String originator, dynamic request) {
     if (originator == 'remote') {
       _direction = 'incoming';
       _local_identity = request.to;

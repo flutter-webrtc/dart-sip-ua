@@ -1,10 +1,13 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
+import '../rtc_session.dart' show RTCSession;
 import '../rtc_session/dtmf.dart';
 import '../rtc_session/info.dart';
 import '../sip_message.dart';
 import '../transactions/transaction_base.dart';
 import 'events.dart';
+
+typedef InitSuccessCallback = bool Function(RTCSession);
 
 class EventStateChanged extends EventType {}
 
@@ -83,22 +86,22 @@ class EventPeerConnection extends EventType {
 class EventReplaces extends EventType {
   EventReplaces({this.request, this.accept, this.reject});
   dynamic request;
-  bool Function(dynamic options) accept;
-  bool Function(dynamic options) reject;
+  void Function(InitSuccessCallback) accept;
+  void Function() reject;
 }
 
 class EventUpdate extends EventType {
   EventUpdate({this.request, this.callback, this.reject});
   dynamic request;
-  bool Function(dynamic options) callback;
-  bool Function(dynamic options) reject;
+  bool Function(Map<String, dynamic> options) callback;
+  bool Function(Map<String, dynamic> options) reject;
 }
 
 class EventReinvite extends EventType {
   EventReinvite({this.request, this.callback, this.reject});
   dynamic request;
-  bool Function(dynamic options) callback;
-  bool Function(dynamic options) reject;
+  bool Function(Map<String, dynamic> options) callback;
+  bool Function(Map<String, dynamic> options) reject;
 }
 
 class EventIceCandidate extends EventType {

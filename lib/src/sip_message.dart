@@ -46,30 +46,34 @@ class OutgoingRequest {
 
     // Route.
     if (params['route_set'] != null) {
-      this.setHeader('route', params['route_set']);
+      setHeader('route', params['route_set']);
     } else if (ua.configuration.use_preloaded_route) {
-      this.setHeader('route', '<${ua.transport.sip_uri};lr>');
+      setHeader('route', '<${ua.transport.sip_uri};lr>');
     }
 
     // Via.
     // Empty Via header. Will be filled by the client transaction.
-    this.setHeader('via', '');
+    setHeader('via', '');
 
     // Max-Forwards.
-    this.setHeader('max-forwards', DartSIP_C.MAX_FORWARDS);
+    setHeader('max-forwards', DartSIP_C.MAX_FORWARDS);
 
     // To
-    var to_uri = params['to_uri'] ?? ruri;
-    var to_params = params['to_tag'] != null ? {'tag': params['to_tag']} : null;
-    var to_display_name = params['to_display_name'];
+    dynamic to_uri = params['to_uri'] ?? ruri;
+    dynamic to_params = params['to_tag'] != null
+        ? <String, dynamic>{'tag': params['to_tag']}
+        : null;
+    String to_display_name = params['to_display_name'];
 
-    this.to = NameAddrHeader(to_uri, to_display_name, to_params);
-    this.setHeader('to', this.to.toString());
+    to = NameAddrHeader(to_uri, to_display_name, to_params);
+    setHeader('to', to.toString());
 
     // From.
-    var from_uri = params['from_uri'] ?? ua.configuration.uri;
-    var from_params = {'tag': params['from_tag'] ?? utils.newTag()};
-    var display_name;
+    dynamic from_uri = params['from_uri'] ?? ua.configuration.uri;
+    Map<String, dynamic> from_params = <String, dynamic>{
+      'tag': params['from_tag'] ?? utils.newTag()
+    };
+    String display_name;
 
     if (params['from_display_name'] != null) {
       display_name = params['from_display_name'];
@@ -79,22 +83,22 @@ class OutgoingRequest {
       display_name = null;
     }
 
-    this.from = NameAddrHeader(from_uri, display_name, from_params);
-    this.setHeader('from', this.from.toString());
+    from = NameAddrHeader(from_uri, display_name, from_params);
+    setHeader('from', from.toString());
 
     // Call-ID.
-    var call_id = params['call_id'] ??
+    String call_id = params['call_id'] ??
         (ua.configuration.jssip_id + utils.createRandomToken(15));
 
     this.call_id = call_id;
-    this.setHeader('call-id', call_id);
+    setHeader('call-id', call_id);
 
     // CSeq.
-    var cseq =
+    num cseq =
         params['cseq'] ?? utils.Math.floor(utils.Math.randomDouble() * 10000);
 
     this.cseq = cseq;
-    this.setHeader('cseq', '$cseq ${SipMethodHelper.getName(method)}');
+    setHeader('cseq', '$cseq ${SipMethodHelper.getName(method)}');
   }
 
   UA ua;
@@ -106,9 +110,9 @@ class OutgoingRequest {
   NameAddrHeader to;
   NameAddrHeader from;
   String call_id;
-  var cseq;
+  int cseq;
   Map<String, dynamic> sdp;
-  var transaction;
+  dynamic transaction;
 
   /**
    * Replace the the given header by the given value.
@@ -119,13 +123,13 @@ class OutgoingRequest {
     // Remove the header from extraHeaders if present.
     RegExp regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
 
-    for (var idx = 0; idx < this.extraHeaders.length; idx++) {
-      if (regexp.hasMatch(this.extraHeaders[idx])) {
-        this.extraHeaders.sublist(idx, 1);
+    for (int idx = 0; idx < extraHeaders.length; idx++) {
+      if (regexp.hasMatch(extraHeaders[idx])) {
+        extraHeaders.sublist(idx, 1);
       }
     }
 
-    this.headers[utils.headerize(name)] = (value is List) ? value : [value];
+    headers[utils.headerize(name)] = (value is List) ? value : <dynamic>[value];
   }
 
   /**
@@ -134,15 +138,15 @@ class OutgoingRequest {
    * -returns {String|null} Returns the specified header, null if header doesn't exist.
    */
   dynamic getHeader(String name) {
-    var headers = this.headers[utils.headerize(name)];
+    List<dynamic> headers = this.headers[utils.headerize(name)];
 
     if (headers != null) {
       if (headers[0] != null) {
         return headers[0];
       }
     } else {
-      var regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
-      for (var header in this.extraHeaders) {
+      RegExp regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
+      for (dynamic header in extraHeaders) {
         if (regexp.hasMatch(header)) {
           return header.substring(header.indexOf(':') + 1).trim();
         }
@@ -158,19 +162,19 @@ class OutgoingRequest {
    * -returns {Array} Array with all the headers of the specified name.
    */
   List<dynamic> getHeaders(String name) {
-    var headers = this.headers[utils.headerize(name)];
-    var result = [];
+    List<dynamic> headers = this.headers[utils.headerize(name)];
+    List<dynamic> result = <dynamic>[];
 
     if (headers != null) {
-      for (var header in headers) {
+      for (dynamic header in headers) {
         result.add(header);
       }
 
       return result;
     } else {
-      var regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
+      RegExp regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
 
-      for (var header in this.extraHeaders) {
+      for (dynamic header in extraHeaders) {
         if (regexp.hasMatch(header)) {
           result.add(header.substring(header.indexOf(':') + 1).trim());
         }
@@ -186,12 +190,12 @@ class OutgoingRequest {
    * -returns {boolean} true if header with given name exists, false otherwise
    */
   bool hasHeader(String name) {
-    if (this.headers[utils.headerize(name)]) {
+    if (headers[utils.headerize(name)]) {
       return true;
     } else {
-      var regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
+      RegExp regexp = RegExp('^\\s*$name\\s*:', caseSensitive: false);
 
-      for (var header in this.extraHeaders) {
+      for (dynamic header in extraHeaders) {
         if (regexp.hasMatch(header)) {
           return true;
         }
@@ -203,56 +207,54 @@ class OutgoingRequest {
 
   /**
    * Parse the current body as a SDP and store the resulting object
-   * into this.sdp.
-   * -param {Boolean} force: Parse even if this.sdp already exists.
+   * into sdp.
+   * -param {Boolean} force: Parse even if sdp already exists.
    *
-   * Returns this.sdp.
+   * Returns sdp.
    */
   Map<String, dynamic> parseSDP({bool force = false}) {
-    if (!force && this.sdp != null) {
-      return this.sdp;
+    if (!force && sdp != null) {
+      return sdp;
     } else {
-      this.sdp = sdp_transform.parse(this.body ?? '');
-      return this.sdp;
+      sdp = sdp_transform.parse(body ?? '');
+      return sdp;
     }
   }
 
   @override
   String toString() {
-    var msg =
-        '${SipMethodHelper.getName(this.method)} ${this.ruri} SIP/2.0\r\n';
+    String msg = '${SipMethodHelper.getName(method)} $ruri SIP/2.0\r\n';
 
-    this.headers.forEach((String headerName, dynamic headerValues) {
-      headerValues.forEach((value) {
+    headers.forEach((String headerName, dynamic headerValues) {
+      headerValues.forEach((dynamic value) {
         msg += '$headerName: $value\r\n';
       });
     });
 
-    this.extraHeaders.forEach((header) {
+    extraHeaders.forEach((dynamic header) {
       msg += '${header.trim()}\r\n';
     });
 
     // Supported.
-    var supported = [];
+    List<dynamic> supported = <dynamic>[];
 
-    switch (this.method) {
+    switch (method) {
       case SipMethod.REGISTER:
         supported.add('path');
         supported.add('gruu');
         break;
       case SipMethod.INVITE:
-        if (this.ua.configuration.session_timers) {
+        if (ua.configuration.session_timers) {
           supported.add('timer');
         }
-        if (this.ua.contact.pub_gruu != null ||
-            this.ua.contact.temp_gruu != null) {
+        if (ua.contact.pub_gruu != null || ua.contact.temp_gruu != null) {
           supported.add('gruu');
         }
         supported.add('ice');
         supported.add('replaces');
         break;
       case SipMethod.UPDATE:
-        if (this.ua.configuration.session_timers) {
+        if (ua.configuration.session_timers) {
           supported.add('timer');
         }
         supported.add('ice');
@@ -263,20 +265,20 @@ class OutgoingRequest {
 
     supported.add('outbound');
 
-    var userAgent = this.ua.configuration.user_agent ?? DartSIP_C.USER_AGENT;
+    String userAgent = ua.configuration.user_agent ?? DartSIP_C.USER_AGENT;
 
     // Allow.
     msg += 'Allow: ${DartSIP_C.ALLOWED_METHODS}\r\n';
     msg += 'Supported: ${supported.join(',')}\r\n';
     msg += 'User-Agent: $userAgent\r\n';
 
-    if (this.body != null) {
-      logger.debug("Outgoing Message: " + this.body);
+    if (body != null) {
+      logger.debug('Outgoing Message: ' + body);
       //Here we should calculate the real content length for UTF8
-      var encoded = utf8.encode(this.body);
-      var length = encoded.length;
+      List<int> encoded = utf8.encode(body);
+      int length = encoded.length;
       msg += 'Content-Length: $length\r\n\r\n';
-      msg += this.body;
+      msg += body;
     } else {
       msg += 'Content-Length: 0\r\n\r\n';
     }
@@ -285,48 +287,51 @@ class OutgoingRequest {
   }
 
   OutgoingRequest clone() {
-    var request = OutgoingRequest(this.method, this.ruri, this.ua);
+    OutgoingRequest request = OutgoingRequest(method, ruri, ua);
 
-    this.headers.forEach((name, value) {
-      request.headers[name] = this.headers[name];
+    headers.forEach((String name, dynamic value) {
+      request.headers[name] = headers[name];
     });
 
-    request.body = this.body;
-    request.extraHeaders = utils.cloneArray(this.extraHeaders);
-    request.to = this.to;
-    request.from = this.from;
-    request.call_id = this.call_id;
-    request.cseq = this.cseq;
+    request.body = body;
+    request.extraHeaders = utils.cloneArray(extraHeaders);
+    request.to = to;
+    request.from = from;
+    request.call_id = call_id;
+    request.cseq = cseq;
 
     return request;
   }
 }
 
 class InitialOutgoingInviteRequest extends OutgoingRequest {
-  InitialOutgoingInviteRequest(ruri, ua, [params, extraHeaders, body])
+  InitialOutgoingInviteRequest(URI ruri, UA ua,
+      [Map<String, dynamic> params, List<dynamic> extraHeaders, String body])
       : super(SipMethod.INVITE, ruri, ua, params, extraHeaders, body) {
-    this.transaction = null;
+    transaction = null;
   }
 
-  void cancel(reason) {
-    this.transaction.cancel(reason);
+  void cancel(String reason) {
+    transaction.cancel(reason);
   }
 
+  @override
   InitialOutgoingInviteRequest clone() {
-    var request = InitialOutgoingInviteRequest(this.ruri, this.ua);
+    InitialOutgoingInviteRequest request =
+        InitialOutgoingInviteRequest(ruri, ua);
 
-    this.headers.forEach((name, value) {
-      request.headers[name] = List.from(this.headers[name]);
+    headers.forEach((String name, dynamic value) {
+      request.headers[name] = List<dynamic>.from(headers[name]);
     });
 
-    request.body = this.body;
-    request.extraHeaders = utils.cloneArray(this.extraHeaders);
-    request.to = this.to;
-    request.from = this.from;
-    request.call_id = this.call_id;
-    request.cseq = this.cseq;
+    request.body = body;
+    request.extraHeaders = utils.cloneArray(extraHeaders);
+    request.to = to;
+    request.from = from;
+    request.call_id = call_id;
+    request.cseq = cseq;
 
-    request.transaction = this.transaction;
+    request.transaction = transaction;
 
     return request;
   }
@@ -334,18 +339,18 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
 
 class IncomingMessage {
   IncomingMessage() {
-    this.data = '';
-    this.headers = null;
-    this.method = null;
-    this.via_branch = null;
-    this.call_id = null;
-    this.cseq = null;
-    this.from = null;
-    this.from_tag = null;
-    this.to = null;
-    this.to_tag = null;
-    this.body = '';
-    this.sdp = null;
+    data = '';
+    headers = null;
+    method = null;
+    via_branch = null;
+    call_id = null;
+    cseq = null;
+    from = null;
+    from_tag = null;
+    to = null;
+    to_tag = null;
+    body = '';
+    sdp = null;
   }
 
   String data;
@@ -360,7 +365,7 @@ class IncomingMessage {
   String to_tag;
   String body;
   Map<String, dynamic> sdp;
-  int status_code;
+  dynamic status_code;
   String reason_phrase;
   int session_expires;
   String session_expires_refresher;
@@ -373,14 +378,14 @@ class IncomingMessage {
   * header array.
   */
   void addHeader(String name, dynamic value) {
-    var header = {'raw': value};
+    Map<String, dynamic> header = <String, dynamic>{'raw': value};
 
     name = utils.headerize(name);
 
-    if (this.headers[name] != null) {
-      this.headers[name].add(header);
+    if (headers[name] != null) {
+      headers[name].add(header);
     } else {
-      this.headers[name] = [header];
+      headers[name] = <dynamic>[header];
     }
   }
 
@@ -388,7 +393,7 @@ class IncomingMessage {
    * Get the value of the given header name at the given position.
    */
   dynamic getHeader(String name) {
-    var header = this.headers[utils.headerize(name)];
+    dynamic header = headers[utils.headerize(name)];
 
     if (header != null) {
       if (header[0] != null) {
@@ -403,14 +408,14 @@ class IncomingMessage {
    * Get the header/s of the given name.
    */
   List<dynamic> getHeaders(String name) {
-    var headers = this.headers[utils.headerize(name)];
-    var result = [];
+    List<dynamic> headers = this.headers[utils.headerize(name)];
+    List<dynamic> result = <dynamic>[];
 
     if (headers == null) {
-      return [];
+      return <dynamic>[];
     }
 
-    for (var header in headers) {
+    for (dynamic header in headers) {
       result.add(header['raw']);
     }
 
@@ -421,7 +426,7 @@ class IncomingMessage {
    * Verify the existence of the given header.
    */
   bool hasHeader(String name) {
-    return this.headers.containsKey(utils.headerize(name));
+    return headers.containsKey(utils.headerize(name));
   }
 
   /**
@@ -434,16 +439,16 @@ class IncomingMessage {
   dynamic parseHeader(String name, {int idx = 0}) {
     name = utils.headerize(name);
 
-    if (this.headers[name] == null) {
+    if (headers[name] == null) {
       logger.debug('header "$name" not present');
       return null;
-    } else if (idx >= this.headers[name].length) {
+    } else if (idx >= headers[name].length) {
       logger.debug('not so many "$name" headers present');
       return null;
     }
 
-    var header = this.headers[name][idx];
-    var value = header['raw'];
+    dynamic header = headers[name][idx];
+    dynamic value = header['raw'];
 
     if (header['parsed'] != null) {
       return header['parsed'];
@@ -452,7 +457,7 @@ class IncomingMessage {
     // Substitute '-' by '_' for grammar rule matching.
     dynamic parsed = Grammar.parse(value, name.replaceAll('-', '_'));
     if (parsed == -1) {
-      this.headers[name].splice(idx, 1); // delete from headers
+      headers[name].splice(idx, 1); // delete from headers
       logger.debug('error parsing "$name" header field with value "$value"');
       return null;
     } else {
@@ -473,7 +478,7 @@ class IncomingMessage {
    * message.s('via',3).port
    */
   dynamic s(String name, {int idx = 0}) {
-    return this.parseHeader(name, idx: idx);
+    return parseHeader(name, idx: idx);
   }
 
   /**
@@ -484,45 +489,43 @@ class IncomingMessage {
   void setHeader(String name, dynamic value) {
     Map<String, dynamic> header = <String, dynamic>{'raw': value};
 
-    this.headers[utils.headerize(name)] = [header];
+    headers[utils.headerize(name)] = <dynamic>[header];
   }
 
   /**
    * Parse the current body as a SDP and store the resulting object
-   * into this.sdp.
-   * -param {Boolean} force: Parse even if this.sdp already exists.
+   * into sdp.
+   * -param {Boolean} force: Parse even if sdp already exists.
    *
-   * Returns this.sdp.
+   * Returns sdp.
    */
   Map<String, dynamic> parseSDP({bool force = false}) {
-    if (!force && this.sdp != null) {
-      return this.sdp;
+    if (!force && sdp != null) {
+      return sdp;
     } else {
-      this.sdp = sdp_transform.parse(this.body ?? '');
-      return this.sdp;
+      sdp = sdp_transform.parse(body ?? '');
+      return sdp;
     }
   }
 
   @override
   String toString() {
-    return this.data;
+    return data;
   }
 }
 
 class IncomingRequest extends IncomingMessage {
+  IncomingRequest(UA ua) : super() {
+    this.ua = ua;
+    headers = <String, dynamic>{};
+    ruri = null;
+    transport = null;
+    server_transaction = null;
+  }
   UA ua;
   URI ruri;
   Transport transport;
   TransactionBase server_transaction;
-
-  IncomingRequest(UA ua) : super() {
-    this.ua = ua;
-    this.headers = {};
-    this.ruri = null;
-    this.transport = null;
-    this.server_transaction = null;
-  }
-
   /**
   * Stateful reply.
   * -param {Number} code status code
@@ -538,8 +541,8 @@ class IncomingRequest extends IncomingMessage {
       String body,
       Function onSuccess,
       Function onFailure]) {
-    var supported = [];
-    var to = this.getHeader('To');
+    List<dynamic> supported = <dynamic>[];
+    dynamic to = getHeader('To');
 
     code = code ?? null;
     reason = reason ?? null;
@@ -554,53 +557,51 @@ class IncomingRequest extends IncomingMessage {
     reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
     extraHeaders = utils.cloneArray(extraHeaders);
 
-    var response = 'SIP/2.0 $code $reason\r\n';
+    String response = 'SIP/2.0 $code $reason\r\n';
 
-    if (this.method == SipMethod.INVITE && code > 100 && code <= 200) {
-      var headers = this.getHeaders('record-route');
+    if (method == SipMethod.INVITE && code > 100 && code <= 200) {
+      List<dynamic> headers = getHeaders('record-route');
 
-      for (var header in headers) {
+      for (dynamic header in headers) {
         response += 'Record-Route: $header\r\n';
       }
     }
 
-    var vias = this.getHeaders('via');
+    List<dynamic> vias = getHeaders('via');
 
-    for (var via in vias) {
+    for (dynamic via in vias) {
       response += 'Via: $via\r\n';
     }
 
-    if (this.to_tag == null && code > 100) {
+    if (to_tag == null && code > 100) {
       to += ';tag=${utils.newTag()}';
-    } else if (this.to_tag != null && !this.s('to').hasParam('tag')) {
-      to += ';tag=${this.to_tag}';
+    } else if (to_tag != null && !s('to').hasParam('tag')) {
+      to += ';tag=$to_tag';
     }
 
     response += 'To: $to\r\n';
-    response += 'From: ${this.getHeader('From')}\r\n';
-    response += 'Call-ID: ${this.call_id}\r\n';
-    response +=
-        'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
+    response += 'From: ${getHeader('From')}\r\n';
+    response += 'Call-ID: $call_id\r\n';
+    response += 'CSeq: $cseq ${SipMethodHelper.getName(method)}\r\n';
 
-    for (var header in extraHeaders) {
+    for (dynamic header in extraHeaders) {
       response += '${header.trim()}\r\n';
     }
 
     // Supported.
-    switch (this.method) {
+    switch (method) {
       case SipMethod.INVITE:
-        if (this.ua.configuration.session_timers) {
+        if (ua.configuration.session_timers) {
           supported.add('timer');
         }
-        if (this.ua.contact.pub_gruu != null ||
-            this.ua.contact.temp_gruu != null) {
+        if (ua.contact.pub_gruu != null || ua.contact.temp_gruu != null) {
           supported.add('gruu');
         }
         supported.add('ice');
         supported.add('replaces');
         break;
       case SipMethod.UPDATE:
-        if (this.ua.configuration.session_timers) {
+        if (ua.configuration.session_timers) {
           supported.add('timer');
         }
         if (body != null) {
@@ -615,7 +616,7 @@ class IncomingRequest extends IncomingMessage {
     supported.add('outbound');
 
     // Allow and Accept.
-    if (this.method == SipMethod.OPTIONS) {
+    if (method == SipMethod.OPTIONS) {
       response += 'Allow: ${DartSIP_C.ALLOWED_METHODS}\r\n';
       response += 'Accept: ${DartSIP_C.ACCEPTED_BODY_TYPES}\r\n';
     } else if (code == 405) {
@@ -627,7 +628,7 @@ class IncomingRequest extends IncomingMessage {
     response += 'Supported: ${supported.join(',')}\r\n';
 
     if (body != null) {
-      var length = body.length;
+      int length = body.length;
 
       response += 'Content-Type: application/sdp\r\n';
       response += 'Content-Length: $length\r\n\r\n';
@@ -636,12 +637,10 @@ class IncomingRequest extends IncomingMessage {
       response += 'Content-Length: ${0}\r\n\r\n';
     }
 
-    var message = IncomingMessage();
+    IncomingMessage message = IncomingMessage();
     message.data = response;
 
-    this
-        .server_transaction
-        .receiveResponse(code, message, onSuccess, onFailure);
+    server_transaction.receiveResponse(code, message, onSuccess, onFailure);
   }
 
   /**
@@ -650,7 +649,7 @@ class IncomingRequest extends IncomingMessage {
   * -param {String} reason reason phrase
   */
   void reply_sl(int code, [String reason]) {
-    var vias = this.getHeaders('via');
+    List<dynamic> vias = getHeaders('via');
 
     // Validate code and reason values.
     if (code == null || (code < 100 || code > 699)) {
@@ -661,35 +660,34 @@ class IncomingRequest extends IncomingMessage {
 
     reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
 
-    var response = 'SIP/2.0 $code $reason\r\n';
+    String response = 'SIP/2.0 $code $reason\r\n';
 
-    for (var via in vias) {
+    for (dynamic via in vias) {
       response += 'Via: $via\r\n';
     }
 
-    var to = this.getHeader('To');
+    dynamic to = getHeader('To');
 
-    if (this.to_tag == null && code > 100) {
+    if (to_tag == null && code > 100) {
       to += ';tag=${utils.newTag()}';
-    } else if (this.to_tag != null && !this.s('to').hasParam('tag')) {
-      to += ';tag=${this.to_tag}';
+    } else if (to_tag != null && !s('to').hasParam('tag')) {
+      to += ';tag=$to_tag';
     }
 
     response += 'To: $to\r\n';
-    response += 'From: ${this.getHeader('From')}\r\n';
-    response += 'Call-ID: ${this.call_id}\r\n';
-    response +=
-        'CSeq: ${this.cseq} ${SipMethodHelper.getName(this.method)}\r\n';
+    response += 'From: ${getHeader('From')}\r\n';
+    response += 'Call-ID: $call_id\r\n';
+    response += 'CSeq: $cseq ${SipMethodHelper.getName(method)}\r\n';
     response += 'Content-Length: ${0}\r\n\r\n';
 
-    this.transport.send(response);
+    transport.send(response);
   }
 }
 
 class IncomingResponse extends IncomingMessage {
   IncomingResponse() {
-    this.headers = <String, dynamic>{};
-    this.status_code = null;
-    this.reason_phrase = null;
+    headers = <String, dynamic>{};
+    status_code = null;
+    reason_phrase = null;
   }
 }

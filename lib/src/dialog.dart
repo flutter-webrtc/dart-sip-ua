@@ -5,7 +5,6 @@ import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
 import 'rtc_session.dart';
-import 'sip_message.dart' as SIPMessage;
 import 'sip_message.dart';
 import 'transactions/transaction_base.dart';
 import 'ua.dart';
@@ -42,15 +41,12 @@ class Dialog {
     _owner = owner;
     _ua = owner.ua;
 
-    _uac_pending_reply = false;
-    _uas_pending_reply = false;
-
     if (!message.hasHeader('contact')) {
       throw Exceptions.TypeError(
           'unable to create a Dialog without Contact header field');
     }
 
-    if (message is SIPMessage.IncomingResponse) {
+    if (message is IncomingResponse) {
       state = (message.status_code < 200)
           ? Dialog_C.STATUS_EARLY
           : Dialog_C.STATUS_CONFIRMED;
@@ -60,7 +56,7 @@ class Dialog {
 
     // RFC 3261 12.1.1.
     if (type == 'UAS') {
-      _id = Id.fromMap({
+      _id = Id.fromMap(<String, dynamic>{
         'call_id': message.call_id,
         'local_tag': message.to_tag,
         'remote_tag': message.from_tag,
@@ -76,13 +72,13 @@ class Dialog {
     }
     // RFC 3261 12.1.2.
     else if (type == 'UAC') {
-      _id = Id.fromMap({
+      _id = Id.fromMap(<String, dynamic>{
         'call_id': message.call_id,
         'local_tag': message.from_tag,
         'remote_tag': message.to_tag,
       });
       _state = state;
-      _local_seqnum = message.cseq;
+      local_seqnum = message.cseq;
       _local_uri = message.parseHeader('from').uri;
       _remote_uri = message.parseHeader('to').uri;
       _remote_target = contact.uri;
@@ -97,38 +93,24 @@ class Dialog {
 
   RTCSession _owner;
   UA _ua;
-  bool _uac_pending_reply;
-  bool _uas_pending_reply;
+  bool uac_pending_reply = false;
+  bool uas_pending_reply = false;
   int _state;
   int _remote_seqnum;
   URI _local_uri;
   URI _remote_uri;
-  var _remote_target;
-  var _route_set;
+  URI _remote_target;
+  List<dynamic> _route_set;
   int _ack_seqnum;
   Id _id;
-  num _local_seqnum;
+  num local_seqnum;
 
   UA get ua => _ua;
   Id get id => _id;
 
-  num get local_seqnum => _local_seqnum;
-
-  set local_seqnum(num n) {
-    _local_seqnum = n;
-  }
-
   RTCSession get owner => _owner;
 
-  bool get uac_pending_reply => _uac_pending_reply;
-
-  set uac_pending_reply(bool pending) {
-    _uac_pending_reply = pending;
-  }
-
-  bool get uas_pending_reply => _uas_pending_reply;
-
-  void update(message, type) {
+  void update(dynamic message, String type) {
     _state = Dialog_C.STATUS_CONFIRMED;
 
     logger.debug('dialog ${_id.toString()}  changed to CONFIRMED state');
@@ -144,21 +126,21 @@ class Dialog {
     _ua.destroyDialog(this);
   }
 
-  SIPMessage.OutgoingRequest sendRequest(SipMethod method, options) {
-    options = options ?? {};
-    var extraHeaders = Utils.cloneArray(options['extraHeaders']);
+  OutgoingRequest sendRequest(SipMethod method, Map<String, dynamic> options) {
+    options = options ?? <String, dynamic>{};
+    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
     EventManager eventHandlers =
         options['eventHandlers'] as EventManager ?? EventManager();
-    var body = options['body'] ?? null;
-    SIPMessage.OutgoingRequest request =
-        _createRequest(method, extraHeaders, body);
+    String body = options['body'] ?? null;
+    OutgoingRequest request = _createRequest(method, extraHeaders, body);
 
     // Increase the local CSeq on authentication.
     eventHandlers.on(EventOnAuthenticated(), (EventOnAuthenticated event) {
-      _local_seqnum += 1;
+      local_seqnum += 1;
     });
 
-    var request_sender = DialogRequestSender(this, request, eventHandlers);
+    DialogRequestSender request_sender =
+        DialogRequestSender(this, request, eventHandlers);
 
     request_sender.send();
 
@@ -185,21 +167,21 @@ class Dialog {
   }
 
   // RFC 3261 12.2.1.1.
-  SIPMessage.OutgoingRequest _createRequest(
-      SipMethod method, extraHeaders, String body) {
+  OutgoingRequest _createRequest(
+      SipMethod method, List<dynamic> extraHeaders, String body) {
     extraHeaders = Utils.cloneArray(extraHeaders);
 
-    _local_seqnum ??= Utils.Math.floor(Utils.Math.randomDouble() * 10000);
+    local_seqnum ??= Utils.Math.floor(Utils.Math.randomDouble() * 10000);
 
     num cseq = (method == SipMethod.CANCEL || method == SipMethod.ACK)
-        ? _local_seqnum
-        : _local_seqnum += 1;
+        ? local_seqnum
+        : local_seqnum += 1;
 
-    SIPMessage.OutgoingRequest request = SIPMessage.OutgoingRequest(
+    OutgoingRequest request = OutgoingRequest(
         method,
         _remote_target,
         _ua,
-        {
+        <String, dynamic>{
           'cseq': cseq,
           'call_id': _id.call_id,
           'from_uri': _local_uri,
@@ -215,7 +197,7 @@ class Dialog {
   }
 
   // RFC 3261 12.2.2.
-  bool _checkInDialogRequest(SIPMessage.IncomingRequest request) {
+  bool _checkInDialogRequest(IncomingRequest request) {
     if (_remote_seqnum == null) {
       _remote_seqnum = request.cseq;
     } else if (request.cseq < _remote_seqnum) {
@@ -237,20 +219,20 @@ class Dialog {
     // RFC3261 14.2 Modifying an Existing Session -UAS BEHAVIOR-.
     if (request.method == SipMethod.INVITE ||
         (request.method == SipMethod.UPDATE && request.body != null)) {
-      if (_uac_pending_reply == true) {
+      if (uac_pending_reply == true) {
         request.reply(491);
-      } else if (_uas_pending_reply == true) {
-        var retryAfter = ((Utils.Math.randomDouble() * 10) % 10) + 1;
-        request.reply(500, null, ['Retry-After:$retryAfter']);
+      } else if (uas_pending_reply == true) {
+        double retryAfter = ((Utils.Math.randomDouble() * 10) % 10) + 1;
+        request.reply(500, null, <String>['Retry-After:$retryAfter']);
         return false;
       } else {
-        _uas_pending_reply = true;
+        uas_pending_reply = true;
         void Function(EventStateChanged state) stateChanged;
         stateChanged = (EventStateChanged state) {
           if (request.server_transaction.state == TransactionState.ACCEPTED ||
               request.server_transaction.state == TransactionState.COMPLETED ||
               request.server_transaction.state == TransactionState.TERMINATED) {
-            _uas_pending_reply = false;
+            uas_pending_reply = false;
             eventHandlers.remove(EventStateChanged(), stateChanged);
           }
         };
