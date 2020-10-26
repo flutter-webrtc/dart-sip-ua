@@ -24,8 +24,6 @@ class URI {
 
     // Initialize parameters.
     this.user = user;
-    _parameters = parameters ?? <dynamic, dynamic>{};
-    _headers = headers ?? <dynamic, dynamic>{};
     _scheme = scheme ?? DartSIP_C.SIP;
     _host = host.toLowerCase();
     _port = port;
@@ -55,8 +53,8 @@ class URI {
 
   String user;
   String _scheme;
-  Map<dynamic, dynamic> _parameters;
-  Map<dynamic, dynamic> _headers;
+  Map<dynamic, dynamic> _parameters = <dynamic, dynamic>{};
+  Map<dynamic, dynamic> _headers = <dynamic, dynamic>{};
   String _host;
   int _port;
   String get scheme => _scheme;

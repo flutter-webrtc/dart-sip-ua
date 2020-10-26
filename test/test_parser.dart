@@ -1,3 +1,4 @@
+import 'package:sip_ua/src/data.dart';
 import 'package:test/test.dart';
 import 'package:sip_ua/src/grammar.dart';
 import 'package:sip_ua/src/uri.dart';
@@ -173,6 +174,12 @@ List<void Function()> testFunctions = <void Function()>[
         c3.setParam('newHeaderParam', 'zxCV');
         expect(c3.toString(),
             '<sip:domain.com:5;newuriparam=zxCV>;newheaderparam=zxCV');
+
+        data =
+            '<sip:4f39zg8g@9c816wt8uay8.invalid>;+sip.ice;reg-id=1;+sip.instance="<urn:uuid:9f331588-736e-4b03-924a-2bb6e69446a7>";expires=600';
+        contacts = Grammar.parse(data, 'Contact');
+        dynamic c0 = contacts[0]['parsed'];
+        expect(c0.uri.host, '9c816wt8uay8.invalid');
       }),
   () => test('Parser: Via.', () {
         String data =
@@ -200,8 +207,8 @@ List<void Function()> testFunctions = <void Function()>[
 
         print('cseq => ' + cseq.toString());
 
-        expect(cseq.value, 123456);
-        expect(cseq.method, 'CHICKEN');
+        expect(cseq.cseq, 123456);
+        expect(cseq.method_str, 'CHICKEN');
       }),
   () => test('Parser: authentication challenge.', () {
         String data =
@@ -321,6 +328,23 @@ List<void Function()> testFunctions = <void Function()>[
         expect(parsed.scheme, 'ws');
         expect(parsed.port, 4040);
         expect(parsed.host, '127.0.0.1');
+      }),
+  () => test('Parser: rport.', () {
+        String data =
+            'SIP/2.0/WSS w1k06226skhf.invalid;rport=6231;received=xxx;branch=z9hG4bK443813988';
+        ParsedData parsed = Grammar.parse(data, 'Via');
+
+        print('rport => ${parsed.rport}');
+        expect(parsed.rport, 6231);
+        data =
+            'SIP/2.0/WSS w1k06226skhf.invalid;rport=;received=xxx;branch=z9hG4bK443813988';
+        parsed = Grammar.parse(data, 'Via');
+        expect(parsed.rport, null);
+
+        data =
+            'SIP/2.0/WSS w1k06226skhf.invalid;rport;received=xxx;branch=z9hG4bK443813988';
+        parsed = Grammar.parse(data, 'Via');
+        expect(parsed.rport, null);
       })
 ];
 

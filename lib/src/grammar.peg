@@ -12,7 +12,7 @@
   var data = ParsedData();
 
   int parseInt(str){
-    return int.parse(str);
+    return int.tryParse(str) ?? null;
   }
 
   double parseFloat(str){
@@ -396,7 +396,7 @@ SIP_URI         <- uri_scheme ":" userinfo? hostport uri_parameters headers? {
                         $$ == -1;
                       }}
 
-uri_scheme      <- (uri_scheme_sips / uri_scheme_sip)
+uri_scheme      <- uri_scheme_sips / uri_scheme_sip
 
 uri_scheme_sips <- scheme: "sips"i {
                     data.scheme = scheme.toLowerCase(); }
@@ -426,7 +426,7 @@ host            <- ( hostname / IPv4address / IPv6reference ) {
 ## 'hostname' grammar is relaxed from RFC 3261:
 ## 'domainlabel' and 'toplabel' can end with dash or hypen
 
-hostname        <- ((( domainlabel "." )* toplabel  "." ?) / token ){
+hostname        <- (( domainlabel "." )* toplabel  "." ?) {
                   data.host = _text().toLowerCase();
                   data.host_type = 'domain';
                   var result = {};
@@ -1095,8 +1095,9 @@ via_branch        <- "branch"i EQUAL via_branch: token {
                     }
 
 response_port     <- "rport"i EQUAL (response_port: (DIGIT ? DIGIT ? DIGIT ? DIGIT ? DIGIT ?) )? {
-                      if(response_port != null)
-                        data.rport = parseInt(response_port.join('')); 
+                      if(response_port != null) {
+                        data.rport = parseInt(response_port.map((e) => e ?? '').join(''));
+                      }
                     }
 
 
