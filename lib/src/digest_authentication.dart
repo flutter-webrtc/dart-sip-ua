@@ -14,7 +14,7 @@ class Challenge {
   String nonce;
   String opaque;
   bool stale;
-  List<dynamic> qop;
+  dynamic qop; // String or List<dynamic>
 }
 
 class Credentials {

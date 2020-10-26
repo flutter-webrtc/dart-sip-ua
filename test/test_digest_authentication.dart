@@ -74,7 +74,7 @@ List<void Function()> testFunctions = <void Function()>[
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
           'opaque': null,
           'stale': null,
-          'qop': 'auth'
+          'qop': ['auth']
         });
 
         DigestAuthentication digest = DigestAuthentication(credentials);
@@ -84,7 +84,7 @@ List<void Function()> testFunctions = <void Function()>[
         expect(digest.response, 'a69b9c2ea0dea1437a21df6ddc9b05e4');
       }),
   () => test(
-          'DigestAuthentication: digest authenticate qop = auth-int and empty body',
+          'DigestAuthentication: digest authenticate qop = ["auth", "auth-int"] and empty body',
           () {
         SipMethod method = SipMethod.REGISTER;
         String ruri = 'sip:testrealm@host.com';
@@ -101,7 +101,7 @@ List<void Function()> testFunctions = <void Function()>[
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
           'opaque': null,
           'stale': null,
-          'qop': 'auth-int'
+          'qop': ['auth', 'auth-int']
         });
 
         DigestAuthentication digest = DigestAuthentication(credentials);
