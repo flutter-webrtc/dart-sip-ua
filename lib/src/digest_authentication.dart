@@ -122,7 +122,7 @@ class DigestAuthentication {
     }
 
     // 'qop' can contain a list of values (Array). Let's choose just one.
-    if (challenge.qop != null) {
+    if (challenge.qop != null && challenge.qop.isNotEmpty) {
       if (challenge.qop.indexOf('auth-int') > -1) {
         _qop = 'auth-int';
       } else if (challenge.qop.indexOf('auth') > -1) {
