@@ -11,11 +11,11 @@ class RegisterWidget extends StatefulWidget {
 
 class _MyRegisterWidget extends State<RegisterWidget>
     implements SipUaHelperListener {
-  String _password;
-  String _wsUri;
-  String _sipUri;
-  String _displayName;
-  String _authorizationUser;
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _wsUriController = TextEditingController();
+  TextEditingController _sipUriController = TextEditingController();
+  TextEditingController _displayNameController = TextEditingController();
+  TextEditingController _authorizationUserController = TextEditingController();
   Map<String, String> _wsExtraHeaders = {
     'Origin': ' https://tryit.jssip.net',
     'Host': 'tryit.jssip.net:10443'
@@ -43,22 +43,22 @@ class _MyRegisterWidget extends State<RegisterWidget>
   void _loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
     this.setState(() {
-      _wsUri =
+      _wsUriController.text =
           _preferences.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
-      _sipUri =
+      _sipUriController.text =
           _preferences.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
-      _displayName = _preferences.getString('display_name') ?? 'Flutter SIP UA';
-      _password = _preferences.getString('password');
-      _authorizationUser = _preferences.getString('auth_user');
+      _displayNameController.text = _preferences.getString('display_name') ?? 'Flutter SIP UA';
+      _passwordController.text = _preferences.getString('password');
+      _authorizationUserController.text = _preferences.getString('auth_user');
     });
   }
 
   void _saveSettings() {
-    _preferences.setString('ws_uri', _wsUri);
-    _preferences.setString('sip_uri', _sipUri);
-    _preferences.setString('display_name', _displayName);
-    _preferences.setString('password', _password);
-    _preferences.setString('auth_user', _authorizationUser);
+    _preferences.setString('ws_uri', _wsUriController.text);
+    _preferences.setString('sip_uri', _sipUriController.text);
+    _preferences.setString('display_name', _displayNameController.text);
+    _preferences.setString('password', _passwordController.text);
+    _preferences.setString('auth_user', _authorizationUserController.text);
   }
 
   @override
@@ -90,23 +90,23 @@ class _MyRegisterWidget extends State<RegisterWidget>
   }
 
   void _handleSave(BuildContext context) {
-    if (_wsUri == null) {
+    if (_wsUriController.text == null) {
       _alert(context, "WebSocket URL");
-    } else if (_sipUri == null) {
+    } else if (_sipUriController.text == null) {
       _alert(context, "SIP URI");
     }
 
     UaSettings settings = UaSettings();
 
-    settings.webSocketUrl = _wsUri;
+    settings.webSocketUrl = _wsUriController.text;
     settings.webSocketSettings.extraHeaders = _wsExtraHeaders;
     settings.webSocketSettings.allowBadCertificate = true;
     settings.webSocketSettings.userAgent = 'Dart/2.8 (dart:io) for OpenSIPS.';
 
-    settings.uri = _sipUri;
-    settings.authorizationUser = _authorizationUser;
-    settings.password = _password;
-    settings.displayName = _displayName;
+    settings.uri = _sipUriController.text;
+    settings.authorizationUser = _authorizationUserController.text;
+    settings.password = _passwordController.text;
+    settings.displayName = _displayNameController.text;
     settings.userAgent = 'Dart SIP Client v1.0.0';
     settings.dtmfMode = DtmfMode.RFC2833;
 
@@ -145,20 +145,15 @@ class _MyRegisterWidget extends State<RegisterWidget>
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(48.0, 0.0, 48.0, 0),
-                        child: TextField(
+                        child: TextFormField(
+                          controller: _wsUriController,
                           keyboardType: TextInputType.text,
                           textAlign: TextAlign.center,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText: _wsUri,
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _wsUri = value;
-                            });
-                          },
                         ),
                       ),
                     ],
@@ -174,20 +169,15 @@ class _MyRegisterWidget extends State<RegisterWidget>
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(48.0, 0.0, 48.0, 0),
-                        child: TextField(
+                        child: TextFormField(
+                          controller: _sipUriController,
                           keyboardType: TextInputType.text,
                           textAlign: TextAlign.center,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText: _sipUri,
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _sipUri = value;
-                            });
-                          },
                         ),
                       ),
                     ],
@@ -203,20 +193,16 @@ class _MyRegisterWidget extends State<RegisterWidget>
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(48.0, 0.0, 48.0, 0),
-                        child: TextField(
+                        child: TextFormField(
+                          controller: _authorizationUserController,
                           keyboardType: TextInputType.text,
                           textAlign: TextAlign.center,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText: _authorizationUser ?? '[Empty]',
+                            hintText: _authorizationUserController.text?.isEmpty ?? true ? '[Empty]' : null,
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _authorizationUser = value;
-                            });
-                          },
                         ),
                       ),
                     ],
@@ -232,20 +218,16 @@ class _MyRegisterWidget extends State<RegisterWidget>
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(48.0, 0.0, 48.0, 0),
-                        child: TextField(
+                        child: TextFormField(
+                          controller: _passwordController,
                           keyboardType: TextInputType.text,
                           textAlign: TextAlign.center,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText: _password ?? '[Empty]',
+                            hintText: _passwordController.text?.isEmpty ?? true ? '[Empty]' : null,
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _password = value;
-                            });
-                          },
                         ),
                       ),
                     ],
@@ -261,20 +243,15 @@ class _MyRegisterWidget extends State<RegisterWidget>
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(48.0, 0.0, 48.0, 0),
-                        child: TextField(
+                        child: TextFormField(
+                          controller: _displayNameController,
                           keyboardType: TextInputType.text,
                           textAlign: TextAlign.center,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText: _displayName,
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _displayName = value;
-                            });
-                          },
                         ),
                       ),
                     ],
