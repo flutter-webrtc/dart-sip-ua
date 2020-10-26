@@ -8,7 +8,7 @@ List<void Function()> testFunctions = <void Function()>[
         expect(uri.scheme, 'wss');
         Uri uri2 = uri.replace(
             scheme: uri.scheme == 'wss' ? 'https' : 'http', path: '/wsxxx');
-        expect(uri.scheme, 'https');
+        expect(uri.scheme, 'wss');
         expect(uri2.scheme, 'https');
       })
 ];
