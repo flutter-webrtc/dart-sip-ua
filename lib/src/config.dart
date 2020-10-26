@@ -1,3 +1,5 @@
+import 'package:sip_ua/sip_ua.dart';
+
 import 'constants.dart';
 import 'constants.dart' as DartSIP_C;
 import 'exceptions.dart' as Exceptions;
@@ -38,6 +40,9 @@ class Settings {
   int register_expires = 600;
   dynamic registrar_server;
   Map<String, dynamic> register_extra_contact_uri_params;
+
+  // Dtmf mode
+  DtmfMode dtmf_mode = DtmfMode.INFO;
 
   // Connection options.
   List<WebSocketInterface> sockets = <WebSocketInterface>[];
@@ -237,7 +242,14 @@ class Checks {
       if (use_preloaded_route is bool) {
         dst.use_preloaded_route = use_preloaded_route;
       }
-    }
+    },
+    'dtmf_mode': (Settings src, Settings dst) {
+      DtmfMode dtmf_mode = src.dtmf_mode;
+      if (dtmf_mode == null) return;
+      if (dtmf_mode is DtmfMode) {
+        dst.dtmf_mode = dtmf_mode;
+      }
+    },
   };
 }
 

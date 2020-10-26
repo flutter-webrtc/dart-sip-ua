@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
+import 'package:sip_ua/sip_ua.dart';
 
 import 'constants.dart';
 import 'constants.dart' as DartSIP_C;
@@ -191,6 +192,9 @@ class RTCSession extends EventManager {
   String get id => _id;
 
   RTCPeerConnection get connection => _connection;
+
+  RTCDTMFSender get dtmfSender =>
+      _connection.createDtmfSender(_localMediaStream.getAudioTracks()[0]);
 
   String get contact => _contact;
 
@@ -833,6 +837,8 @@ class RTCSession extends EventManager {
 
     options = options ?? <String, dynamic>{};
 
+    DtmfMode mode = _ua.configuration.dtmf_mode;
+
     // sensible defaults
     int duration = options['duration'] ?? RTCSession_DTMF.C.DEFAULT_DURATION;
     int interToneGap =
@@ -892,6 +898,8 @@ class RTCSession extends EventManager {
       interToneGap = utils.Math.abs(interToneGap);
     }
 
+    options['interToneGap'] = interToneGap;
+
     //// ***************** and follows the actual code to queue DTMF tone(s) **********************
 
     ///using dtmfFuture to queue the playing of the tones
@@ -913,7 +921,7 @@ class RTCSession extends EventManager {
             return;
           }
 
-          RTCSession_DTMF.DTMF dtmf = RTCSession_DTMF.DTMF(this);
+          RTCSession_DTMF.DTMF dtmf = RTCSession_DTMF.DTMF(this, mode: mode);
 
           EventManager handlers = EventManager();
           handlers.on(EventCallFailed(), (EventCallFailed event) {

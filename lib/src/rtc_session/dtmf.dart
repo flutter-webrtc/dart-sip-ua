@@ -1,3 +1,6 @@
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:sip_ua/sip_ua.dart';
+
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
@@ -16,12 +19,16 @@ class C {
 }
 
 class DTMF extends EventManager {
-  DTMF(this._session);
+  DTMF(this._session, {DtmfMode mode = DtmfMode.INFO}) {
+    _mode = mode;
+  }
 
   final rtc.RTCSession _session;
+  DtmfMode _mode;
   String _direction;
   String _tone;
   int _duration;
+  int _interToneGap;
   IncomingRequest _request;
   EventManager _eventHandlers;
 
@@ -66,40 +73,47 @@ class DTMF extends EventManager {
 
     // Duration is checked/corrected in RTCSession.
     _duration = options['duration'];
+    _interToneGap = options['interToneGap'];
 
-    extraHeaders.add('Content-Type: application/dtmf-relay');
+    if (_mode == DtmfMode.RFC2833) {
+      RTCDTMFSender dtmfSender = _session.dtmfSender;
+      dtmfSender.insertDTMF(_tone,
+          duration: _duration, interToneGap: _interToneGap);
+    } else if (_mode == DtmfMode.INFO) {
+      extraHeaders.add('Content-Type: application/dtmf-relay');
 
-    String body = 'Signal=$_tone\r\n';
+      String body = 'Signal=$_tone\r\n';
 
-    body += 'Duration=$_duration';
+      body += 'Duration=$_duration';
 
-    _session.newDTMF('local', this, _request);
+      _session.newDTMF('local', this, _request);
 
-    EventManager handlers = EventManager();
-    handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
-      emit(EventSucceeded(originator: 'remote', response: event.response));
-    });
-    handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
-      _eventHandlers.emit(EventOnFialed());
-      emit(EventOnFialed());
-      emit(EventCallFailed(originator: 'remote', response: event.response));
-    });
-    handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
-      _session.onRequestTimeout();
-    });
-    handlers.on(EventOnTransportError(), (EventOnTransportError event) {
-      _session.onTransportError();
-    });
+      EventManager handlers = EventManager();
+      handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
+        emit(EventSucceeded(originator: 'remote', response: event.response));
+      });
+      handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
+        _eventHandlers.emit(EventOnFialed());
+        emit(EventOnFialed());
+        emit(EventCallFailed(originator: 'remote', response: event.response));
+      });
+      handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
+        _session.onRequestTimeout();
+      });
+      handlers.on(EventOnTransportError(), (EventOnTransportError event) {
+        _session.onTransportError();
+      });
 
-    handlers.on(EventOnDialogError(), (EventOnDialogError event) {
-      _session.onDialogError();
-    });
+      handlers.on(EventOnDialogError(), (EventOnDialogError event) {
+        _session.onDialogError();
+      });
 
-    _session.sendRequest(SipMethod.INFO, <String, dynamic>{
-      'extraHeaders': extraHeaders,
-      'eventHandlers': handlers,
-      'body': body
-    });
+      _session.sendRequest(SipMethod.INFO, <String, dynamic>{
+        'extraHeaders': extraHeaders,
+        'eventHandlers': handlers,
+        'body': body
+      });
+    }
   }
 
   void init_incoming(IncomingRequest request) {

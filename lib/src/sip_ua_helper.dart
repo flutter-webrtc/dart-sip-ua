@@ -106,6 +106,7 @@ class SIPUAHelper extends EventManager {
     _settings.register_expires = uaSettings.register_expires;
     _settings.register_extra_contact_uri_params =
         uaSettings.registerParams.extraContactUriParams;
+    _settings.dtmf_mode = uaSettings.dtmfMode;
 
     try {
       _ua = UA(_settings);
@@ -543,6 +544,11 @@ class WebSocketSettings {
   bool allowBadCertificate = false;
 }
 
+enum DtmfMode {
+  INFO,
+  RFC2833,
+}
+
 class UaSettings {
   String webSocketUrl;
   WebSocketSettings webSocketSettings = WebSocketSettings();
@@ -564,6 +570,9 @@ class UaSettings {
   String password;
   String ha1;
   String displayName;
+
+  /// DTMF mode, in band (rfc2833) or out of band (sip info)
+  DtmfMode dtmfMode = DtmfMode.INFO;
 
   List<Map<String, String>> iceServers = <Map<String, String>>[
     <String, String>{'url': 'stun:stun.l.google.com:19302'},

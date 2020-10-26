@@ -108,6 +108,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     settings.password = _password;
     settings.displayName = _displayName;
     settings.userAgent = 'Dart SIP Client v1.0.0';
+    settings.dtmfMode = DtmfMode.RFC2833;
 
     helper.start(settings);
   }
