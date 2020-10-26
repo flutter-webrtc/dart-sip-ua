@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:flutter_dtmf/flutter_dtmf.dart';
 
 import 'widgets/action_button.dart';
 import 'package:sip_ua/sip_ua.dart';
@@ -270,6 +272,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _handleDtmf(String tone) {
     print('Dtmf tone => $tone');
+    if (WebRTC.platformIsMobile) {
+      FlutterDtmf.playTone(digits: tone);
+    }
     call.sendDTMF(tone);
   }
 
@@ -485,41 +490,40 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     }
 
     stackWidgets.addAll([
-        Positioned(
-          top: voiceonly ? 48 : 6,
-          left: 0,
-          right: 0,
-          child: Center(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Text(
-                        (voiceonly ? 'VOICE CALL' : 'VIDEO CALL') +
-                            (_hold
-                                ? ' PAUSED BY ${this._holdOriginator.toUpperCase()}'
-                                : ''),
-                        style: TextStyle(fontSize: 24, color: Colors.black54),
-                      ))),
-              Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Text(
-                        '$remote_identity',
-                        style: TextStyle(fontSize: 18, color: Colors.black54),
-                      ))),
-              Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Text(_timeLabel,
-                          style:
-                              TextStyle(fontSize: 14, color: Colors.black54))))
-            ],
-          )),
-        ),
+      Positioned(
+        top: voiceonly ? 48 : 6,
+        left: 0,
+        right: 0,
+        child: Center(
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Center(
+                child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Text(
+                      (voiceonly ? 'VOICE CALL' : 'VIDEO CALL') +
+                          (_hold
+                              ? ' PAUSED BY ${this._holdOriginator.toUpperCase()}'
+                              : ''),
+                      style: TextStyle(fontSize: 24, color: Colors.black54),
+                    ))),
+            Center(
+                child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Text(
+                      '$remote_identity',
+                      style: TextStyle(fontSize: 18, color: Colors.black54),
+                    ))),
+            Center(
+                child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Text(_timeLabel,
+                        style: TextStyle(fontSize: 14, color: Colors.black54))))
+          ],
+        )),
+      ),
     ]);
 
     return Stack(
