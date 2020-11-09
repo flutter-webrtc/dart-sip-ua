@@ -512,6 +512,7 @@ class UA extends EventManager {
 
     // Check that request URI points to us.
     if (request.ruri.user != _configuration.uri.user &&
+        request.ruri.user != _configuration.uri.user.toString().toLowerCase() &&
         request.ruri.user != _contact.uri.user) {
       logger.debug('Request-URI does not point to us');
       if (request.method != SipMethod.ACK) {
