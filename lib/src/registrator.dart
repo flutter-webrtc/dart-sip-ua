@@ -58,6 +58,7 @@ class Registrator {
 
     // Custom Contact header params for REGISTER and un-REGISTER.
     _extraContactParams = '';
+    setExtraContactParams(ua.configuration.register_extra_contact_params);
 
     // Custom Contact URI params for REGISTER and un-REGISTER.
     setExtraContactUriParams(

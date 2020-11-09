@@ -106,6 +106,8 @@ class SIPUAHelper extends EventManager {
     _settings.register_expires = uaSettings.register_expires;
     _settings.register_extra_contact_uri_params =
         uaSettings.registerParams.extraContactUriParams;
+    _settings.register_extra_contact_params =
+        uaSettings.registerParams.extraContactParams;
     _settings.dtmf_mode = uaSettings.dtmfMode;
 
     try {
@@ -530,6 +532,7 @@ class RegisterParams {
   /// Mainly used for RFC8599 Support
   /// https://github.com/cloudwebrtc/dart-sip-ua/issues/89
   Map<String, dynamic> extraContactUriParams = <String, dynamic>{};
+  Map<String, dynamic> extraContactParams = <String, dynamic>{};
 }
 
 class WebSocketSettings {

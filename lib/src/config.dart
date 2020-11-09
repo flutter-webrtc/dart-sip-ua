@@ -40,6 +40,7 @@ class Settings {
   int register_expires = 600;
   dynamic registrar_server;
   Map<String, dynamic> register_extra_contact_uri_params;
+  Map<String, dynamic> register_extra_contact_params;
 
   // Dtmf mode
   DtmfMode dtmf_mode = DtmfMode.INFO;
@@ -225,6 +226,15 @@ class Checks {
         return;
       } else {
         dst.registrar_server = parsed;
+      }
+    },
+    'register_extra_contact_params': (Settings src, Settings dst) {
+      Map<String, dynamic> register_extra_contact_params =
+          src.register_extra_contact_params;
+      if (register_extra_contact_params == null) return;
+      if (register_extra_contact_params is Map<String, dynamic>) {
+        dst.register_extra_contact_params =
+            register_extra_contact_params;
       }
     },
     'register_extra_contact_uri_params': (Settings src, Settings dst) {
