@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   crypto: ^2.1.2
-  flutter_webrtc: ^0.4.1
+  flutter_webrtc: ^0.5.7
   intl: ^0.16.0
   logger: ^0.9.0
   parser_error: ^0.1.1
