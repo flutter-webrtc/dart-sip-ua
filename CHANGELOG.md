@@ -1,6 +1,15 @@
 # Changelog
 
 --------------------------------------------
+[0.3.2] - 2020.11.11
+
+* Added dtmf options to Call (#154)
+* Fix bug for digest authentication.
+* Fix rport parse (#144).
+* Support RFC2833.
+* Upgrade flutter_webrtc to 0.4.1.
+* Fix incorrect register assert (#139).
+
 [0.3.1] - 2020.10.18
 
 * fix rport in Via parser.

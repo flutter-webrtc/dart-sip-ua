@@ -421,9 +421,9 @@ class Call {
     _session.unmute(audio, video);
   }
 
-  void sendDTMF(String tones) {
+  void sendDTMF(String tones, [Map<String, dynamic> options]) {
     assert(_session != null, 'ERROR(sendDTMF): rtc session is invalid!');
-    _session.sendDTMF(tones);
+    _session.sendDTMF(tones, options);
   }
 
   String get remote_display_name {
