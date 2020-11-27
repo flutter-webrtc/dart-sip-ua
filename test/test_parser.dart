@@ -345,6 +345,13 @@ List<void Function()> testFunctions = <void Function()>[
             'SIP/2.0/WSS w1k06226skhf.invalid;rport;received=xxx;branch=z9hG4bK443813988';
         parsed = Grammar.parse(data, 'Via');
         expect(parsed.rport, null);
+      }),
+  () => test('Parser: contact with none-domain.', () {
+        String data = 'hello <sip:asterisk@8c2d06b92042:5060;transport=ws>';
+        dynamic contacts = Grammar.parse(data, 'Contact');
+        print('contacts => ' + contacts.toString());
+        dynamic c0 = contacts[0]['parsed'];
+        expect(c0.uri.host, '8c2d06b92042');
       })
 ];
 

@@ -282,7 +282,7 @@ class GrammarParser {
   
   static final List<String> _expect99 = <String>["!", "%", "\'", "*", "+", "-", ".", "Digest", "_", "`", "alphanum", "~"];
   
-  static final List<bool> _lookahead = _unmap([0x2800001, 0x1fc0093, 0x700000, 0x51a00000, 0x7e03ff6c, 0x7f0fffff, 0x271fffff, 0x7dafffdf, 0x7effffff, 0x77fffff, 0x780ffd9e, 0x743fffff, 0xc7fffff, 0x33c, 0x8000000, 0x18000000, 0x603ff2ca, 0x70ffffff, 0x31ffffff, 0x557ffffe, 0x21ffffff, 0x63ffffff, 0x1fffbfc, 0x57ffffff, 0x47fffffe, 0x43fff7d9, 0x2ffffffe, 0xffffffd, 0x2fff7ff3, 0xfffffff, 0x1ffffffa, 0x5fffffe6, 0x1ffffffe, 0x3ffffff4, 0x1ffdffcc, 0x3ffffff9, 0x7fffffe8, 0x7ffbff98, 0x7ffffff2, 0x7fffffd0, 0x7f800031, 0x7f03ffff, 0x1fffffff, 0x7fffffe0, 0x7fffffc0, 0x7ffc07ff, 0x7ff83fff, 0x2217fff, 0x20, 0x220680, 0x42, 0x1f80ffe8, 0x7f000000, 0x3f03ff, 0x7ffe0000, 0x3, 0x1fc00, 0x100, 0x2c009858, 0x6a002617, 0x4c00008, 0x760]);
+  static final List<bool> _lookahead = _unmap([0x2800001, 0x1fc0093, 0x700000, 0x51a00000, 0x7e03ff6c, 0x7f0fffff, 0x271fffff, 0x7dafffdf, 0x7effffff, 0x77fffff, 0x780ffd9e, 0x743fffff, 0xc7fffff, 0x33c, 0x8000000, 0x18000000, 0x603ff2ca, 0x70ffffff, 0x31ffffff, 0x557ffffe, 0x21ffffff, 0x63ffffff, 0xffcb28, 0x47ffffff, 0x47ffffff, 0x3fff7f9, 0x2ffffffe, 0xffffffd, 0x7ffefb3, 0x5ffffffd, 0x1ffffffa, 0x5ffeffe6, 0x1ffffffe, 0x3ffffff4, 0x3fffffcc, 0x3ffffffd, 0x7fffffe8, 0x3ffbff98, 0x7ffffff2, 0x7fffffd0, 0x7ff7ff31, 0x7fffffe5, 0x7fffffa1, 0x7f000063, 0x7e07ffff, 0x3fffffff, 0x7fffffc0, 0x7fffff81, 0x7ff80fff, 0x7ff07fff, 0x440ffff, 0x840, 0x442d00, 0x4, 0x3f01ffd0, 0x7e000000, 0x7e07ff, 0x7ffc0000, 0x7, 0x3f800, 0x200, 0x580130b0, 0x54004c2e, 0x9800011, 0xec0]);
   
   static final List<bool> _mapping0 = _unmap([0x3ffffff, 0x7fffffe]);
   
@@ -512,11 +512,11 @@ class GrammarParser {
   
   static final List<List<int>> _transitions28 = [[33, 33, 39, 42, 45, 46, 48, 57, 65, 90, 95, 95, 97, 122, 126, 126], [36, 36], [37, 37], [38, 38], [43, 43], [44, 44], [61, 61]];
   
-  static final List<List<int>> _transitions29 = [[48, 57, 65, 91, 97, 122]];
+  static final List<List<int>> _transitions29 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 45, 48, 57, 65, 91, 95, 122, 126, 126]];
   
   static final List<List<int>> _transitions3 = [[48, 57, 65, 90, 97, 122]];
   
-  static final List<List<int>> _transitions30 = [[48, 57], [65, 90, 97, 122], [91, 91]];
+  static final List<List<int>> _transitions30 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 45, 95, 96, 126, 126], [48, 57], [65, 90, 97, 122], [91, 91]];
   
   static final List<List<int>> _transitions31 = [[45, 45], [48, 57, 65, 90, 97, 122], [95, 95]];
   
@@ -566,7 +566,7 @@ class GrammarParser {
   
   static final List<List<int>> _transitions52 = [[43, 43], [45, 45], [46, 46], [48, 57], [65, 90, 97, 122]];
   
-  static final List<List<int>> _transitions53 = [[33, 33, 36, 57, 59, 59, 61, 61, 63, 63, 65, 91, 95, 95, 97, 122, 126, 126]];
+  static final List<List<int>> _transitions53 = [[33, 33, 36, 57, 59, 59, 61, 61, 63, 63, 65, 91, 95, 122, 126, 126]];
   
   static final List<List<int>> _transitions54 = [[33, 33, 36, 46, 48, 59, 61, 61, 64, 90, 95, 95, 97, 122, 126, 126]];
   
@@ -584,7 +584,7 @@ class GrammarParser {
   
   static final List<List<int>> _transitions60 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 95, 100, 102, 112, 114, 122, 126, 126], [101, 101], [113, 113]];
   
-  static final List<List<int>> _transitions61 = [[0, 32, 34, 36, 38, 38, 40, 41, 44, 44, 47, 47, 58, 64, 92, 94, 123, 125, 127, 1114111], [33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 126, 126], [48, 57, 65, 90, 95, 122], [91, 91]];
+  static final List<List<int>> _transitions61 = [[0, 32, 34, 36, 38, 38, 40, 41, 44, 44, 47, 47, 58, 64, 92, 94, 123, 125, 127, 1114111], [33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 95, 122, 126, 126], [91, 91]];
   
   static final List<List<int>> _transitions62 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 95, 96, 98, 104, 106, 113, 116, 122, 126, 126], [65, 97], [73, 105], [82, 114], [83, 115]];
   
@@ -630,11 +630,15 @@ class GrammarParser {
   
   static final List<List<int>> _transitions81 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 82, 86, 90, 95, 122, 126, 126], [83, 115], [84, 116], [85, 117]];
   
-  static final List<List<int>> _transitions82 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 95, 113, 115, 122, 126, 126], [114, 114]];
+  static final List<List<int>> _transitions82 = [[48, 57, 65, 91, 97, 122]];
   
-  static final List<List<int>> _transitions83 = [[9, 9, 13, 13, 32, 32], [33, 126], [128, 65535]];
+  static final List<List<int>> _transitions83 = [[48, 57], [65, 90, 97, 122], [91, 91]];
   
-  static final List<List<int>> _transitions84 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 95, 100, 103, 115, 117, 122, 126, 126], [101, 101], [102, 102], [116, 116]];
+  static final List<List<int>> _transitions84 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 95, 113, 115, 122, 126, 126], [114, 114]];
+  
+  static final List<List<int>> _transitions85 = [[9, 9, 13, 13, 32, 32], [33, 126], [128, 65535]];
+  
+  static final List<List<int>> _transitions86 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 95, 100, 103, 115, 117, 122, 126, 126], [101, 101], [102, 102], [116, 116]];
   
   static final List<List<int>> _transitions9 = [[33, 126, 128, 65535]];
   
@@ -1583,13 +1587,13 @@ class GrammarParser {
   dynamic _parse_IPv4address() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[62] >= pos) {
-      $$ = _getFromCache(62);
+    if(_cachePos[63] >= pos) {
+      $$ = _getFromCache(63);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[62] = pos;
+      _cachePos[63] = pos;
     }  
     switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -1656,8 +1660,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(const [null]);
     }
-    if (_cacheable[62]) {
-      _addToCache($$, pos, 62);
+    if (_cacheable[63]) {
+      _addToCache($$, pos, 63);
     }    
     return $$;
   }
@@ -1665,13 +1669,13 @@ class GrammarParser {
   dynamic _parse_IPv6address() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[59] >= pos) {
-      $$ = _getFromCache(59);
+    if(_cachePos[60] >= pos) {
+      $$ = _getFromCache(60);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[59] = pos;
+      _cachePos[60] = pos;
     }  
     switch (_getState(_transitions32)) {
       case 0:
@@ -4136,8 +4140,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect40);
     }
-    if (_cacheable[59]) {
-      _addToCache($$, pos, 59);
+    if (_cacheable[60]) {
+      _addToCache($$, pos, 60);
     }    
     return $$;
   }
@@ -4145,13 +4149,13 @@ class GrammarParser {
   dynamic _parse_IPv6reference() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[58] >= pos) {
-      $$ = _getFromCache(58);
+    if(_cachePos[59] >= pos) {
+      $$ = _getFromCache(59);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[58] = pos;
+      _cachePos[59] = pos;
     }  
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -4202,8 +4206,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect39);
     }
-    if (_cacheable[58]) {
-      _addToCache($$, pos, 58);
+    if (_cacheable[59]) {
+      _addToCache($$, pos, 59);
     }    
     return $$;
   }
@@ -4495,13 +4499,13 @@ class GrammarParser {
   dynamic _parse_Method() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[114] >= pos) {
-      $$ = _getFromCache(114);
+    if(_cachePos[115] >= pos) {
+      $$ = _getFromCache(115);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[114] = pos;
+      _cachePos[115] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -4662,8 +4666,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect58);
     }
-    if (_cacheable[114]) {
-      _addToCache($$, pos, 114);
+    if (_cacheable[115]) {
+      _addToCache($$, pos, 115);
     }    
     return $$;
   }
@@ -5391,13 +5395,13 @@ class GrammarParser {
   dynamic _parse_SIP_Version() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[104] >= pos) {
-      $$ = _getFromCache(104);
+    if(_cachePos[105] >= pos) {
+      $$ = _getFromCache(105);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[104] = pos;
+      _cachePos[105] = pos;
     }  
     switch ((_ch == 115 || _ch == 83 ) ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -5491,8 +5495,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect68);
     }
-    if (_cacheable[104]) {
-      _addToCache($$, pos, 104);
+    if (_cacheable[105]) {
+      _addToCache($$, pos, 105);
     }    
     return $$;
   }
@@ -5942,13 +5946,13 @@ class GrammarParser {
   dynamic _parse_URI() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[182] >= pos) {
-      $$ = _getFromCache(182);
+    if(_cachePos[183] >= pos) {
+      $$ = _getFromCache(183);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[182] = pos;
+      _cachePos[183] = pos;
     }  
     switch (_getState(_transitions71)) {
       case 0:
@@ -5985,8 +5989,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect104);
     }
-    if (_cacheable[182]) {
-      _addToCache($$, pos, 182);
+    if (_cacheable[183]) {
+      _addToCache($$, pos, 183);
     }    
     return $$;
   }
@@ -6107,13 +6111,13 @@ class GrammarParser {
   dynamic _parse_abs_path() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[91] >= pos) {
-      $$ = _getFromCache(91);
+    if(_cachePos[92] >= pos) {
+      $$ = _getFromCache(92);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[91] = pos;
+      _cachePos[92] = pos;
     }  
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -6144,8 +6148,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect23);
     }
-    if (_cacheable[91]) {
-      _addToCache($$, pos, 91);
+    if (_cacheable[92]) {
+      _addToCache($$, pos, 92);
     }    
     return $$;
   }
@@ -6153,13 +6157,13 @@ class GrammarParser {
   dynamic _parse_absoluteURI() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[88] >= pos) {
-      $$ = _getFromCache(88);
+    if(_cachePos[89] >= pos) {
+      $$ = _getFromCache(89);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[88] = pos;
+      _cachePos[89] = pos;
     }  
     switch (_getState(_transitions0)) {
       case 0:
@@ -6239,8 +6243,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect2);
     }
-    if (_cacheable[88]) {
-      _addToCache($$, pos, 88);
+    if (_cacheable[89]) {
+      _addToCache($$, pos, 89);
     }    
     return $$;
   }
@@ -6248,13 +6252,13 @@ class GrammarParser {
   dynamic _parse_addr_spec() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[125] >= pos) {
-      $$ = _getFromCache(125);
+    if(_cachePos[126] >= pos) {
+      $$ = _getFromCache(126);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[125] = pos;
+      _cachePos[126] = pos;
     }  
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -6272,8 +6276,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect32);
     }
-    if (_cacheable[125]) {
-      _addToCache($$, pos, 125);
+    if (_cacheable[126]) {
+      _addToCache($$, pos, 126);
     }    
     return $$;
   }
@@ -6401,13 +6405,13 @@ class GrammarParser {
   dynamic _parse_auth_param() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[176] >= pos) {
-      $$ = _getFromCache(176);
+    if(_cachePos[177] >= pos) {
+      $$ = _getFromCache(177);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[176] = pos;
+      _cachePos[177] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -6484,8 +6488,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect18);
     }
-    if (_cacheable[176]) {
-      _addToCache($$, pos, 176);
+    if (_cacheable[177]) {
+      _addToCache($$, pos, 177);
     }    
     return $$;
   }
@@ -6761,13 +6765,13 @@ class GrammarParser {
   dynamic _parse_challenge() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[173] >= pos) {
-      $$ = _getFromCache(173);
+    if(_cachePos[174] >= pos) {
+      $$ = _getFromCache(174);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[173] = pos;
+      _cachePos[174] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -6898,8 +6902,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect99);
     }
-    if (_cacheable[173]) {
-      _addToCache($$, pos, 173);
+    if (_cacheable[174]) {
+      _addToCache($$, pos, 174);
     }    
     return $$;
   }
@@ -6968,13 +6972,13 @@ class GrammarParser {
   dynamic _parse_contact_param() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[123] >= pos) {
-      $$ = _getFromCache(123);
+    if(_cachePos[124] >= pos) {
+      $$ = _getFromCache(124);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[123] = pos;
+      _cachePos[124] = pos;
     }  
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -7097,8 +7101,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect81);
     }
-    if (_cacheable[123]) {
-      _addToCache($$, pos, 123);
+    if (_cacheable[124]) {
+      _addToCache($$, pos, 124);
     }    
     return $$;
   }
@@ -7173,13 +7177,13 @@ class GrammarParser {
   dynamic _parse_content_coding() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[142] >= pos) {
-      $$ = _getFromCache(142);
+    if(_cachePos[143] >= pos) {
+      $$ = _getFromCache(143);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[142] = pos;
+      _cachePos[143] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -7197,8 +7201,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect18);
     }
-    if (_cacheable[142]) {
-      _addToCache($$, pos, 142);
+    if (_cacheable[143]) {
+      _addToCache($$, pos, 143);
     }    
     return $$;
   }
@@ -7251,13 +7255,13 @@ class GrammarParser {
   dynamic _parse_dec_octet() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[63] >= pos) {
-      $$ = _getFromCache(63);
+    if(_cachePos[64] >= pos) {
+      $$ = _getFromCache(64);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[63] = pos;
+      _cachePos[64] = pos;
     }  
     switch (_getState(_transitions35)) {
       case 0:
@@ -7416,8 +7420,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(const [null]);
     }
-    if (_cacheable[63]) {
-      _addToCache($$, pos, 63);
+    if (_cacheable[64]) {
+      _addToCache($$, pos, 64);
     }    
     return $$;
   }
@@ -7425,13 +7429,13 @@ class GrammarParser {
   dynamic _parse_delta_seconds() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[131] >= pos) {
-      $$ = _getFromCache(131);
+    if(_cachePos[132] >= pos) {
+      $$ = _getFromCache(132);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[131] = pos;
+      _cachePos[132] = pos;
     }  
     switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -7479,8 +7483,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect1);
     }
-    if (_cacheable[131]) {
-      _addToCache($$, pos, 131);
+    if (_cacheable[132]) {
+      _addToCache($$, pos, 132);
     }    
     return $$;
   }
@@ -7488,13 +7492,13 @@ class GrammarParser {
   dynamic _parse_digest_cln() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[178] >= pos) {
-      $$ = _getFromCache(178);
+    if(_cachePos[179] >= pos) {
+      $$ = _getFromCache(179);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[178] = pos;
+      _cachePos[179] = pos;
     }  
     switch (_getState(_transitions70)) {
       case 0:
@@ -7586,8 +7590,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect101);
     }
-    if (_cacheable[178]) {
-      _addToCache($$, pos, 178);
+    if (_cacheable[179]) {
+      _addToCache($$, pos, 179);
     }    
     return $$;
   }
@@ -7824,13 +7828,13 @@ class GrammarParser {
   dynamic _parse_display_name() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[126] >= pos) {
-      $$ = _getFromCache(126);
+    if(_cachePos[127] >= pos) {
+      $$ = _getFromCache(127);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[126] = pos;
+      _cachePos[127] = pos;
     }  
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -8030,8 +8034,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect82);
     }
-    if (_cacheable[126]) {
-      _addToCache($$, pos, 126);
+    if (_cacheable[127]) {
+      _addToCache($$, pos, 127);
     }    
     return $$;
   }
@@ -8534,13 +8538,13 @@ class GrammarParser {
   dynamic _parse_event_type() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[162] >= pos) {
-      $$ = _getFromCache(162);
+    if(_cachePos[163] >= pos) {
+      $$ = _getFromCache(163);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[162] = pos;
+      _cachePos[163] = pos;
     }  
     switch (_getState(_transitions15)) {
       case 0:
@@ -8622,8 +8626,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect19);
     }
-    if (_cacheable[162]) {
-      _addToCache($$, pos, 162);
+    if (_cacheable[163]) {
+      _addToCache($$, pos, 163);
     }    
     return $$;
   }
@@ -8710,13 +8714,13 @@ class GrammarParser {
   dynamic _parse_extension_token() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[149] >= pos) {
-      $$ = _getFromCache(149);
+    if(_cachePos[150] >= pos) {
+      $$ = _getFromCache(150);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[149] = pos;
+      _cachePos[150] = pos;
     }  
     switch (_getState(_transitions67)) {
       case 0:
@@ -8748,8 +8752,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect95);
     }
-    if (_cacheable[149]) {
-      _addToCache($$, pos, 149);
+    if (_cacheable[150]) {
+      _addToCache($$, pos, 150);
     }    
     return $$;
   }
@@ -8871,18 +8875,19 @@ class GrammarParser {
           if (success) break;
           var startPos2 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_quoted_string();
+          $$ = _parse_host();
           _startPos = startPos2;
+          if (success) break;
+          var startPos3 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_quoted_string();
+          _startPos = startPos3;
           break;
         }
         break;
       case 2:
+      case 4:
         while (true) {
-          var startPos3 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_token();
-          _startPos = startPos3;
-          if (success) break;
           var startPos4 = _startPos;
           _startPos = _cursor;
           $$ = _parse_host();
@@ -8896,21 +8901,6 @@ class GrammarParser {
         }
         break;
       case 3:
-      case 5:
-        while (true) {
-          var startPos6 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_host();
-          _startPos = startPos6;
-          if (success) break;
-          var startPos7 = _startPos;
-          _startPos = _cursor;
-          $$ = _parse_quoted_string();
-          _startPos = startPos7;
-          break;
-        }
-        break;
-      case 4:
         $$ = null;
         success = false;
         break;
@@ -8924,13 +8914,13 @@ class GrammarParser {
   dynamic _parse_generic_param() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[133] >= pos) {
-      $$ = _getFromCache(133);
+    if(_cachePos[134] >= pos) {
+      $$ = _getFromCache(134);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[133] = pos;
+      _cachePos[134] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -9011,8 +9001,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect18);
     }
-    if (_cacheable[133]) {
-      _addToCache($$, pos, 133);
+    if (_cacheable[134]) {
+      _addToCache($$, pos, 134);
     }    
     return $$;
   }
@@ -9020,13 +9010,13 @@ class GrammarParser {
   dynamic _parse_h16() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[60] >= pos) {
-      $$ = _getFromCache(60);
+    if(_cachePos[61] >= pos) {
+      $$ = _getFromCache(61);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[60] = pos;
+      _cachePos[61] = pos;
     }  
     _token = 16;    
     _tokenStart = _cursor;    
@@ -9077,8 +9067,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect41);
     }
-    if (_cacheable[60]) {
-      _addToCache($$, pos, 60);
+    if (_cacheable[61]) {
+      _addToCache($$, pos, 61);
     }    
     _token = null;
     _tokenStart = null;
@@ -9168,13 +9158,13 @@ class GrammarParser {
   dynamic _parse_header() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[81] >= pos) {
-      $$ = _getFromCache(81);
+    if(_cachePos[82] >= pos) {
+      $$ = _getFromCache(82);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[81] = pos;
+      _cachePos[82] = pos;
     }  
     switch (_getState(_transitions42)) {
       case 0:
@@ -9227,8 +9217,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect55);
     }
-    if (_cacheable[81]) {
-      _addToCache($$, pos, 81);
+    if (_cacheable[82]) {
+      _addToCache($$, pos, 82);
     }    
     return $$;
   }
@@ -9264,7 +9254,7 @@ class GrammarParser {
         var testing0 = _testing; 
         for (var reps = []; ; ) {
           _testing = _cursor;
-          switch (_getState(_transitions83)) {
+          switch (_getState(_transitions85)) {
             case 0:
             case 4:
               var startPos1 = _startPos;
@@ -9670,13 +9660,13 @@ class GrammarParser {
   dynamic _parse_hnv_unreserved() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[84] >= pos) {
-      $$ = _getFromCache(84);
+    if(_cachePos[85] >= pos) {
+      $$ = _getFromCache(85);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[84] = pos;
+      _cachePos[85] = pos;
     }  
     _token = 18;    
     _tokenStart = _cursor;    
@@ -9732,8 +9722,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect56);
     }
-    if (_cacheable[84]) {
-      _addToCache($$, pos, 84);
+    if (_cacheable[85]) {
+      _addToCache($$, pos, 85);
     }    
     _token = null;
     _tokenStart = null;
@@ -9758,36 +9748,31 @@ class GrammarParser {
         _startPos = _cursor;
         switch (_getState(_transitions30)) {
           case 0:
+            var startPos1 = _startPos;
+            _startPos = _cursor;
+            $$ = _parse_hosttoken();
+            _startPos = startPos1;
+            break;
+          case 1:
             while (true) {
-              var startPos1 = _startPos;
-              _startPos = _cursor;
-              $$ = _parse_hostname();
-              _startPos = startPos1;
-              if (success) break;
               var startPos2 = _startPos;
               _startPos = _cursor;
-              $$ = _parse_IPv4address();
+              $$ = _parse_hostname();
               _startPos = startPos2;
+              if (success) break;
+              var startPos3 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_IPv4address();
+              _startPos = startPos3;
+              if (success) break;
+              var startPos4 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_hosttoken();
+              _startPos = startPos4;
               break;
             }
             break;
-          case 1:
-            var startPos3 = _startPos;
-            _startPos = _cursor;
-            $$ = _parse_hostname();
-            _startPos = startPos3;
-            break;
           case 2:
-            var startPos4 = _startPos;
-            _startPos = _cursor;
-            $$ = _parse_IPv6reference();
-            _startPos = startPos4;
-            break;
-          case 3:
-            $$ = null;
-            success = false;
-            break;
-          case 4:
             while (true) {
               var startPos5 = _startPos;
               _startPos = _cursor;
@@ -9796,8 +9781,32 @@ class GrammarParser {
               if (success) break;
               var startPos6 = _startPos;
               _startPos = _cursor;
-              $$ = _parse_IPv6reference();
+              $$ = _parse_hosttoken();
               _startPos = startPos6;
+              break;
+            }
+            break;
+          case 3:
+            var startPos7 = _startPos;
+            _startPos = _cursor;
+            $$ = _parse_IPv6reference();
+            _startPos = startPos7;
+            break;
+          case 4:
+            $$ = null;
+            success = false;
+            break;
+          case 5:
+            while (true) {
+              var startPos8 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_hostname();
+              _startPos = startPos8;
+              if (success) break;
+              var startPos9 = _startPos;
+              _startPos = _cursor;
+              $$ = _parse_IPv6reference();
+              _startPos = startPos9;
               break;
             }
             break;
@@ -10032,6 +10041,42 @@ class GrammarParser {
     return $$;
   }
   
+  dynamic _parse_hosttoken() {
+    var $$;
+    switch (_getState(_transitions15)) {
+      case 0:
+        var startPos0 = _startPos;
+        _startPos = _cursor;
+        $$ = _parse_token_nodot();
+        if (success) {    
+          final $1 = $$;
+          final $start = startPos0;
+          var pos0 = _startPos, offset = $start;
+          {
+          ///CODE_START
+          data.host = _text();
+          data.host_type = 'domain';
+          var result = {};
+          result['host_type'] = data.host_type;
+          result['host'] = data.host;
+          $$ =  result;
+          ///CODE_END
+          }
+        }
+        _startPos = startPos0;
+        break;
+      case 1:
+      case 2:
+        $$ = null;
+        success = false;
+        break;
+    }
+    if (!success && _cursor > _testing) {
+      _failure(_expect19);
+    }
+    return $$;
+  }
+  
   dynamic _parse_hvalue() {
     var $$;
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
@@ -10215,13 +10260,13 @@ class GrammarParser {
   dynamic _parse_ls32() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[61] >= pos) {
-      $$ = _getFromCache(61);
+    if(_cachePos[62] >= pos) {
+      $$ = _getFromCache(62);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[61] = pos;
+      _cachePos[62] = pos;
     }  
     switch (_getState(_transitions34)) {
       case 0:
@@ -10315,8 +10360,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(const [null]);
     }
-    if (_cacheable[61]) {
-      _addToCache($$, pos, 61);
+    if (_cacheable[62]) {
+      _addToCache($$, pos, 62);
     }    
     return $$;
   }
@@ -10720,13 +10765,13 @@ class GrammarParser {
   dynamic _parse_name_addr() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[124] >= pos) {
-      $$ = _getFromCache(124);
+    if(_cachePos[125] >= pos) {
+      $$ = _getFromCache(125);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[124] = pos;
+      _cachePos[125] = pos;
     }  
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -10782,8 +10827,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect28);
     }
-    if (_cacheable[124]) {
-      _addToCache($$, pos, 124);
+    if (_cacheable[125]) {
+      _addToCache($$, pos, 125);
     }    
     return $$;
   }
@@ -10995,13 +11040,13 @@ class GrammarParser {
   dynamic _parse_option_tag() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[191] >= pos) {
-      $$ = _getFromCache(191);
+    if(_cachePos[192] >= pos) {
+      $$ = _getFromCache(192);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[191] = pos;
+      _cachePos[192] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -11019,8 +11064,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect18);
     }
-    if (_cacheable[191]) {
-      _addToCache($$, pos, 191);
+    if (_cacheable[192]) {
+      _addToCache($$, pos, 192);
     }    
     return $$;
   }
@@ -11212,13 +11257,13 @@ class GrammarParser {
   dynamic _parse_other_transport() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[68] >= pos) {
-      $$ = _getFromCache(68);
+    if(_cachePos[69] >= pos) {
+      $$ = _getFromCache(69);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[68] = pos;
+      _cachePos[69] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -11236,8 +11281,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect18);
     }
-    if (_cacheable[68]) {
-      _addToCache($$, pos, 68);
+    if (_cacheable[69]) {
+      _addToCache($$, pos, 69);
     }    
     return $$;
   }
@@ -11360,13 +11405,13 @@ class GrammarParser {
   dynamic _parse_paramchar() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[78] >= pos) {
-      $$ = _getFromCache(78);
+    if(_cachePos[79] >= pos) {
+      $$ = _getFromCache(79);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[78] = pos;
+      _cachePos[79] = pos;
     }  
     switch (_getState(_transitions40)) {
       case 0:
@@ -11396,8 +11441,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect51);
     }
-    if (_cacheable[78]) {
-      _addToCache($$, pos, 78);
+    if (_cacheable[79]) {
+      _addToCache($$, pos, 79);
     }    
     return $$;
   }
@@ -11574,13 +11619,13 @@ class GrammarParser {
   dynamic _parse_pchar() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[98] >= pos) {
-      $$ = _getFromCache(98);
+    if(_cachePos[99] >= pos) {
+      $$ = _getFromCache(99);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[98] = pos;
+      _cachePos[99] = pos;
     }  
     switch (_getState(_transitions51)) {
       case 0:
@@ -11646,8 +11691,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect65);
     }
-    if (_cacheable[98]) {
-      _addToCache($$, pos, 98);
+    if (_cacheable[99]) {
+      _addToCache($$, pos, 99);
     }    
     return $$;
   }
@@ -12097,13 +12142,13 @@ class GrammarParser {
   dynamic _parse_qop_value() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[189] >= pos) {
-      $$ = _getFromCache(189);
+    if(_cachePos[190] >= pos) {
+      $$ = _getFromCache(190);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[189] = pos;
+      _cachePos[190] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -12167,8 +12212,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect111);
     }
-    if (_cacheable[189]) {
-      _addToCache($$, pos, 189);
+    if (_cacheable[190]) {
+      _addToCache($$, pos, 190);
     }    
     return $$;
   }
@@ -12768,13 +12813,13 @@ class GrammarParser {
   dynamic _parse_rec_route() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[193] >= pos) {
-      $$ = _getFromCache(193);
+    if(_cachePos[194] >= pos) {
+      $$ = _getFromCache(194);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[193] = pos;
+      _cachePos[194] = pos;
     }  
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -12882,8 +12927,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect28);
     }
-    if (_cacheable[193]) {
-      _addToCache($$, pos, 193);
+    if (_cacheable[194]) {
+      _addToCache($$, pos, 194);
     }    
     return $$;
   }
@@ -13000,7 +13045,7 @@ class GrammarParser {
   
   dynamic _parse_replaces_param() {
     var $$;
-    switch (_getState(_transitions84)) {
+    switch (_getState(_transitions86)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -13300,13 +13345,13 @@ class GrammarParser {
   dynamic _parse_route_param() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[200] >= pos) {
-      $$ = _getFromCache(200);
+    if(_cachePos[201] >= pos) {
+      $$ = _getFromCache(201);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[200] = pos;
+      _cachePos[201] = pos;
     }  
     switch (_ch >= 0 && _ch <= 1114111 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -13377,8 +13422,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect28);
     }
-    if (_cacheable[200]) {
-      _addToCache($$, pos, 200);
+    if (_cacheable[201]) {
+      _addToCache($$, pos, 201);
     }    
     return $$;
   }
@@ -13386,13 +13431,13 @@ class GrammarParser {
   dynamic _parse_rr_param() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[194] >= pos) {
-      $$ = _getFromCache(194);
+    if(_cachePos[195] >= pos) {
+      $$ = _getFromCache(195);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[194] = pos;
+      _cachePos[195] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -13410,8 +13455,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect18);
     }
-    if (_cacheable[194]) {
-      _addToCache($$, pos, 194);
+    if (_cacheable[195]) {
+      _addToCache($$, pos, 195);
     }    
     return $$;
   }
@@ -13470,7 +13515,7 @@ class GrammarParser {
   
   dynamic _parse_s_e_params() {
     var $$;
-    switch (_getState(_transitions82)) {
+    switch (_getState(_transitions84)) {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
@@ -13773,7 +13818,7 @@ class GrammarParser {
   
   dynamic _parse_sent_by() {
     var $$;
-    switch (_getState(_transitions29)) {
+    switch (_getState(_transitions82)) {
       case 0:
       case 2:
         var ch0 = _ch, pos0 = _cursor, startPos0 = _startPos;
@@ -14429,13 +14474,13 @@ class GrammarParser {
   dynamic _parse_tag_param() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[168] >= pos) {
-      $$ = _getFromCache(168);
+    if(_cachePos[169] >= pos) {
+      $$ = _getFromCache(169);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[168] = pos;
+      _cachePos[169] = pos;
     }  
     switch ((_ch == 116 || _ch == 84 ) ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -14481,8 +14526,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect98);
     }
-    if (_cacheable[168]) {
-      _addToCache($$, pos, 168);
+    if (_cacheable[169]) {
+      _addToCache($$, pos, 169);
     }    
     return $$;
   }
@@ -15118,13 +15163,13 @@ class GrammarParser {
   dynamic _parse_ttl() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[227] >= pos) {
-      $$ = _getFromCache(227);
+    if(_cachePos[228] >= pos) {
+      $$ = _getFromCache(228);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[227] = pos;
+      _cachePos[228] = pos;
     }  
     switch (_ch >= 0 && _ch <= 57 ? 0 : _ch == -1 ? 2 : 1) {
       case 0:
@@ -15191,8 +15236,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect1);
     }
-    if (_cacheable[227]) {
-      _addToCache($$, pos, 227);
+    if (_cacheable[228]) {
+      _addToCache($$, pos, 228);
     }    
     return $$;
   }
@@ -15563,13 +15608,13 @@ class GrammarParser {
   dynamic _parse_uric() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[93] >= pos) {
-      $$ = _getFromCache(93);
+    if(_cachePos[94] >= pos) {
+      $$ = _getFromCache(94);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[93] = pos;
+      _cachePos[94] = pos;
     }  
     switch (_getState(_transitions49)) {
       case 0:
@@ -15599,8 +15644,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect64);
     }
-    if (_cacheable[93]) {
-      _addToCache($$, pos, 93);
+    if (_cacheable[94]) {
+      _addToCache($$, pos, 94);
     }    
     return $$;
   }
@@ -16178,12 +16223,12 @@ class GrammarParser {
   
   dynamic _parse_via_host() {
     var $$;
-    switch (_getState(_transitions29)) {
+    switch (_getState(_transitions82)) {
       case 0:
       case 2:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        switch (_getState(_transitions30)) {
+        switch (_getState(_transitions83)) {
           case 0:
             while (true) {
               var startPos1 = _startPos;
@@ -16307,13 +16352,13 @@ class GrammarParser {
   dynamic _parse_via_param() {
     var $$;          
     var pos = _cursor;             
-    if(_cachePos[212] >= pos) {
-      $$ = _getFromCache(212);
+    if(_cachePos[213] >= pos) {
+      $$ = _getFromCache(213);
       if($$ != null) {
         return $$[0];       
       }
     } else {
-      _cachePos[212] = pos;
+      _cachePos[213] = pos;
     }  
     switch (_getState(_transitions13)) {
       case 0:
@@ -16390,8 +16435,8 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect112);
     }
-    if (_cacheable[212]) {
-      _addToCache($$, pos, 212);
+    if (_cacheable[213]) {
+      _addToCache($$, pos, 213);
     }    
     return $$;
   }
@@ -19736,9 +19781,9 @@ class GrammarParser {
       throw new RangeError('pos');
     }      
     _cursor = pos;
-    _cache = new List<Map<int, List>>(251);
-    _cachePos = new List<int>.filled(251, -1);  
-    _cacheable = new List<bool>.filled(251, false);
+    _cache = new List<Map<int, List>>(252);
+    _cachePos = new List<int>.filled(252, -1);  
+    _cacheable = new List<bool>.filled(252, false);
     _ch = -1;
     _errors = <GrammarParserError>[];   
     _expected = <String>[];
