@@ -420,7 +420,7 @@ password        <- ( unreserved / escaped / "&" / "=" / "+" / "$" / "," )* {
 
 hostport        <- host ( ":" port )?
 
-host            <- ( hostname / IPv4address / IPv6reference ) {
+host            <- ( hostname / IPv4address / IPv6reference / hosttoken) {
                     $$ =  $1; }
 
 ## 'hostname' grammar is relaxed from RFC 3261:
@@ -428,6 +428,15 @@ host            <- ( hostname / IPv4address / IPv6reference ) {
 
 hostname        <- (( domainlabel "." )* toplabel  "." ?) {
                   data.host = _text().toLowerCase();
+                  data.host_type = 'domain';
+                  var result = {};
+                  result['host_type'] = data.host_type;
+                  result['host'] = data.host;
+                  $$ =  result; }
+
+## hello <sip:asterisk@8c2d06b92042:5060;transport=ws>
+hosttoken       <- token_nodot {
+                  data.host = _text();
                   data.host_type = 'domain';
                   var result = {};
                   result['host_type'] = data.host_type;

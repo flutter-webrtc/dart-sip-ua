@@ -7,7 +7,7 @@ class NameAddrHeader {
       [Map<dynamic, dynamic> parameters]) {
     // Checks.
     if (uri == null || uri is! URI) {
-      throw AssertionError('missing or invalid "uri" parameter');
+      throw AssertionError('missing or invalid "uri" = $uri parameter');
     }
 
     // Initialize parameters.

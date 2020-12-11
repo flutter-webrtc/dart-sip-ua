@@ -1,6 +1,11 @@
 # Changelog
 
 --------------------------------------------
+[0.3.3] - 2020.11.27
+
+* Fix uri parse.
+* Upgrade flutter_webrtc to 0.5.7.
+
 [0.3.2] - 2020.11.11
 
 * Added dtmf options to Call (#154)
