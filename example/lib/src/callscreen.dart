@@ -164,6 +164,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       if (_localRenderer != null) {
         _localRenderer.srcObject = stream;
       }
+      event.stream?.getAudioTracks()?.first?.enableSpeakerphone(false);
       _localStream = stream;
     }
     if (event.originator == 'remote') {
@@ -485,41 +486,40 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     }
 
     stackWidgets.addAll([
-        Positioned(
-          top: voiceonly ? 48 : 6,
-          left: 0,
-          right: 0,
-          child: Center(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Text(
-                        (voiceonly ? 'VOICE CALL' : 'VIDEO CALL') +
-                            (_hold
-                                ? ' PAUSED BY ${this._holdOriginator.toUpperCase()}'
-                                : ''),
-                        style: TextStyle(fontSize: 24, color: Colors.black54),
-                      ))),
-              Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Text(
-                        '$remote_identity',
-                        style: TextStyle(fontSize: 18, color: Colors.black54),
-                      ))),
-              Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Text(_timeLabel,
-                          style:
-                              TextStyle(fontSize: 14, color: Colors.black54))))
-            ],
-          )),
-        ),
+      Positioned(
+        top: voiceonly ? 48 : 6,
+        left: 0,
+        right: 0,
+        child: Center(
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Center(
+                child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Text(
+                      (voiceonly ? 'VOICE CALL' : 'VIDEO CALL') +
+                          (_hold
+                              ? ' PAUSED BY ${this._holdOriginator.toUpperCase()}'
+                              : ''),
+                      style: TextStyle(fontSize: 24, color: Colors.black54),
+                    ))),
+            Center(
+                child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Text(
+                      '$remote_identity',
+                      style: TextStyle(fontSize: 18, color: Colors.black54),
+                    ))),
+            Center(
+                child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Text(_timeLabel,
+                        style: TextStyle(fontSize: 14, color: Colors.black54))))
+          ],
+        )),
+      ),
     ]);
 
     return Stack(
