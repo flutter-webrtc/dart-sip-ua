@@ -104,8 +104,10 @@ bool rfc3261_18_3_request() {
   int len = Utils.str_utf8_length(message.body);
   dynamic contentLength = message.getHeader('content-length');
 
-  if (contentLength is String) {
+  if (contentLength != null && contentLength is String) {
     contentLength = int.tryParse(contentLength) ?? 0;
+  } else {
+    contentLength = 0;
   }
 
   if (len < contentLength) {
@@ -192,8 +194,10 @@ bool rfc3261_18_3_response() {
   // ignore: always_specify_types
   var contentLength = message.getHeader('content-length');
 
-  if (contentLength is String) {
+  if (contentLength != null && contentLength is String) {
     contentLength = int.tryParse(contentLength) ?? 0;
+  } else {
+    contentLength = 0;
   }
 
   if (len < contentLength) {
