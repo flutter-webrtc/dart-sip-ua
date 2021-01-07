@@ -27,8 +27,6 @@ dependencies:
   sip_ua:
     path: ../
   shared_preferences:
-  shared_preferences_macos:
-  shared_preferences_web:
 
 dev_dependencies:
   flutter_test:

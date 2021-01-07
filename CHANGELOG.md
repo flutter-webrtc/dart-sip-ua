@@ -1,6 +1,12 @@
 # Changelog
 
 --------------------------------------------
+[0.3.4] - 2021.01.08
+
+* fix bug.
+* Check Content-Length loosely.
+* [example] 🐛 makes sure speaker is off to match UI state
+
 [0.3.3] - 2020.11.27
 
 * Fix uri parse.
