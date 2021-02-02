@@ -2746,7 +2746,7 @@ class RTCSession extends EventManager {
 
     String session_expires_refresher;
 
-    if ((response.session_expires != 0 || response.session_expires != null) &&
+    if ((response.session_expires != 0 && response.session_expires != null) &&
         response.session_expires >= DartSIP_C.MIN_SESSION_EXPIRES) {
       _sessionTimers.currentExpires = response.session_expires;
       session_expires_refresher = response.session_expires_refresher ?? 'uac';
