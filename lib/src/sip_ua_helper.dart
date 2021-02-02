@@ -70,7 +70,7 @@ class SIPUAHelper extends EventManager {
 
   Future<bool> call(String target, [bool voiceonly = false]) async {
     if (_ua != null && _ua.isConnected()) {
-      _ua.call(target, _options(voiceonly));
+      _ua.call(target, buildCallOptions(voiceonly));
       return true;
     } else {
       logger.error(
@@ -157,7 +157,7 @@ class SIPUAHelper extends EventManager {
         if (session.direction == 'incoming') {
           // Set event handlers.
           session
-              .addAllEventHandlers(_options()['eventHandlers'] as EventManager);
+              .addAllEventHandlers(buildCallOptions()['eventHandlers'] as EventManager);
         }
         _calls[event.id] =
             Call(event.id, session, CallStateEnum.CALL_INITIATION);
@@ -181,6 +181,9 @@ class SIPUAHelper extends EventManager {
     }
   }
 
+  /// Build the call options.
+  /// You may override this method in a custom SIPUAHelper class in order to
+  /// modify the options to your needs.
   Map<String, Object> buildCallOptions([bool voiceonly = false]) =>
       _options(voiceonly);
 
@@ -260,7 +263,7 @@ class SIPUAHelper extends EventManager {
       //Always accept.
       refer.accept((RTCSession session) {
         logger.debug('session initialized.');
-      }, _options(true));
+      }, buildCallOptions(true));
     });
 
     Map<String, Object> _defaultOptions = <String, dynamic>{
