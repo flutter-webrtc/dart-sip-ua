@@ -1,6 +1,13 @@
 # Changelog
 
 --------------------------------------------
+[0.3.5] - 2021.02.03
+
+* Upgrade flutter-webrtc to 0.5.8.
+* Set sdpSemantics (plan-b or unfied-plan) to unfied-plan by default.
+* Add correct transport param to contact uri. close #161, close #160.
+* Let the user override the call options by extending SIPUAHelper (#170).
+
 [0.3.4] - 2021.01.08
 
 * fix bug.
