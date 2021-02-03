@@ -156,8 +156,8 @@ class SIPUAHelper extends EventManager {
         RTCSession session = event.session;
         if (session.direction == 'incoming') {
           // Set event handlers.
-          session
-              .addAllEventHandlers(buildCallOptions()['eventHandlers'] as EventManager);
+          session.addAllEventHandlers(
+              buildCallOptions()['eventHandlers'] as EventManager);
         }
         _calls[event.id] =
             Call(event.id, session, CallStateEnum.CALL_INITIATION);
@@ -268,7 +268,10 @@ class SIPUAHelper extends EventManager {
 
     Map<String, Object> _defaultOptions = <String, dynamic>{
       'eventHandlers': handlers,
-      'pcConfig': <String, dynamic>{'iceServers': _uaSettings.iceServers},
+      'pcConfig': <String, dynamic>{
+        'sdpSemantics': 'unified-plan',
+        'iceServers': _uaSettings.iceServers
+      },
       'mediaConstraints': <String, dynamic>{
         'audio': true,
         'video': voiceonly
