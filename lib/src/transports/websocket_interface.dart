@@ -18,10 +18,14 @@ class WebSocketInterface implements Socket {
       logger.error('invalid WebSocket URI scheme: ${parsed_url.scheme}');
       throw AssertionError('Invalid argument: $url');
     } else {
+      String transport_scheme = webSocketSettings != null
+          ? webSocketSettings.transport_scheme.toLowerCase()
+          : parsed_url.scheme;
+
       String port = parsed_url.port != null ? ':${parsed_url.port}' : '';
-      _sip_uri = 'sip:${parsed_url.host}$port;transport=${parsed_url.scheme}';
+      _sip_uri = 'sip:${parsed_url.host}$port;transport=$transport_scheme';
       logger.debug('SIP URI: $_sip_uri');
-      _via_transport = parsed_url.scheme.toUpperCase();
+      _via_transport = transport_scheme.toUpperCase();
     }
     _webSocketSettings = webSocketSettings ?? WebSocketSettings();
   }
