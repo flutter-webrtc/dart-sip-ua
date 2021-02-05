@@ -19,7 +19,7 @@ class WebSocketInterface implements Socket {
       throw AssertionError('Invalid argument: $url');
     } else {
       String transport_scheme = webSocketSettings != null
-          ? webSocketSettings.transport_scheme.toLowerCase()
+          ? webSocketSettings.transport_scheme?.toLowerCase()
           : parsed_url.scheme;
 
       String port = parsed_url.port != null ? ':${parsed_url.port}' : '';
