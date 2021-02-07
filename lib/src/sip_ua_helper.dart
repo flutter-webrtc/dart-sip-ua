@@ -577,6 +577,11 @@ class WebSocketSettings {
   /// Don‘t check the server certificate
   /// for self-signed certificate.
   bool allowBadCertificate = false;
+
+  /// Custom transport scheme string to use.
+  /// Otherwise the used protocol will be used (for example WS for ws://
+  /// or WSS for wss://, based on the given web socket URL).
+  String transport_scheme;
 }
 
 enum DtmfMode {
