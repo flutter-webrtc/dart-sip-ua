@@ -191,6 +191,8 @@ class RTCSession extends EventManager {
 
   String get id => _id;
 
+  dynamic get request => _request;
+
   RTCPeerConnection get connection => _connection;
 
   RTCDTMFSender get dtmfSender =>

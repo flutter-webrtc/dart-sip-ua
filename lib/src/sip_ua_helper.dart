@@ -471,6 +471,35 @@ class Call {
     }
     return '';
   }
+
+  bool get remote_has_audio => _peerHasMediaLine('audio');
+
+  bool get remote_has_video => _peerHasMediaLine('video');
+
+  bool _peerHasMediaLine(String media) {
+    assert(
+        _session != null, 'ERROR(_peerHasMediaLine): rtc session is invalid!');
+    if (_session.request == null) {
+      return false;
+    }
+
+    bool peerHasMediaLine = false;
+    Map<String, dynamic> sdp = _session.request.parseSDP();
+    // Make sure sdp['media'] is an array, not the case if there is only one media.
+    if (sdp['media'] is! List) {
+      sdp['media'] = <dynamic>[sdp['media']];
+    }
+    // Go through all medias in SDP to find offered capabilities to answer with.
+    for (Map<String, dynamic> m in sdp['media']) {
+      if (media == 'audio' && m['type'] == 'audio') {
+        peerHasMediaLine = true;
+      }
+      if (media == 'video' && m['type'] == 'video') {
+        peerHasMediaLine = true;
+      }
+    }
+    return peerHasMediaLine;
+  }
 }
 
 class CallState {
