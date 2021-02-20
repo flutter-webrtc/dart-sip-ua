@@ -2767,23 +2767,19 @@ class RTCSession extends EventManager {
   }
 
   void _toggleMuteAudio(bool mute) {
-    List<MediaStream> streams = _connection.getLocalStreams();
-    streams.forEach((MediaStream stream) {
-      if (stream.getAudioTracks().isNotEmpty) {
-        MediaStreamTrack track = stream.getAudioTracks()[0];
+    if (_localMediaStream != null) {
+      for (MediaStreamTrack track in _localMediaStream.getAudioTracks()) {
         track.enabled = !mute;
       }
-    });
+    }
   }
 
   void _toggleMuteVideo(bool mute) {
-    List<MediaStream> streams = _connection.getLocalStreams();
-    streams.forEach((MediaStream stream) {
-      if (stream.getVideoTracks().isNotEmpty) {
-        MediaStreamTrack track = stream.getVideoTracks()[0];
+    if (_localMediaStream != null) {
+      for (MediaStreamTrack track in _localMediaStream.getVideoTracks()) {
         track.enabled = !mute;
       }
-    });
+    }
   }
 
   void _newRTCSession(String originator, dynamic request) {
