@@ -749,6 +749,12 @@ class UA extends EventManager {
       throw Exceptions.ConfigurationError('sockets', _configuration.sockets);
     }
 
+    String transport = 'ws';
+
+    if (_configuration.sockets.isNotEmpty) {
+      transport = _configuration.sockets.first.via_transport.toLowerCase();
+    }
+
     // Remove sockets instance from configuration object.
     // TODO(cloudwebrtc):  need dispose??
     _configuration.sockets = null;
@@ -776,8 +782,12 @@ class UA extends EventManager {
     }
     // Contact URI.
     else {
-      _configuration.contact_uri = URI('sip', Utils.createRandomToken(8),
-          _configuration.via_host, null, <dynamic, dynamic>{'transport': 'ws'});
+      _configuration.contact_uri = URI(
+          'sip',
+          Utils.createRandomToken(8),
+          _configuration.via_host,
+          null,
+          <dynamic, dynamic>{'transport': transport});
     }
     _contact = Contact(_configuration.contact_uri);
     return;

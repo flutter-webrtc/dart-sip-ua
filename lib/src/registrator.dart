@@ -118,7 +118,6 @@ class Registrator {
     }
 
     NameAddrHeader contact = Grammar.parse(_contact, 'Contact')[0]['parsed'];
-    contact.uri.clearParams();
 
     extraContactUriParams.forEach((String param_key, dynamic param_value) {
       contact.uri.setParam(param_key, param_value);

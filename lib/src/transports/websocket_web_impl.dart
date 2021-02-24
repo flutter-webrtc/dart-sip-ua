@@ -23,7 +23,7 @@ class WebSocketImpl {
     try {
       _socket = WebSocket(_url, 'sip');
       _socket.onOpen.listen((Event e) {
-        this?.onOpen();
+        onOpen?.call();
       });
 
       _socket.onMessage.listen((MessageEvent e) async {
@@ -31,17 +31,17 @@ class WebSocketImpl {
           dynamic arrayBuffer = await JSUtils.promiseToFuture(
               JSUtils.callMethod(e.data, 'arrayBuffer', <Object>[]));
           String message = String.fromCharCodes(arrayBuffer.asUint8List());
-          this?.onMessage(message);
+          onMessage?.call(message);
         } else {
-          this?.onMessage(e.data);
+          onMessage?.call(e.data);
         }
       });
 
       _socket.onClose.listen((CloseEvent e) {
-        this?.onClose(e.code, e.reason);
+        onClose?.call(e.code, e.reason);
       });
     } catch (e) {
-      this?.onClose(e.code, e.reason);
+      onClose?.call(e.code, e.reason);
     }
   }
 

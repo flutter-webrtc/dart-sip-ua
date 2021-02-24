@@ -70,7 +70,7 @@ class SIPUAHelper extends EventManager {
 
   Future<bool> call(String target, [bool voiceonly = false]) async {
     if (_ua != null && _ua.isConnected()) {
-      _ua.call(target, _options(voiceonly));
+      _ua.call(target, buildCallOptions(voiceonly));
       return true;
     } else {
       logger.error(
@@ -158,8 +158,8 @@ class SIPUAHelper extends EventManager {
         RTCSession session = event.session;
         if (session.direction == 'incoming') {
           // Set event handlers.
-          session
-              .addAllEventHandlers(_options()['eventHandlers'] as EventManager);
+          session.addAllEventHandlers(
+              buildCallOptions()['eventHandlers'] as EventManager);
         }
         _calls[event.id] =
             Call(event.id, session, CallStateEnum.CALL_INITIATION);
@@ -183,6 +183,9 @@ class SIPUAHelper extends EventManager {
     }
   }
 
+  /// Build the call options.
+  /// You may override this method in a custom SIPUAHelper class in order to
+  /// modify the options to your needs.
   Map<String, Object> buildCallOptions([bool voiceonly = false]) =>
       _options(voiceonly);
 
@@ -262,12 +265,15 @@ class SIPUAHelper extends EventManager {
       //Always accept.
       refer.accept((RTCSession session) {
         logger.debug('session initialized.');
-      }, _options(true));
+      }, buildCallOptions(true));
     });
 
     Map<String, Object> _defaultOptions = <String, dynamic>{
       'eventHandlers': handlers,
-      'pcConfig': <String, dynamic>{'iceServers': _uaSettings.iceServers},
+      'pcConfig': <String, dynamic>{
+        'sdpSemantics': 'unified-plan',
+        'iceServers': _uaSettings.iceServers
+      },
       'mediaConstraints': <String, dynamic>{
         'audio': true,
         'video': voiceonly
@@ -467,6 +473,35 @@ class Call {
     }
     return '';
   }
+
+  bool get remote_has_audio => _peerHasMediaLine('audio');
+
+  bool get remote_has_video => _peerHasMediaLine('video');
+
+  bool _peerHasMediaLine(String media) {
+    assert(
+        _session != null, 'ERROR(_peerHasMediaLine): rtc session is invalid!');
+    if (_session.request == null) {
+      return false;
+    }
+
+    bool peerHasMediaLine = false;
+    Map<String, dynamic> sdp = _session.request.parseSDP();
+    // Make sure sdp['media'] is an array, not the case if there is only one media.
+    if (sdp['media'] is! List) {
+      sdp['media'] = <dynamic>[sdp['media']];
+    }
+    // Go through all medias in SDP to find offered capabilities to answer with.
+    for (Map<String, dynamic> m in sdp['media']) {
+      if (media == 'audio' && m['type'] == 'audio') {
+        peerHasMediaLine = true;
+      }
+      if (media == 'video' && m['type'] == 'video') {
+        peerHasMediaLine = true;
+      }
+    }
+    return peerHasMediaLine;
+  }
 }
 
 class CallState {
@@ -545,6 +580,11 @@ class WebSocketSettings {
   /// Don‘t check the server certificate
   /// for self-signed certificate.
   bool allowBadCertificate = false;
+
+  /// Custom transport scheme string to use.
+  /// Otherwise the used protocol will be used (for example WS for ws://
+  /// or WSS for wss://, based on the given web socket URL).
+  String transport_scheme;
 }
 
 enum DtmfMode {

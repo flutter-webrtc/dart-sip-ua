@@ -191,6 +191,8 @@ class RTCSession extends EventManager {
 
   String get id => _id;
 
+  dynamic get request => _request;
+
   RTCPeerConnection get connection => _connection;
 
   RTCDTMFSender get dtmfSender =>
@@ -359,7 +361,7 @@ class RTCSession extends EventManager {
 
     _newRTCSession('local', _request);
     await _sendInitialRequest(
-        mediaConstraints, rtcOfferConstraints, mediaStream);
+        pcConfig, mediaConstraints, rtcOfferConstraints, mediaStream);
   }
 
   void init_incoming(IncomingRequest request,
@@ -474,6 +476,12 @@ class RTCSession extends EventManager {
     bool peerHasVideoLine = false;
     bool peerOffersFullAudio = false;
     bool peerOffersFullVideo = false;
+
+    // In future versions, unified-plan will be used by default
+    String sdpSemantics = 'unified-plan';
+    if (pcConfig['sdpSemantics'] != null) {
+      sdpSemantics = pcConfig['sdpSemantics'];
+    }
 
     _rtcAnswerConstraints = rtcAnswerConstraints;
     _rtcOfferConstraints = options['rtcOfferConstraints'] ?? null;
@@ -615,8 +623,22 @@ class RTCSession extends EventManager {
 
     // Attach MediaStream to RTCPeerconnection.
     _localMediaStream = stream;
+
     if (stream != null) {
-      _connection.addStream(stream);
+      switch (sdpSemantics) {
+        case 'unified-plan':
+          stream.getTracks().forEach((MediaStreamTrack track) {
+            _connection.addTrack(track, stream);
+          });
+          break;
+        case 'plan-b':
+          _connection.addStream(stream);
+          break;
+        default:
+          logger.error('Unkown sdp semantics $sdpSemantics');
+          throw Exceptions.NotReadyError('Unkown sdp semantics $sdpSemantics');
+          break;
+      }
     }
 
     // Set remote description.
@@ -1565,9 +1587,28 @@ class RTCSession extends EventManager {
       }
     };
 
-    _connection.onAddStream = (MediaStream stream) {
-      emit(EventStream(session: this, originator: 'remote', stream: stream));
-    };
+    // In future versions, unified-plan will be used by default
+    String sdpSemantics = 'unified-plan';
+    if (pcConfig['sdpSemantics'] != null) {
+      sdpSemantics = pcConfig['sdpSemantics'];
+    }
+
+    switch (sdpSemantics) {
+      case 'unified-plan':
+        _connection.onTrack = (RTCTrackEvent event) {
+          if (event.track.kind == 'video' && event.streams.isNotEmpty) {
+            emit(EventStream(
+                session: this, originator: 'remote', stream: event.streams[0]));
+          }
+        };
+        break;
+      case 'plan-b':
+        _connection.onAddStream = (MediaStream stream) {
+          emit(
+              EventStream(session: this, originator: 'remote', stream: stream));
+        };
+        break;
+    }
 
     logger.debug('emit "peerconnection"');
     emit(EventPeerConnection(_connection));
@@ -2121,8 +2162,11 @@ class RTCSession extends EventManager {
   /**
    * Initial Request Sender
    */
-  Future<Null> _sendInitialRequest(Map<String, dynamic> mediaConstraints,
-      Map<String, dynamic> rtcOfferConstraints, MediaStream mediaStream) async {
+  Future<Null> _sendInitialRequest(
+      Map<String, dynamic> pcConfig,
+      Map<String, dynamic> mediaConstraints,
+      Map<String, dynamic> rtcOfferConstraints,
+      MediaStream mediaStream) async {
     EventManager handlers = EventManager();
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
       onRequestTimeout();
@@ -2138,6 +2182,12 @@ class RTCSession extends EventManager {
     });
 
     RequestSender request_sender = RequestSender(_ua, _request, handlers);
+
+    // In future versions, unified-plan will be used by default
+    String sdpSemantics = 'unified-plan';
+    if (pcConfig['sdpSemantics'] != null) {
+      sdpSemantics = pcConfig['sdpSemantics'];
+    }
 
     // This Promise is resolved within the next iteration, so the app has now
     // a chance to set events such as 'peerconnection' and 'connecting'.
@@ -2177,7 +2227,20 @@ class RTCSession extends EventManager {
     _localMediaStream = stream;
 
     if (stream != null) {
-      _connection.addStream(stream);
+      switch (sdpSemantics) {
+        case 'unified-plan':
+          stream.getTracks().forEach((MediaStreamTrack track) {
+            _connection.addTrack(track, stream);
+          });
+          break;
+        case 'plan-b':
+          _connection.addStream(stream);
+          break;
+        default:
+          logger.error('Unkown sdp semantics $sdpSemantics');
+          throw Exceptions.NotReadyError('Unkown sdp semantics $sdpSemantics');
+          break;
+      }
     }
 
     // TODO(cloudwebrtc): should this be triggered here?
@@ -2746,7 +2809,8 @@ class RTCSession extends EventManager {
 
     String session_expires_refresher;
 
-    if ((response.session_expires != 0 && response.session_expires != null) &&
+    if ((response.session_expires != null &&
+        response.session_expires != 0 && response.session_expires != null) &&
         response.session_expires >= DartSIP_C.MIN_SESSION_EXPIRES) {
       _sessionTimers.currentExpires = response.session_expires;
       session_expires_refresher = response.session_expires_refresher ?? 'uac';
@@ -2802,23 +2866,19 @@ class RTCSession extends EventManager {
   }
 
   void _toggleMuteAudio(bool mute) {
-    List<MediaStream> streams = _connection.getLocalStreams();
-    streams.forEach((MediaStream stream) {
-      if (stream.getAudioTracks().isNotEmpty) {
-        MediaStreamTrack track = stream.getAudioTracks()[0];
+    if (_localMediaStream != null) {
+      for (MediaStreamTrack track in _localMediaStream.getAudioTracks()) {
         track.enabled = !mute;
       }
-    });
+    }
   }
 
   void _toggleMuteVideo(bool mute) {
-    List<MediaStream> streams = _connection.getLocalStreams();
-    streams.forEach((MediaStream stream) {
-      if (stream.getVideoTracks().isNotEmpty) {
-        MediaStreamTrack track = stream.getVideoTracks()[0];
+    if (_localMediaStream != null) {
+      for (MediaStreamTrack track in _localMediaStream.getVideoTracks()) {
         track.enabled = !mute;
       }
-    });
+    }
   }
 
   void _newRTCSession(String originator, dynamic request) {
