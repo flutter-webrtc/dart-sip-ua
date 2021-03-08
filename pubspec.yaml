@@ -7,7 +7,7 @@ environment:
   flutter: ">=1.10.0"
 
 dependencies:
-  crypto: ^2.1.2
+  crypto: ^3.0.0
   flutter_webrtc: ^0.5.8
   intl: any
   logger: ^0.9.0
