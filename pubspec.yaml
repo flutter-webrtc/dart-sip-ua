@@ -11,7 +11,7 @@ dependencies:
   flutter_webrtc: ^0.5.8
   intl: any
   logger: ^0.9.0
-  parser_error: ^0.1.1
+  parser_error: ^0.2.0
   path: ^1.6.4
   random_string: ^2.0.0
   recase: ^3.0.0
