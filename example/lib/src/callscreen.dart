@@ -250,14 +250,14 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             textAlign: TextAlign.center,
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('Ok'),
               onPressed: () {
                 call.refer(_tansfer_target);
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();

@@ -68,7 +68,8 @@ class SIPUAHelper extends EventManager {
     }
   }
 
-  Future<bool> call(String target, [bool voiceonly = false]) async {
+  Future<bool> call(String target,
+      [bool voiceonly = false, MediaStream mediaStream = null]) async {
     if (_ua != null && _ua.isConnected()) {
       _ua.call(target, buildCallOptions(voiceonly));
       return true;

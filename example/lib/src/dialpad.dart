@@ -33,7 +33,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
     _dest = _preferences.getString('dest') ?? 'sip:hello_jssip@tryit.jssip.net';
     _textController = TextEditingController(text: _dest);
     _textController.text = _dest;
-    
+
     this.setState(() {});
   }
 
@@ -52,7 +52,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
             title: Text('Target is empty.'),
             content: Text('Please enter a SIP URI or username!'),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('Ok'),
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -285,7 +285,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   @override
   void onNewMessage(SIPMessageRequest msg) {
-     //Save the incoming message to DB
+    //Save the incoming message to DB
     String msgBody = msg.request.body as String;
     setState(() {
       receivedMsg = msgBody;
