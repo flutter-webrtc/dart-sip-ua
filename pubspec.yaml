@@ -15,7 +15,7 @@ dependencies:
   path: ^1.6.4
   random_string: ^2.0.0
   recase: ^3.0.0
-  sdp_transform: ^0.2.0
+  sdp_transform: ^0.3.0
   uuid: ^3.0.2
   
 
