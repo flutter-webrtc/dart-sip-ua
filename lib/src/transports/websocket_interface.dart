@@ -7,7 +7,7 @@ import 'websocket_dart_impl.dart'
     if (dart.library.js) 'websocket_web_impl.dart';
 
 class WebSocketInterface implements Socket {
-  WebSocketInterface(String url, [WebSocketSettings webSocketSettings]) {
+  WebSocketInterface(String url, [WebSocketSettings? webSocketSettings]) {
     logger.debug('new() [url:' + url + ']');
     _url = url;
     dynamic parsed_url = Grammar.parse(url, 'absoluteURI');
@@ -18,7 +18,8 @@ class WebSocketInterface implements Socket {
       logger.error('invalid WebSocket URI scheme: ${parsed_url.scheme}');
       throw AssertionError('Invalid argument: $url');
     } else {
-      String transport_scheme = webSocketSettings != null && webSocketSettings.transport_scheme != null
+      String transport_scheme = webSocketSettings != null &&
+              webSocketSettings.transport_scheme != null
           ? webSocketSettings.transport_scheme.toLowerCase()
           : parsed_url.scheme;
 

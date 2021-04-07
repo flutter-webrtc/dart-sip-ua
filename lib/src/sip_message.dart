@@ -105,7 +105,7 @@ class OutgoingRequest {
   Map<String, dynamic> headers = <String, dynamic>{};
   SipMethod method;
   URI ruri;
-  String body;
+  String? body;
   List<dynamic> extraHeaders = <dynamic>[];
   NameAddrHeader to;
   NameAddrHeader from;
@@ -362,7 +362,7 @@ class IncomingMessage {
   NameAddrHeader from;
   String from_tag;
   NameAddrHeader to;
-  String to_tag;
+  String? to_tag;
   String body;
   Map<String, dynamic> sdp;
   dynamic status_code;

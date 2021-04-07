@@ -3,18 +3,18 @@ version: 0.3.5
 description: A SIP UA stack for Flutter/Dart, based on flutter-webrtc, support iOS/Android/Destkop/Web.
 homepage: https://github.com/cloudwebrtc/dart-sip-ua
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
   flutter: ">=1.10.0"
 
 dependencies:
   crypto: ^3.0.0
-  flutter_webrtc: ^0.5.8
-  intl: any
-  logger: ^0.9.0
-  parser_error: ^0.1.1
-  path: ^1.6.4
-  random_string: ^2.0.0
-  recase: ^3.0.0
+  flutter_webrtc: ^0.6.0
+  intl: ^0.17.0
+  logger: ^1.0.0
+  parser_error: ^0.2.0
+  path: ^1.8.0
+  random_string: ^2.2.0-nullsafety
+  recase: ^4.0.0-nullsafety.0
   sdp_transform: ^0.2.0
   uuid: ^3.0.2
   
