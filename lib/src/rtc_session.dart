@@ -1596,7 +1596,7 @@ class RTCSession extends EventManager {
     switch (sdpSemantics) {
       case 'unified-plan':
         _connection.onTrack = (RTCTrackEvent event) {
-          if (event.track.kind == 'video' && event.streams.isNotEmpty) {
+          if (/*event.track.kind == 'video' && */event.streams.isNotEmpty) {
             emit(EventStream(
                 session: this, originator: 'remote', stream: event.streams[0]));
           }
