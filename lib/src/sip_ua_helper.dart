@@ -385,6 +385,7 @@ class Call {
   Call(this._id, this._session, this.state);
   final String _id;
   final RTCSession _session;
+  RTCSession get session => _session;
   String get id => _id;
   CallStateEnum state;
 
