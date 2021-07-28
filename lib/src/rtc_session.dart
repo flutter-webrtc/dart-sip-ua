@@ -1138,8 +1138,9 @@ class RTCSession extends EventManager {
 
     options = options ?? <String, dynamic>{};
 
-    Map<String, dynamic> rtcOfferConstraints = options['rtcOfferConstraints'];
-
+    Map<String, dynamic> rtcOfferConstraints = options['rtcOfferConstraints']??_rtcOfferConstraints;
+    Map<String, dynamic> mandatory= rtcOfferConstraints['mandatory']?? <String, dynamic>{};
+    mandatory['IceRestart']= true;
     if (_status != C.STATUS_WAITING_FOR_ACK && _status != C.STATUS_CONFIRMED) {
       return false;
     }
@@ -1584,6 +1585,8 @@ class RTCSession extends EventManager {
           'status_code': 408,
           'reason_phrase': DartSIP_C.causes.RTP_TIMEOUT
         });
+      }else if (state== RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
+        renegotiate();
       }
     };
 
@@ -1618,7 +1621,7 @@ class RTCSession extends EventManager {
   FutureOr<RTCSessionDescription> _createLocalDescription(
       String type, Map<String, dynamic> constraints) async {
     logger.debug('createLocalDescription()');
-
+    _iceGatheringState=RTCIceGatheringState.RTCIceGatheringStateNew;
     Completer<RTCSessionDescription> completer =
         Completer<RTCSessionDescription>();
 
