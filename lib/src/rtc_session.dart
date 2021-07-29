@@ -1140,7 +1140,7 @@ class RTCSession extends EventManager {
 
     Map<String, dynamic> rtcOfferConstraints = options['rtcOfferConstraints']??_rtcOfferConstraints;
     Map<String, dynamic> mandatory= rtcOfferConstraints['mandatory']?? <String, dynamic>{};
-    mandatory['IceRestart']= true;
+    mandatory['IceRestart']= true; //设置Ice重启
     if (_status != C.STATUS_WAITING_FOR_ACK && _status != C.STATUS_CONFIRMED) {
       return false;
     }
@@ -1657,7 +1657,7 @@ class RTCSession extends EventManager {
     Future<Null> Function() ready = () async {
       _connection.onIceCandidate = null;
       _connection.onIceGatheringState = null;
-      _connection.onIceConnectionState = null;
+      // _connection.onIceConnectionState = null;
       _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateComplete;
       finished = true;
       _rtcReady = true;
