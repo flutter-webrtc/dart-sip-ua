@@ -151,6 +151,8 @@ class RTCSession extends EventManager {
   Map<String, Dialog> _earlyDialogs;
   String _from_tag;
   String _to_tag;
+  String get from_tag => _from_tag;
+  String get to_tag => _to_tag;
   SIPTimers _timers;
   bool _is_confirmed;
   bool _is_canceled;

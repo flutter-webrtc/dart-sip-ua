@@ -68,15 +68,15 @@ class SIPUAHelper extends EventManager {
     }
   }
 
-  Future<bool> call(String target, [bool voiceonly = false]) async {
+  Future<RTCSession> call(String target, [bool voiceonly = false]) async {
     if (_ua != null && _ua.isConnected()) {
-      _ua.call(target, buildCallOptions(voiceonly));
-      return true;
+      RTCSession session = _ua.call(target, buildCallOptions(voiceonly));
+      return session;
     } else {
       logger.error(
           'Not connected, you will need to register.', null, StackTraceNJ());
+      return null;
     }
-    return false;
   }
 
   Call findCall(String id) {
@@ -385,6 +385,7 @@ class Call {
   Call(this._id, this._session, this.state);
   final String _id;
   final RTCSession _session;
+  RTCSession get session => _session;
   String get id => _id;
   CallStateEnum state;
 
