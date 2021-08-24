@@ -1574,10 +1574,11 @@ class RTCSession extends EventManager {
     }, Timers.TIMER_H);
   }
 
-  void _iceRestart() {
-    Map<String, dynamic> options = _rtcOfferConstraints ?? <String, dynamic>{};
-    options['mandatory']['IceRestart'] = true;
-    renegotiate(options);
+  void _iceRestart() async {
+    Map<String, dynamic> offerConstraints =
+        _rtcOfferConstraints ?? <String, dynamic>{};
+    offerConstraints['mandatory']['IceRestart'] = true;
+    renegotiate(offerConstraints);
   }
 
   Future<void> _createRTCConnection(Map<String, dynamic> pcConfig,
