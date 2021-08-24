@@ -72,7 +72,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
     MediaStream mediaStream;
 
-    if (kIsWeb) {
+    if (kIsWeb && !voiceonly) {
       mediaStream =
           await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
       mediaConstraints['video'] = false;
@@ -80,9 +80,10 @@ class _MyDialPadWidget extends State<DialPadWidget>
           await navigator.mediaDevices.getUserMedia(mediaConstraints);
       mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
+      mediaConstraints['video'] = !voiceonly;
       mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
-    
+
     helper.call(dest, voiceonly: voiceonly, mediaStream: mediaStream);
     _preferences.setString('dest', dest);
     return null;

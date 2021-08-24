@@ -203,7 +203,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
     MediaStream mediaStream;
 
-    if (kIsWeb) {
+    if (kIsWeb && !voiceonly) {
       mediaStream =
           await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
       mediaConstraints['video'] = false;
@@ -211,6 +211,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           await navigator.mediaDevices.getUserMedia(mediaConstraints);
       mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
+      mediaConstraints['video'] = !voiceonly;
       mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
 
