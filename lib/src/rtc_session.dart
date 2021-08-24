@@ -590,6 +590,7 @@ class RTCSession extends EventManager {
     // A local MediaStream is given, use it.
     if (mediaStream != null) {
       stream = mediaStream;
+      emit(EventStream(session: this, originator: 'local', stream: stream));
     }
     // Audio and/or video requested, prompt getUserMedia.
     else if (mediaConstraints['audio'] != null ||
@@ -2195,6 +2196,7 @@ class RTCSession extends EventManager {
     // A stream is given, var the app set events such as 'peerconnection' and 'connecting'.
     if (mediaStream != null) {
       stream = mediaStream;
+      emit(EventStream(session: this, originator: 'local', stream: stream));
     } // Request for user media access.
     else if (mediaConstraints['audio'] != null ||
         mediaConstraints['video'] != null) {

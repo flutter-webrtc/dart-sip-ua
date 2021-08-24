@@ -199,8 +199,22 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     _timer.cancel();
   }
 
-  void _handleAccept() {
-    call.answer(helper.buildCallOptions());
+  void _handleAccept() async {
+    final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
+    MediaStream mediaStream;
+
+    if (kIsWeb) {
+      mediaStream =
+          await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+      mediaConstraints['video'] = false;
+      MediaStream userStream =
+          await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+    } else {
+      mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    }
+
+    call.answer(helper.buildCallOptions(), mediaStream: mediaStream);
   }
 
   void _switchCamera() {

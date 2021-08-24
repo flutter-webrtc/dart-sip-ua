@@ -69,9 +69,13 @@ class SIPUAHelper extends EventManager {
   }
 
   Future<bool> call(String target,
-      [bool voiceonly = false, MediaStream mediaStream = null]) async {
+      {bool voiceonly = false, MediaStream mediaStream = null}) async {
     if (_ua != null && _ua.isConnected()) {
-      _ua.call(target, buildCallOptions(voiceonly));
+      Map<String, Object> options = buildCallOptions(voiceonly);
+      if (mediaStream != null) {
+        options['mediaStream'] = mediaStream;
+      }
+      _ua.call(target, options);
       return true;
     } else {
       logger.error(
@@ -387,8 +391,11 @@ class Call {
   String get id => _id;
   CallStateEnum state;
 
-  void answer(Map<String, Object> options) {
+  void answer(Map<String, Object> options, {MediaStream mediaStream = null}) {
     assert(_session != null, 'ERROR(answer): rtc session is invalid!');
+    if (mediaStream != null) {
+      options['mediaStream'] = mediaStream;
+    }
     _session.answer(options);
   }
 
