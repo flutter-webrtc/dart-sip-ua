@@ -1,6 +1,19 @@
 # Changelog
 
 --------------------------------------------
+[0.3.6] - 2021.08.24
+
+* Support custom MediaStream for call/answer.
+* Fix the exception caused by speaker operation in web mode.
+* bump dependencies (#216)
+* Fix the parameters with double quotes in the Authentication header,
+    and the unknown parameters are saved to auth_params.
+* updated crypto and uuid versions (#188)
+* Update dependency sdp_transform to ^0.3.0
+* Fixed mute audio for unified-plan
+* Add remote_has_audio/video method for Call.
+* Configuring via_transport 
+
 [0.3.5] - 2021.02.03
 
 * Upgrade flutter-webrtc to 0.5.8.
