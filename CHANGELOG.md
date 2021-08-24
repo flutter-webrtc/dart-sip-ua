@@ -1,6 +1,11 @@
 # Changelog
 
 --------------------------------------------
+[0.3.7] - 2021.08.24
+
+* Fix the issue that unified-plan's onTrack does not call back AudioTrack.
+* Export PeerConnection for call.
+
 [0.3.6] - 2021.08.24
 
 * Support custom MediaStream for call/answer.
@@ -12,7 +17,7 @@
 * Update dependency sdp_transform to ^0.3.0
 * Fixed mute audio for unified-plan
 * Add remote_has_audio/video method for Call.
-* Configuring via_transport 
+* Configuring via_transport.
 
 [0.3.5] - 2021.02.03
 
