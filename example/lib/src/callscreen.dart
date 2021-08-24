@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -164,7 +165,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       if (_localRenderer != null) {
         _localRenderer.srcObject = stream;
       }
-      event.stream?.getAudioTracks()?.first?.enableSpeakerphone(false);
+      if (!kIsWeb) {
+        event.stream?.getAudioTracks()?.first?.enableSpeakerphone(false);
+      }
       _localStream = stream;
     }
     if (event.originator == 'remote') {
@@ -283,7 +286,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void _toggleSpeaker() {
     if (_localStream != null) {
       _speakerOn = !_speakerOn;
-      _localStream.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      if (!kIsWeb) {
+        _localStream.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      }
     }
   }
 
