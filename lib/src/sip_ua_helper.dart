@@ -438,7 +438,7 @@ class Call {
   }
 
   void renegotiate(Map<String, dynamic> options) {
-    assert(_session != null, 'ERROR(umute): rtc session is invalid!');
+    assert(_session != null, 'ERROR(renegotiate): rtc session is invalid!');
     _session.renegotiate(options);
   }
 
