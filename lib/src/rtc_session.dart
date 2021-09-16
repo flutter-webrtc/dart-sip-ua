@@ -1652,6 +1652,7 @@ class RTCSession extends EventManager {
     // Add 'pc.onicencandidate' event handler to resolve on last candidate.
     bool finished = false;
     Future<Null> Function() ready = () async {
+      if (_status != C.STATUS_TERMINATED) {
       _connection.onIceCandidate = null;
       _connection.onIceGatheringState = null;
       _connection.onIceConnectionState = null;
@@ -1662,6 +1663,8 @@ class RTCSession extends EventManager {
       logger.debug('emit "sdp"');
       emit(EventSdp(originator: 'local', type: type, sdp: desc.sdp));
       completer.complete(desc);
+      }
+      
     };
 
     _connection.onIceGatheringState = (RTCIceGatheringState state) {
