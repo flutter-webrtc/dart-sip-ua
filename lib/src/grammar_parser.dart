@@ -18,7 +18,7 @@ class GrammarParser {
   
   static final List<String> _expect100 = <String>["Digest"];
   
-  static final List<String> _expect101 = <String>["algorithm", "domain", "nonce", "opaque", "qop", "realm", "stale"];
+  static final List<String> _expect101 = <String>["!", "%", "\'", "*", "+", "-", ".", "_", "`", "algorithm", "alphanum", "domain", "nonce", "opaque", "qop", "realm", "stale", "~"];
   
   static final List<String> _expect102 = <String>["realm"];
   
@@ -34,7 +34,7 @@ class GrammarParser {
   
   static final List<String> _expect108 = <String>["algorithm"];
   
-  static final List<String> _expect109 = <String>["!", "%", "\'", "*", "+", "-", ".", "MD5", "MD5-sess", "_", "`", "alphanum", "~"];
+  static final List<String> _expect109 = <String>["!", "%", "\'", "*", "+", "-", ".", "DQUOTE", "MD5", "MD5-sess", "_", "`", "alphanum", "~"];
   
   static final List<String> _expect11 = <String>["mark"];
   
@@ -282,7 +282,7 @@ class GrammarParser {
   
   static final List<String> _expect99 = <String>["!", "%", "\'", "*", "+", "-", ".", "Digest", "_", "`", "alphanum", "~"];
   
-  static final List<bool> _lookahead = _unmap([0x2800001, 0x1fc0093, 0x700000, 0x51a00000, 0x7e03ff6c, 0x7f0fffff, 0x271fffff, 0x7dafffdf, 0x7effffff, 0x77fffff, 0x780ffd9e, 0x743fffff, 0xc7fffff, 0x33c, 0x8000000, 0x18000000, 0x603ff2ca, 0x70ffffff, 0x31ffffff, 0x557ffffe, 0x21ffffff, 0x63ffffff, 0xffcb28, 0x47ffffff, 0x47ffffff, 0x3fff7f9, 0x2ffffffe, 0xffffffd, 0x7ffefb3, 0x5ffffffd, 0x1ffffffa, 0x5ffeffe6, 0x1ffffffe, 0x3ffffff4, 0x3fffffcc, 0x3ffffffd, 0x7fffffe8, 0x3ffbff98, 0x7ffffff2, 0x7fffffd0, 0x7ff7ff31, 0x7fffffe5, 0x7fffffa1, 0x7f000063, 0x7e07ffff, 0x3fffffff, 0x7fffffc0, 0x7fffff81, 0x7ff80fff, 0x7ff07fff, 0x440ffff, 0x840, 0x442d00, 0x4, 0x3f01ffd0, 0x7e000000, 0x7e07ff, 0x7ffc0000, 0x7, 0x3f800, 0x200, 0x580130b0, 0x54004c2e, 0x9800011, 0xec0]);
+  static final List<bool> _lookahead = _unmap([0x2800001, 0x1fc0093, 0x700000, 0x51a00000, 0x7e03ff6c, 0x7f0fffff, 0x271fffff, 0x7dafffdf, 0x7effffff, 0x77fffff, 0x780ffd9e, 0x743fffff, 0xc7fffff, 0x33c, 0x8000000, 0x18000000, 0x603ff2ca, 0x70ffffff, 0x31ffffff, 0x557ffffe, 0x21ffffff, 0x63ffffff, 0xffcb28, 0x47ffffff, 0x47ffffff, 0x3fff7f9, 0x2ffffffe, 0xffffffd, 0x7ffefb3, 0x5ffffffd, 0x1ffffffa, 0x5ffeffe6, 0x1ffffffe, 0x3ffffff4, 0x3fffffcc, 0x3ffffffd, 0x7fffffe8, 0x3ffbff98, 0x7ffffff2, 0x7fffffd0, 0x7ff7ff31, 0x7fffffe5, 0x7fffffa1, 0x7f000063, 0x7e07ffff, 0x3fffffff, 0x7fffffc0, 0x7fffff81, 0x7ff80fff, 0x7ff07fff, 0x440ffff, 0x840, 0x442d00, 0x4, 0x1ffd0, 0x7e000000, 0x7e03ff, 0x7ffc0000, 0xfc0f, 0x3f800, 0x200, 0x580130b0, 0x54004c2e, 0x800011]);
   
   static final List<bool> _mapping0 = _unmap([0x3ffffff, 0x7fffffe]);
   
@@ -604,11 +604,11 @@ class GrammarParser {
   
   static final List<List<int>> _transitions7 = [[9, 9, 13, 13, 32, 32]];
   
-  static final List<List<int>> _transitions70 = [[97, 97], [100, 100], [110, 110], [111, 111], [113, 113], [114, 114], [115, 115]];
+  static final List<List<int>> _transitions70 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 95, 96, 98, 99, 101, 109, 112, 112, 116, 122, 126, 126], [97, 97], [100, 100], [110, 110], [111, 111], [113, 113], [114, 114], [115, 115]];
   
   static final List<List<int>> _transitions71 = [[47, 47], [65, 90, 97, 122]];
   
-  static final List<List<int>> _transitions72 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 76, 78, 90, 95, 122, 126, 126], [77, 109]];
+  static final List<List<int>> _transitions72 = [[0, 32, 34, 36, 38, 38, 40, 41, 44, 44, 47, 47, 58, 64, 91, 94, 123, 125, 127, 1114111], [33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 76, 78, 90, 95, 122, 126, 126], [77, 109]];
   
   static final List<List<int>> _transitions73 = [[33, 33, 37, 37, 39, 39, 42, 43, 45, 46, 48, 57, 65, 90, 95, 96, 98, 122, 126, 126], [65, 97]];
   
@@ -6298,31 +6298,55 @@ class GrammarParser {
           seq[1] = $$;
           switch (_getState(_transitions72)) {
             case 0:
+            case 4:
               var startPos1 = _startPos;
               _startPos = _cursor;
-              $$ = _parse_token();
+              $$ = _parse_quoted_string_clean();
               _startPos = startPos1;
               break;
             case 1:
               while (true) {
                 var startPos2 = _startPos;
                 _startPos = _cursor;
-                $$ = _matchString(_strings52, 'MD5', true);
+                $$ = _parse_token();
                 _startPos = startPos2;
                 if (success) break;
                 var startPos3 = _startPos;
                 _startPos = _cursor;
-                $$ = _matchString(_strings53, 'MD5-sess', true);
+                $$ = _parse_quoted_string_clean();
                 _startPos = startPos3;
-                if (success) break;
-                var startPos4 = _startPos;
-                _startPos = _cursor;
-                $$ = _parse_token();
-                _startPos = startPos4;
                 break;
               }
               break;
             case 2:
+              while (true) {
+                var startPos4 = _startPos;
+                _startPos = _cursor;
+                $$ = _matchString(_strings52, 'MD5', true);
+                _startPos = startPos4;
+                if (success) break;
+                var startPos5 = _startPos;
+                _startPos = _cursor;
+                $$ = _matchString(_strings52, 'MD5', true);
+                _startPos = startPos5;
+                if (success) break;
+                var startPos6 = _startPos;
+                _startPos = _cursor;
+                $$ = _matchString(_strings53, 'MD5-sess', true);
+                _startPos = startPos6;
+                if (success) break;
+                var startPos7 = _startPos;
+                _startPos = _cursor;
+                $$ = _parse_token();
+                _startPos = startPos7;
+                if (success) break;
+                var startPos8 = _startPos;
+                _startPos = _cursor;
+                $$ = _parse_quoted_string_clean();
+                _startPos = startPos8;
+                break;
+              }
+              break;
             case 3:
               $$ = null;
               success = false;
@@ -6430,7 +6454,7 @@ class GrammarParser {
             case 3:
               var startPos1 = _startPos;
               _startPos = _cursor;
-              $$ = _parse_quoted_string();
+              $$ = _parse_quoted_string_clean();
               _startPos = startPos1;
               break;
             case 1:
@@ -6442,7 +6466,7 @@ class GrammarParser {
                 if (success) break;
                 var startPos3 = _startPos;
                 _startPos = _cursor;
-                $$ = _parse_quoted_string();
+                $$ = _parse_quoted_string_clean();
                 _startPos = startPos3;
                 break;
               }
@@ -6466,8 +6490,8 @@ class GrammarParser {
             var pos0 = _startPos;
             $$ = ((offset, key, value) {
             ///CODE_START
-            print(key + ' => ' + value);
-            if(data.auth_params == null) data.auth_params = [];
+            // print('other_auth_param: ' + key + ' => ' + value);
+            if(data.auth_params == null) data.auth_params = {};
             data.auth_params[key] = value;
             ///CODE_END
             })($start, $1, $3);
@@ -7504,85 +7528,152 @@ class GrammarParser {
       case 0:
         var startPos0 = _startPos;
         _startPos = _cursor;
-        $$ = _parse_algorithm();
+        $$ = _parse_auth_param();
         _startPos = startPos0;
         break;
       case 1:
-        var startPos1 = _startPos;
-        _startPos = _cursor;
-        $$ = _parse_domain();
-        _startPos = startPos1;
+        while (true) {
+          var startPos1 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_algorithm();
+          _startPos = startPos1;
+          if (success) break;
+          var startPos2 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_auth_param();
+          _startPos = startPos2;
+          break;
+        }
         break;
       case 2:
-        var startPos2 = _startPos;
-        _startPos = _cursor;
-        $$ = _parse_nonce();
-        _startPos = startPos2;
+        while (true) {
+          var startPos3 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_domain();
+          _startPos = startPos3;
+          if (success) break;
+          var startPos4 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_auth_param();
+          _startPos = startPos4;
+          break;
+        }
         break;
       case 3:
-        var startPos3 = _startPos;
-        _startPos = _cursor;
-        $$ = _parse_opaque();
-        _startPos = startPos3;
+        while (true) {
+          var startPos5 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_nonce();
+          _startPos = startPos5;
+          if (success) break;
+          var startPos6 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_auth_param();
+          _startPos = startPos6;
+          break;
+        }
         break;
       case 4:
-        var startPos4 = _startPos;
-        _startPos = _cursor;
-        $$ = _parse_qop_options();
-        _startPos = startPos4;
-        break;
-      case 5:
-        var startPos5 = _startPos;
-        _startPos = _cursor;
-        $$ = _parse_realm();
-        _startPos = startPos5;
-        break;
-      case 6:
-        var startPos6 = _startPos;
-        _startPos = _cursor;
-        $$ = _parse_stale();
-        _startPos = startPos6;
-        break;
-      case 7:
-        $$ = null;
-        success = false;
-        break;
-      case 8:
         while (true) {
           var startPos7 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_realm();
+          $$ = _parse_opaque();
           _startPos = startPos7;
           if (success) break;
           var startPos8 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_domain();
+          $$ = _parse_auth_param();
           _startPos = startPos8;
-          if (success) break;
+          break;
+        }
+        break;
+      case 5:
+        while (true) {
           var startPos9 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_nonce();
+          $$ = _parse_qop_options();
           _startPos = startPos9;
           if (success) break;
           var startPos10 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_opaque();
+          $$ = _parse_auth_param();
           _startPos = startPos10;
-          if (success) break;
+          break;
+        }
+        break;
+      case 6:
+        while (true) {
           var startPos11 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_stale();
+          $$ = _parse_realm();
           _startPos = startPos11;
           if (success) break;
           var startPos12 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_algorithm();
+          $$ = _parse_auth_param();
           _startPos = startPos12;
-          if (success) break;
+          break;
+        }
+        break;
+      case 7:
+        while (true) {
           var startPos13 = _startPos;
           _startPos = _cursor;
-          $$ = _parse_qop_options();
+          $$ = _parse_stale();
           _startPos = startPos13;
+          if (success) break;
+          var startPos14 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_auth_param();
+          _startPos = startPos14;
+          break;
+        }
+        break;
+      case 8:
+        $$ = null;
+        success = false;
+        break;
+      case 9:
+        while (true) {
+          var startPos15 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_realm();
+          _startPos = startPos15;
+          if (success) break;
+          var startPos16 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_domain();
+          _startPos = startPos16;
+          if (success) break;
+          var startPos17 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_nonce();
+          _startPos = startPos17;
+          if (success) break;
+          var startPos18 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_opaque();
+          _startPos = startPos18;
+          if (success) break;
+          var startPos19 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_stale();
+          _startPos = startPos19;
+          if (success) break;
+          var startPos20 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_algorithm();
+          _startPos = startPos20;
+          if (success) break;
+          var startPos21 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_qop_options();
+          _startPos = startPos21;
+          if (success) break;
+          var startPos22 = _startPos;
+          _startPos = _cursor;
+          $$ = _parse_auth_param();
+          _startPos = startPos22;
           break;
         }
         break;
@@ -11131,6 +11222,19 @@ class GrammarParser {
           if (!success) break;
           seq[3] = $$;
           $$ = seq;
+          if (success) {    
+            final $1 = seq[0];
+            final $2 = seq[1];
+            final $3 = seq[2];
+            final $4 = seq[3];
+            final $start = startPos0;
+            var pos0 = _startPos, offset = $start;
+            $$ = ((offset) {
+            ///CODE_START
+            return data;
+            ///CODE_END
+            })($start);
+          }
           break;
         }
         if (!success) {

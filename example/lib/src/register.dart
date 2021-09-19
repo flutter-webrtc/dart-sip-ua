@@ -47,7 +47,8 @@ class _MyRegisterWidget extends State<RegisterWidget>
           _preferences.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
       _sipUriController.text =
           _preferences.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
-      _displayNameController.text = _preferences.getString('display_name') ?? 'Flutter SIP UA';
+      _displayNameController.text =
+          _preferences.getString('display_name') ?? 'Flutter SIP UA';
       _passwordController.text = _preferences.getString('password');
       _authorizationUserController.text = _preferences.getString('auth_user');
     });
@@ -77,7 +78,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
           title: Text('$alertFieldName is empty'),
           content: Text('Please enter $alertFieldName!'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('Ok'),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -101,7 +102,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     settings.webSocketUrl = _wsUriController.text;
     settings.webSocketSettings.extraHeaders = _wsExtraHeaders;
     settings.webSocketSettings.allowBadCertificate = true;
-    settings.webSocketSettings.userAgent = 'Dart/2.8 (dart:io) for OpenSIPS.';
+    //settings.webSocketSettings.userAgent = 'Dart/2.8 (dart:io) for OpenSIPS.';
 
     settings.uri = _sipUriController.text;
     settings.authorizationUser = _authorizationUserController.text;
@@ -201,7 +202,11 @@ class _MyRegisterWidget extends State<RegisterWidget>
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText: _authorizationUserController.text?.isEmpty ?? true ? '[Empty]' : null,
+                            hintText:
+                                _authorizationUserController.text?.isEmpty ??
+                                        true
+                                    ? '[Empty]'
+                                    : null,
                           ),
                         ),
                       ),
@@ -226,7 +231,9 @@ class _MyRegisterWidget extends State<RegisterWidget>
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText: _passwordController.text?.isEmpty ?? true ? '[Empty]' : null,
+                            hintText: _passwordController.text?.isEmpty ?? true
+                                ? '[Empty]'
+                                : null,
                           ),
                         ),
                       ),

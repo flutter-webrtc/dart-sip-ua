@@ -68,9 +68,14 @@ class SIPUAHelper extends EventManager {
     }
   }
 
-  Future<bool> call(String target, [bool voiceonly = false]) async {
+  Future<bool> call(String target,
+      {bool voiceonly = false, MediaStream mediaStream = null}) async {
     if (_ua != null && _ua.isConnected()) {
-      _ua.call(target, buildCallOptions(voiceonly));
+      Map<String, Object> options = buildCallOptions(voiceonly);
+      if (mediaStream != null) {
+        options['mediaStream'] = mediaStream;
+      }
+      _ua.call(target, options);
       return true;
     } else {
       logger.error(
@@ -383,11 +388,16 @@ class Call {
   Call(this._id, this._session, this.state);
   final String _id;
   final RTCSession _session;
+
   String get id => _id;
+  RTCPeerConnection get peerConnection => _session.connection;
   CallStateEnum state;
 
-  void answer(Map<String, Object> options) {
+  void answer(Map<String, Object> options, {MediaStream mediaStream = null}) {
     assert(_session != null, 'ERROR(answer): rtc session is invalid!');
+    if (mediaStream != null) {
+      options['mediaStream'] = mediaStream;
+    }
     _session.answer(options);
   }
 
@@ -427,9 +437,19 @@ class Call {
     _session.unmute(audio, video);
   }
 
+  void renegotiate(Map<String, dynamic> options) {
+    assert(_session != null, 'ERROR(renegotiate): rtc session is invalid!');
+    _session.renegotiate(options);
+  }
+
   void sendDTMF(String tones, [Map<String, dynamic> options]) {
     assert(_session != null, 'ERROR(sendDTMF): rtc session is invalid!');
     _session.sendDTMF(tones, options);
+  }
+
+  void sendInfo(String contentType, String body, Map<String, dynamic> options) {
+    assert(_session != null, 'ERROR(sendInfo): rtc session is invalid');
+    _session.sendInfo(contentType, body, options);
   }
 
   String get remote_display_name {

@@ -74,7 +74,7 @@ List<void Function()> testFunctions = <void Function()>[
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
           'opaque': null,
           'stale': null,
-          'qop': ['auth']
+          'qop': <String>['auth']
         });
 
         DigestAuthentication digest = DigestAuthentication(credentials);
@@ -101,7 +101,7 @@ List<void Function()> testFunctions = <void Function()>[
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
           'opaque': null,
           'stale': null,
-          'qop': ['auth', 'auth-int']
+          'qop': <String>['auth', 'auth-int']
         });
 
         DigestAuthentication digest = DigestAuthentication(credentials);

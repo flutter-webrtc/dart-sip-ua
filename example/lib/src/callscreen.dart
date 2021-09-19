@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -164,7 +165,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       if (_localRenderer != null) {
         _localRenderer.srcObject = stream;
       }
-      event.stream?.getAudioTracks()?.first?.enableSpeakerphone(false);
+      if (!kIsWeb) {
+        event.stream?.getAudioTracks()?.first?.enableSpeakerphone(false);
+      }
       _localStream = stream;
     }
     if (event.originator == 'remote') {
@@ -196,8 +199,23 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     _timer.cancel();
   }
 
-  void _handleAccept() {
-    call.answer(helper.buildCallOptions());
+  void _handleAccept() async {
+    final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
+    MediaStream mediaStream;
+
+    if (kIsWeb && !voiceonly) {
+      mediaStream =
+          await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+      mediaConstraints['video'] = false;
+      MediaStream userStream =
+          await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+    } else {
+      mediaConstraints['video'] = !voiceonly;
+      mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    }
+
+    call.answer(helper.buildCallOptions(), mediaStream: mediaStream);
   }
 
   void _switchCamera() {
@@ -250,14 +268,14 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             textAlign: TextAlign.center,
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('Ok'),
               onPressed: () {
                 call.refer(_tansfer_target);
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -283,7 +301,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void _toggleSpeaker() {
     if (_localStream != null) {
       _speakerOn = !_speakerOn;
-      _localStream.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      if (!kIsWeb) {
+        _localStream.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      }
     }
   }
 

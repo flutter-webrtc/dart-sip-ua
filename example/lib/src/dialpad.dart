@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sip_ua/sip_ua.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import 'widgets/action_button.dart';
 
@@ -33,7 +35,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
     _dest = _preferences.getString('dest') ?? 'sip:hello_jssip@tryit.jssip.net';
     _textController = TextEditingController(text: _dest);
     _textController.text = _dest;
-    
+
     this.setState(() {});
   }
 
@@ -41,7 +43,8 @@ class _MyDialPadWidget extends State<DialPadWidget>
     helper.addSipUaHelperListener(this);
   }
 
-  Widget _handleCall(BuildContext context, [bool voiceonly = false]) {
+  Future<Widget> _handleCall(BuildContext context,
+      [bool voiceonly = false]) async {
     var dest = _textController.text;
     if (dest == null || dest.isEmpty) {
       showDialog<Null>(
@@ -52,7 +55,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
             title: Text('Target is empty.'),
             content: Text('Please enter a SIP URI or username!'),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('Ok'),
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -64,7 +67,24 @@ class _MyDialPadWidget extends State<DialPadWidget>
       );
       return null;
     }
-    helper.call(dest, voiceonly);
+
+    final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
+
+    MediaStream mediaStream;
+
+    if (kIsWeb && !voiceonly) {
+      mediaStream =
+          await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+      mediaConstraints['video'] = false;
+      MediaStream userStream =
+          await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+    } else {
+      mediaConstraints['video'] = !voiceonly;
+      mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    }
+
+    helper.call(dest, voiceonly: voiceonly, mediaStream: mediaStream);
     _preferences.setString('dest', dest);
     return null;
   }
@@ -285,7 +305,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   @override
   void onNewMessage(SIPMessageRequest msg) {
-     //Save the incoming message to DB
+    //Save the incoming message to DB
     String msgBody = msg.request.body as String;
     setState(() {
       receivedMsg = msgBody;

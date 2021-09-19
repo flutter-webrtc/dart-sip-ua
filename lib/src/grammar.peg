@@ -897,19 +897,20 @@ Proxy_Authenticate  <- proxy_authenticate: challenge
 challenge           <- (("Digest"i LWS digest_cln (COMMA digest_cln)*)
                       / other_challenge) {return data;}
 
-other_challenge     <- auth_scheme LWS auth_param (COMMA auth_param)*
+other_challenge     <- auth_scheme LWS  auth_param (COMMA auth_param)*
+                      {return data;}
 
 auth_scheme         <- token
 
-auth_param          <- key: auth_param_name EQUAL value: ( token / quoted_string ) {
-                        print(key + ' => ' + value);
-                        if(data.auth_params == null) data.auth_params = [];
+auth_param          <- key: auth_param_name EQUAL value: ( token / quoted_string_clean ) {
+                        // print('other_auth_param: ' + key + ' => ' + value);
+                        if(data.auth_params == null) data.auth_params = {};
                         data.auth_params[key] = value;
                       }
 
 auth_param_name     <- token
 
-digest_cln          <- realm / domain / nonce / opaque / stale / algorithm / qop_options
+digest_cln          <- realm / domain / nonce / opaque / stale / algorithm / qop_options / auth_param
 
 realm               <- "realm"i EQUAL realm_value
 
@@ -931,7 +932,7 @@ stale               <- "stale"i EQUAL stale: token {
                       data.stale = stale.toLowerCase() == 'true';
                       return stale;}
 
-algorithm           <- "algorithm"i EQUAL algorithm: ( "MD5"i / "MD5-sess"i / token ) {
+algorithm           <- "algorithm"i EQUAL algorithm: ( "MD5"i / "MD5"i / "MD5-sess"i / token / quoted_string_clean) {
                       data.algorithm=algorithm.toUpperCase(); return data.algorithm;}
 
 qop_options         <- "qop"i EQUAL LDQUOT (qop_value ("," qop_value)*) RDQUOT
