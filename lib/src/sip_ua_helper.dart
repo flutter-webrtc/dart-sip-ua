@@ -412,7 +412,7 @@ class Call {
     refer.on(EventReferFailed(), (EventReferFailed data) {});
   }
 
-  void hangup(Map<String, dynamic> options) {
+  void hangup([Map<String, dynamic> options]) {
     assert(_session != null, 'ERROR(hangup): rtc session is invalid!');
     _session.terminate(options);
   }
