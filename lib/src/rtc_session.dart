@@ -1664,7 +1664,7 @@ class RTCSession extends EventManager {
     // Add 'pc.onicencandidate' event handler to resolve on last candidate.
     bool finished = false;
     Future<Null> Function() ready = () async {
-      if (!finished) {
+      if (!finished && _status != C.STATUS_TERMINATED) {
         finished = true;
         _connection.onIceCandidate = null;
         _connection.onIceGatheringState = null;
