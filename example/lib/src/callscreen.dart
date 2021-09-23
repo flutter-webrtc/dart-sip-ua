@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -152,11 +153,20 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   @override
   void registrationStateChanged(RegistrationState state) {}
 
+  void _cleanUp() {
+    _localStream?.getTracks()?.forEach((track) {
+      track.stop();
+    });
+    _localStream.dispose();
+    _localStream = null;
+  }
+
   void _backToDialPad() {
     _timer.cancel();
     Timer(Duration(seconds: 2), () {
       Navigator.of(context).pop();
     });
+    _cleanUp();
   }
 
   void _handelStreams(CallState event) async {
@@ -165,7 +175,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       if (_localRenderer != null) {
         _localRenderer.srcObject = stream;
       }
-      if (!kIsWeb) {
+      if (!kIsWeb && !WebRTC.platformIsDesktop) {
         event.stream?.getAudioTracks()?.first?.enableSpeakerphone(false);
       }
       _localStream = stream;
@@ -200,10 +210,14 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _handleAccept() async {
-    final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
+    bool remote_has_video = call.remote_has_video;
+    final mediaConstraints = <String, dynamic>{
+      'audio': true,
+      'video': remote_has_video
+    };
     MediaStream mediaStream;
 
-    if (kIsWeb && !voiceonly) {
+    if (kIsWeb && remote_has_video) {
       mediaStream =
           await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
       mediaConstraints['video'] = false;
@@ -211,11 +225,12 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           await navigator.mediaDevices.getUserMedia(mediaConstraints);
       mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
-      mediaConstraints['video'] = !voiceonly;
+      mediaConstraints['video'] = remote_has_video;
       mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
 
-    call.answer(helper.buildCallOptions(), mediaStream: mediaStream);
+    call.answer(helper.buildCallOptions(!remote_has_video),
+        mediaStream: mediaStream);
   }
 
   void _switchCamera() {

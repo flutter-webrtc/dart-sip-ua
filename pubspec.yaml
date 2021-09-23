@@ -8,14 +8,14 @@ environment:
 
 dependencies:
   crypto: ^3.0.0
-  flutter_webrtc: ^0.6.5
+  flutter_webrtc: ^0.6.7
   intl: any
   logger: ^1.0.0
   parser_error: ^0.2.0
   path: ^1.6.4
   random_string: ^2.0.0
   recase: ^4.0.0
-  sdp_transform: ^0.3.0
+  sdp_transform: ^0.3.2
   uuid: ^3.0.2
   
 
