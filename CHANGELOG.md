@@ -1,6 +1,14 @@
 # Changelog
 
 --------------------------------------------
+[0.3.8] - 2021.09.26
+
+* Fix ice delay.
+* Don't run ready if session has been terminated (#226)
+* Support IceRestart when IceStateDisconnected (#218)
+* Add options to the hangup (#224)
+* Adaptive when answering audio or video calls.
+
 [0.3.7] - 2021.08.24
 
 * Fix the issue that unified-plan's onTrack does not call back AudioTrack.

@@ -225,8 +225,9 @@ List<void Function()> testFunctions = <void Function()>[
         expect(auth.opaque, '00000188');
       }),
   () => test('Parser: authentication challenge2.', () {
-        String data = 'Digest algorithm="MD5",qop="auth",realm="some.sip.domain.com",nonce="217384172034871293047102934",otherk1="other_v1"';
-         dynamic auth = Grammar.parse(data, 'challenge');
+        String data =
+            'Digest algorithm="MD5",qop="auth",realm="some.sip.domain.com",nonce="217384172034871293047102934",otherk1="other_v1"';
+        dynamic auth = Grammar.parse(data, 'challenge');
         print('auth => ' + auth.toString());
         expect(auth.realm, 'some.sip.domain.com');
         expect(auth.nonce, '217384172034871293047102934');
