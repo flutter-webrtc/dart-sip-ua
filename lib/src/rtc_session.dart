@@ -1664,38 +1664,39 @@ class RTCSession extends EventManager {
     // Add 'pc.onicencandidate' event handler to resolve on last candidate.
     bool finished = false;
     Future<Null> Function() ready = () async {
-      _connection.onIceCandidate = null;
-      _connection.onIceGatheringState = null;
-      _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateComplete;
-      finished = true;
-      _rtcReady = true;
-      RTCSessionDescription desc = await _connection.getLocalDescription();
-      logger.debug('emit "sdp"');
-      emit(EventSdp(originator: 'local', type: type, sdp: desc.sdp));
-      completer.complete(desc);
+      if (!finished && _status != C.STATUS_TERMINATED) {
+        finished = true;
+        _connection.onIceCandidate = null;
+        _connection.onIceGatheringState = null;
+        _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateComplete;
+        _rtcReady = true;
+        RTCSessionDescription desc = await _connection.getLocalDescription();
+        logger.debug('emit "sdp"');
+        emit(EventSdp(originator: 'local', type: type, sdp: desc.sdp));
+        completer.complete(desc);
+      }
     };
 
     _connection.onIceGatheringState = (RTCIceGatheringState state) {
       _iceGatheringState = state;
       if (state == RTCIceGatheringState.RTCIceGatheringStateComplete) {
-        if (!finished) {
-          ready();
-        }
+        ready();
       }
     };
 
+    bool hasCandidate = false;
     _connection.onIceCandidate = (RTCIceCandidate candidate) {
       if (candidate != null) {
         emit(EventIceCandidate(candidate, ready));
-        if (!finished) {
-          finished = true;
+        if (!hasCandidate) {
+          hasCandidate = true;
           /**
-           *  Just wait for 3 seconds. In the case of multiple network connections,
+           *  Just wait for 0.5 seconds. In the case of multiple network connections,
            *  the RTCIceGatheringStateComplete event needs to wait for 10 ~ 30 seconds.
            *  Because trickle ICE is not defined in the sip protocol, the delay of
            * initiating a call to answer the call waiting will be unacceptable.
            */
-          setTimeout(() => ready(), 3000);
+          setTimeout(() => ready(), 500);
         }
       }
     };

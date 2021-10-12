@@ -447,6 +447,11 @@ class Call {
     _session.sendDTMF(tones, options);
   }
 
+  void sendInfo(String contentType, String body, Map<String, dynamic> options) {
+    assert(_session != null, 'ERROR(sendInfo): rtc session is invalid');
+    _session.sendInfo(contentType, body, options);
+  }
+
   String get remote_display_name {
     assert(_session != null,
         'ERROR(get remote_identity): rtc session is invalid!');
