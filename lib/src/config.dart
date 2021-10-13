@@ -1,7 +1,6 @@
 import 'package:sip_ua/sip_ua.dart';
-
-import 'constants.dart';
 import 'constants.dart' as DartSIP_C;
+import 'constants.dart';
 import 'exceptions.dart' as Exceptions;
 import 'grammar.dart';
 import 'logger.dart';

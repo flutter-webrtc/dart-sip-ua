@@ -33,7 +33,7 @@ class ParsedData {
   List<String> qop = <String>[];
   String protocol;
   String realm;
-  Map<String, dynamic> auth_params =  <String, dynamic>{};
+  Map<String, dynamic> auth_params = <String, dynamic>{};
   int cause;
   int expires;
   String refresher;

@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -151,11 +153,20 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   @override
   void registrationStateChanged(RegistrationState state) {}
 
+  void _cleanUp() {
+    _localStream?.getTracks()?.forEach((track) {
+      track.stop();
+    });
+    _localStream.dispose();
+    _localStream = null;
+  }
+
   void _backToDialPad() {
     _timer.cancel();
     Timer(Duration(seconds: 2), () {
       Navigator.of(context).pop();
     });
+    _cleanUp();
   }
 
   void _handelStreams(CallState event) async {
@@ -164,7 +175,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       if (_localRenderer != null) {
         _localRenderer.srcObject = stream;
       }
-      event.stream?.getAudioTracks()?.first?.enableSpeakerphone(false);
+      if (!kIsWeb && !WebRTC.platformIsDesktop) {
+        event.stream?.getAudioTracks()?.first?.enableSpeakerphone(false);
+      }
       _localStream = stream;
     }
     if (event.originator == 'remote') {
@@ -196,8 +209,28 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     _timer.cancel();
   }
 
-  void _handleAccept() {
-    call.answer(helper.buildCallOptions());
+  void _handleAccept() async {
+    bool remote_has_video = call.remote_has_video;
+    final mediaConstraints = <String, dynamic>{
+      'audio': true,
+      'video': remote_has_video
+    };
+    MediaStream mediaStream;
+
+    if (kIsWeb && remote_has_video) {
+      mediaStream =
+          await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+      mediaConstraints['video'] = false;
+      MediaStream userStream =
+          await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+    } else {
+      mediaConstraints['video'] = remote_has_video;
+      mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    }
+
+    call.answer(helper.buildCallOptions(!remote_has_video),
+        mediaStream: mediaStream);
   }
 
   void _switchCamera() {
@@ -283,7 +316,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void _toggleSpeaker() {
     if (_localStream != null) {
       _speakerOn = !_speakerOn;
-      _localStream.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      if (!kIsWeb) {
+        _localStream.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      }
     }
   }
 

@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:sip_ua/src/event_manager/events.dart';
+
 import 'package:test/test.dart';
-import 'package:sip_ua/src/transports/websocket_interface.dart';
+
+import 'package:sip_ua/src/event_manager/events.dart';
 import 'package:sip_ua/src/transport.dart';
+import 'package:sip_ua/src/transports/websocket_interface.dart';
 
 List<void Function()> testFunctions = <void Function()>[
   () => test(' WebSocket: EchoTest', () async {

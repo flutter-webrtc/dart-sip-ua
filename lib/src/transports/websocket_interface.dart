@@ -1,8 +1,8 @@
 import 'package:sip_ua/sip_ua.dart';
-
 import '../grammar.dart';
 import '../logger.dart';
 import '../socket.dart';
+
 import 'websocket_dart_impl.dart'
     if (dart.library.js) 'websocket_web_impl.dart';
 

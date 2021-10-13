@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:sip_ua/src/event_manager/events.dart';
-
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
 import 'socket.dart' as Socket;

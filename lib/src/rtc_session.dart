@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
-import 'package:sip_ua/sip_ua.dart';
 
-import 'constants.dart';
+import 'package:sip_ua/sip_ua.dart';
 import 'constants.dart' as DartSIP_C;
+import 'constants.dart';
 import 'dialog.dart';
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
@@ -590,6 +590,7 @@ class RTCSession extends EventManager {
     // A local MediaStream is given, use it.
     if (mediaStream != null) {
       stream = mediaStream;
+      emit(EventStream(session: this, originator: 'local', stream: stream));
     }
     // Audio and/or video requested, prompt getUserMedia.
     else if (mediaConstraints['audio'] != null ||
@@ -1138,7 +1139,8 @@ class RTCSession extends EventManager {
 
     options = options ?? <String, dynamic>{};
 
-    Map<String, dynamic> rtcOfferConstraints = options['rtcOfferConstraints'];
+    Map<String, dynamic> rtcOfferConstraints =
+        options['rtcOfferConstraints'] ?? _rtcOfferConstraints;
 
     if (_status != C.STATUS_WAITING_FOR_ACK && _status != C.STATUS_CONFIRMED) {
       return false;
@@ -1573,6 +1575,13 @@ class RTCSession extends EventManager {
     }, Timers.TIMER_H);
   }
 
+  void _iceRestart() async {
+    Map<String, dynamic> offerConstraints =
+        _rtcOfferConstraints ?? <String, dynamic>{};
+    offerConstraints['mandatory']['IceRestart'] = true;
+    renegotiate(offerConstraints);
+  }
+
   Future<void> _createRTCConnection(Map<String, dynamic> pcConfig,
       Map<String, dynamic> rtcConstraints) async {
     _connection = await createPeerConnection(pcConfig, rtcConstraints);
@@ -1584,6 +1593,9 @@ class RTCSession extends EventManager {
           'status_code': 408,
           'reason_phrase': DartSIP_C.causes.RTP_TIMEOUT
         });
+      } else if (state ==
+          RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
+        _iceRestart();
       }
     };
 
@@ -1596,7 +1608,7 @@ class RTCSession extends EventManager {
     switch (sdpSemantics) {
       case 'unified-plan':
         _connection.onTrack = (RTCTrackEvent event) {
-          if (event.track.kind == 'video' && event.streams.isNotEmpty) {
+          if (event.streams.isNotEmpty) {
             emit(EventStream(
                 session: this, originator: 'remote', stream: event.streams[0]));
           }
@@ -1618,7 +1630,7 @@ class RTCSession extends EventManager {
   FutureOr<RTCSessionDescription> _createLocalDescription(
       String type, Map<String, dynamic> constraints) async {
     logger.debug('createLocalDescription()');
-
+    _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateNew;
     Completer<RTCSessionDescription> completer =
         Completer<RTCSessionDescription>();
 
@@ -1652,39 +1664,39 @@ class RTCSession extends EventManager {
     // Add 'pc.onicencandidate' event handler to resolve on last candidate.
     bool finished = false;
     Future<Null> Function() ready = () async {
-      _connection.onIceCandidate = null;
-      _connection.onIceGatheringState = null;
-      _connection.onIceConnectionState = null;
-      _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateComplete;
-      finished = true;
-      _rtcReady = true;
-      RTCSessionDescription desc = await _connection.getLocalDescription();
-      logger.debug('emit "sdp"');
-      emit(EventSdp(originator: 'local', type: type, sdp: desc.sdp));
-      completer.complete(desc);
+      if (!finished && _status != C.STATUS_TERMINATED) {
+        finished = true;
+        _connection.onIceCandidate = null;
+        _connection.onIceGatheringState = null;
+        _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateComplete;
+        _rtcReady = true;
+        RTCSessionDescription desc = await _connection.getLocalDescription();
+        logger.debug('emit "sdp"');
+        emit(EventSdp(originator: 'local', type: type, sdp: desc.sdp));
+        completer.complete(desc);
+      }
     };
 
     _connection.onIceGatheringState = (RTCIceGatheringState state) {
       _iceGatheringState = state;
       if (state == RTCIceGatheringState.RTCIceGatheringStateComplete) {
-        if (!finished) {
-          ready();
-        }
+        ready();
       }
     };
 
+    bool hasCandidate = false;
     _connection.onIceCandidate = (RTCIceCandidate candidate) {
       if (candidate != null) {
         emit(EventIceCandidate(candidate, ready));
-        if (!finished) {
-          finished = true;
+        if (!hasCandidate) {
+          hasCandidate = true;
           /**
-           *  Just wait for 3 seconds. In the case of multiple network connections,
+           *  Just wait for 0.5 seconds. In the case of multiple network connections,
            *  the RTCIceGatheringStateComplete event needs to wait for 10 ~ 30 seconds.
            *  Because trickle ICE is not defined in the sip protocol, the delay of
            * initiating a call to answer the call waiting will be unacceptable.
            */
-          setTimeout(() => ready(), 3000);
+          setTimeout(() => ready(), 500);
         }
       }
     };
@@ -2195,6 +2207,7 @@ class RTCSession extends EventManager {
     // A stream is given, var the app set events such as 'peerconnection' and 'connecting'.
     if (mediaStream != null) {
       stream = mediaStream;
+      emit(EventStream(session: this, originator: 'local', stream: stream));
     } // Request for user media access.
     else if (mediaConstraints['audio'] != null ||
         mediaConstraints['video'] != null) {
