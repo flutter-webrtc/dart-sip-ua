@@ -1,5 +1,4 @@
 import 'package:sip_ua/src/sip_message.dart';
-
 import '../constants.dart' as DartSIP_C;
 import '../constants.dart';
 import '../event_manager/event_manager.dart';

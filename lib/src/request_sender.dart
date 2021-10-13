@@ -1,5 +1,4 @@
 import 'package:sip_ua/src/grammar_parser.dart';
-
 import 'constants.dart';
 import 'data.dart';
 import 'digest_authentication.dart';
