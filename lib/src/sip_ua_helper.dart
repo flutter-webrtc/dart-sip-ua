@@ -70,12 +70,16 @@ class SIPUAHelper extends EventManager {
   }
 
   Future<bool> call(String target,
-      {bool voiceonly = false, MediaStream mediaStream = null}) async {
+      {bool voiceonly = false,
+      MediaStream mediaStream = null,
+      List<String> headers = const []}) async {
     if (_ua != null && _ua.isConnected()) {
       Map<String, Object> options = buildCallOptions(voiceonly);
       if (mediaStream != null) {
         options['mediaStream'] = mediaStream;
       }
+      List<dynamic> extHeaders = options['extraHeaders'];
+      extHeaders.addAll(headers);
       _ua.call(target, options);
       return true;
     } else {
@@ -274,6 +278,7 @@ class SIPUAHelper extends EventManager {
 
     Map<String, Object> _defaultOptions = <String, dynamic>{
       'eventHandlers': handlers,
+      'extraHeaders': <dynamic>[],
       'pcConfig': <String, dynamic>{
         'sdpSemantics': 'unified-plan',
         'iceServers': _uaSettings.iceServers
@@ -392,6 +397,7 @@ class Call {
 
   String get id => _id;
   RTCPeerConnection get peerConnection => _session.connection;
+  RTCSession get session => _session;
   CallStateEnum state;
 
   void answer(Map<String, Object> options, {MediaStream mediaStream = null}) {
