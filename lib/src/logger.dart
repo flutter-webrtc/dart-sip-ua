@@ -9,7 +9,7 @@ final Log logger = Log();
 class Log extends Logger {
   Log();
   Log._internal(String currentWorkingDirectory)
-      : super(printer: MyLogPrinter(currentWorkingDirectory));
+      : super(printer: MyLogPrinter(currentWorkingDirectory), filter: MyFilter());
 
   factory Log.d(String message, [dynamic error, StackTrace stackTrace]) {
     autoInit();
@@ -200,4 +200,12 @@ class AnsiColor {
   String get resetBackground => color ? '${ansiEsc}49m' : '';
 
   static int grey(double level) => 232 + (level.clamp(0.0, 1.0) * 23).round();
+}
+
+class MyFilter extends LogFilter {
+  @override
+  ///Allows you to control which logs go into the release version and which are only available in debug
+  bool shouldLog(LogEvent event) {
+    return true;
+  }
 }
