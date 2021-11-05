@@ -58,6 +58,9 @@ class Settings {
   String jssip_id;
 
   String hostport_params;
+
+  /// ICE Gathering Timeout (in millisecond).
+  int ice_gathering_timeout = 500;
 }
 
 // Configuration checks.

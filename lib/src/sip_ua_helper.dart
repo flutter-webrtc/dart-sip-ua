@@ -107,6 +107,8 @@ class SIPUAHelper extends EventManager {
     _settings.register_extra_contact_uri_params =
         uaSettings.registerParams.extraContactUriParams;
     _settings.dtmf_mode = uaSettings.dtmfMode;
+    _settings.session_timers = uaSettings.sessionTimers;
+    _settings.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
 
     try {
       UA ua = UA(_settings);
@@ -632,6 +634,12 @@ class UaSettings {
 
   /// DTMF mode, in band (rfc2833) or out of band (sip info)
   DtmfMode dtmfMode = DtmfMode.INFO;
+
+  /// Session Timers
+  bool sessionTimers = true;
+
+  /// ICE Gathering Timeout, default 500ms
+  int iceGatheringTimeout = 500;
 
   List<Map<String, String>> iceServers = <Map<String, String>>[
     <String, String>{'url': 'stun:stun.l.google.com:19302'},

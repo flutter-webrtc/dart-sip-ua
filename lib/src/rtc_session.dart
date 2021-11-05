@@ -1696,7 +1696,7 @@ class RTCSession extends EventManager {
            *  Because trickle ICE is not defined in the sip protocol, the delay of
            * initiating a call to answer the call waiting will be unacceptable.
            */
-          setTimeout(() => ready(), 500);
+          setTimeout(() => ready(), ua.configuration.ice_gathering_timeout);
         }
       }
     };
