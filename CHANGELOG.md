@@ -1,6 +1,11 @@
 # Changelog
 
 --------------------------------------------
+[0.4.0] - 2021.10.13
+
+* Add extended header support (#235)
+* Add iceGatheringTimeout for UaSettings.
+
 [0.3.9] - 2021.09.27
 
 * Upgrade flutter-webrtc to 0.6.8
