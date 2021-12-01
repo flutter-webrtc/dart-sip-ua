@@ -7,7 +7,7 @@ List<void Function()> testFunctions = <void Function()>[
         String domain = 'jssip.net';
 
         void test_ok(dynamic given_data, dynamic expected) {
-          URI uri = Utils.normalizeTarget(given_data, domain);
+          URI? uri = Utils.normalizeTarget(given_data, domain);
           expect(uri.toString(), expected);
         }
 

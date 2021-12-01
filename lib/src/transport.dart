@@ -85,28 +85,28 @@ class Transport {
     _getSocket();
   }
 
-  int status;
-  WebSocketInterface socket;
-  List<Map<String, dynamic>> _socketsMap;
-  Map<String, int> _recovery_options;
-  int _recover_attempts;
-  Timer _recovery_timer;
-  bool _close_requested;
+  int? status;
+  WebSocketInterface? socket;
+  late List<Map<String, dynamic>> _socketsMap;
+  late Map<String, int> _recovery_options;
+  int? _recover_attempts;
+  Timer? _recovery_timer;
+  late bool _close_requested;
 
-  void Function(WebSocketInterface socket, int attempts) onconnecting;
-  void Function(WebSocketInterface socket, ErrorCause cause) ondisconnect;
-  void Function(Transport transport) onconnect;
-  void Function(Transport transport, String messageData) ondata;
+  late void Function(WebSocketInterface? socket, int? attempts) onconnecting;
+  late void Function(WebSocketInterface? socket, ErrorCause cause) ondisconnect;
+  late void Function(Transport transport) onconnect;
+  late void Function(Transport transport, String messageData) ondata;
 
   /**
    * Instance Methods
    */
 
-  String get via_transport => socket.via_transport;
+  String get via_transport => socket!.via_transport;
 
-  String get url => socket.url;
+  String? get url => socket!.url;
 
-  String get sip_uri => socket.sip_uri;
+  String? get sip_uri => socket!.sip_uri;
 
   void connect() {
     logger.debug('connect()');
@@ -127,10 +127,10 @@ class Transport {
 
     if (!_close_requested) {
       // Bind socket event callbacks.
-      socket.onconnect = _onConnect;
-      socket.ondisconnect = _onDisconnect;
-      socket.ondata = _onData;
-      socket.connect();
+      socket!.onconnect = _onConnect;
+      socket!.ondisconnect = _onDisconnect;
+      socket!.ondata = _onData;
+      socket!.connect();
     }
     return;
   }
@@ -149,13 +149,13 @@ class Transport {
     }
 
     // Unbind socket event callbacks.
-    socket.onconnect = () => () {};
-    socket.ondisconnect =
-        (WebSocketInterface socket, bool error, int closeCode, String reason) =>
-            () {};
-    socket.ondata = (dynamic data) => () {};
+    socket!.onconnect = () => () {};
+    socket!.ondisconnect = (WebSocketInterface socket, bool error,
+            int? closeCode, String? reason) =>
+        () {};
+    socket!.ondata = (dynamic data) => () {};
 
-    socket.disconnect();
+    socket!.disconnect();
     ondisconnect(
         socket,
         ErrorCause(
@@ -177,7 +177,7 @@ class Transport {
 
     String message = data.toString();
     //logger.debug('sending message:\n\n$message\n');
-    return socket.send(message);
+    return socket!.send(message);
   }
 
   bool isConnected() {
@@ -193,15 +193,15 @@ class Transport {
    */
 
   void _reconnect(bool error) {
-    _recover_attempts += 1;
+    _recover_attempts = _recover_attempts! + 1;
 
     num k =
-        Math.floor((Math.randomDouble() * Math.pow(2, _recover_attempts)) + 1);
+        Math.floor((Math.randomDouble() * Math.pow(2, _recover_attempts!)) + 1);
 
-    if (k < _recovery_options['min_interval']) {
-      k = _recovery_options['min_interval'];
-    } else if (k > _recovery_options['max_interval']) {
-      k = _recovery_options['max_interval'];
+    if (k < _recovery_options['min_interval']!) {
+      k = _recovery_options['min_interval']!;
+    } else if (k > _recovery_options['max_interval']!) {
+      k = _recovery_options['max_interval']!;
     }
 
     logger.debug(
@@ -214,7 +214,7 @@ class Transport {
         // Connect the socket.
         connect();
       }
-    }, k * 1000);
+    }, k * 1000 as int);
   }
 
   /**
@@ -247,7 +247,7 @@ class Transport {
 
     num idx = Math.floor(Math.randomDouble() * candidates.length);
 
-    socket = candidates[idx]['socket'];
+    socket = candidates[idx as int]['socket'];
   }
 
   /**
@@ -267,7 +267,7 @@ class Transport {
   }
 
   void _onDisconnect(
-      WebSocketInterface socket, bool error, int closeCode, String reason) {
+      WebSocketInterface socket, bool error, int? closeCode, String? reason) {
     status = C.STATUS_DISCONNECTED;
     ondisconnect(
         socket,

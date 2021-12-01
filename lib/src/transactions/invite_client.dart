@@ -24,15 +24,15 @@ class InviteClientTransaction extends TransactionBase {
 
     String via = 'SIP/2.0/${transport.via_transport}';
 
-    via += ' ${ua.configuration.via_host};branch=$id';
+    via += ' ${ua.configuration!.via_host};branch=$id';
 
     this.request.setHeader('via', via);
 
-    this.ua.newTransaction(this);
+    this.ua!.newTransaction(this);
   }
-  EventManager _eventHandlers;
+  late EventManager _eventHandlers;
 
-  Timer B, D, M;
+  Timer? B, D, M;
 
   void stateChanged(TransactionState state) {
     this.state = state;
@@ -46,7 +46,7 @@ class InviteClientTransaction extends TransactionBase {
       timer_B();
     }, Timers.TIMER_B);
 
-    if (!transport.send(request)) {
+    if (!transport!.send(request)) {
       onTransportError();
     }
   }
@@ -63,7 +63,7 @@ class InviteClientTransaction extends TransactionBase {
     }
 
     stateChanged(TransactionState.TERMINATED);
-    ua.destroyTransaction(this);
+    ua!.destroyTransaction(this);
   }
 
   // RFC 6026 7.2.
@@ -73,7 +73,7 @@ class InviteClientTransaction extends TransactionBase {
     if (state == TransactionState.ACCEPTED) {
       clearTimeout(B);
       stateChanged(TransactionState.TERMINATED);
-      ua.destroyTransaction(this);
+      ua!.destroyTransaction(this);
     }
   }
 
@@ -82,7 +82,7 @@ class InviteClientTransaction extends TransactionBase {
     logger.debug('Timer B expired for transaction $id');
     if (state == TransactionState.CALLING) {
       stateChanged(TransactionState.TERMINATED);
-      ua.destroyTransaction(this);
+      ua!.destroyTransaction(this);
       _eventHandlers.emit(EventOnRequestTimeout());
     }
   }
@@ -91,7 +91,7 @@ class InviteClientTransaction extends TransactionBase {
     logger.debug('Timer D expired for transaction $id');
     clearTimeout(B);
     stateChanged(TransactionState.TERMINATED);
-    ua.destroyTransaction(this);
+    ua!.destroyTransaction(this);
   }
 
   void sendACK(IncomingMessage response) {
@@ -110,7 +110,7 @@ class InviteClientTransaction extends TransactionBase {
       timer_D();
     }, Timers.TIMER_D);
 
-    transport.send(ack);
+    transport!.send(ack);
   }
 
   void cancel(String reason) {
@@ -134,22 +134,22 @@ class InviteClientTransaction extends TransactionBase {
       cancel.setHeader('reason', reason);
     }
 
-    transport.send(cancel);
+    transport!.send(cancel);
   }
 
   @override
-  void receiveResponse(int status_code, IncomingMessage response,
-      [void Function() onSuccess, void Function() onFailure]) {
+  void receiveResponse(int? status_code, IncomingMessage response,
+      [void Function()? onSuccess, void Function()? onFailure]) {
     int status_code = response.status_code;
 
     if (status_code >= 100 && status_code <= 199) {
       switch (state) {
         case TransactionState.CALLING:
           stateChanged(TransactionState.PROCEEDING);
-          _eventHandlers.emit(EventOnReceiveResponse(response: response));
+          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         case TransactionState.PROCEEDING:
-          _eventHandlers.emit(EventOnReceiveResponse(response: response));
+          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         default:
           break;
@@ -162,10 +162,10 @@ class InviteClientTransaction extends TransactionBase {
           M = setTimeout(() {
             timer_M();
           }, Timers.TIMER_M);
-          _eventHandlers.emit(EventOnReceiveResponse(response: response));
+          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         case TransactionState.ACCEPTED:
-          _eventHandlers.emit(EventOnReceiveResponse(response: response));
+          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         default:
           break;
@@ -176,7 +176,7 @@ class InviteClientTransaction extends TransactionBase {
         case TransactionState.PROCEEDING:
           stateChanged(TransactionState.COMPLETED);
           sendACK(response);
-          _eventHandlers.emit(EventOnReceiveResponse(response: response));
+          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         case TransactionState.COMPLETED:
           sendACK(response);

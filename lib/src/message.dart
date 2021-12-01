@@ -29,23 +29,23 @@ class Message extends EventManager {
     _data = <String, dynamic>{};
   }
 
-  UA _ua;
+  UA? _ua;
   dynamic _request;
-  bool _closed;
-  String _direction;
-  NameAddrHeader _local_identity;
-  NameAddrHeader _remote_identity;
-  bool _is_replied;
-  Map<String, dynamic> _data;
-  String get direction => _direction;
+  bool? _closed;
+  String? _direction;
+  NameAddrHeader? _local_identity;
+  NameAddrHeader? _remote_identity;
+  bool? _is_replied;
+  Map<String, dynamic>? _data;
+  String? get direction => _direction;
 
-  NameAddrHeader get local_identity => _local_identity;
+  NameAddrHeader? get local_identity => _local_identity;
 
-  NameAddrHeader get remote_identity => _remote_identity;
+  NameAddrHeader? get remote_identity => _remote_identity;
 
-  Map<String, dynamic> get data => _data;
+  Map<String, dynamic>? get data => _data;
 
-  void send(String target, String body, [Map<String, dynamic> options]) {
+  void send(String target, String body, [Map<String, dynamic>? options]) {
     String originalTarget = target;
     options = options ?? <String, dynamic>{};
 
@@ -54,7 +54,7 @@ class Message extends EventManager {
     }
 
     // Check target validity.
-    URI normalized = _ua.normalizeTarget(target);
+    URI? normalized = _ua!.normalizeTarget(target);
     if (normalized == null) {
       throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
@@ -86,7 +86,7 @@ class Message extends EventManager {
       _receiveResponse(event.response);
     });
 
-    RequestSender request_sender = RequestSender(_ua, _request, handlers);
+    RequestSender request_sender = RequestSender(_ua!, _request, handlers);
 
     _newMessage('local', _request);
 
@@ -113,7 +113,7 @@ class Message extends EventManager {
    */
   void accept(Map<String, dynamic> options) {
     List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    String body = options['body'];
+    String? body = options['body'];
 
     if (_direction != 'incoming') {
       throw Exceptions.NotSupportedError(
@@ -134,9 +134,9 @@ class Message extends EventManager {
    */
   void reject(Map<String, dynamic> options) {
     int status_code = options['status_code'] ?? 480;
-    String reason_phrase = options['reason_phrase'];
+    String? reason_phrase = options['reason_phrase'];
     List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
-    String body = options['body'];
+    String? body = options['body'];
 
     if (_direction != 'incoming') {
       throw Exceptions.NotSupportedError(
@@ -155,11 +155,11 @@ class Message extends EventManager {
     _request.reply(status_code, reason_phrase, extraHeaders, body);
   }
 
-  void _receiveResponse(IncomingResponse response) {
+  void _receiveResponse(IncomingResponse? response) {
     if (_closed != null) {
       return;
     }
-    if (RegExp(r'^1[0-9]{2}$').hasMatch(response.status_code)) {
+    if (RegExp(r'^1[0-9]{2}$').hasMatch(response!.status_code)) {
       // Ignore provisional responses.
     } else if (RegExp(r'^2[0-9]{2}$').hasMatch(response.status_code)) {
       _succeeded('remote', response);
@@ -186,7 +186,7 @@ class Message extends EventManager {
 
   void close() {
     _closed = true;
-    _ua.destroyMessage(this);
+    _ua!.destroyMessage(this);
   }
 
   /**
@@ -204,11 +204,11 @@ class Message extends EventManager {
       _remote_identity = request.to;
     }
 
-    _ua.newMessage(this, originator, request);
+    _ua!.newMessage(this, originator, request);
   }
 
   void _failed(
-      String originator, int status_code, String cause, String reason_phrase) {
+      String originator, int? status_code, String cause, String? reason_phrase) {
     logger.debug('MESSAGE failed');
     close();
     logger.debug('emit "failed"');
@@ -220,7 +220,7 @@ class Message extends EventManager {
             reason_phrase: reason_phrase)));
   }
 
-  void _succeeded(String originator, IncomingResponse response) {
+  void _succeeded(String originator, IncomingResponse? response) {
     logger.debug('MESSAGE succeeded');
 
     close();

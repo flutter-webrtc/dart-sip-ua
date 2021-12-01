@@ -11,7 +11,7 @@ import 'transaction_base.dart';
 
 class NonInviteServerTransaction extends TransactionBase {
   NonInviteServerTransaction(
-      UA ua, Transport transport, IncomingRequest request) {
+      UA ua, Transport? transport, IncomingRequest request) {
     id = request.via_branch;
     this.ua = ua;
     this.transport = transport;
@@ -23,8 +23,8 @@ class NonInviteServerTransaction extends TransactionBase {
 
     ua.newTransaction(this);
   }
-  bool transportError;
-  Timer J;
+  bool? transportError;
+  Timer? J;
 
   void stateChanged(TransactionState state) {
     this.state = state;
@@ -34,7 +34,7 @@ class NonInviteServerTransaction extends TransactionBase {
   void timer_J() {
     logger.debug('Timer J expired for transaction $id');
     stateChanged(TransactionState.TERMINATED);
-    ua.destroyTransaction(this);
+    ua!.destroyTransaction(this);
   }
 
   @override
@@ -46,13 +46,13 @@ class NonInviteServerTransaction extends TransactionBase {
 
       clearTimeout(J);
       stateChanged(TransactionState.TERMINATED);
-      ua.destroyTransaction(this);
+      ua!.destroyTransaction(this);
     }
   }
 
   @override
   void receiveResponse(int status_code, IncomingMessage response,
-      [void Function() onSuccess, void Function() onFailure]) {
+      [void Function()? onSuccess, void Function()? onFailure]) {
     if (status_code == 100) {
       /* RFC 4320 4.1
        * 'A SIP element MUST NOT
@@ -62,13 +62,13 @@ class NonInviteServerTransaction extends TransactionBase {
       switch (state) {
         case TransactionState.TRYING:
           stateChanged(TransactionState.PROCEEDING);
-          if (!transport.send(response)) {
+          if (!transport!.send(response)) {
             onTransportError();
           }
           break;
         case TransactionState.PROCEEDING:
           last_response = response;
-          if (!transport.send(response)) {
+          if (!transport!.send(response)) {
             onTransportError();
             if (onFailure != null) {
               onFailure();
@@ -89,7 +89,7 @@ class NonInviteServerTransaction extends TransactionBase {
           J = setTimeout(() {
             timer_J();
           }, Timers.TIMER_J);
-          if (!transport.send(response)) {
+          if (!transport!.send(response)) {
             onTransportError();
             if (onFailure != null) {
               onFailure();

@@ -1,12 +1,12 @@
 import 'utils.dart';
 
 class ErrorImpl extends Error {
-  int code;
-  String name;
-  String parameter;
-  dynamic value;
-  String message;
-  dynamic status;
+  int? code;
+  String? name;
+  String? parameter;
+  dynamic? value;
+  String? message;
+  dynamic? status;
 }
 
 class ConfigurationError extends ErrorImpl {

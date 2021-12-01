@@ -24,19 +24,19 @@ class DTMF extends EventManager {
   }
 
   final rtc.RTCSession _session;
-  DtmfMode _mode;
-  String _direction;
-  String _tone;
-  int _duration;
-  int _interToneGap;
-  IncomingRequest _request;
-  EventManager _eventHandlers;
+  DtmfMode? _mode;
+  String? _direction;
+  String? _tone;
+  int? _duration;
+  int? _interToneGap;
+  IncomingRequest? _request;
+  late EventManager _eventHandlers;
 
-  String get tone => _tone;
+  String? get tone => _tone;
 
-  int get duration => _duration;
+  int? get duration => _duration;
 
-  String get direction => _direction;
+  String? get direction => _direction;
 
   void send(String tone, Map<String, dynamic> options) {
     if (tone == null) {
@@ -51,7 +51,10 @@ class DTMF extends EventManager {
       throw Exceptions.InvalidStateError(_session.status);
     }
 
-    List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
+    print(options);
+    List<dynamic> extraHeaders = options['extraHeaders'] != null
+        ? Utils.cloneArray(options['extraHeaders'])
+        : [];
 
     _eventHandlers = options['eventHandlers'] ?? EventManager();
 
@@ -77,8 +80,8 @@ class DTMF extends EventManager {
 
     if (_mode == DtmfMode.RFC2833) {
       RTCDTMFSender dtmfSender = _session.dtmfSender;
-      dtmfSender.insertDTMF(_tone,
-          duration: _duration, interToneGap: _interToneGap);
+      dtmfSender.insertDTMF(_tone!,
+          duration: _duration!, interToneGap: _interToneGap!);
     } else if (_mode == DtmfMode.INFO) {
       extraHeaders.add('Content-Type: application/dtmf-relay');
 
@@ -126,7 +129,7 @@ class DTMF extends EventManager {
     request.reply(200);
 
     if (request.body != null) {
-      List<String> body = request.body.split('\n');
+      List<String> body = request.body!.split('\n');
 
       if (body.length >= 1) {
         if ((body[0]).contains(RegExp(reg_tone))) {

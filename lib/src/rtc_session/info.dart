@@ -11,16 +11,16 @@ class Info extends EventManager {
   Info(this._session);
 
   final rtc.RTCSession _session;
-  String _direction;
-  String _contentType;
-  String _body;
-  IncomingRequest _request;
+  String? _direction;
+  String? _contentType;
+  String? _body;
+  IncomingRequest? _request;
 
-  String get contentType => _contentType;
+  String? get contentType => _contentType;
 
-  String get body => _body;
+  String? get body => _body;
 
-  String get direction => _direction;
+  String? get direction => _direction;
 
   void send(String contentType, String body, Map<String, dynamic> options) {
     _direction = 'outgoing';

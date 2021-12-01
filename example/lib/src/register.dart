@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:sip_ua/sip_ua.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sip_ua/sip_ua.dart';
 
 class RegisterWidget extends StatefulWidget {
-  final SIPUAHelper _helper;
-  RegisterWidget(this._helper, {Key key}) : super(key: key);
+  final SIPUAHelper? _helper;
+  RegisterWidget(this._helper, {Key? key}) : super(key: key);
   @override
   _MyRegisterWidget createState() => _MyRegisterWidget();
 }
@@ -17,26 +17,26 @@ class _MyRegisterWidget extends State<RegisterWidget>
   TextEditingController _displayNameController = TextEditingController();
   TextEditingController _authorizationUserController = TextEditingController();
   Map<String, String> _wsExtraHeaders = {
-    'Origin': ' https://tryit.jssip.net',
-    'Host': 'tryit.jssip.net:10443'
+    // 'Origin': ' https://tryit.jssip.net',
+    // 'Host': 'tryit.jssip.net:10443'
   };
-  SharedPreferences _preferences;
-  RegistrationState _registerState;
+  late SharedPreferences _preferences;
+  late RegistrationState _registerState;
 
-  SIPUAHelper get helper => widget._helper;
+  SIPUAHelper? get helper => widget._helper;
 
   @override
   initState() {
     super.initState();
-    _registerState = helper.registerState;
-    helper.addSipUaHelperListener(this);
+    _registerState = helper!.registerState;
+    helper!.addSipUaHelperListener(this);
     _loadSettings();
   }
 
   @override
   deactivate() {
     super.deactivate();
-    helper.removeSipUaHelperListener(this);
+    helper!.removeSipUaHelperListener(this);
     _saveSettings();
   }
 
@@ -49,8 +49,9 @@ class _MyRegisterWidget extends State<RegisterWidget>
           _preferences.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
       _displayNameController.text =
           _preferences.getString('display_name') ?? 'Flutter SIP UA';
-      _passwordController.text = _preferences.getString('password');
-      _authorizationUserController.text = _preferences.getString('auth_user');
+      _passwordController.text = _preferences.getString('password') ?? '';
+      _authorizationUserController.text =
+          _preferences.getString('auth_user') ?? '';
     });
   }
 
@@ -111,7 +112,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     settings.userAgent = 'Dart SIP Client v1.0.0';
     settings.dtmfMode = DtmfMode.RFC2833;
 
-    helper.start(settings);
+    helper!.start(settings);
   }
 
   @override
@@ -202,11 +203,9 @@ class _MyRegisterWidget extends State<RegisterWidget>
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText:
-                                _authorizationUserController.text?.isEmpty ??
-                                        true
-                                    ? '[Empty]'
-                                    : null,
+                            hintText: _authorizationUserController.text.isEmpty
+                                ? '[Empty]'
+                                : null,
                           ),
                         ),
                       ),
@@ -231,7 +230,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
                             contentPadding: EdgeInsets.all(10.0),
                             border: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black12)),
-                            hintText: _passwordController.text?.isEmpty ?? true
+                            hintText: _passwordController.text.isEmpty
                                 ? '[Empty]'
                                 : null,
                           ),

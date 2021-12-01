@@ -66,11 +66,11 @@ bool isNaN(dynamic input) {
   return input.isNaN;
 }
 
-int parseInt(String input, int radix) {
+int? parseInt(String input, int radix) {
   return int.tryParse(input, radix: radix) ?? null;
 }
 
-double parseFloat(String input) {
+double? parseFloat(String input) {
   return double.tryParse(input) ?? null;
 }
 
@@ -144,7 +144,7 @@ String escapeUser(String user) => encodeURIComponent(decodeURIComponent(user))
 * Detects the domain part (if given) and properly hex-escapes the user portion.
 * If the user portion has only 'tel' number symbols the user portion is clean of 'tel' visual separators.
 */
-URI normalizeTarget(dynamic target, [String domain]) {
+URI? normalizeTarget(dynamic target, [String? domain]) {
   // If no target is given then raise an error.
   if (target == null) {
     return null;
@@ -217,7 +217,7 @@ String headerize(String str) {
             names[part].substring(1);
   }
   if (exceptions[hname] != null) {
-    hname = exceptions[hname];
+    hname = exceptions[hname]!;
   }
 
   return hname;

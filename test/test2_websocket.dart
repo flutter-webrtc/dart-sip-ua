@@ -10,8 +10,8 @@ void main() async {
 
 class TestWebsocket2 {
   bool connected = false;
-  WebSocket ws;
-  Completer<String> completer;
+  late WebSocket ws;
+  late Completer<String> completer;
   int ctr = 1;
 
   Completer<String> finished = Completer<String>();
