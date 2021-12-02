@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:sip_ua/src/sip_message.dart';
-
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import '../timers.dart';

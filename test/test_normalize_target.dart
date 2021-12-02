@@ -1,5 +1,6 @@
-import 'package:sip_ua/src/uri.dart';
 import 'package:test/test.dart';
+
+import 'package:sip_ua/src/uri.dart';
 import 'package:sip_ua/src/utils.dart' as Utils;
 
 List<void Function()> testFunctions = <void Function()>[
