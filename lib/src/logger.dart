@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
@@ -39,6 +40,8 @@ class Log extends Logger {
   static String _localPath;
   static Level _loggingLevel = Level.debug;
   static set loggingLevel(Level loggingLevel) => _loggingLevel = loggingLevel;
+  static File _loggingFile;
+  static set loggingFile(File file) => _loggingFile = file;
 
   void debug(String message, [dynamic error, StackTrace stackTrace]) {
     autoInit();
@@ -119,22 +122,31 @@ class MyLogPrinter extends LogPrinter {
       }
     }
 
-    print(color(
+    _print(color(
         '[$formattedDate] ${event.level} ${StackTraceNJ(skipFrames: depth).formatStackTrace(methodCount: 1)} ::: ${event.message}'));
     if (event.error != null) {
-      print('${event.error}');
+      _print('${event.error}');
     }
 
     if (event.stackTrace != null) {
       if (event.stackTrace.runtimeType == StackTraceNJ) {
         StackTraceNJ st = event.stackTrace as StackTraceNJ;
-        print(color('$st'));
+        _print(color('$st'));
       } else {
-        print(color('${event.stackTrace}'));
+        _print(color('${event.stackTrace}'));
       }
     }
 
     return <String>[];
+  }
+
+  void _print(Object obj) {
+    print(obj);
+    try {
+      if (Log._loggingFile != null) {
+        Log._loggingFile.writeAsString(obj.toString(), mode: FileMode.append, flush: true);
+      }
+    } catch (e) {}
   }
 
   AnsiColor _getLevelColor(Level level) {

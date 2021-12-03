@@ -13,6 +13,7 @@ import 'socket.dart';
 import 'stack_trace_nj.dart';
 import 'transports/websocket_interface.dart';
 import 'ua.dart';
+import 'dart:io';
 
 class SIPUAHelper extends EventManager {
   SIPUAHelper() {
@@ -28,6 +29,7 @@ class SIPUAHelper extends EventManager {
       RegistrationState(state: RegistrationStateEnum.NONE);
 
   set loggingLevel(Level loggingLevel) => Log.loggingLevel = loggingLevel;
+  set loggingFile(File file) => Log.loggingFile = file;
 
   bool get registered {
     if (_ua != null) {
