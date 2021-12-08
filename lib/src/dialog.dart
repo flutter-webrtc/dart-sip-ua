@@ -103,7 +103,7 @@ class Dialog {
   List<dynamic>? _route_set;
   int? _ack_seqnum;
   Id? _id;
-  late num? local_seqnum;
+  num? local_seqnum;
 
   UA? get ua => _ua;
   Id? get id => _id;
