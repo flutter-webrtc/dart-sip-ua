@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
 import 'package:sip_ua/src/rtc_session/refer_subscriber.dart';
@@ -13,7 +14,6 @@ import 'socket.dart';
 import 'stack_trace_nj.dart';
 import 'transports/websocket_interface.dart';
 import 'ua.dart';
-import 'dart:io';
 
 class SIPUAHelper extends EventManager {
   SIPUAHelper() {

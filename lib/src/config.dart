@@ -48,6 +48,7 @@ class Settings {
   List<WebSocketInterface> sockets = <WebSocketInterface>[];
   int connection_recovery_max_interval = 30;
   int connection_recovery_min_interval = 2;
+  int connection_recovery_max_times = 5;
 
   /*
    * Host address.
@@ -139,6 +140,13 @@ class Checks {
       if (connection_recovery_min_interval == null) return;
       if (connection_recovery_min_interval > 0) {
         dst.connection_recovery_min_interval = connection_recovery_min_interval;
+      }
+    },
+    'connection_recovery_max_times': (Settings src, Settings dst) {
+      int connection_recovery_max_times = src.connection_recovery_max_times;
+      if (connection_recovery_max_times == null) return;
+      if (connection_recovery_max_times > 0) {
+        dst.connection_recovery_max_times = connection_recovery_max_times;
       }
     },
     'contact_uri': (Settings src, Settings dst) {

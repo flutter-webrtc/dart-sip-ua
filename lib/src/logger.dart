@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter/foundation.dart';
 
 import 'enum_helper.dart';
 import 'stack_trace_nj.dart';
@@ -10,7 +11,10 @@ final Log logger = Log();
 class Log extends Logger {
   Log();
   Log._internal(String currentWorkingDirectory)
-      : super(printer: MyLogPrinter(currentWorkingDirectory));
+      : super(
+          filter: MyLogFilter(),
+          printer: MyLogPrinter(currentWorkingDirectory),
+        );
 
   factory Log.d(String message, [dynamic error, StackTrace stackTrace]) {
     autoInit();
@@ -82,6 +86,15 @@ class Log extends Logger {
   }
 }
 
+class MyLogFilter extends LogFilter {
+  bool shouldLog(LogEvent event) {
+    if (kDebugMode || Log._loggingFile != null) {
+      return true;
+    }
+    return false;
+  }
+}
+
 class MyLogPrinter extends LogPrinter {
   MyLogPrinter(this.currentWorkingDirectory);
 
@@ -144,7 +157,8 @@ class MyLogPrinter extends LogPrinter {
     print(obj);
     try {
       if (Log._loggingFile != null) {
-        Log._loggingFile.writeAsStringSync(obj.toString(), mode: FileMode.append, flush: true);
+        Log._loggingFile
+            .writeAsStringSync('${obj.toString()}\n', mode: FileMode.append, flush: true);
       }
     } catch (e) {}
   }

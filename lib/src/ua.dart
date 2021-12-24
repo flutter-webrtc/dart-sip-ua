@@ -735,7 +735,8 @@ class UA extends EventManager {
       _transport = Transport(_configuration.sockets, <String, int>{
         // Recovery options.
         'max_interval': _configuration.connection_recovery_max_interval,
-        'min_interval': _configuration.connection_recovery_min_interval
+        'min_interval': _configuration.connection_recovery_min_interval,
+        'max_times': _configuration.connection_recovery_max_times
       });
 
       // Transport event callbacks.

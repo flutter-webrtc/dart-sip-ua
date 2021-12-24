@@ -37,6 +37,10 @@ class WebSocketImpl {
         onMessage?.call(data);
       }, onDone: () {
         onClose?.call(_socket.closeCode, _socket.closeReason);
+      }, onError: (Object error, StackTrace stack) {
+        //onerror
+        logger.error('websock-error=${error.toString()}');
+        logger.error('websock-stack=${stack.toString()}');
       });
     } catch (e) {
       onClose?.call(500, e.toString());

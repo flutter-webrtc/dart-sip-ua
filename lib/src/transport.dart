@@ -26,7 +26,8 @@ class C {
   // Recovery options.
   static const Map<String, int> recovery_options = <String, int>{
     'min_interval': 2, // minimum interval in seconds between recover attempts
-    'max_interval': 30 // maximum interval in seconds between recover attempts
+    'max_interval': 30, // maximum interval in seconds between recover attempts
+    'max_times': 5 // maximum times  between recovery attempts
   };
 }
 
@@ -192,11 +193,10 @@ class Transport {
    * Private API.
    */
 
-  void _reconnect(bool error) {
+  bool _reconnect(bool error) {
     _recover_attempts += 1;
-
-    num k =
-        Math.floor((Math.randomDouble() * Math.pow(2, _recover_attempts)) + 1);
+    if (_recover_attempts > _recovery_options['max_times']) return false;
+    num k = Math.floor((Math.randomDouble() * Math.pow(2, _recover_attempts)) + 1);
 
     if (k < _recovery_options['min_interval']) {
       k = _recovery_options['min_interval'];
@@ -215,6 +215,7 @@ class Transport {
         connect();
       }
     }, k * 1000);
+    return true;
   }
 
   /**
