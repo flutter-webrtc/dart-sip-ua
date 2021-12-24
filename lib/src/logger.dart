@@ -144,7 +144,7 @@ class MyLogPrinter extends LogPrinter {
     print(obj);
     try {
       if (Log._loggingFile != null) {
-        Log._loggingFile.writeAsString(obj.toString(), mode: FileMode.append, flush: true);
+        Log._loggingFile.writeAsStringSync(obj.toString(), mode: FileMode.append, flush: true);
       }
     } catch (e) {}
   }
