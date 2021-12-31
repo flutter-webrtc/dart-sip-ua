@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'package:test/test.dart';
-
 import 'package:sip_ua/src/config.dart' as config;
 import 'package:sip_ua/src/event_manager/event_manager.dart';
 import 'package:sip_ua/src/transports/websocket_interface.dart';
 import 'package:sip_ua/src/ua.dart';
+import 'package:test/test.dart';
 
 late UA ua;
 void main() {
@@ -20,17 +19,16 @@ void main() {
     configuration.uri = 'sip:100@127.0.0.1';
     try {
       ua = UA(configuration);
-      ua.on<EventSocketConnecting>(EventSocketConnecting(),
-          (EventSocketConnecting data) {
+      ua.on(EventSocketConnecting(), (EventSocketConnecting data) {
         print('connecting => ' + data.toString());
       });
 
-      ua.on<EventSocketConnected>(EventSocketConnected(),
+      ua.on<EventSocketConnected>(EventSocketConnected,
           (EventSocketConnected data) {
         print('connected => ' + data.toString());
       });
 
-      ua.on<EventSocketDisconnected>(EventSocketDisconnected(),
+      ua.on<EventSocketDisconnected>(EventSocketDisconnected,
           (EventSocketDisconnected data) {
         print('disconnected => ' + data.toString());
       });

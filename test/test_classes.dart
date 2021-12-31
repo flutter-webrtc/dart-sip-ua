@@ -33,8 +33,6 @@ List<void Function()> testFunctions = <void Function()>[
         expect(uri.toAor(), 'sip:jssip.net');
         uri.user = 'alice';
 
-        expect(() => uri.host, throwsNoSuchMethodError);
-
         // causes compile error with strict
         // expect(() => uri.host = {'bar': 'foo'}, throwsNoSuchMethodError);
 

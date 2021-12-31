@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:test/test.dart';
-
 import 'package:sip_ua/src/event_manager/events.dart';
 import 'package:sip_ua/src/transport.dart';
 import 'package:sip_ua/src/transports/websocket_interface.dart';
+import 'package:test/test.dart';
 
 List<void Function()> testFunctions = <void Function()>[
   () => test(' WebSocket: EchoTest', () async {
@@ -95,7 +94,8 @@ List<void Function()> testFunctions = <void Function()>[
           trasnport.disconnect();
         };
 
-        trasnport.ondisconnect = (WebSocketInterface? socket, ErrorCause cause) {
+        trasnport.ondisconnect =
+            (WebSocketInterface? socket, ErrorCause cause) {
           expect(trasnport.isConnected(), false);
           completer.complete();
         };
