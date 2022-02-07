@@ -26,7 +26,7 @@ class ErrorCause {
     return 'Code: [$status_code], Cause: $cause, Reason: $reason_phrase';
   }
 
-  int status_code;
-  String cause;
-  String reason_phrase;
+  int? status_code;
+  String? cause;
+  String? reason_phrase;
 }

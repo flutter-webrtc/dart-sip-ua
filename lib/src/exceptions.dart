@@ -4,9 +4,9 @@ class ErrorImpl extends Error {
   int? code;
   String? name;
   String? parameter;
-  dynamic? value;
+  dynamic value;
   String? message;
-  dynamic? status;
+  dynamic status;
 }
 
 class ConfigurationError extends ErrorImpl {

@@ -13,29 +13,29 @@ class Log extends Logger {
 
   factory Log.d(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
-    _self.d(message, error, stackTrace);
-    return _self;
+    _self!.d(message, error, stackTrace);
+    return _self!;
   }
 
   factory Log.i(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
-    _self.i(message, error, stackTrace);
-    return _self;
+    _self!.i(message, error, stackTrace);
+    return _self!;
   }
 
   factory Log.w(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
-    _self.w(message, error, stackTrace);
-    return _self;
+    _self!.w(message, error, stackTrace);
+    return _self!;
   }
 
   factory Log.e(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
-    _self.e(message, error, stackTrace);
-    return _self;
+    _self!.e(message, error, stackTrace);
+    return _self!;
   }
 
-  static late Log _self;
+  static Log? _self;
   static late String _localPath;
   static Level _loggingLevel = Level.debug;
   static set loggingLevel(Level loggingLevel) => _loggingLevel = loggingLevel;
@@ -71,11 +71,12 @@ class Log extends Logger {
 
     StackTraceNJ frames = StackTraceNJ();
 
-    for (Stackframe frame in frames.frames) {
-      _localPath = frame.sourceFile.path
-          .substring(frame.sourceFile.path.lastIndexOf('/'));
-      break;
-    }
+    if (frames.frames != null)
+      for (Stackframe frame in frames.frames!) {
+        _localPath = frame.sourceFile.path
+            .substring(frame.sourceFile.path.lastIndexOf('/'));
+        break;
+      }
   }
 }
 
@@ -110,14 +111,15 @@ class MyLogPrinter extends LogPrinter {
     StackTraceNJ frames = StackTraceNJ();
     int i = 0;
     int depth = 0;
-    for (Stackframe frame in frames.frames) {
-      i++;
-      String path2 = frame.sourceFile.path;
-      if (!path2.contains(Log._localPath) && !path2.contains('logger.dart')) {
-        depth = i - 1;
-        break;
+    if (frames.frames != null)
+      for (Stackframe frame in frames.frames!) {
+        i++;
+        String path2 = frame.sourceFile.path;
+        if (!path2.contains(Log._localPath) && !path2.contains('logger.dart')) {
+          depth = i - 1;
+          break;
+        }
       }
-    }
 
     print(color(
         '[$formattedDate] ${event.level} ${StackTraceNJ(skipFrames: depth).formatStackTrace(methodCount: 1)} ::: ${event.message}'));

@@ -156,7 +156,7 @@ URI? normalizeTarget(dynamic target, [String? domain]) {
     // - Last fragment is the desired domain.
     // - Otherwise append the given domain argument.
   } else if (target is String) {
-    List<String> targetArray = (target as String).split('@');
+    List<String> targetArray = target.split('@');
     String targetUser;
     String targetDomain;
 
@@ -237,6 +237,6 @@ String calculateMD5(String string) {
   return md5.convert(utf8.encode(string)).toString();
 }
 
-List<dynamic> cloneArray(List<dynamic> array) {
-  return (array != null && array is List) ? array.sublist(0) : <dynamic>[];
+List<dynamic> cloneArray(List<dynamic>? array) {
+  return (array != null) ? array.sublist(0) : <dynamic>[];
 }

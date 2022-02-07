@@ -1,4 +1,4 @@
-include: package:pedantic/analysis_options.yaml
+include: package:lints/recommended.yaml
 
 linter:
   rules:
@@ -45,7 +45,6 @@ analyzer:
     slash_for_doc_comments: ignore
     library_prefixes: ignore
     unused_field: ignore
-    top_level_function_literal_block: ignore
     avoid_init_to_null: ignore
     prefer_is_empty: ignore
     unused_element: ignore
@@ -59,6 +58,8 @@ analyzer:
     unused_import: ignore
     must_be_immutable: ignore
     todo: ignore
+    non_constant_identifier_names: ignore
+    unnecessary_null_comparison: ignore
 
   exclude:
     - lib/src/grammar_parser.dart

@@ -15,7 +15,7 @@ class DialogRequestSender {
   DialogRequestSender(
       Dialog dialog, OutgoingRequest request, EventManager eventHandlers) {
     _dialog = dialog;
-    _ua = dialog.ua;
+    _ua = dialog.ua!;
     _request = request;
     _eventHandlers = eventHandlers;
 
@@ -44,7 +44,7 @@ class DialogRequestSender {
       _eventHandlers.emit(EventOnAuthenticated(request: event.request));
     });
     handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
-      _receiveResponse(event.response);
+      _receiveResponse(event.response!);
     });
 
     _request_sender = RequestSender(_ua, _request, handlers);
@@ -87,11 +87,11 @@ class DialogRequestSender {
           _eventHandlers.emit(EventOnErrorResponse(response: response));
         }
       } else {
-        _dialog.local_seqnum += 1;
-        _request.cseq = _dialog.local_seqnum.toInt();
+        _dialog.local_seqnum = _dialog.local_seqnum! + 1;
+        _request.cseq = _dialog.local_seqnum!.toInt();
         _reattemptTimer = setTimeout(() {
           // TODO(cloudwebrtc): look at dialog state instead.
-          if (_dialog.owner.status != RTCSession.C.STATUS_TERMINATED) {
+          if (_dialog.owner!.status != RTCSession.C.STATUS_TERMINATED) {
             _reattempt = true;
             _request_sender.send();
           }

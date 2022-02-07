@@ -26,4 +26,3 @@ jobs:
           channel: 'stable'
       - run: flutter packages get
       - run: flutter format lib/ test/ --set-exit-if-changed
-      - run: flutter pub run import_sorter:main --no-comments --exit-if-changed
