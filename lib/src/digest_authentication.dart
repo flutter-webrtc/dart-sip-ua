@@ -9,12 +9,12 @@ class Challenge {
     return Challenge(map['algorithm'], map['realm'], map['nonce'],
         map['opaque'], map['stale'], map['qop']);
   }
-  String algorithm;
-  String realm;
-  String nonce;
-  String opaque;
-  bool stale;
-  dynamic qop; // String or List<dynamic>
+  String? algorithm;
+  String? realm;
+  String? nonce;
+  String? opaque;
+  bool? stale;
+  dynamic? qop; // String or List<dynamic>
 }
 
 class Credentials {
@@ -36,10 +36,10 @@ class DigestAuthentication {
   int _nc = 0;
   String _ncHex = '00000000';
   String? _algorithm;
-  late String _realm;
-  late String _nonce;
-  late String _opaque;
-  late bool _stale;
+  String? _realm;
+  String? _nonce;
+  String? _opaque;
+  bool? _stale;
   String? _qop;
   late SipMethod _method;
   dynamic _uri;
@@ -234,7 +234,7 @@ class DigestAuthentication {
       auth_params.add('nc=$_ncHex');
     }
     if (_stale != null) {
-      auth_params.add('stale=${_stale ? 'true' : 'false'}');
+      auth_params.add('stale=${_stale! ? 'true' : 'false'}');
     }
     return 'Digest ${auth_params.join(', ')}';
   }

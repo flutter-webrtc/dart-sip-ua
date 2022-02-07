@@ -229,8 +229,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
 
-    call!.answer(
-        helper!.buildCallOptions(!remote_has_video) as Map<String, Object>,
+    call!.answer(helper!.buildCallOptions(!remote_has_video),
         mediaStream: mediaStream);
   }
 

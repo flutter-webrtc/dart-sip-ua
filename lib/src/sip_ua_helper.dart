@@ -401,7 +401,7 @@ class Call {
   RTCSession get session => _session;
   CallStateEnum state;
 
-  void answer(Map<String, Object> options, {MediaStream? mediaStream = null}) {
+  void answer(Map<String, dynamic> options, {MediaStream? mediaStream = null}) {
     assert(_session != null, 'ERROR(answer): rtc session is invalid!');
     if (mediaStream != null) {
       options['mediaStream'] = mediaStream;
