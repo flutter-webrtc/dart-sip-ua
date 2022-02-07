@@ -1,7 +1,6 @@
-import 'package:test/test.dart';
-import 'package:sip_ua/src/digest_authentication.dart';
-
 import 'package:sip_ua/src/constants.dart';
+import 'package:sip_ua/src/digest_authentication.dart';
+import 'package:test/test.dart';
 
 // Results of this tests originally obtained from RFC 2617 and:
 // 'https://pernau.at/kd/sipdigest.php'
@@ -141,5 +140,7 @@ List<void Function()> testFunctions = <void Function()>[
 ];
 
 void main() {
-  testFunctions.forEach((Function func) => func());
+  for (Function func in testFunctions) {
+    func();
+  }
 }

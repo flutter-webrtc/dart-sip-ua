@@ -1,5 +1,4 @@
 import 'package:sip_ua/src/sip_message.dart';
-
 import '../constants.dart' as DartSIP_C;
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
@@ -13,10 +12,10 @@ import '../utils.dart' as Utils;
 class ReferSubscriber extends EventManager {
   ReferSubscriber(this._session);
 
-  int _id;
+  int? _id;
   final rtc.RTCSession _session;
 
-  int get id => _id;
+  int? get id => _id;
 
   void sendRefer(URI target, Map<String, dynamic> options) {
     logger.debug('sendRefer()');
@@ -28,7 +27,8 @@ class ReferSubscriber extends EventManager {
     addAllEventHandlers(eventHandlers);
 
     // Replaces URI header field.
-    String replaces;
+
+    String replaces = '';
 
     if (options['replaces'] != null) {
       replaces = options['replaces'].call_id;
@@ -39,14 +39,14 @@ class ReferSubscriber extends EventManager {
 
     // Refer-To header field.
     String referTo = 'Refer-To: <$target' +
-        (replaces != null ? '?Replaces=$replaces' : '') +
+        (replaces.isNotEmpty ? '?Replaces=$replaces' : '') +
         '>';
 
     extraHeaders.add(referTo);
 
     // Referred-By header field.
     String referredBy =
-        'Referred-By: <${_session.ua.configuration.uri.scheme}:${_session.ua.configuration.uri.user}@${_session.ua.configuration.uri.host}>';
+        'Referred-By: <${_session.ua!.configuration!.uri.scheme}:${_session.ua!.configuration!.uri.user}@${_session.ua!.configuration!.uri.host}>';
 
     extraHeaders.add(referredBy);
     extraHeaders.add('Contact: ${_session.contact}');
@@ -56,16 +56,16 @@ class ReferSubscriber extends EventManager {
       _requestSucceeded(event.response);
     });
     handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
-      _requestFailed(event.response, DartSIP_C.causes.REJECTED);
+      _requestFailed(event.response, DartSIP_C.CausesType.REJECTED);
     });
     handlers.on(EventOnTransportError(), (EventOnTransportError event) {
-      _requestFailed(null, DartSIP_C.causes.CONNECTION_ERROR);
+      _requestFailed(null, DartSIP_C.CausesType.CONNECTION_ERROR);
     });
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
-      _requestFailed(null, DartSIP_C.causes.REQUEST_TIMEOUT);
+      _requestFailed(null, DartSIP_C.CausesType.REQUEST_TIMEOUT);
     });
     handlers.on(EventOnDialogError(), (EventOnDialogError event) {
-      _requestFailed(null, DartSIP_C.causes.DIALOG_ERROR);
+      _requestFailed(null, DartSIP_C.CausesType.DIALOG_ERROR);
     });
 
     OutgoingRequest request = _session.sendRequest(
@@ -84,7 +84,7 @@ class ReferSubscriber extends EventManager {
       return;
     }
 
-    String status_line = request.body.trim();
+    String status_line = request.body!.trim();
     dynamic parsed = Grammar.parse(status_line, 'Status_Line');
 
     if (parsed == -1) {
@@ -109,7 +109,7 @@ class ReferSubscriber extends EventManager {
     }
   }
 
-  void _requestSucceeded(IncomingMessage response) {
+  void _requestSucceeded(IncomingMessage? response) {
     logger.debug('REFER succeeded');
 
     logger.debug('emit "requestSucceeded"');
@@ -117,7 +117,7 @@ class ReferSubscriber extends EventManager {
     emit(EventReferRequestSucceeded(response: response));
   }
 
-  void _requestFailed(IncomingMessage response, dynamic cause) {
+  void _requestFailed(IncomingMessage? response, dynamic cause) {
     logger.debug('REFER failed');
 
     logger.debug('emit "requestFailed"');

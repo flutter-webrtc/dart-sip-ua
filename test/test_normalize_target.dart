@@ -1,13 +1,13 @@
 import 'package:sip_ua/src/uri.dart';
-import 'package:test/test.dart';
 import 'package:sip_ua/src/utils.dart' as Utils;
+import 'package:test/test.dart';
 
 List<void Function()> testFunctions = <void Function()>[
   () => test('NormalizeTarget: valid targets', () {
         String domain = 'jssip.net';
 
         void test_ok(dynamic given_data, dynamic expected) {
-          URI uri = Utils.normalizeTarget(given_data, domain);
+          URI? uri = Utils.normalizeTarget(given_data, domain);
           expect(uri.toString(), expected);
         }
 
@@ -54,5 +54,7 @@ List<void Function()> testFunctions = <void Function()>[
 ];
 
 void main() {
-  testFunctions.forEach((Function func) => func());
+  for (Function func in testFunctions) {
+    func();
+  }
 }

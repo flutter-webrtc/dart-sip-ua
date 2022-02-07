@@ -13,17 +13,14 @@ import 'utils.dart';
  *
  */
 class URI {
-  URI(String scheme, String user, String host,
-      [int port,
-      Map<dynamic, dynamic> parameters,
-      Map<dynamic, dynamic> headers]) {
+  URI(String? scheme, this.user, String? host,
+      [int? port,
+      Map<dynamic, dynamic>? parameters,
+      Map<dynamic, dynamic>? headers]) {
     // Checks.
     if (host == null) {
       throw AssertionError('missing or invalid "host" parameter');
     }
-
-    // Initialize parameters.
-    this.user = user;
     _scheme = scheme ?? DartSIP_C.SIP;
     _host = host.toLowerCase();
     _port = port;
@@ -51,12 +48,12 @@ class URI {
     }
   }
 
-  String user;
-  String _scheme;
+  String? user;
+  late String _scheme;
   Map<dynamic, dynamic> _parameters = <dynamic, dynamic>{};
   Map<dynamic, dynamic> _headers = <dynamic, dynamic>{};
-  String _host;
-  int _port;
+  late String _host;
+  int? _port;
   String get scheme => _scheme;
 
   set scheme(String value) {
@@ -69,31 +66,31 @@ class URI {
     _host = value.toLowerCase();
   }
 
-  int get port => _port;
+  int? get port => _port;
 
-  set port(int value) {
-    _port = value == 0
+  set port(int? value) {
+    _port = (value == 0
         ? value
         : (value != null)
             ? utils.parseInt(value.toString(), 10)
-            : null;
+            : null)!;
   }
 
-  void setParam(String key, dynamic value) {
+  void setParam(String? key, dynamic value) {
     if (key != null) {
       _parameters[key.toLowerCase()] =
           (value == null) ? null : value.toString();
     }
   }
 
-  dynamic getParam(String key) {
+  dynamic getParam(String? key) {
     if (key != null) {
       return _parameters[key.toLowerCase()];
     }
     return null;
   }
 
-  bool hasParam(String key) {
+  bool hasParam(String? key) {
     if (key != null) {
       return (_parameters.containsKey(key.toLowerCase()) && true) || false;
     }
@@ -118,14 +115,14 @@ class URI {
         (value is List) ? value : <dynamic>[value];
   }
 
-  dynamic getHeader(String name) {
+  dynamic getHeader(String? name) {
     if (name != null) {
       return _headers[utils.headerize(name)];
     }
     return null;
   }
 
-  bool hasHeader(String name) {
+  bool hasHeader(String? name) {
     if (name != null) {
       return (_headers.containsKey(utils.headerize(name)) && true) || false;
     }
@@ -163,7 +160,7 @@ class URI {
     String uri = '$_scheme:';
 
     if (user != null) {
-      uri += '${utils.escapeUser(user)}@';
+      uri += '${utils.escapeUser(user!)}@';
     }
     uri += host;
     if (port != null || port == 0) {
@@ -195,7 +192,7 @@ class URI {
     String aor = '$_scheme:';
 
     if (user != null) {
-      aor += '${utils.escapeUser(user)}@';
+      aor += '${utils.escapeUser(user!)}@';
     }
     aor += _host;
     if (show_port && (_port != null || _port == 0)) {

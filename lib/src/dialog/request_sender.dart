@@ -15,20 +15,20 @@ class DialogRequestSender {
   DialogRequestSender(
       Dialog dialog, OutgoingRequest request, EventManager eventHandlers) {
     _dialog = dialog;
-    _ua = dialog.ua;
+    _ua = dialog.ua!;
     _request = request;
     _eventHandlers = eventHandlers;
 
     // RFC3261 14.1 Modifying an Existing Session. UAC Behavior.
     _reattempt = false;
   }
-  Dialog _dialog;
-  UA _ua;
-  OutgoingRequest _request;
-  EventManager _eventHandlers;
-  bool _reattempt;
-  Timer _reattemptTimer;
-  RequestSender _request_sender;
+  late Dialog _dialog;
+  late UA _ua;
+  late OutgoingRequest _request;
+  late EventManager _eventHandlers;
+  late bool _reattempt;
+  Timer? _reattemptTimer;
+  late RequestSender _request_sender;
   RequestSender get request_sender => _request_sender;
   OutgoingRequest get request => _request;
 
@@ -44,7 +44,7 @@ class DialogRequestSender {
       _eventHandlers.emit(EventOnAuthenticated(request: event.request));
     });
     handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
-      _receiveResponse(event.response);
+      _receiveResponse(event.response!);
     });
 
     _request_sender = RequestSender(_ua, _request, handlers);
@@ -57,7 +57,7 @@ class DialogRequestSender {
         request_sender.clientTransaction.state != TransactionState.TERMINATED) {
       _dialog.uac_pending_reply = true;
       EventManager eventHandlers = request_sender.clientTransaction;
-      void Function(EventStateChanged data) stateChanged;
+      late void Function(EventStateChanged data) stateChanged;
       stateChanged = (EventStateChanged data) {
         if (request_sender.clientTransaction.state ==
                 TransactionState.ACCEPTED ||
@@ -87,10 +87,11 @@ class DialogRequestSender {
           _eventHandlers.emit(EventOnErrorResponse(response: response));
         }
       } else {
-        _request.cseq = _dialog.local_seqnum += 1;
+        _dialog.local_seqnum = _dialog.local_seqnum! + 1;
+        _request.cseq = _dialog.local_seqnum!.toInt();
         _reattemptTimer = setTimeout(() {
           // TODO(cloudwebrtc): look at dialog state instead.
-          if (_dialog.owner.status != RTCSession.C.STATUS_TERMINATED) {
+          if (_dialog.owner!.status != RTCSession.C.STATUS_TERMINATED) {
             _reattempt = true;
             _request_sender.send();
           }
