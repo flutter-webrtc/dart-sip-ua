@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
-import 'package:sip_ua/src/rtc_session/refer_subscriber.dart';
 
+import 'package:sip_ua/src/rtc_session/refer_subscriber.dart';
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'event_manager/event_manager.dart';
@@ -71,14 +71,14 @@ class SIPUAHelper extends EventManager {
   Future<bool> call(String target,
       {bool voiceonly = false,
       MediaStream? mediaStream,
-      List<String> headers = const []}) async {
+      List<String>? headers}) async {
     if (_ua != null && _ua!.isConnected()) {
       Map<String, dynamic> options = buildCallOptions(voiceonly);
       if (mediaStream != null) {
         options['mediaStream'] = mediaStream;
       }
       List<dynamic> extHeaders = options['extraHeaders'] as List<dynamic>;
-      extHeaders.addAll(headers);
+      extHeaders.addAll(headers ?? <String>[]);
       _ua!.call(target, options);
       return true;
     } else {
@@ -344,15 +344,15 @@ class SIPUAHelper extends EventManager {
   }
 
   void _notifyTransportStateListeners(TransportState state) {
-    _sipUaHelperListeners.forEach((SipUaHelperListener listener) {
+    for (SipUaHelperListener listener in _sipUaHelperListeners) {
       listener.transportStateChanged(state);
-    });
+    }
   }
 
   void _notifyRegsistrationStateListeners(RegistrationState state) {
-    _sipUaHelperListeners.forEach((SipUaHelperListener listener) {
+    for (SipUaHelperListener listener in _sipUaHelperListeners) {
       listener.registrationStateChanged(state);
-    });
+    }
   }
 
   void _notifyCallStateListeners(CallEvent event, CallState state) {
@@ -362,15 +362,15 @@ class SIPUAHelper extends EventManager {
       return;
     }
     call.state = state.state;
-    _sipUaHelperListeners.forEach((SipUaHelperListener listener) {
+    for (SipUaHelperListener listener in _sipUaHelperListeners) {
       listener.callStateChanged(call, state);
-    });
+    }
   }
 
   void _notifyNewMessageListeners(SIPMessageRequest msg) {
-    _sipUaHelperListeners.forEach((SipUaHelperListener listener) {
+    for (SipUaHelperListener listener in _sipUaHelperListeners) {
       listener.onNewMessage(msg);
-    });
+    }
   }
 }
 

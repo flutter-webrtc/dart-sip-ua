@@ -92,9 +92,9 @@ class _MyRegisterWidget extends State<RegisterWidget>
   }
 
   void _handleSave(BuildContext context) {
-    if (_wsUriController.text == null) {
+    if (_wsUriController.text == '') {
       _alert(context, "WebSocket URL");
-    } else if (_sipUriController.text == null) {
+    } else if (_sipUriController.text == '') {
       _alert(context, "SIP URI");
     }
 

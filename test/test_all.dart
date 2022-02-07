@@ -5,9 +5,19 @@ import 'test_parser.dart' as Parser;
 import 'test_websocket.dart' as Websocket;
 
 void main() {
-  Classes.testFunctions.forEach((Function func) => func());
-  Parser.testFunctions.forEach((Function func) => func());
-  NormalizeTarget.testFunctions.forEach((Function func) => func());
-  DigestAuthentication.testFunctions.forEach((Function func) => func());
-  Websocket.testFunctions.forEach((Function func) => func());
+  for (Function func in Classes.testFunctions) {
+    func();
+  }
+  for (Function func in Parser.testFunctions) {
+    func();
+  }
+  for (Function func in NormalizeTarget.testFunctions) {
+    func();
+  }
+  for (Function func in DigestAuthentication.testFunctions) {
+    func();
+  }
+  for (Function func in Websocket.testFunctions) {
+    func();
+  }
 }

@@ -145,10 +145,12 @@ class InviteClientTransaction extends TransactionBase {
       switch (state) {
         case TransactionState.CALLING:
           stateChanged(TransactionState.PROCEEDING);
-          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
+          _eventHandlers.emit(
+              EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         case TransactionState.PROCEEDING:
-          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
+          _eventHandlers.emit(
+              EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         default:
           break;
@@ -161,10 +163,12 @@ class InviteClientTransaction extends TransactionBase {
           M = setTimeout(() {
             timer_M();
           }, Timers.TIMER_M);
-          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
+          _eventHandlers.emit(
+              EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         case TransactionState.ACCEPTED:
-          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
+          _eventHandlers.emit(
+              EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         default:
           break;
@@ -175,7 +179,8 @@ class InviteClientTransaction extends TransactionBase {
         case TransactionState.PROCEEDING:
           stateChanged(TransactionState.COMPLETED);
           sendACK(response);
-          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
+          _eventHandlers.emit(
+              EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         case TransactionState.COMPLETED:
           sendACK(response);

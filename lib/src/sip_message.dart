@@ -1,10 +1,10 @@
 import 'dart:convert' show utf8;
 
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
-import 'package:sip_ua/src/transactions/transaction_base.dart';
 
-import 'constants.dart';
+import 'package:sip_ua/src/transactions/transaction_base.dart';
 import 'constants.dart' as DartSIP_C;
+import 'constants.dart';
 import 'data.dart';
 import 'exceptions.dart' as Exceptions;
 import 'grammar.dart';
@@ -26,7 +26,7 @@ import 'utils.dart' as utils;
  * -param {String} [body]
  */
 class OutgoingRequest {
-  OutgoingRequest(SipMethod? method, URI? ruri, UA? ua,
+  OutgoingRequest(this.method, this.ruri, this.ua,
       [Map<String, dynamic>? params,
       List<dynamic>? extraHeaders,
       String? body]) {
@@ -36,10 +36,7 @@ class OutgoingRequest {
     }
 
     params = params ?? <String, dynamic>{};
-
-    this.ua = ua;
-    this.method = method;
-    this.ruri = ruri;
+    // ignore: prefer_initializing_formals
     this.body = body;
     if (extraHeaders != null)
       this.extraHeaders = utils.cloneArray(extraHeaders);
@@ -49,8 +46,8 @@ class OutgoingRequest {
     // Route.
     if (params['route_set'] != null) {
       setHeader('route', params['route_set']);
-    } else if (ua.configuration!.use_preloaded_route) {
-      setHeader('route', '<${ua.transport!.sip_uri};lr>');
+    } else if (ua!.configuration!.use_preloaded_route) {
+      setHeader('route', '<${ua!.transport!.sip_uri};lr>');
     }
 
     // Via.
@@ -71,7 +68,7 @@ class OutgoingRequest {
     setHeader('to', to.toString());
 
     // From.
-    dynamic from_uri = params['from_uri'] ?? ua.configuration!.uri;
+    dynamic from_uri = params['from_uri'] ?? ua!.configuration!.uri;
     Map<String, dynamic> from_params = <String, dynamic>{
       'tag': params['from_tag'] ?? utils.newTag()
     };
@@ -79,8 +76,8 @@ class OutgoingRequest {
 
     if (params['from_display_name'] != null) {
       display_name = params['from_display_name'];
-    } else if (ua.configuration!.display_name != null) {
-      display_name = ua.configuration!.display_name;
+    } else if (ua!.configuration!.display_name != null) {
+      display_name = ua!.configuration!.display_name;
     } else {
       display_name = null;
     }
@@ -90,7 +87,7 @@ class OutgoingRequest {
 
     // Call-ID.
     String call_id = params['call_id'] ??
-        (ua.configuration!.jssip_id! + utils.createRandomToken(15));
+        (ua!.configuration!.jssip_id! + utils.createRandomToken(15));
 
     this.call_id = call_id;
     setHeader('call-id', call_id);
@@ -233,9 +230,9 @@ class OutgoingRequest {
       });
     });
 
-    extraHeaders.forEach((dynamic header) {
+    for (dynamic header in extraHeaders) {
       msg += '${header.trim()}\r\n';
-    });
+    }
 
     // Supported.
     List<dynamic> supported = <dynamic>[];
@@ -517,8 +514,7 @@ class IncomingMessage {
 }
 
 class IncomingRequest extends IncomingMessage {
-  IncomingRequest(UA? ua) : super() {
-    this.ua = ua;
+  IncomingRequest(this.ua) : super() {
     headers = <String?, dynamic>{};
     ruri = null;
     transport = null;
@@ -551,7 +547,7 @@ class IncomingRequest extends IncomingMessage {
     // Validate code and reason values.
     if (code < 100 || code > 699) {
       throw Exceptions.TypeError('Invalid status_code: $code');
-    } else if (reason != null && reason is! String) {
+    } else if (reason != null) {
       throw Exceptions.TypeError('Invalid reason_phrase: $reason');
     }
 
@@ -657,7 +653,7 @@ class IncomingRequest extends IncomingMessage {
     // Validate code and reason values.
     if (code == null || (code < 100 || code > 699)) {
       throw Exceptions.TypeError('Invalid status_code: $code');
-    } else if (reason != null && reason is! String) {
+    } else if (reason != null) {
       throw Exceptions.TypeError('Invalid reason_phrase: $reason');
     }
 

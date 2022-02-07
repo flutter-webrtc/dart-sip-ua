@@ -78,7 +78,8 @@ class NonInviteClientTransaction extends TransactionBase {
         case TransactionState.TRYING:
         case TransactionState.PROCEEDING:
           stateChanged(TransactionState.PROCEEDING);
-          _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
+          _eventHandlers.emit(
+              EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         default:
           break;
@@ -93,7 +94,8 @@ class NonInviteClientTransaction extends TransactionBase {
           if (status_code == 408) {
             _eventHandlers.emit(EventOnRequestTimeout());
           } else {
-            _eventHandlers.emit(EventOnReceiveResponse(response: response as IncomingResponse?));
+            _eventHandlers.emit(EventOnReceiveResponse(
+                response: response as IncomingResponse?));
           }
 
           K = setTimeout(() {

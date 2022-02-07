@@ -54,18 +54,9 @@ class DTMF extends EventManager {
     print(options);
     List<dynamic> extraHeaders = options['extraHeaders'] != null
         ? Utils.cloneArray(options['extraHeaders'])
-        : [];
+        : <dynamic>[];
 
     _eventHandlers = options['eventHandlers'] ?? EventManager();
-
-    // Check tone type.
-    if (tone is String) {
-      tone = tone.toUpperCase();
-    } else if (tone is num) {
-      tone = tone.toString();
-    } else {
-      throw Exceptions.TypeError('Invalid tone: $tone');
-    }
 
     // Check tone value.
     if (!tone.contains(RegExp(r'^[0-9A-DR#*]$'))) {

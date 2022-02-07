@@ -120,16 +120,15 @@ class Checks {
     'user_agent': (Settings src, Settings? dst) {
       String user_agent = src.user_agent;
       if (user_agent == null) return;
-      if (user_agent is String) {
-        dst!.user_agent = user_agent;
-      }
+      dst!.user_agent = user_agent;
     },
     'connection_recovery_max_interval': (Settings src, Settings? dst) {
       int connection_recovery_max_interval =
           src.connection_recovery_max_interval;
       if (connection_recovery_max_interval == null) return;
       if (connection_recovery_max_interval > 0) {
-        dst!.connection_recovery_max_interval = connection_recovery_max_interval;
+        dst!.connection_recovery_max_interval =
+            connection_recovery_max_interval;
       }
     },
     'connection_recovery_min_interval': (Settings src, Settings? dst) {
@@ -137,7 +136,8 @@ class Checks {
           src.connection_recovery_min_interval;
       if (connection_recovery_min_interval == null) return;
       if (connection_recovery_min_interval > 0) {
-        dst!.connection_recovery_min_interval = connection_recovery_min_interval;
+        dst!.connection_recovery_min_interval =
+            connection_recovery_min_interval;
       }
     },
     'contact_uri': (Settings src, Settings? dst) {
@@ -177,9 +177,7 @@ class Checks {
     'session_timers': (Settings src, Settings? dst) {
       bool session_timers = src.session_timers;
       if (session_timers == null) return;
-      if (session_timers is bool) {
-        dst!.session_timers = session_timers;
-      }
+      dst!.session_timers = session_timers;
     },
     'session_timers_refresh_method': (Settings src, Settings? dst) {
       SipMethod method = src.session_timers_refresh_method;
@@ -205,9 +203,7 @@ class Checks {
     'register': (Settings src, Settings? dst) {
       bool? register = src.register;
       if (register == null) return;
-      if (register is bool) {
-        dst!.register = register;
-      }
+      dst!.register = register;
     },
     'register_expires': (Settings src, Settings? dst) {
       int? register_expires = src.register_expires;
@@ -233,24 +229,18 @@ class Checks {
       Map<String, dynamic>? register_extra_contact_uri_params =
           src.register_extra_contact_uri_params;
       if (register_extra_contact_uri_params == null) return;
-      if (register_extra_contact_uri_params is Map<String, dynamic>) {
-        dst!.register_extra_contact_uri_params =
-            register_extra_contact_uri_params;
-      }
+      dst!.register_extra_contact_uri_params =
+          register_extra_contact_uri_params;
     },
     'use_preloaded_route': (Settings src, Settings? dst) {
       bool use_preloaded_route = src.use_preloaded_route;
       if (use_preloaded_route == null) return;
-      if (use_preloaded_route is bool) {
-        dst!.use_preloaded_route = use_preloaded_route;
-      }
+      dst!.use_preloaded_route = use_preloaded_route;
     },
     'dtmf_mode': (Settings src, Settings? dst) {
       DtmfMode dtmf_mode = src.dtmf_mode;
       if (dtmf_mode == null) return;
-      if (dtmf_mode is DtmfMode) {
-        dst!.dtmf_mode = dtmf_mode;
-      }
+      dst!.dtmf_mode = dtmf_mode;
     },
   };
 }

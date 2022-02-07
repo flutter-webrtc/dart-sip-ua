@@ -235,7 +235,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _switchCamera() {
     if (_localStream != null) {
-      _localStream!.getVideoTracks()[0].switchCamera();
+      Helper.switchCamera(_localStream!.getVideoTracks()[0]);
     }
   }
 

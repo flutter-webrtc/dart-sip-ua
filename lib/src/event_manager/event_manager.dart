@@ -75,9 +75,9 @@ class EventManager {
   /// add all event handlers from an other instance of EventManager to this one.
   void addAllEventHandlers(EventManager other) {
     other.listeners.forEach((Type runtimeType, List<dynamic> otherListeners) {
-      otherListeners.forEach((dynamic otherListener) {
+      for (dynamic otherListener in otherListeners) {
         _addListener(runtimeType, otherListener);
-      });
+      }
     });
   }
 
@@ -102,14 +102,14 @@ class EventManager {
       // avoid concurrent modification
       List<dynamic> copy = List<dynamic>.from(targets);
 
-      copy.forEach((dynamic target) {
+      for (dynamic target in copy) {
         try {
           //   logger.warn("invoking $event on $target");
           target(event);
         } catch (e, s) {
           logger.error(e.toString(), null, s);
         }
-      });
+      }
     }
   }
 }

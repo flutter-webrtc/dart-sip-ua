@@ -29,11 +29,11 @@ class TransactionBag {
   List<T> getAll<T>(Type type) {
     List<T> results = <T>[];
 
-    transactions.values.forEach((TransactionBase transaction) {
+    for (TransactionBase transaction in transactions.values) {
       if (transaction.runtimeType == type) {
         results.add(transaction as T);
       }
-    });
+    }
 
     return results;
   }
@@ -127,7 +127,6 @@ bool checkTransaction(TransactionBag _transactions, IncomingRequest request) {
         request.reply_sl(481);
         return true;
       }
-      break;
     default:
       // Non-INVITE Server Transaction RFC 3261 17.2.2.
       NonInviteServerTransaction? tr = _transactions.getTransaction(

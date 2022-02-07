@@ -45,7 +45,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   Future<Widget?> _handleCall(BuildContext context,
       [bool voiceonly = false]) async {
-    var dest = _textController!.text;
+    var dest = _textController?.text;
     if (dest == null || dest.isEmpty) {
       showDialog<Null>(
         context: context,

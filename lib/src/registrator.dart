@@ -88,17 +88,12 @@ class Registrator {
 
   Transport? get transport => _transport;
 
-  void setExtraHeaders(List<String> extraHeaders) {
-    if (extraHeaders is! List) {
-      extraHeaders = <String>[];
-    }
-    _extraHeaders = extraHeaders;
+  void setExtraHeaders(List<String>? extraHeaders) {
+    _extraHeaders = extraHeaders ?? <String>[];
   }
 
-  void setExtraContactParams(Map<String, dynamic> extraContactParams) {
-    if (extraContactParams is! Map) {
-      extraContactParams = <String, dynamic>{};
-    }
+  void setExtraContactParams(Map<String, dynamic>? extraContactParams) {
+    extraContactParams ??= <String, dynamic>{};
 
     // Reset it.
     _extraContactParams = '';
@@ -153,13 +148,13 @@ class Registrator {
     EventManager handlers = EventManager();
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
       _registrationFailure(
-          UnHandledResponse(408, DartSIP_C.causes.REQUEST_TIMEOUT),
-          DartSIP_C.causes.REQUEST_TIMEOUT);
+          UnHandledResponse(408, DartSIP_C.CausesType.REQUEST_TIMEOUT),
+          DartSIP_C.CausesType.REQUEST_TIMEOUT);
     });
     handlers.on(EventOnTransportError(), (EventOnTransportError value) {
       _registrationFailure(
-          UnHandledResponse(500, DartSIP_C.causes.CONNECTION_ERROR),
-          DartSIP_C.causes.CONNECTION_ERROR);
+          UnHandledResponse(500, DartSIP_C.CausesType.CONNECTION_ERROR),
+          DartSIP_C.CausesType.CONNECTION_ERROR);
     });
     handlers.on(EventOnAuthenticated(), (EventOnAuthenticated value) {
       _cseq += 1;
@@ -265,7 +260,7 @@ class Registrator {
                 '423 response received for REGISTER without Min-Expires');
 
             _registrationFailure(
-                event.response, DartSIP_C.causes.SIP_FAILURE_CODE);
+                event.response, DartSIP_C.CausesType.SIP_FAILURE_CODE);
           }
         } else {
           String cause = utils.sipErrorCause(event.response!.status_code);
@@ -319,10 +314,10 @@ class Registrator {
 
     EventManager handlers = EventManager();
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
-      _unregistered(null, DartSIP_C.causes.REQUEST_TIMEOUT);
+      _unregistered(null, DartSIP_C.CausesType.REQUEST_TIMEOUT);
     });
     handlers.on(EventOnTransportError(), (EventOnTransportError value) {
-      _unregistered(null, DartSIP_C.causes.CONNECTION_ERROR);
+      _unregistered(null, DartSIP_C.CausesType.CONNECTION_ERROR);
     });
     handlers.on(EventOnAuthenticated(), (EventOnAuthenticated response) {
       // Increase the CSeq on authentication.

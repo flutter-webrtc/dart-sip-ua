@@ -62,7 +62,7 @@ class Transport {
       sockets = <WebSocketInterface>[sockets];
     }
 
-    sockets.forEach((dynamic socket) {
+    for (dynamic socket in sockets) {
       if (!Socket.isSocket(socket)) {
         throw Exceptions.TypeError(
             'Invalid argument. invalid \'DartSIP.Socket\' instance');
@@ -78,7 +78,7 @@ class Transport {
         'weight': socket.weight ?? 0,
         'status': C.SOCKET_STATUS_READY
       });
-    });
+    }
 
     // Get the socket with higher weight.
     _getSocket();
@@ -222,7 +222,7 @@ class Transport {
   void _getSocket() {
     List<Map<String, dynamic>> candidates = <Map<String, dynamic>>[];
 
-    _socketsMap.forEach((Map<String, dynamic> socket) {
+    for (Map<String, dynamic> socket in _socketsMap) {
       if (socket['status'] == C.SOCKET_STATUS_ERROR) {
         return; // continue the array iteration
       } else if (candidates.isEmpty) {
@@ -232,13 +232,13 @@ class Transport {
       } else if (socket['weight'] == candidates[0]['weight']) {
         candidates.add(socket);
       }
-    });
+    }
 
     if (candidates.isEmpty) {
       // All sockets have failed. reset sockets status.
-      _socketsMap.forEach((Map<String, dynamic> socket) {
+      for (Map<String, dynamic> socket in _socketsMap) {
         socket['status'] = C.SOCKET_STATUS_READY;
-      });
+      }
       // Get next available socket.
       _getSocket();
       return;
@@ -278,11 +278,11 @@ class Transport {
     }
     // Update socket status.
     else {
-      _socketsMap.forEach((Map<String, dynamic> socket) {
+      for (Map<String, dynamic> socket in _socketsMap) {
         if (socket == socket['socket']) {
           socket['status'] = C.SOCKET_STATUS_ERROR;
         }
-      });
+      }
     }
 
     _reconnect(error);

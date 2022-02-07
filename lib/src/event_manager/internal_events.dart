@@ -107,7 +107,7 @@ class EventReinvite extends EventType {
 class EventIceCandidate extends EventType {
   EventIceCandidate(this.candidate, this.ready);
   RTCIceCandidate candidate;
-  Future<Null> Function() ready;
+  Future<void> Function() ready;
 }
 
 class EventCreateAnswerFialed extends EventType {

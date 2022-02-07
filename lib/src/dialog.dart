@@ -11,7 +11,7 @@ import 'ua.dart';
 import 'uri.dart';
 import 'utils.dart' as Utils;
 
-class Dialog_C {
+class DialogStatus {
   // Dialog states.
   static const int STATUS_EARLY = 1;
   static const int STATUS_CONFIRMED = 2;
@@ -37,7 +37,7 @@ class Id {
 // RFC 3261 12.1.
 class Dialog {
   Dialog(RTCSession owner, dynamic message, String type, [int? state]) {
-    state = state ?? Dialog_C.STATUS_CONFIRMED;
+    state = state ?? DialogStatus.STATUS_CONFIRMED;
     _owner = owner;
     _ua = owner.ua;
 
@@ -48,8 +48,8 @@ class Dialog {
 
     if (message is IncomingResponse) {
       state = (message.status_code < 200)
-          ? Dialog_C.STATUS_EARLY
-          : Dialog_C.STATUS_CONFIRMED;
+          ? DialogStatus.STATUS_EARLY
+          : DialogStatus.STATUS_CONFIRMED;
     }
 
     dynamic contact = message.parseHeader('contact');
@@ -88,7 +88,7 @@ class Dialog {
 
     _ua!.newDialog(this);
     logger.debug(
-        '$type dialog created with status ${_state == Dialog_C.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
+        '$type dialog created with status ${_state == DialogStatus.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
   RTCSession? _owner;
@@ -111,7 +111,7 @@ class Dialog {
   RTCSession? get owner => _owner;
 
   void update(dynamic message, String type) {
-    _state = Dialog_C.STATUS_CONFIRMED;
+    _state = DialogStatus.STATUS_CONFIRMED;
 
     logger.debug('dialog ${_id.toString()}  changed to CONFIRMED state');
 
@@ -130,7 +130,7 @@ class Dialog {
     options = options ?? <String, dynamic>{};
     List<dynamic> extraHeaders = options['extraHeaders'] != null
         ? Utils.cloneArray(options['extraHeaders'])
-        : [];
+        : <dynamic>[];
     EventManager eventHandlers =
         options['eventHandlers'] as EventManager? ?? EventManager();
     String? body = options['body'] ?? null;

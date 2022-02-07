@@ -47,7 +47,7 @@ Map<String, List<int>> SIP_ERROR_CAUSES = <String, List<int>>{
   Causes.AUTHENTICATION_ERROR: <int>[401, 407]
 };
 
-class causes {
+class CausesType {
   static const String CONNECTION_ERROR = Causes.CONNECTION_ERROR;
   static const String REQUEST_TIMEOUT = Causes.REQUEST_TIMEOUT;
   static const String SIP_FAILURE_CODE = Causes.SIP_FAILURE_CODE;

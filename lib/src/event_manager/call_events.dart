@@ -55,7 +55,8 @@ class EventCallUnhold extends CallEvent {
 }
 
 class EventCallMuted extends CallEvent {
-  EventCallMuted({RTCSession? session, this.audio, this.video}) : super(session);
+  EventCallMuted({RTCSession? session, this.audio, this.video})
+      : super(session);
   bool? audio;
   bool? video;
 }

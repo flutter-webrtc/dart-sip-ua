@@ -45,9 +45,8 @@ class WebSocketInterface implements Socket {
   @override
   void Function()? onconnect;
   @override
-  void Function(
-          WebSocketInterface socket, bool error, int? closeCode, String? reason)?
-      ondisconnect;
+  void Function(WebSocketInterface socket, bool error, int? closeCode,
+      String? reason)? ondisconnect;
   @override
   void Function(dynamic data)? ondata;
   @override

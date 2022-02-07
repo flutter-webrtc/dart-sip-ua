@@ -172,15 +172,16 @@ class Message extends EventManager {
     if (_closed != null) {
       return;
     }
-    _failed('system', 408, DartSIP_C.causes.REQUEST_TIMEOUT, 'Request Timeout');
+    _failed(
+        'system', 408, DartSIP_C.CausesType.REQUEST_TIMEOUT, 'Request Timeout');
   }
 
   void _onTransportError() {
     if (_closed != null) {
       return;
     }
-    _failed(
-        'system', 500, DartSIP_C.causes.CONNECTION_ERROR, 'Transport Error');
+    _failed('system', 500, DartSIP_C.CausesType.CONNECTION_ERROR,
+        'Transport Error');
   }
 
   void close() {
@@ -206,8 +207,8 @@ class Message extends EventManager {
     _ua!.newMessage(this, originator, request);
   }
 
-  void _failed(
-      String originator, int? status_code, String cause, String? reason_phrase) {
+  void _failed(String originator, int? status_code, String cause,
+      String? reason_phrase) {
     logger.debug('MESSAGE failed');
     close();
     logger.debug('emit "failed"');

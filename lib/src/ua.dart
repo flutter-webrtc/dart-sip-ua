@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:sip_ua/src/data.dart';
-
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -41,9 +40,7 @@ class C {
   static const int NETWORK_ERROR = 2;
 }
 
-class window {
-  static bool hasRTCPeerConnection = true;
-}
+final bool hasRTCPeerConnection = true;
 
 class DynamicSettings {
   bool? register = false;
@@ -576,7 +573,7 @@ class UA extends EventManager {
     if (request.to_tag == null) {
       switch (method) {
         case SipMethod.INVITE:
-          if (window.hasRTCPeerConnection) {
+          if (hasRTCPeerConnection) {
             if (request.hasHeader('replaces')) {
               ParsedData replaces = request.replaces;
 

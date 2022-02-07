@@ -20,7 +20,8 @@ class WebSocketImpl {
   OnCloseCallback? onClose;
 
   void connect(
-      {Iterable<String>? protocols, required WebSocketSettings webSocketSettings}) async {
+      {Iterable<String>? protocols,
+      required WebSocketSettings webSocketSettings}) async {
     logger.info('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
       if (webSocketSettings.allowBadCertificate) {

@@ -56,16 +56,16 @@ class ReferSubscriber extends EventManager {
       _requestSucceeded(event.response);
     });
     handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
-      _requestFailed(event.response, DartSIP_C.causes.REJECTED);
+      _requestFailed(event.response, DartSIP_C.CausesType.REJECTED);
     });
     handlers.on(EventOnTransportError(), (EventOnTransportError event) {
-      _requestFailed(null, DartSIP_C.causes.CONNECTION_ERROR);
+      _requestFailed(null, DartSIP_C.CausesType.CONNECTION_ERROR);
     });
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
-      _requestFailed(null, DartSIP_C.causes.REQUEST_TIMEOUT);
+      _requestFailed(null, DartSIP_C.CausesType.REQUEST_TIMEOUT);
     });
     handlers.on(EventOnDialogError(), (EventOnDialogError event) {
-      _requestFailed(null, DartSIP_C.causes.DIALOG_ERROR);
+      _requestFailed(null, DartSIP_C.CausesType.DIALOG_ERROR);
     });
 
     OutgoingRequest request = _session.sendRequest(
