@@ -78,7 +78,7 @@ class WebSocketInterface implements Socket {
     }
     logger.debug('connecting to WebSocket $_url');
     try {
-      _ws = WebSocketImpl(_url);
+      _ws = WebSocketImpl(_url!);
 
       _ws!.onOpen = () {
         _closed = false;
