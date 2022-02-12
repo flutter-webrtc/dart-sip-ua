@@ -66,6 +66,11 @@ class WebSocketInterface implements Socket {
   @override
   void connect() async {
     logger.debug('connect()');
+
+    if (_url == null) {
+      throw AssertionError('Invalid argument: _url');
+    }
+
     if (isConnected()) {
       logger.debug('WebSocket $_url is already connected');
       return;
@@ -78,7 +83,7 @@ class WebSocketInterface implements Socket {
     }
     logger.debug('connecting to WebSocket $_url');
     try {
-      _ws = WebSocketImpl(_url);
+      _ws = WebSocketImpl(_url!);
 
       _ws!.onOpen = () {
         _closed = false;

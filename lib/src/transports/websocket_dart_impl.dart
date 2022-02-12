@@ -13,7 +13,7 @@ typedef OnOpenCallback = void Function();
 class WebSocketImpl {
   WebSocketImpl(this._url);
 
-  final String? _url;
+  final String _url;
   WebSocket? _socket;
   OnOpenCallback? onOpen;
   OnMessageCallback? onMessage;
@@ -26,9 +26,9 @@ class WebSocketImpl {
     try {
       if (webSocketSettings.allowBadCertificate) {
         /// Allow self-signed certificate, for test only.
-        _socket = await _connectForBadCertificate(_url!, webSocketSettings);
+        _socket = await _connectForBadCertificate(_url, webSocketSettings);
       } else {
-        _socket = await WebSocket.connect(_url!,
+        _socket = await WebSocket.connect(_url,
             protocols: protocols, headers: webSocketSettings.extraHeaders);
       }
 
