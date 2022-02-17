@@ -226,12 +226,12 @@ class Checks {
         dst!.registrar_server = parsed;
       }
     },
-    'register_extra_contact_params': (Settings src, Settings dst) {
+    'register_extra_contact_params': (Settings src, Settings? dst) {
       Map<String, dynamic>? register_extra_contact_params =
           src.register_extra_contact_params;
       if (register_extra_contact_params == null) return;
       if (register_extra_contact_params is Map<String, dynamic>) {
-        dst.register_extra_contact_params =
+        dst!.register_extra_contact_params =
             register_extra_contact_params;
       }
     },

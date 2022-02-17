@@ -68,7 +68,7 @@ class SIPUAHelper extends EventManager {
     }
   }
 
-  Future<RTCSession> call(String target,
+  Future<RTCSession?> call(String target,
       {bool voiceonly = false,
       MediaStream? mediaStream,
       List<String>? headers}) async {
