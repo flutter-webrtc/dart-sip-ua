@@ -10,8 +10,8 @@ void main() async {
 
 class TestWebsocket2 {
   bool connected = false;
-  WebSocket ws;
-  Completer<String> completer;
+  late WebSocket ws;
+  late Completer<String> completer;
   int ctr = 1;
 
   Completer<String> finished = Completer<String>();
@@ -23,7 +23,7 @@ class TestWebsocket2 {
     completer.future.then((dynamic t) {
       ctr += 7;
       if (ctr > 5000 || finished.isCompleted) {
-        finished.complete();
+        finished.complete('');
       } else {
         send();
       }
@@ -45,8 +45,8 @@ class TestWebsocket2 {
   void _onMessage(String data) {
     print('Received data of size ${data.length} expected $ctr');
     if (data.length != ctr) {
-      finished.complete();
+      finished.complete('');
     }
-    completer.complete();
+    completer.complete('');
   }
 }

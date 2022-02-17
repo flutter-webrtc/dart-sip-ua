@@ -9,7 +9,8 @@ import '../ua.dart';
 import 'transaction_base.dart';
 
 class InviteServerTransaction extends TransactionBase {
-  InviteServerTransaction(UA ua, Transport transport, IncomingRequest request) {
+  InviteServerTransaction(
+      UA ua, Transport? transport, IncomingRequest request) {
     id = request.via_branch;
     this.ua = ua;
     this.transport = transport;
@@ -25,9 +26,9 @@ class InviteServerTransaction extends TransactionBase {
 
     request.reply(100);
   }
-  Timer _resendProvisionalTimer;
-  bool transportError;
-  Timer L, H, I;
+  Timer? _resendProvisionalTimer;
+  bool? transportError;
+  Timer? L, H, I;
 
   void stateChanged(TransactionState state) {
     this.state = state;
@@ -42,7 +43,7 @@ class InviteServerTransaction extends TransactionBase {
     }
 
     stateChanged(TransactionState.TERMINATED);
-    ua.destroyTransaction(this);
+    ua!.destroyTransaction(this);
   }
 
   void timer_I() {
@@ -55,7 +56,7 @@ class InviteServerTransaction extends TransactionBase {
 
     if (state == TransactionState.ACCEPTED) {
       stateChanged(TransactionState.TERMINATED);
-      ua.destroyTransaction(this);
+      ua!.destroyTransaction(this);
     }
   }
 
@@ -76,12 +77,12 @@ class InviteServerTransaction extends TransactionBase {
       clearTimeout(I);
 
       stateChanged(TransactionState.TERMINATED);
-      ua.destroyTransaction(this);
+      ua!.destroyTransaction(this);
     }
   }
 
   void resend_provisional() {
-    if (!transport.send(last_response)) {
+    if (!transport!.send(last_response)) {
       onTransportError();
     }
   }
@@ -89,11 +90,11 @@ class InviteServerTransaction extends TransactionBase {
   // INVITE Server Transaction RFC 3261 17.2.1.
   @override
   void receiveResponse(int status_code, IncomingMessage response,
-      [void Function() onSuccess, void Function() onFailure]) {
+      [void Function()? onSuccess, void Function()? onFailure]) {
     if (status_code >= 100 && status_code <= 199) {
       switch (state) {
         case TransactionState.PROCEEDING:
-          if (!transport.send(response)) {
+          if (!transport!.send(response)) {
             onTransportError();
           }
           last_response = response;
@@ -126,7 +127,7 @@ class InviteServerTransaction extends TransactionBase {
       /* falls through */
       if (state == TransactionState.ACCEPTED) {
         // Note that this point will be reached for proceeding state also.
-        if (!transport.send(response)) {
+        if (!transport!.send(response)) {
           onTransportError();
           if (onFailure != null) {
             onFailure();
@@ -143,7 +144,7 @@ class InviteServerTransaction extends TransactionBase {
             _resendProvisionalTimer = null;
           }
 
-          if (!transport.send(response)) {
+          if (!transport!.send(response)) {
             onTransportError();
             if (onFailure != null) {
               onFailure();

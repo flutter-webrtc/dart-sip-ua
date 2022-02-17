@@ -1,6 +1,7 @@
 import 'dart:core' as core show StackTrace;
 import 'dart:core';
 import 'dart:io';
+
 import 'package:path/path.dart';
 
 class StackTraceNJ implements core.StackTrace {
@@ -16,16 +17,16 @@ class StackTraceNJ implements core.StackTrace {
       RegExp(r'#[0-9]+[\s]+(.+) \(([^\s]+)\)');
   final core.StackTrace stackTrace;
 
-  final String workingDirectory;
+  final String? workingDirectory;
   final int _skipFrames;
 
-  List<Stackframe> _frames;
+  List<Stackframe>? _frames;
 
   ///
   /// Returns a File instance for the current stackframe
   ///
   File get sourceFile {
-    return frames[0].sourceFile;
+    return frames![0].sourceFile;
   }
 
   ///
@@ -42,18 +43,18 @@ class StackTraceNJ implements core.StackTrace {
   /// Returns the filename for the current stackframe
   ///
   int get lineNo {
-    return frames[0].lineNo;
+    return frames![0].lineNo;
   }
 
   /// Outputs a formatted string of the current stack_trace_nj
   /// showing upto [methodCount] methods in the trace.
   /// [methodCount] defaults to 10.
 
-  String formatStackTrace({bool showPath = false, int methodCount = 10}) {
+  String? formatStackTrace({bool showPath = false, int methodCount = 10}) {
     List<String> formatted = <String>[];
     int count = 0;
 
-    for (Stackframe stackFrame in frames) {
+    for (Stackframe stackFrame in frames!) {
       // if (stackFrame.sourceFile.contains('log.dart') ||
       //     stackFrame.sourceFile.contains('package:logger')) {
       //   continue;
@@ -68,7 +69,7 @@ class StackTraceNJ implements core.StackTrace {
       String newLine = '$sourceFile:${stackFrame.lineNo}';
 
       if (workingDirectory != null) {
-        formatted.add('file:///' + workingDirectory + newLine);
+        formatted.add('file:///' + workingDirectory! + newLine);
       } else {
         formatted.add(newLine);
       }
@@ -84,14 +85,14 @@ class StackTraceNJ implements core.StackTrace {
     }
   }
 
-  List<Stackframe> get frames {
+  List<Stackframe>? get frames {
     _frames ??= _extractFrames();
     return _frames;
   }
 
   @override
   String toString() {
-    return formatStackTrace();
+    return formatStackTrace()!;
   }
 
   List<Stackframe> _extractFrames() {
@@ -106,13 +107,13 @@ class StackTraceNJ implements core.StackTrace {
         skipFrames--;
         continue;
       }
-      Match match = stackTraceRegex.matchAsPrefix(line);
+      Match? match = stackTraceRegex.matchAsPrefix(line);
       if (match == null) continue;
 
       // source is one of two formats
       // file:///.../squarephone_app/filename.dart:column:line
       // package:/squarephone/.path./filename.dart:column:line
-      String source = match.group(2);
+      String source = match.group(2)!;
       List<String> sourceParts = source.split(':');
       ArgumentError.value(sourceParts.length == 4,
           "Stackframe source does not contain the expeted no of colons '$source'");
@@ -128,7 +129,7 @@ class StackTraceNJ implements core.StackTrace {
       }
 
       // the actual contents of the line (sort of)
-      String details = match.group(1);
+      String? details = match.group(1);
 
       sourcePath = sourcePath.replaceAll('<anonymous closure>', '()');
       sourcePath = sourcePath.replaceAll('package:', '');
@@ -151,5 +152,5 @@ class Stackframe {
   final File sourceFile;
   final int lineNo;
   final int column;
-  final String details;
+  final String? details;
 }

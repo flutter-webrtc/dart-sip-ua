@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:test/test.dart';
 
 List<void Function()> testFunctions = <void Function()>[
@@ -14,5 +15,7 @@ List<void Function()> testFunctions = <void Function()>[
 ];
 
 void main() {
-  testFunctions.forEach((Function func) => func());
+  for (Function func in testFunctions) {
+    func();
+  }
 }

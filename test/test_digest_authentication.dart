@@ -1,7 +1,6 @@
-import 'package:test/test.dart';
-import 'package:sip_ua/src/digest_authentication.dart';
-
 import 'package:sip_ua/src/constants.dart';
+import 'package:sip_ua/src/digest_authentication.dart';
+import 'package:test/test.dart';
 
 // Results of this tests originally obtained from RFC 2617 and:
 // 'https://pernau.at/kd/sipdigest.php'
@@ -74,7 +73,7 @@ List<void Function()> testFunctions = <void Function()>[
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
           'opaque': null,
           'stale': null,
-          'qop': ['auth']
+          'qop': <String>['auth']
         });
 
         DigestAuthentication digest = DigestAuthentication(credentials);
@@ -101,7 +100,7 @@ List<void Function()> testFunctions = <void Function()>[
           'nonce': '5a071f75353f667787615249c62dcc7b15a4828f',
           'opaque': null,
           'stale': null,
-          'qop': ['auth', 'auth-int']
+          'qop': <String>['auth', 'auth-int']
         });
 
         DigestAuthentication digest = DigestAuthentication(credentials);
@@ -141,5 +140,7 @@ List<void Function()> testFunctions = <void Function()>[
 ];
 
 void main() {
-  testFunctions.forEach((Function func) => func());
+  for (Function func in testFunctions) {
+    func();
+  }
 }

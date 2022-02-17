@@ -47,7 +47,7 @@ Map<String, List<int>> SIP_ERROR_CAUSES = <String, List<int>>{
   Causes.AUTHENTICATION_ERROR: <int>[401, 407]
 };
 
-class causes {
+class CausesType {
   static const String CONNECTION_ERROR = Causes.CONNECTION_ERROR;
   static const String REQUEST_TIMEOUT = Causes.REQUEST_TIMEOUT;
   static const String SIP_FAILURE_CODE = Causes.SIP_FAILURE_CODE;
@@ -110,12 +110,12 @@ enum SipMethod {
 }
 
 class SipMethodHelper {
-  static String getName(SipMethod method) {
+  static String getName(SipMethod? method) {
     int period = method.toString().indexOf('.');
     return method.toString().substring(period + 1);
   }
 
-  static SipMethod fromString(String name) {
+  static SipMethod? fromString(String? name) {
     if (name != null) {
       String cleanName = name.toUpperCase();
       for (SipMethod method in SipMethod.values) {

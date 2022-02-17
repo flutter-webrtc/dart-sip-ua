@@ -1,61 +1,63 @@
 import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-
-import 'widgets/action_button.dart';
 import 'package:sip_ua/sip_ua.dart';
 
+import 'widgets/action_button.dart';
+
 class CallScreenWidget extends StatefulWidget {
-  final SIPUAHelper _helper;
-  final Call _call;
-  CallScreenWidget(this._helper, this._call, {Key key}) : super(key: key);
+  final SIPUAHelper? _helper;
+  final Call? _call;
+  CallScreenWidget(this._helper, this._call, {Key? key}) : super(key: key);
   @override
   _MyCallScreenWidget createState() => _MyCallScreenWidget();
 }
 
 class _MyCallScreenWidget extends State<CallScreenWidget>
     implements SipUaHelperListener {
-  RTCVideoRenderer _localRenderer = RTCVideoRenderer();
-  RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
-  double _localVideoHeight;
-  double _localVideoWidth;
-  EdgeInsetsGeometry _localVideoMargin;
-  MediaStream _localStream;
-  MediaStream _remoteStream;
+  RTCVideoRenderer? _localRenderer = RTCVideoRenderer();
+  RTCVideoRenderer? _remoteRenderer = RTCVideoRenderer();
+  double? _localVideoHeight;
+  double? _localVideoWidth;
+  EdgeInsetsGeometry? _localVideoMargin;
+  MediaStream? _localStream;
+  MediaStream? _remoteStream;
 
   bool _showNumPad = false;
   String _timeLabel = '00:00';
-  Timer _timer;
+  late Timer _timer;
   bool _audioMuted = false;
   bool _videoMuted = false;
   bool _speakerOn = false;
   bool _hold = false;
-  String _holdOriginator;
+  String? _holdOriginator;
   CallStateEnum _state = CallStateEnum.NONE;
-  SIPUAHelper get helper => widget._helper;
+  SIPUAHelper? get helper => widget._helper;
 
   bool get voiceonly =>
-      (_localStream == null || _localStream.getVideoTracks().isEmpty) &&
-      (_remoteStream == null || _remoteStream.getVideoTracks().isEmpty);
+      (_localStream == null || _localStream!.getVideoTracks().isEmpty) &&
+      (_remoteStream == null || _remoteStream!.getVideoTracks().isEmpty);
 
-  String get remote_identity => call.remote_identity;
+  String? get remote_identity => call!.remote_identity;
 
-  String get direction => call.direction;
+  String get direction => call!.direction;
 
-  Call get call => widget._call;
+  Call? get call => widget._call;
 
   @override
   initState() {
     super.initState();
     _initRenderers();
-    helper.addSipUaHelperListener(this);
+    helper!.addSipUaHelperListener(this);
     _startTimer();
   }
 
   @override
   deactivate() {
     super.deactivate();
-    helper.removeSipUaHelperListener(this);
+    helper!.removeSipUaHelperListener(this);
     _disposeRenderers();
   }
 
@@ -76,20 +78,20 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _initRenderers() async {
     if (_localRenderer != null) {
-      await _localRenderer.initialize();
+      await _localRenderer!.initialize();
     }
     if (_remoteRenderer != null) {
-      await _remoteRenderer.initialize();
+      await _remoteRenderer!.initialize();
     }
   }
 
   void _disposeRenderers() {
     if (_localRenderer != null) {
-      _localRenderer.dispose();
+      _localRenderer!.dispose();
       _localRenderer = null;
     }
     if (_remoteRenderer != null) {
-      _remoteRenderer.dispose();
+      _remoteRenderer!.dispose();
       _remoteRenderer = null;
     }
   }
@@ -105,15 +107,15 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     }
 
     if (callState.state == CallStateEnum.MUTED) {
-      if (callState.audio) _audioMuted = true;
-      if (callState.video) _videoMuted = true;
+      if (callState.audio!) _audioMuted = true;
+      if (callState.video!) _videoMuted = true;
       this.setState(() {});
       return;
     }
 
     if (callState.state == CallStateEnum.UNMUTED) {
-      if (callState.audio) _audioMuted = false;
-      if (callState.video) _videoMuted = false;
+      if (callState.audio!) _audioMuted = false;
+      if (callState.video!) _videoMuted = false;
       this.setState(() {});
       return;
     }
@@ -151,25 +153,36 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   @override
   void registrationStateChanged(RegistrationState state) {}
 
+  void _cleanUp() {
+    _localStream?.getTracks().forEach((track) {
+      track.stop();
+    });
+    _localStream!.dispose();
+    _localStream = null;
+  }
+
   void _backToDialPad() {
     _timer.cancel();
     Timer(Duration(seconds: 2), () {
       Navigator.of(context).pop();
     });
+    _cleanUp();
   }
 
   void _handelStreams(CallState event) async {
-    MediaStream stream = event.stream;
+    MediaStream? stream = event.stream;
     if (event.originator == 'local') {
       if (_localRenderer != null) {
-        _localRenderer.srcObject = stream;
+        _localRenderer!.srcObject = stream;
       }
-      event.stream?.getAudioTracks()?.first?.enableSpeakerphone(false);
+      if (!kIsWeb && !WebRTC.platformIsDesktop) {
+        event.stream?.getAudioTracks().first.enableSpeakerphone(false);
+      }
       _localStream = stream;
     }
     if (event.originator == 'remote') {
       if (_remoteRenderer != null) {
-        _remoteRenderer.srcObject = stream;
+        _remoteRenderer!.srcObject = stream;
       }
       _remoteStream = stream;
     }
@@ -192,45 +205,65 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _handleHangup() {
-    call.hangup();
+    call!.hangup();
     _timer.cancel();
   }
 
-  void _handleAccept() {
-    call.answer(helper.buildCallOptions());
+  void _handleAccept() async {
+    bool remote_has_video = call!.remote_has_video;
+    final mediaConstraints = <String, dynamic>{
+      'audio': true,
+      'video': remote_has_video
+    };
+    MediaStream mediaStream;
+
+    if (kIsWeb && remote_has_video) {
+      mediaStream =
+          await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+      mediaConstraints['video'] = false;
+      MediaStream userStream =
+          await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+    } else {
+      mediaConstraints['video'] = remote_has_video;
+      mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    }
+
+    call!.answer(helper!.buildCallOptions(!remote_has_video),
+        mediaStream: mediaStream);
   }
 
   void _switchCamera() {
     if (_localStream != null) {
-      _localStream.getVideoTracks()[0].switchCamera();
+      Helper.switchCamera(_localStream!.getVideoTracks()[0]);
     }
   }
 
   void _muteAudio() {
     if (_audioMuted) {
-      call.unmute(true, false);
+      call!.unmute(true, false);
     } else {
-      call.mute(true, false);
+      call!.mute(true, false);
     }
   }
 
   void _muteVideo() {
     if (_videoMuted) {
-      call.unmute(false, true);
+      call!.unmute(false, true);
     } else {
-      call.mute(false, true);
+      call!.mute(false, true);
     }
   }
 
   void _handleHold() {
     if (_hold) {
-      call.unhold();
+      call!.unhold();
     } else {
-      call.hold();
+      call!.hold();
     }
   }
 
-  String _tansfer_target;
+  late String _tansfer_target;
   void _handleTransfer() {
     showDialog<Null>(
       context: context,
@@ -250,14 +283,14 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             textAlign: TextAlign.center,
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('Ok'),
               onPressed: () {
-                call.refer(_tansfer_target);
+                call!.refer(_tansfer_target);
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -271,7 +304,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _handleDtmf(String tone) {
     print('Dtmf tone => $tone');
-    call.sendDTMF(tone);
+    call!.sendDTMF(tone);
   }
 
   void _handleKeyPad() {
@@ -283,7 +316,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void _toggleSpeaker() {
     if (_localStream != null) {
       _speakerOn = !_speakerOn;
-      _localStream.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      if (!kIsWeb) {
+        _localStream!.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      }
     }
   }
 
@@ -467,14 +502,14 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
     if (!voiceonly && _remoteStream != null) {
       stackWidgets.add(Center(
-        child: RTCVideoView(_remoteRenderer),
+        child: RTCVideoView(_remoteRenderer!),
       ));
     }
 
     if (!voiceonly && _localStream != null) {
       stackWidgets.add(Container(
         child: AnimatedContainer(
-          child: RTCVideoView(_localRenderer),
+          child: RTCVideoView(_localRenderer!),
           height: _localVideoHeight,
           width: _localVideoWidth,
           alignment: Alignment.topRight,
@@ -501,7 +536,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
                     child: Text(
                       (voiceonly ? 'VOICE CALL' : 'VIDEO CALL') +
                           (_hold
-                              ? ' PAUSED BY ${this._holdOriginator.toUpperCase()}'
+                              ? ' PAUSED BY ${this._holdOriginator!.toUpperCase()}'
                               : ''),
                       style: TextStyle(fontSize: 24, color: Colors.black54),
                     ))),

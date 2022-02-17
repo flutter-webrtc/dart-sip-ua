@@ -21,15 +21,15 @@ class NonInviteClientTransaction extends TransactionBase {
 
     String via = 'SIP/2.0/${transport.via_transport}';
 
-    via += ' ${ua.configuration.via_host};branch=$id';
+    via += ' ${ua.configuration!.via_host};branch=$id';
 
     request.setHeader('via', via);
 
     ua.newTransaction(this);
   }
 
-  EventManager _eventHandlers;
-  Timer F, K;
+  late EventManager _eventHandlers;
+  Timer? F, K;
 
   void stateChanged(TransactionState state) {
     this.state = state;
@@ -43,7 +43,7 @@ class NonInviteClientTransaction extends TransactionBase {
       timer_F();
     }, Timers.TIMER_F);
 
-    if (!transport.send(request)) {
+    if (!transport!.send(request)) {
       onTransportError();
     }
   }
@@ -54,31 +54,32 @@ class NonInviteClientTransaction extends TransactionBase {
     clearTimeout(F);
     clearTimeout(K);
     stateChanged(TransactionState.TERMINATED);
-    ua.destroyTransaction(this);
+    ua!.destroyTransaction(this);
     _eventHandlers.emit(EventOnTransportError());
   }
 
   void timer_F() {
     logger.debug('Timer F expired for transaction $id');
     stateChanged(TransactionState.TERMINATED);
-    ua.destroyTransaction(this);
+    ua!.destroyTransaction(this);
     _eventHandlers.emit(EventOnRequestTimeout());
   }
 
   void timer_K() {
     stateChanged(TransactionState.TERMINATED);
-    ua.destroyTransaction(this);
+    ua!.destroyTransaction(this);
   }
 
   @override
   void receiveResponse(int status_code, IncomingMessage response,
-      [void Function() onSuccess, void Function() onFailure]) {
+      [void Function()? onSuccess, void Function()? onFailure]) {
     if (status_code < 200) {
       switch (state) {
         case TransactionState.TRYING:
         case TransactionState.PROCEEDING:
           stateChanged(TransactionState.PROCEEDING);
-          _eventHandlers.emit(EventOnReceiveResponse(response: response));
+          _eventHandlers.emit(
+              EventOnReceiveResponse(response: response as IncomingResponse?));
           break;
         default:
           break;
@@ -93,7 +94,8 @@ class NonInviteClientTransaction extends TransactionBase {
           if (status_code == 408) {
             _eventHandlers.emit(EventOnRequestTimeout());
           } else {
-            _eventHandlers.emit(EventOnReceiveResponse(response: response));
+            _eventHandlers.emit(EventOnReceiveResponse(
+                response: response as IncomingResponse?));
           }
 
           K = setTimeout(() {

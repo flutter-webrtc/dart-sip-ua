@@ -1,6 +1,50 @@
 # Changelog
 
 --------------------------------------------
+[0.5.1] - 2022.02.13
+
+* chore: Fix compilation error for web.
+
+[0.5.0] - 2022.02.08
+
+* Null safety.
+* Bump version for flutter-webrtc.
+
+[0.4.0] - 2021.10.13
+
+* Add extended header support (#235)
+* Add iceGatheringTimeout for UaSettings.
+
+[0.3.9] - 2021.09.27
+
+* Upgrade flutter-webrtc to 0.6.8
+
+[0.3.8] - 2021.09.26
+
+* Fix ice delay.
+* Don't run ready if session has been terminated (#226)
+* Support IceRestart when IceStateDisconnected (#218)
+* Add options to the hangup (#224)
+* Adaptive when answering audio or video calls.
+
+[0.3.7] - 2021.08.24
+
+* Fix the issue that unified-plan's onTrack does not call back AudioTrack.
+* Export PeerConnection for call.
+
+[0.3.6] - 2021.08.24
+
+* Support custom MediaStream for call/answer.
+* Fix the exception caused by speaker operation in web mode.
+* bump dependencies (#216)
+* Fix the parameters with double quotes in the Authentication header,
+    and the unknown parameters are saved to auth_params.
+* updated crypto and uuid versions (#188)
+* Update dependency sdp_transform to ^0.3.0
+* Fixed mute audio for unified-plan
+* Add remote_has_audio/video method for Call.
+* Configuring via_transport.
+
 [0.3.5] - 2021.02.03
 
 * Upgrade flutter-webrtc to 0.5.8.

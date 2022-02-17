@@ -1,8 +1,8 @@
 import 'package:sip_ua/src/data.dart';
-import 'package:test/test.dart';
 import 'package:sip_ua/src/grammar.dart';
-import 'package:sip_ua/src/uri.dart';
 import 'package:sip_ua/src/name_addr_header.dart';
+import 'package:sip_ua/src/uri.dart';
+import 'package:test/test.dart';
 
 List<void Function()> testFunctions = <void Function()>[
   () => test('Parser: Host => [ domain, ipv4, ipv6 ].', () {
@@ -216,9 +216,6 @@ List<void Function()> testFunctions = <void Function()>[
         dynamic auth = Grammar.parse(data, 'challenge');
 
         print('auth => ' + auth.toString());
-
-        // TODO(cloudwebrtc):  fix other_auth_param parse;
-
         expect(auth.realm, '[1:ABCD::abc]');
         expect(auth.nonce, '31d0a89ed7781ce6877de5cb032bf114');
         expect(auth.qop[0], 'auth');
@@ -226,6 +223,17 @@ List<void Function()> testFunctions = <void Function()>[
         expect(auth.algorithm, 'MD5');
         expect(auth.stale, true);
         expect(auth.opaque, '00000188');
+      }),
+  () => test('Parser: authentication challenge2.', () {
+        String data =
+            'Digest algorithm="MD5",qop="auth",realm="some.sip.domain.com",nonce="217384172034871293047102934",otherk1="other_v1"';
+        dynamic auth = Grammar.parse(data, 'challenge');
+        print('auth => ' + auth.toString());
+        expect(auth.realm, 'some.sip.domain.com');
+        expect(auth.nonce, '217384172034871293047102934');
+        expect(auth.qop[0], 'auth');
+        expect(auth.algorithm, 'MD5');
+        expect(auth.auth_params['otherk1'], 'other_v1');
       }),
   () => test('Parser: Event.', () {
         String data = 'Presence;Param1=QWe;paraM2';
@@ -356,5 +364,7 @@ List<void Function()> testFunctions = <void Function()>[
 ];
 
 void main() {
-  testFunctions.forEach((Function func) => func());
+  for (Function func in testFunctions) {
+    func();
+  }
 }

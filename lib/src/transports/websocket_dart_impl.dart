@@ -4,24 +4,24 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:sip_ua/src/sip_ua_helper.dart';
-
 import '../logger.dart';
 
 typedef OnMessageCallback = void Function(dynamic msg);
-typedef OnCloseCallback = void Function(int code, String reason);
+typedef OnCloseCallback = void Function(int? code, String? reason);
 typedef OnOpenCallback = void Function();
 
 class WebSocketImpl {
   WebSocketImpl(this._url);
 
   final String _url;
-  WebSocket _socket;
-  OnOpenCallback onOpen;
-  OnMessageCallback onMessage;
-  OnCloseCallback onClose;
+  WebSocket? _socket;
+  OnOpenCallback? onOpen;
+  OnMessageCallback? onMessage;
+  OnCloseCallback? onClose;
 
   void connect(
-      {Iterable<String> protocols, WebSocketSettings webSocketSettings}) async {
+      {Iterable<String>? protocols,
+      required WebSocketSettings webSocketSettings}) async {
     logger.info('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
       if (webSocketSettings.allowBadCertificate) {
@@ -33,10 +33,10 @@ class WebSocketImpl {
       }
 
       onOpen?.call();
-      _socket.listen((dynamic data) {
+      _socket!.listen((dynamic data) {
         onMessage?.call(data);
       }, onDone: () {
-        onClose?.call(_socket.closeCode, _socket.closeReason);
+        onClose?.call(_socket!.closeCode, _socket!.closeReason);
       });
     } catch (e) {
       onClose?.call(500, e.toString());
@@ -45,17 +45,17 @@ class WebSocketImpl {
 
   void send(dynamic data) {
     if (_socket != null) {
-      _socket.add(data);
+      _socket!.add(data);
       logger.debug('send: \n\n$data');
     }
   }
 
   void close() {
-    _socket.close();
+    _socket!.close();
   }
 
   bool isConnecting() {
-    return _socket != null && _socket.readyState == WebSocket.connecting;
+    return _socket != null && _socket!.readyState == WebSocket.connecting;
   }
 
   /// For test only.

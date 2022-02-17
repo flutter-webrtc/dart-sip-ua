@@ -18,10 +18,10 @@ class Timers {
 }
 
 Timer setTimeout(Function fn, int duration) {
-  return Timer(Duration(milliseconds: duration), fn);
+  return Timer(Duration(milliseconds: duration), fn as void Function());
 }
 
-void clearTimeout(Timer timer) {
+void clearTimeout(Timer? timer) {
   if (timer != null) {
     timer.cancel();
   }
@@ -33,7 +33,7 @@ Timer setInterval(Function fn, int interval) {
   });
 }
 
-void clearInterval(Timer timer) {
+void clearInterval(Timer? timer) {
   if (timer != null) {
     timer.cancel();
   }

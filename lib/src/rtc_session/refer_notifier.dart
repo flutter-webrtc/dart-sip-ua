@@ -12,7 +12,7 @@ class C {
 }
 
 class ReferNotifier {
-  ReferNotifier(rtc.RTCSession session, int id, [int expires]) {
+  ReferNotifier(rtc.RTCSession session, int? id, [int? expires]) {
     _session = session;
     _id = id;
     _expires = expires ?? C.expires;
@@ -22,23 +22,23 @@ class ReferNotifier {
     notify(100);
   }
 
-  rtc.RTCSession _session;
-  int _id;
-  int _expires;
-  bool _active;
+  late rtc.RTCSession _session;
+  int? _id;
+  int? _expires;
+  bool? _active;
 
-  void notify(int code, [String reason]) {
+  void notify(int? code, [String? reason]) {
     logger.debug('notify()');
 
     if (_active == false) {
       return;
     }
 
-    reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
+    reason = reason ?? DartSIP_C.REASON_PHRASE[code!] ?? '';
 
     String state;
 
-    if (code >= 200) {
+    if (code! >= 200) {
       state = 'terminated;reason=noresource';
     } else {
       state = 'active;expires=$_expires';
