@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:sip_ua/src/event_manager/events.dart';
-import 'package:test/test.dart';
-import 'package:sip_ua/src/transports/websocket_interface.dart';
 import 'package:sip_ua/src/transport.dart';
+import 'package:sip_ua/src/transports/websocket_interface.dart';
+import 'package:test/test.dart';
 
 List<void Function()> testFunctions = <void Function()>[
   () => test(' WebSocket: EchoTest', () async {
@@ -47,7 +48,7 @@ List<void Function()> testFunctions = <void Function()>[
           completer.complete();
         };
         client.ondisconnect = (WebSocketInterface socket, bool error,
-            int closeCode, String reason) {
+            int? closeCode, String? reason) {
           print(
               'ondisconnect => error $error [$closeCode] ${reason.toString()}');
           expect(client.isConnected(), false);
@@ -79,7 +80,7 @@ List<void Function()> testFunctions = <void Function()>[
             WebSocketInterface('ws://127.0.0.1:4041/sip');
         Transport trasnport = Transport(socket);
 
-        trasnport.onconnecting = (WebSocketInterface socket, int attempt) {
+        trasnport.onconnecting = (WebSocketInterface? socket, int? attempt) {
           expect(trasnport.isConnecting(), true);
         };
 
@@ -93,7 +94,8 @@ List<void Function()> testFunctions = <void Function()>[
           trasnport.disconnect();
         };
 
-        trasnport.ondisconnect = (WebSocketInterface socket, ErrorCause cause) {
+        trasnport.ondisconnect =
+            (WebSocketInterface? socket, ErrorCause cause) {
           expect(trasnport.isConnected(), false);
           completer.complete();
         };
@@ -105,5 +107,7 @@ List<void Function()> testFunctions = <void Function()>[
 ];
 
 void main() {
-  testFunctions.forEach((Function func) => func());
+  for (Function func in testFunctions) {
+    func();
+  }
 }

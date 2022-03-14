@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
-import 'package:flutter/foundation.dart';
 
 import 'enum_helper.dart';
 import 'stack_trace_nj.dart';
@@ -11,58 +9,53 @@ final Log logger = Log();
 class Log extends Logger {
   Log();
   Log._internal(String currentWorkingDirectory)
-      : super(
-          filter: MyLogFilter(),
-          printer: MyLogPrinter(currentWorkingDirectory),
-        );
+      : super(printer: MyLogPrinter(currentWorkingDirectory));
 
-  factory Log.d(String message, [dynamic error, StackTrace stackTrace]) {
+  factory Log.d(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
-    _self.d(message, error, stackTrace);
-    return _self;
+    _self!.d(message, error, stackTrace);
+    return _self!;
   }
 
-  factory Log.i(String message, [dynamic error, StackTrace stackTrace]) {
+  factory Log.i(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
-    _self.i(message, error, stackTrace);
-    return _self;
+    _self!.i(message, error, stackTrace);
+    return _self!;
   }
 
-  factory Log.w(String message, [dynamic error, StackTrace stackTrace]) {
+  factory Log.w(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
-    _self.w(message, error, stackTrace);
-    return _self;
+    _self!.w(message, error, stackTrace);
+    return _self!;
   }
 
-  factory Log.e(String message, [dynamic error, StackTrace stackTrace]) {
+  factory Log.e(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
-    _self.e(message, error, stackTrace);
-    return _self;
+    _self!.e(message, error, stackTrace);
+    return _self!;
   }
 
-  static Log _self;
-  static String _localPath;
+  static Log? _self;
+  static late String _localPath;
   static Level _loggingLevel = Level.debug;
   static set loggingLevel(Level loggingLevel) => _loggingLevel = loggingLevel;
-  static File _loggingFile;
-  static set loggingFile(File file) => _loggingFile = file;
 
-  void debug(String message, [dynamic error, StackTrace stackTrace]) {
+  void debug(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
     Log.d(message, error, stackTrace);
   }
 
-  void info(String message, [dynamic error, StackTrace stackTrace]) {
+  void info(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
     Log.i(message, error, stackTrace);
   }
 
-  void warn(String message, [dynamic error, StackTrace stackTrace]) {
+  void warn(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
     Log.w(message, error, stackTrace);
   }
 
-  void error(String message, [dynamic error, StackTrace stackTrace]) {
+  void error(String message, [dynamic error, StackTrace? stackTrace]) {
     autoInit();
     Log.e(message, error, stackTrace);
   }
@@ -78,20 +71,12 @@ class Log extends Logger {
 
     StackTraceNJ frames = StackTraceNJ();
 
-    for (Stackframe frame in frames.frames) {
-      _localPath = frame.sourceFile.path
-          .substring(frame.sourceFile.path.lastIndexOf('/'));
-      break;
-    }
-  }
-}
-
-class MyLogFilter extends LogFilter {
-  bool shouldLog(LogEvent event) {
-    if (kDebugMode || Log._loggingFile != null) {
-      return true;
-    }
-    return false;
+    if (frames.frames != null)
+      for (Stackframe frame in frames.frames!) {
+        _localPath = frame.sourceFile.path
+            .substring(frame.sourceFile.path.lastIndexOf('/'));
+        break;
+      }
   }
 }
 
@@ -126,46 +111,37 @@ class MyLogPrinter extends LogPrinter {
     StackTraceNJ frames = StackTraceNJ();
     int i = 0;
     int depth = 0;
-    for (Stackframe frame in frames.frames) {
-      i++;
-      String path2 = frame.sourceFile.path;
-      if (!path2.contains(Log._localPath) && !path2.contains('logger.dart')) {
-        depth = i - 1;
-        break;
+    if (frames.frames != null)
+      for (Stackframe frame in frames.frames!) {
+        i++;
+        String path2 = frame.sourceFile.path;
+        if (!path2.contains(Log._localPath) && !path2.contains('logger.dart')) {
+          depth = i - 1;
+          break;
+        }
       }
-    }
 
-    _print(color(
+    print(color(
         '[$formattedDate] ${event.level} ${StackTraceNJ(skipFrames: depth).formatStackTrace(methodCount: 1)} ::: ${event.message}'));
     if (event.error != null) {
-      _print('${event.error}');
+      print('${event.error}');
     }
 
     if (event.stackTrace != null) {
       if (event.stackTrace.runtimeType == StackTraceNJ) {
         StackTraceNJ st = event.stackTrace as StackTraceNJ;
-        _print(color('$st'));
+        print(color('$st'));
       } else {
-        _print(color('${event.stackTrace}'));
+        print(color('${event.stackTrace}'));
       }
     }
 
     return <String>[];
   }
 
-  void _print(Object obj) {
-    print(obj);
-    try {
-      if (Log._loggingFile != null) {
-        Log._loggingFile
-            .writeAsStringSync('${obj.toString()}\n', mode: FileMode.append, flush: true);
-      }
-    } catch (e) {}
-  }
-
   AnsiColor _getLevelColor(Level level) {
     if (colors) {
-      return levelColors[level];
+      return levelColors[level] ?? AnsiColor.none();
     } else {
       return AnsiColor.none();
     }
@@ -192,8 +168,8 @@ class AnsiColor {
   /// Reset all colors and options for current SGRs to terminal defaults.
   static const String ansiDefault = '${ansiEsc}0m';
 
-  final int fg;
-  final int bg;
+  final int? fg;
+  final int? bg;
   final bool color;
 
   @override

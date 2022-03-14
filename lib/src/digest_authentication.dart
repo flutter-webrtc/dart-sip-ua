@@ -9,11 +9,11 @@ class Challenge {
     return Challenge(map['algorithm'], map['realm'], map['nonce'],
         map['opaque'], map['stale'], map['qop']);
   }
-  String algorithm;
-  String realm;
-  String nonce;
-  String opaque;
-  bool stale;
+  String? algorithm;
+  String? realm;
+  String? nonce;
+  String? opaque;
+  bool? stale;
   dynamic qop; // String or List<dynamic>
 }
 
@@ -23,32 +23,32 @@ class Credentials {
     return Credentials(
         map['username'], map['password'], map['realm'], map['ha1']);
   }
-  String username;
-  String password;
-  String realm;
-  String ha1;
+  String? username;
+  String? password;
+  String? realm;
+  String? ha1;
 }
 
 class DigestAuthentication {
   DigestAuthentication(this._credentials);
 
-  String _cnonce;
+  late String _cnonce;
   int _nc = 0;
   String _ncHex = '00000000';
-  String _algorithm;
-  String _realm;
-  String _nonce;
-  String _opaque;
-  bool _stale;
-  String _qop;
-  SipMethod _method;
+  String? _algorithm;
+  String? _realm;
+  String? _nonce;
+  String? _opaque;
+  bool? _stale;
+  String? _qop;
+  late SipMethod _method;
   dynamic _uri;
-  String _ha1;
-  String _response;
+  String? _ha1;
+  late String _response;
   final Credentials _credentials;
   String get response => _response;
 
-  String get(String parameter) {
+  String? get(String parameter) {
     switch (parameter) {
       case 'realm':
         return _realm;
@@ -70,7 +70,7 @@ class DigestAuthentication {
 * Returns true if auth was successfully generated, false otherwise.
 */
   bool authenticate(SipMethod method, Challenge challenge,
-      [dynamic ruri, String cnonce, String body]) {
+      [dynamic ruri, String? cnonce, String? body]) {
     _algorithm = challenge.algorithm;
     _realm = challenge.realm;
     _nonce = challenge.nonce;
@@ -234,7 +234,7 @@ class DigestAuthentication {
       auth_params.add('nc=$_ncHex');
     }
     if (_stale != null) {
-      auth_params.add('stale=${_stale ? 'true' : 'false'}');
+      auth_params.add('stale=${_stale! ? 'true' : 'false'}');
     }
     return 'Digest ${auth_params.join(', ')}';
   }

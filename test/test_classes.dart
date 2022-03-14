@@ -1,6 +1,6 @@
-import 'package:test/test.dart';
-import 'package:sip_ua/src/uri.dart';
 import 'package:sip_ua/src/name_addr_header.dart';
+import 'package:sip_ua/src/uri.dart';
+import 'package:test/test.dart';
 
 List<void Function()> testFunctions = <void Function()>[
   () => test('Class: URI', () {
@@ -32,8 +32,6 @@ List<void Function()> testFunctions = <void Function()>[
         expect(uri.user, null);
         expect(uri.toAor(), 'sip:jssip.net');
         uri.user = 'alice';
-
-        expect(() => uri.host = null, throwsNoSuchMethodError);
 
         // causes compile error with strict
         // expect(() => uri.host = {'bar': 'foo'}, throwsNoSuchMethodError);
@@ -147,5 +145,7 @@ List<void Function()> testFunctions = <void Function()>[
 ];
 
 void main() {
-  testFunctions.forEach((Function func) => func());
+  for (Function func in testFunctions) {
+    func();
+  }
 }

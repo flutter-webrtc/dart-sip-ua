@@ -1,5 +1,3 @@
-import 'package:sip_ua/src/grammar_parser.dart';
-
 import 'constants.dart';
 import 'data.dart';
 import 'digest_authentication.dart';
@@ -32,14 +30,14 @@ class RequestSender {
       _eventHandlers.emit(EventOnTransportError());
     }
   }
-  UA _ua;
-  EventManager _eventHandlers;
-  SipMethod _method;
-  OutgoingRequest _request;
-  DigestAuthentication _auth;
-  bool _challenged;
-  bool _staled;
-  TransactionBase clientTransaction;
+  late UA _ua;
+  late EventManager _eventHandlers;
+  SipMethod? _method;
+  OutgoingRequest? _request;
+  DigestAuthentication? _auth;
+  late bool _challenged;
+  late bool _staled;
+  late TransactionBase clientTransaction;
 
   /**
   * Create the client transaction and send the message.
@@ -56,21 +54,21 @@ class RequestSender {
       _eventHandlers.emit(event);
     });
     handlers.on(EventOnReceiveResponse(), (EventOnReceiveResponse event) {
-      _receiveResponse(event.response);
+      _receiveResponse(event.response!);
     });
 
     switch (_method) {
       case SipMethod.INVITE:
         clientTransaction =
-            InviteClientTransaction(_ua, _ua.transport, _request, handlers);
+            InviteClientTransaction(_ua, _ua.transport!, _request!, handlers);
         break;
       case SipMethod.ACK:
         clientTransaction =
-            AckClientTransaction(_ua, _ua.transport, _request, handlers);
+            AckClientTransaction(_ua, _ua.transport!, _request!, handlers);
         break;
       default:
-        clientTransaction =
-            NonInviteClientTransaction(_ua, _ua.transport, _request, handlers);
+        clientTransaction = NonInviteClientTransaction(
+            _ua, _ua.transport!, _request!, handlers);
     }
 
     clientTransaction.send();
@@ -81,16 +79,17 @@ class RequestSender {
   * Authenticate request if needed or pass the response back to the applicant.
   */
   void _receiveResponse(IncomingResponse response) {
-    ParsedData challenge;
+    ParsedData? challenge;
     String authorization_header_name;
-    int status_code = response.status_code;
+    int? status_code = response.status_code;
 
     /*
     * Authentication
     * Authenticate once. _challenged_ flag used to avoid infinite authentications.
     */
     if ((status_code == 401 || status_code == 407) &&
-        (_ua.configuration.password != null || _ua.configuration.ha1 != null)) {
+        (_ua.configuration!.password != null ||
+            _ua.configuration!.ha1 != null)) {
       // Get and parse the appropriate WWW-Authenticate or Proxy-Authenticate header.
       if (response.status_code == 401) {
         challenge = response.parseHeader('www-authenticate');
@@ -111,15 +110,15 @@ class RequestSender {
 
       if (!_challenged || (!_staled && challenge.stale == true)) {
         _auth ??= DigestAuthentication(Credentials.fromMap(<String, dynamic>{
-          'username': _ua.configuration.authorization_user,
-          'password': _ua.configuration.password,
-          'realm': _ua.configuration.realm,
-          'ha1': _ua.configuration.ha1
+          'username': _ua.configuration!.authorization_user,
+          'password': _ua.configuration!.password,
+          'realm': _ua.configuration!.realm,
+          'ha1': _ua.configuration!.ha1
         }));
 
         // Verify that the challenge is really valid.
-        if (!_auth.authenticate(
-            _request.method,
+        if (!_auth!.authenticate(
+            _request!.method!,
             Challenge.fromMap(<String, dynamic>{
               'algorithm': challenge.algorithm,
               'realm': challenge.realm,
@@ -128,25 +127,25 @@ class RequestSender {
               'stale': challenge.stale,
               'qop': challenge.qop,
             }),
-            _request.ruri)) {
+            _request!.ruri)) {
           _eventHandlers.emit(EventOnReceiveResponse(response: response));
           return;
         }
         _challenged = true;
 
         // Update ha1 and realm in the UA.
-        _ua.set('realm', _auth.get('realm'));
-        _ua.set('ha1', _auth.get('ha1'));
+        _ua.set('realm', _auth!.get('realm'));
+        _ua.set('ha1', _auth!.get('ha1'));
 
         if (challenge.stale != null) {
           _staled = true;
         }
 
-        _request = _request.clone();
-        _request.cseq += 1;
-        _request.setHeader(
-            'cseq', '${_request.cseq} ${SipMethodHelper.getName(_method)}');
-        _request.setHeader(authorization_header_name, _auth.toString());
+        _request = _request!.clone();
+        _request!.cseq = _request!.cseq! + 1;
+        _request!.setHeader(
+            'cseq', '${_request!.cseq} ${SipMethodHelper.getName(_method)}');
+        _request!.setHeader(authorization_header_name, _auth.toString());
 
         _eventHandlers.emit(EventOnAuthenticated(request: _request));
         send();

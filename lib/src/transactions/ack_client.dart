@@ -1,5 +1,4 @@
 import 'package:sip_ua/src/sip_message.dart';
-
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
@@ -18,16 +17,16 @@ class AckClientTransaction extends TransactionBase {
 
     String via = 'SIP/2.0/${transport.via_transport}';
 
-    via += ' ${ua.configuration.via_host};branch=$id';
+    via += ' ${ua.configuration!.via_host};branch=$id';
 
     request.setHeader('via', via);
   }
 
-  EventManager _eventHandlers;
+  late EventManager _eventHandlers;
 
   @override
   void send() {
-    if (!transport.send(request)) {
+    if (!transport!.send(request)) {
       onTransportError();
     }
   }

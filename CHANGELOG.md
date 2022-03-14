@@ -1,6 +1,15 @@
 # Changelog
 
 --------------------------------------------
+[0.5.1] - 2022.02.13
+
+* chore: Fix compilation error for web.
+
+[0.5.0] - 2022.02.08
+
+* Null safety.
+* Bump version for flutter-webrtc.
+
 [0.4.0] - 2021.10.13
 
 * Add extended header support (#235)

@@ -26,9 +26,9 @@ const List<bool Function()> responses = <bool Function()>[
 ];
 
 // local variables.
-IncomingMessage message;
-UA ua;
-Transport transport;
+late IncomingMessage message;
+late UA ua;
+late Transport transport;
 
 bool sanityCheck(IncomingMessage m, UA u, Transport t) {
   message = m;
@@ -91,7 +91,7 @@ bool rfc3261_8_2_2_1() {
 
 bool rfc3261_16_3_4() {
   if (message.to_tag == null) {
-    if (message.call_id.substring(0, 5) == ua.configuration.jssip_id) {
+    if (message.call_id!.substring(0, 5) == ua.configuration!.jssip_id) {
       reply(482);
 
       return false;
@@ -101,7 +101,7 @@ bool rfc3261_16_3_4() {
 }
 
 bool rfc3261_18_3_request() {
-  int len = Utils.str_utf8_length(message.body);
+  int len = Utils.str_utf8_length(message.body!);
   dynamic contentLength = message.getHeader('content-length');
 
   if (contentLength != null && contentLength is String) {
@@ -120,9 +120,9 @@ bool rfc3261_18_3_request() {
 }
 
 bool rfc3261_8_2_2_2() {
-  String fromTag = message.from_tag;
-  String call_id = message.call_id;
-  int cseq = message.cseq;
+  String? fromTag = message.from_tag;
+  String? call_id = message.call_id;
+  int? cseq = message.cseq;
 
   // Accept any in-dialog request.
   if (message.to_tag != null) {
@@ -136,7 +136,7 @@ bool rfc3261_8_2_2_2() {
     // and ignore the INVITE.
     // TODO(cloudwebrtc): we should reply the last response.
     if (ua.transactions
-            .getTransaction(InviteServerTransaction, message.via_branch) !=
+            .getTransaction(InviteServerTransaction, message.via_branch!) !=
         null) {
       result = false;
     }
@@ -158,7 +158,7 @@ bool rfc3261_8_2_2_2() {
   // and ignore the request.
   // TODO(cloudwebrtc): we should reply the last response.
   else if (ua.transactions
-          .getTransaction(NonInviteServerTransaction, message.via_branch) !=
+          .getTransaction(NonInviteServerTransaction, message.via_branch!) !=
       null) {
     result = false;
   }
@@ -190,7 +190,7 @@ bool rfc3261_8_1_3_3() {
 }
 
 bool rfc3261_18_3_response() {
-  int len = Utils.str_utf8_length(message.body);
+  int len = Utils.str_utf8_length(message.body!);
   // ignore: always_specify_types
   var contentLength = message.getHeader('content-length');
 
