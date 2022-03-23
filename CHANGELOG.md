@@ -1,6 +1,10 @@
 # Changelog
 
 --------------------------------------------
+[0.5.1] - 2022.02.13
+
+* chore: Fix compilation error for web.
+
 [0.5.0] - 2022.02.08
 
 * Null safety.
