@@ -161,3 +161,8 @@ class EventOnErrorResponse extends EventType {
   EventOnErrorResponse({this.response});
   IncomingMessage? response;
 }
+
+class EventOnNewSubscribe extends EventType {
+  EventOnNewSubscribe({this.request});
+  IncomingRequest? request;
+}

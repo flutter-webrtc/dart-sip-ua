@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:sip_ua/src/data.dart';
+import 'package:sip_ua/src/subscriber.dart';
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -11,6 +12,7 @@ import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
 import 'message.dart';
+import 'notifier.dart';
 import 'parser.dart' as Parser;
 import 'registrator.dart';
 import 'rtc_session.dart';
@@ -203,6 +205,41 @@ class UA extends EventManager {
 
     _dynConfiguration!.register = false;
     _registrator.unregister(all);
+  }
+
+  /** 
+   * Create subscriber instance
+   */
+  Subscriber subscribe(
+    String target,
+    String eventName,
+    String accept, [
+    int expires = 900,
+    String? contentType,
+    String? allowEvents,
+    Map<String, dynamic> requestParams = const <String, dynamic>{},
+    List<String> extraHeaders = const <String>[],
+  ]) {
+    logger.debug('subscribe()');
+
+    return Subscriber(this, target, eventName, accept, expires, contentType,
+        allowEvents, requestParams, extraHeaders);
+  }
+
+  /**
+   * Create notifier instance
+   */
+  Notifier notify(
+    IncomingRequest subscribe,
+    String contentType, [
+    bool pending = false,
+    List<String>? extraHeaders = null,
+    String? allowEvents = null,
+  ]) {
+    logger.debug('notify()');
+
+    return Notifier(
+        this, subscribe, contentType, pending, extraHeaders, allowEvents);
   }
 
   /**
@@ -564,6 +601,12 @@ class UA extends EventManager {
 
         return;
       }
+    } else if (method == SipMethod.SUBSCRIBE) {
+      if (listeners['newSubscribe']?.length == 0) {
+        request.reply(405);
+
+        return;
+      }
     }
 
     Dialog? dialog;
@@ -621,6 +664,9 @@ class UA extends EventManager {
           // Receive sip event.
           emit(EventSipEvent(request: request));
           request.reply(200);
+          break;
+        case SipMethod.SUBSCRIBE:
+          emit(EventOnNewSubscribe(request: request));
           break;
         default:
           request.reply(405);
