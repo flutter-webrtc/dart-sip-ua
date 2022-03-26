@@ -10,6 +10,8 @@ import 'package:sip_ua/src/exceptions.dart';
 import 'package:sip_ua/src/grammar.dart';
 import 'package:sip_ua/src/logger.dart';
 import 'package:sip_ua/src/request_sender.dart';
+import 'package:sip_ua/src/rtc_session.dart';
+import 'package:sip_ua/src/sanity_check.dart';
 import 'package:sip_ua/src/sip_message.dart';
 import 'package:sip_ua/src/timers.dart';
 import 'package:sip_ua/src/ua.dart';
@@ -101,7 +103,7 @@ class Subscriber extends EventManager {
       'Accept: $accept'
     ]);
 
-    if (!_headers.any((String element) => element.startsWith('Contact'))) {
+    if (!_headers.any((dynamic element) => element.startsWith('Contact'))) {
       String contact = 'Contact: ${_ua.contact.toString()}';
 
       _headers.add(contact);
@@ -222,7 +224,7 @@ class Subscriber extends EventManager {
 
         // Expiration time is shorter and the difference is not too small.
         if (_expires_timestamp!.difference(expiresTimestamp) >
-            maxTimeDeviation) {
+            Duration(milliseconds: maxTimeDeviation)) {
           logger.debug('update sending re-SUBSCRIBE time');
 
           _scheduleSubscribe(expires);
@@ -296,9 +298,9 @@ class Subscriber extends EventManager {
     _terminated = true;
 
     // Set header Expires: 0.
-    Iterable<dynamic> headers = _headers.map((String header) {
+    List<dynamic> headers = _headers.map((dynamic header) {
       return header.startsWith('Expires') ? 'Expires: 0' : header;
-    });
+    }).toList();
 
     if (_state == C.STATE_INIT) {
       // fetch-subscribe - initial subscribe with Expires: 0.
@@ -318,7 +320,7 @@ class Subscriber extends EventManager {
   /**
    * Private API.
    */
-  void _sendInitialSubscribe(String? body, List<String> headers) {
+  void _sendInitialSubscribe(String? body, List<dynamic> headers) {
     if (body != null) {
       if (_contentType == null) {
         throw TypeError('content_type is undefined');
@@ -336,14 +338,14 @@ class Subscriber extends EventManager {
     EventManager handler = EventManager();
 
     handler.on(EventOnReceiveResponse(), (EventOnReceiveResponse response) {
-      _receiveSubscribeResponse(response);
+      _receiveSubscribeResponse(response.response);
     });
 
-    handler.on(EventOnRequestTimeout(), () {
+    handler.on(EventOnRequestTimeout(), (EventOnRequestTimeout timeout) {
       onRequestTimeout();
     });
 
-    handler.on(EventOnTransportError(), () {
+    handler.on(EventOnTransportError(), (EventOnTransportError event) {
       onTransportError();
     });
 
@@ -352,15 +354,18 @@ class Subscriber extends EventManager {
     request_sender.send();
   }
 
-  void _receiveSubscribeResponse(IncomingRequest response) {
-    if (response.status_code >= 200 && response.status_code < 300) {
+  void _receiveSubscribeResponse(IncomingResponse? response) {
+    if (response == null) {
+      throw ArgumentError('Incoming response was null');
+    }
+    if (response.status_code >= 200 && response.status_code! < 300) {
       // Create dialog
       if (_dialog == null) {
         try {
-          Dialog dialog = Dialog(this, response, 'UAC');
+          Dialog dialog = Dialog(RTCSession(ua), response, 'UAC');
           _dialog = dialog;
         } catch (e) {
-          logger.warn(e);
+          logger.warn(e.toString());
           _dialogTerminated(C.SUBSCRIBE_BAD_OK_RESPONSE);
 
           return;
@@ -400,7 +405,7 @@ class Subscriber extends EventManager {
     }
   }
 
-  void _sendSubsequentSubscribe(Object? body, List<String> headers) {
+  void _sendSubsequentSubscribe(Object? body, List<dynamic> headers) {
     if (_state == C.STATE_TERMINATED) {
       return;
     }
@@ -482,10 +487,11 @@ class Subscriber extends EventManager {
 	       expires is 600, re-subscribe will be ordered to send in 300 + (0 .. 230) seconds.
 	 */
 
-    num timeout = expires >= 140
-        ? (expires * 1000 / 2) +
-            Math.floor(((expires / 2) - 70) * 1000 * Math.random())
-        : (expires * 1000) - 5000;
+    int timeout = (expires >= 140
+            ? (expires * 1000 / 2) +
+                Math.floor(((expires / 2) - 70) * 1000 * Math.random())
+            : (expires * 1000) - 5000)
+        .toInt();
 
     _expires_timestamp =
         DateTime.now().add(Duration(milliseconds: expires * 1000));

@@ -6,6 +6,7 @@ import 'package:sip_ua/src/dialog.dart';
 import 'package:sip_ua/src/event_manager/notifier_events.dart';
 import 'package:sip_ua/src/exceptions.dart';
 import 'package:sip_ua/src/logger.dart';
+import 'package:sip_ua/src/rtc_session.dart';
 import 'package:sip_ua/src/sip_message.dart';
 import 'package:sip_ua/src/timers.dart';
 import 'package:sip_ua/src/ua.dart';
@@ -54,7 +55,7 @@ class Notifier extends EventManager {
 
     // Use contact from extraHeaders or create it.
     String? c = _headers
-        .firstWhereOrNull((String header) => header.startsWith('Contact'));
+        .firstWhereOrNull((dynamic header) => header.startsWith('Contact'));
     if (c == null) {
       _contact = 'Contact: ${ua.contact.toString()}';
 
@@ -72,7 +73,7 @@ class Notifier extends EventManager {
     _initialSubscribe.to_tag = newTag();
 
     // Create dialog for normal and fetch-subscribe.
-    Dialog dialog = Dialog(this, _initialSubscribe, 'UAS');
+    Dialog dialog = Dialog(RTCSession(ua), _initialSubscribe, 'UAS');
 
     _dialog = dialog;
 
@@ -181,8 +182,8 @@ class Notifier extends EventManager {
     String subs_state = _stateNumberToString(_state);
 
     if (_state != C.STATE_TERMINATED) {
-      num expires = Math.floor(
-          (_expires_timestamp!.subtract(DateTime.now())).millisecond / 1000);
+      num expires =
+          Math.floor(_expires_timestamp!.difference(DateTime.now()).inSeconds);
 
       if (expires < 0) {
         expires = 0;
