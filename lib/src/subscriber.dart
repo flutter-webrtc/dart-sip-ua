@@ -250,7 +250,11 @@ class Subscriber extends EventManager {
       dynamic contentType = request.getHeader('content-type');
 
       logger.debug('emit "notify"');
-      emit(EventNotify(isFinal, request, body, contentType));
+      emit(EventNotify(
+          isFinal: isFinal,
+          request: request,
+          body: body,
+          contentType: contentType));
     }
 
     if (isFinal) {
@@ -469,7 +473,10 @@ class Subscriber extends EventManager {
     }
 
     logger.debug('emit "terminated" code=$terminationCode');
-    emit(EventTerminated(terminationCode, reason, retryAfter));
+    emit(EventTerminated(
+        TerminationCode: terminationCode,
+        reason: reason,
+        retryAfter: retryAfter));
   }
 
   void _scheduleSubscribe(int expires) {

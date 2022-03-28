@@ -135,7 +135,11 @@ class Notifier extends EventManager {
     }
 
     logger.debug('emit "subscribe"');
-    emit(EventSubscribe(is_unsubscribe, request, body, content_type));
+    emit(EventSubscribe(
+        isUnsubscribe: is_unsubscribe,
+        request: request,
+        body: body,
+        content_type: content_type));
 
     if (is_unsubscribe) {
       _dialogTerminated(C.RECEIVE_UNSUBSCRIBE);
@@ -285,7 +289,8 @@ class Notifier extends EventManager {
 
     logger.debug(
         'emit "terminated" code=$termination_code, send final notify=$send_final_notify');
-    emit(EventTerminated(termination_code, send_final_notify));
+    emit(EventTerminated(
+        terminationCode: termination_code, sendFinalNotify: send_final_notify));
   }
 
   void _setExpiresTimer() {
