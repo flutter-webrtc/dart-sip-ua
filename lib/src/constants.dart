@@ -209,7 +209,7 @@ Map<int, String> REASON_PHRASE = <int, String>{
 };
 
 const String ALLOWED_METHODS =
-    'INVITE,ACK,CANCEL,BYE,UPDATE,MESSAGE,OPTIONS,REFER,INFO';
+    'INVITE,ACK,CANCEL,BYE,UPDATE,MESSAGE,OPTIONS,REFER,INFO,NOTIFY';
 const String ACCEPTED_BODY_TYPES = 'application/sdp, application/dtmf-relay';
 const int MAX_FORWARDS = 69;
 const int SESSION_EXPIRES = 90;

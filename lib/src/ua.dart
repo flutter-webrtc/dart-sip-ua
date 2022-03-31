@@ -686,6 +686,7 @@ class UA extends EventManager {
         if (session != null) {
           session.receiveRequest(request);
         } else {
+          // TODO: Look for subscriver to notify.
           logger
               .debug('received NOTIFY request for a non existent subscription');
           request.reply(481, 'Subscription does not exist');

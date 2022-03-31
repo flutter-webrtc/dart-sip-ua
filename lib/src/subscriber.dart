@@ -55,7 +55,7 @@ class Subscriber extends EventManager {
     // Used to subscribe with body.
     _contentType = contentType;
 
-    _params = requestParams;
+    _params = Map.from(requestParams);
 
     _params['from_tag'] = newTag();
 
@@ -63,9 +63,9 @@ class Subscriber extends EventManager {
 
     _params['call_id'] = createRandomToken(20);
 
-    if (_params['cseq'] == null) {
-      _params['cseq'] = Math.floor((Math.random() * 10000) + 1);
-    }
+    //if (_params['cseq'] == null) {
+    //  _params['cseq'] = Math.floor((Math.random() * 10000) + 1);
+    //}
 
     _state = C.STATE_INIT;
 
@@ -87,7 +87,7 @@ class Subscriber extends EventManager {
 
     _event_name = parsed.event;
     // this._event_id = parsed.params && parsed.params.id;
-    _event_id = parsed.params && parsed.params.id;
+    _event_id = parsed.params['id'];
 
     String eventValue = _event_name;
 
@@ -97,11 +97,7 @@ class Subscriber extends EventManager {
 
     _headers = cloneArray(extraHeaders);
 
-    _headers.addAll(<String>[
-      'Event: $eventValue',
-      'Expires: $_expires',
-      'Accept: $accept'
-    ]);
+    _headers.addAll(<String>['Event: $eventValue', 'Expires: $_expires']);
 
     if (!_headers.any((dynamic element) => element.startsWith('Contact'))) {
       String contact = 'Contact: ${_ua.contact.toString()}';
@@ -143,7 +139,7 @@ class Subscriber extends EventManager {
 
   late String _event_name;
 
-  bool? _event_id;
+  num? _event_id;
 
   late List<dynamic> _headers;
 
@@ -156,10 +152,12 @@ class Subscriber extends EventManager {
     return C();
   }
 
+  @override
   void onRequestTimeout() {
     _dialogTerminated(C.SUBSCRIBE_RESPONSE_TIMEOUT);
   }
 
+  @override
   void onTransportError() {
     _dialogTerminated(C.SUBSCRIBE_TRANSPORT_ERROR);
   }
@@ -167,7 +165,7 @@ class Subscriber extends EventManager {
   /**
    * Dialog callback.
    */
-  void receiveRequest(IncomingRequest request) {
+  void receiveNotifyRequest(IncomingRequest request) {
     if (request.method != SipMethod.NOTIFY) {
       logger.warn('received non-NOTIFY request');
       request.reply(405);
@@ -277,7 +275,7 @@ class Subscriber extends EventManager {
    * Send the initial (non-fetch)  and subsequent subscribe.
    * @param {string} body - subscribe request body.
    */
-  void subscribe([String? body]) {
+  void subscribe([String? target, String? body]) {
     logger.debug('subscribe()');
 
     if (_state == C.STATE_INIT) {
@@ -292,7 +290,8 @@ class Subscriber extends EventManager {
    * Send un-subscribe or fetch-subscribe (with Expires: 0).
    * @param {string} body - un-subscribe request body
    */
-  void terminate([String? body]) {
+  @override
+  void terminate([Map<String, dynamic>? body]) {
     logger.debug('terminate()');
 
     // Prevent duplication un-subscribe sending.
@@ -366,8 +365,7 @@ class Subscriber extends EventManager {
       // Create dialog
       if (_dialog == null) {
         try {
-          Dialog dialog = Dialog(RTCSession(ua), response, 'UAC');
-          _dialog = dialog;
+          // TODO: Check for ok Response
         } catch (e) {
           logger.warn(e.toString());
           _dialogTerminated(C.SUBSCRIBE_BAD_OK_RESPONSE);
@@ -387,9 +385,11 @@ class Subscriber extends EventManager {
       }
 
       // Check expires value.
-      dynamic expires_value = response.getHeader('expires');
+      String? expires_value = response.getHeader('Expires');
 
-      if (expires_value != 0 && !expires_value) {
+      if (expires_value != null &&
+          expires_value == '' &&
+          expires_value == '0') {
         logger.warn('response without Expires header');
 
         // RFC 6665 3.1.1 subscribe OK response must contain Expires header.
@@ -397,7 +397,7 @@ class Subscriber extends EventManager {
         expires_value = '900';
       }
 
-      int? expires = parseInt(expires_value, 10);
+      int? expires = parseInt(expires_value!, 10);
 
       if (expires! > 0) {
         _scheduleSubscribe(expires);
@@ -409,7 +409,8 @@ class Subscriber extends EventManager {
     }
   }
 
-  void _sendSubsequentSubscribe(Object? body, List<dynamic> headers) {
+  void _sendSubsequentSubscribe(String? body, List<dynamic> headers) {
+    // TODO: Rework this
     if (_state == C.STATE_TERMINATED) {
       return;
     }
@@ -431,27 +432,33 @@ class Subscriber extends EventManager {
       headers.add('Content-Type: $_contentType');
     }
 
-    _dialog!.sendRequest(SipMethod.SUBSCRIBE, <String, dynamic>{
+    var manager = EventManager();
+    manager.on(EventOnReceiveResponse(), (EventOnReceiveResponse response) {
+      _receiveSubscribeResponse(response.response);
+    });
+
+    manager.on(EventOnRequestTimeout(), (EventOnRequestTimeout timeout) {
+      onRequestTimeout();
+    });
+
+    manager.on(EventOnTransportError(), (EventOnTransportError event) {
+      onTransportError();
+    });
+
+    OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
+        _ua.normalizeTarget(_target), _ua, _params, headers, body);
+
+    RequestSender request_sender = RequestSender(_ua, request, manager);
+
+    request_sender.send();
+
+    var s = _dialog!.sendRequest(SipMethod.SUBSCRIBE, <String, dynamic>{
       'body': body,
       'extraHeaders': headers,
-      'eventHandlers': <String, dynamic>{
-        'onRequestTimeout': () {
-          onRequestTimeout();
-        },
-        'onTransportError': () {
-          onTransportError();
-        },
-        'onSuccessResponse': (IncomingResponse response) {
-          _receiveSubscribeResponse(response);
-        },
-        'onErrorResponse': (IncomingResponse response) {
-          _receiveSubscribeResponse(response);
-        },
-        'onDialogError': (IncomingResponse response) {
-          _receiveSubscribeResponse(response);
-        }
-      }
+      'eventHandlers': manager,
     });
+
+    print(s);
   }
 
   void _dialogTerminated(int terminationCode,
@@ -494,23 +501,18 @@ class Subscriber extends EventManager {
 	       expires is 600, re-subscribe will be ordered to send in 300 + (0 .. 230) seconds.
 	 */
 
-    int timeout = (expires >= 140
-            ? (expires * 1000 / 2) +
-                Math.floor(((expires / 2) - 70) * 1000 * Math.random())
-            : (expires * 1000) - 5000)
-        .toInt();
+    num timeout = 10;
 
-    _expires_timestamp =
-        DateTime.now().add(Duration(milliseconds: expires * 1000));
+    _expires_timestamp = DateTime.now().add(Duration(seconds: expires));
 
-    logger.debug(
-        'next SUBSCRIBE will be sent in ${Math.floor(timeout / 1000)} sec');
+    logger.debug('next SUBSCRIBE will be sent in $timeout sec');
 
     clearTimeout(_expires_timer);
+
     _expires_timer = setTimeout(() {
       _expires_timer = null;
       _sendSubsequentSubscribe(null, _headers);
-    }, timeout);
+    }, timeout.toInt() * 1000);
   }
 
   int _stateStringToNumber(String? strState) {
@@ -528,5 +530,9 @@ class Subscriber extends EventManager {
       default:
         throw TypeError('wrong state value');
     }
+  }
+
+  void _handlePresence(EventOnPresence event) {
+    emit(event);
   }
 }

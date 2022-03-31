@@ -166,3 +166,8 @@ class EventOnNewSubscribe extends EventType {
   EventOnNewSubscribe({this.request});
   IncomingRequest? request;
 }
+
+class EventOnPresence extends EventType {
+  EventOnPresence({this.request});
+  IncomingRequest? request;
+}
