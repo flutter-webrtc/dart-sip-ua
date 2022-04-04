@@ -36,7 +36,7 @@ class Id {
 
 // RFC 3261 12.1.
 class Dialog {
-  Dialog(RTCSession owner, dynamic message, String type, [int? state]) {
+  Dialog(Owner owner, dynamic message, String type, [int? state]) {
     state = state ?? DialogStatus.STATUS_CONFIRMED;
     _owner = owner;
     _ua = owner.ua;
@@ -91,7 +91,7 @@ class Dialog {
         '$type dialog created with status ${_state == DialogStatus.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
-  RTCSession? _owner;
+  Owner? _owner;
   UA? _ua;
   bool uac_pending_reply = false;
   bool uas_pending_reply = false;
@@ -108,7 +108,7 @@ class Dialog {
   UA? get ua => _ua;
   Id? get id => _id;
 
-  RTCSession? get owner => _owner;
+  Owner? get owner => _owner;
 
   void update(dynamic message, String type) {
     _state = DialogStatus.STATUS_CONFIRMED;
@@ -262,4 +262,11 @@ class Dialog {
     }
     return true;
   }
+}
+
+abstract class Owner {
+  Function(IncomingRequest) get receiveRequest;
+  int? get status;
+  int get TerminatedCode;
+  UA? get ua;
 }

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:sip_ua/src/data.dart';
-import 'package:sip_ua/src/subscriber.dart';
+import 'data.dart';
+import 'subscriber.dart';
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -12,7 +12,6 @@ import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
 import 'message.dart';
-import 'notifier.dart';
 import 'parser.dart' as Parser;
 import 'registrator.dart';
 import 'rtc_session.dart';
@@ -124,8 +123,11 @@ class UA extends EventManager {
 
     // Initialize registrator.
     _registrator = Registrator(this);
+
+    _subscribers = <String?, Subscriber>{};
   }
 
+  late Map<String?, Subscriber> _subscribers;
   Map<String, dynamic>? _cache;
   Settings? _configuration;
   DynamicSettings? _dynConfiguration;
@@ -224,22 +226,6 @@ class UA extends EventManager {
 
     return Subscriber(this, target, eventName, accept, expires, contentType,
         allowEvents, requestParams, extraHeaders);
-  }
-
-  /**
-   * Create notifier instance
-   */
-  Notifier notify(
-    IncomingRequest subscribe,
-    String contentType, [
-    bool pending = false,
-    List<String>? extraHeaders = null,
-    String? allowEvents = null,
-  ]) {
-    logger.debug('notify()');
-
-    return Notifier(
-        this, subscribe, contentType, pending, extraHeaders, allowEvents);
   }
 
   /**
@@ -456,6 +442,20 @@ class UA extends EventManager {
   }
 
   /**
+   * Subscriber
+   */
+  void newSubscriber({required Subscriber sub}) {
+    _subscribers[sub.id] = sub;
+  }
+
+  /**
+   * Subscriber destroyed.
+   */
+  void destroySubscriber(Subscriber sub) {
+    _subscribers.remove(sub.id);
+  }
+
+  /**
    * Dialog
    */
   void newDialog(Dialog dialog) {
@@ -623,7 +623,7 @@ class UA extends EventManager {
               dialog = _findDialog(
                   replaces.call_id, replaces.from_tag!, replaces.to_tag!);
               if (dialog != null) {
-                session = dialog.owner;
+                session = dialog.owner as RTCSession?;
                 if (!session!.isEnded()) {
                   session.receiveRequest(request);
                 } else {
@@ -681,12 +681,11 @@ class UA extends EventManager {
       if (dialog != null) {
         dialog.receiveRequest(request);
       } else if (method == SipMethod.NOTIFY) {
-        session =
-            _findSession(request.call_id!, request.from_tag, request.to_tag);
-        if (session != null) {
-          session.receiveRequest(request);
+        Subscriber? sub = _findSubscriber(
+            request.call_id!, request.from_tag!, request.to_tag!);
+        if (sub != null) {
+          sub.receiveRequest(request);
         } else {
-          // TODO: Look for subscriver to notify.
           logger
               .debug('received NOTIFY request for a non existent subscription');
           request.reply(481, 'Subscription does not exist');
@@ -707,6 +706,23 @@ class UA extends EventManager {
   // ============
   // Utils.
   // ============
+
+  Subscriber? _findSubscriber(String call_id, String from_tag, String to_tag) {
+    String id = call_id + from_tag + to_tag;
+    Subscriber? sub = _subscribers[id];
+
+    if (sub != null) {
+      return sub;
+    } else {
+      id = call_id + to_tag + from_tag;
+      sub = _subscribers[id];
+      if (sub != null) {
+        return sub;
+      } else {
+        return null;
+      }
+    }
+  }
 
   /**
    * Get the session to which the request belongs to, if any.

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:sip_ua/sip_ua.dart';
@@ -41,8 +42,46 @@ class C {
   static const int STATE_NOTIFY_WAIT = 4;
 }
 
-class Subscriber extends EventManager {
-  Subscriber(this._ua, this._target, String eventName, String accept,
+class Subscriber extends EventManager implements Owner {
+  String? _id;
+
+  final String _target;
+
+  late int _expires;
+
+  String? _contentType;
+
+  late Map<String, dynamic> _params;
+
+  late int _state;
+
+  late Dialog? _dialog;
+
+  DateTime? _expires_timestamp;
+
+  Timer? _expires_timer;
+
+  late bool _terminated;
+
+  Timer? _unsubscribe_timeout_timer;
+
+  late Map<String, dynamic> _data;
+
+  late String _event_name;
+
+  num? _event_id;
+
+  late List<dynamic> _headers;
+
+  late List<Map<String, dynamic>> _queue;
+
+  @override
+  late Function(IncomingRequest p1) receiveRequest;
+
+  @override
+  UA ua;
+
+  Subscriber(this.ua, this._target, String eventName, String accept,
       [int expires = 900,
       String? contentType,
       String? allowEvents,
@@ -100,7 +139,7 @@ class Subscriber extends EventManager {
     _headers.addAll(<String>['Event: $eventValue', 'Expires: $_expires']);
 
     if (!_headers.any((dynamic element) => element.startsWith('Contact'))) {
-      String contact = 'Contact: ${_ua.contact.toString()}';
+      String contact = 'Contact: ${ua.contact.toString()}';
 
       _headers.add(contact);
     }
@@ -109,53 +148,26 @@ class Subscriber extends EventManager {
       _headers.add('Allow-Events: $allowEvents');
     }
 
+    receiveRequest = receiveNotifyRequest;
+
     // To enqueue subscribes created before receive initial subscribe OK.
     _queue = <Map<String, dynamic>>[];
   }
+  String? get id => _id;
 
-  final UA _ua;
+  int? get status => _state;
 
-  final String _target;
-
-  late int _expires;
-
-  String? _contentType;
-
-  late Map<String, dynamic> _params;
-
-  late int _state;
-
-  late Dialog? _dialog;
-
-  DateTime? _expires_timestamp;
-
-  Timer? _expires_timer;
-
-  late bool _terminated;
-
-  Timer? _unsubscribe_timeout_timer;
-
-  late Map<String, dynamic> _data;
-
-  late String _event_name;
-
-  num? _event_id;
-
-  late List<dynamic> _headers;
-
-  late List<Map<String, dynamic>> _queue;
-
-  /**
-   * Expose C object.
-   */
-  static C getC() {
-    return C();
-  }
+  @override
+  int get TerminatedCode => C.STATE_TERMINATED;
 
   @override
   void onRequestTimeout() {
     _dialogTerminated(C.SUBSCRIBE_RESPONSE_TIMEOUT);
   }
+
+  /**
+   * User API
+   */
 
   @override
   void onTransportError() {
@@ -176,7 +188,7 @@ class Subscriber extends EventManager {
     // RFC 6665 8.2.1. Check if event header matches.
     dynamic eventHeader = request.parseHeader('Event');
 
-    if (!eventHeader) {
+    if (eventHeader == null) {
       logger.warn('missed Event header');
       request.reply(400);
       _dialogTerminated(C.RECEIVE_BAD_NOTIFY);
@@ -185,7 +197,7 @@ class Subscriber extends EventManager {
     }
 
     dynamic eventName = eventHeader.event;
-    bool eventId = eventHeader.params && eventHeader.params.id;
+    num? eventId = eventHeader.params['id'];
 
     if (eventName != _event_name || eventId != _event_id) {
       logger.warn('Event header does not match SUBSCRIBE');
@@ -198,7 +210,7 @@ class Subscriber extends EventManager {
     // Process Subscription-State header.
     dynamic subsState = request.parseHeader('subscription-state');
 
-    if (!subsState) {
+    if (subsState == null) {
       logger.warn('missed Subscription-State header');
       request.reply(400);
       _dialogTerminated(C.RECEIVE_BAD_NOTIFY);
@@ -267,10 +279,6 @@ class Subscriber extends EventManager {
     }
   }
 
-  /**
-   * User API
-   */
-
   /** 
    * Send the initial (non-fetch)  and subsequent subscribe.
    * @param {string} body - subscribe request body.
@@ -290,8 +298,7 @@ class Subscriber extends EventManager {
    * Send un-subscribe or fetch-subscribe (with Expires: 0).
    * @param {string} body - un-subscribe request body
    */
-  @override
-  void terminate([Map<String, dynamic>? body]) {
+  void terminate(String? body) {
     logger.debug('terminate()');
 
     // Prevent duplication un-subscribe sending.
@@ -320,52 +327,47 @@ class Subscriber extends EventManager {
     }, final_notify_timeout);
   }
 
-  /**
-   * Private API.
-   */
-  void _sendInitialSubscribe(String? body, List<dynamic> headers) {
-    if (body != null) {
-      if (_contentType == null) {
-        throw TypeError('content_type is undefined');
-      }
-
-      headers = headers.slice(0);
-      headers.add('Content-Type: $_contentType');
+  void _dialogTerminated(int terminationCode,
+      [String? reason, int? retryAfter]) {
+    // To prevent duplicate emit terminated event.
+    if (_state == C.STATE_TERMINATED) {
+      return;
     }
 
-    _state = C.STATE_NOTIFY_WAIT;
+    _state = C.STATE_TERMINATED;
 
-    OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
-        _ua.normalizeTarget(_target), _ua, _params, headers, body);
+    // Clear timers.
+    clearTimeout(_expires_timer);
+    clearTimeout(_unsubscribe_timeout_timer);
 
-    EventManager handler = EventManager();
+    if (_dialog != null) {
+      _dialog!.terminate();
+      _dialog = null;
+    }
 
-    handler.on(EventOnReceiveResponse(), (EventOnReceiveResponse response) {
-      _receiveSubscribeResponse(response.response);
-    });
+    logger.debug('emit "terminated" code=$terminationCode');
+    emit(EventTerminated(
+        TerminationCode: terminationCode,
+        reason: reason,
+        retryAfter: retryAfter));
+  }
 
-    handler.on(EventOnRequestTimeout(), (EventOnRequestTimeout timeout) {
-      onRequestTimeout();
-    });
-
-    handler.on(EventOnTransportError(), (EventOnTransportError event) {
-      onTransportError();
-    });
-
-    RequestSender request_sender = RequestSender(_ua, request, handler);
-
-    request_sender.send();
+  void _handlePresence(EventNotify event) {
+    emit(event);
   }
 
   void _receiveSubscribeResponse(IncomingResponse? response) {
     if (response == null) {
       throw ArgumentError('Incoming response was null');
     }
+
     if (response.status_code >= 200 && response.status_code! < 300) {
       // Create dialog
       if (_dialog == null) {
+        _id = response.call_id! + response.from_tag! + response.to_tag!;
         try {
-          // TODO: Check for ok Response
+          Dialog dialog = Dialog(this, response, 'UAC');
+          _dialog = dialog;
         } catch (e) {
           logger.warn(e.toString());
           _dialogTerminated(C.SUBSCRIBE_BAD_OK_RESPONSE);
@@ -382,7 +384,13 @@ class Subscriber extends EventManager {
 
           _sendSubsequentSubscribe(sub['body'], sub['headers']);
         }
+      } else {
+        ua.destroySubscriber(this);
+        _id = response.call_id! + response.from_tag! + response.to_tag!;
+        ua.newSubscriber(sub: this);
       }
+
+      ua.newSubscriber(sub: this);
 
       // Check expires value.
       String? expires_value = response.getHeader('Expires');
@@ -409,8 +417,73 @@ class Subscriber extends EventManager {
     }
   }
 
+  void _scheduleSubscribe(int expires) {
+    /*
+      If the expires time is less than 140 seconds we do not support Chrome intensive timer throttling mode. 
+      In this case, the re-subscribe is sent 5 seconds before the subscription expiration.
+
+      When Chrome is in intensive timer throttling mode, in the worst case, 
+	  the timer will be 60 seconds late.
+      We give the server 10 seconds to make sure it will execute the command even if it is heavily loaded. 
+      As a result, we order the time no later than 70 seconds before the subscription expiration.
+      Resulting time calculated as half time interval + (half interval - 70) * random.
+
+      E.g. expires is 140, re-subscribe will be ordered to send in 70 seconds.
+	       expires is 600, re-subscribe will be ordered to send in 300 + (0 .. 230) seconds.
+	 */
+
+    num timeout = expires / 2;
+
+    _expires_timestamp = DateTime.now().add(Duration(seconds: expires));
+
+    logger.debug('next SUBSCRIBE will be sent in $timeout sec');
+
+    clearTimeout(_expires_timer);
+
+    _expires_timer = setTimeout(() {
+      _expires_timer = null;
+      _sendSubsequentSubscribe(null, _headers);
+    }, timeout.toInt() * 1000);
+  }
+
+  /**
+   * Private API.
+   */
+  void _sendInitialSubscribe(String? body, List<dynamic> headers) {
+    if (body != null) {
+      if (_contentType == null) {
+        throw TypeError('content_type is undefined');
+      }
+
+      headers = headers.slice(0);
+      headers.add('Content-Type: $_contentType');
+    }
+
+    _state = C.STATE_NOTIFY_WAIT;
+
+    OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
+        ua.normalizeTarget(_target), ua, _params, headers, body);
+
+    EventManager handler = EventManager();
+
+    handler.on(EventOnReceiveResponse(), (EventOnReceiveResponse response) {
+      _receiveSubscribeResponse(response.response);
+    });
+
+    handler.on(EventOnRequestTimeout(), (EventOnRequestTimeout timeout) {
+      onRequestTimeout();
+    });
+
+    handler.on(EventOnTransportError(), (EventOnTransportError event) {
+      onTransportError();
+    });
+
+    RequestSender request_sender = RequestSender(ua, request, handler);
+
+    request_sender.send();
+  }
+
   void _sendSubsequentSubscribe(String? body, List<dynamic> headers) {
-    // TODO: Rework this
     if (_state == C.STATE_TERMINATED) {
       return;
     }
@@ -446,9 +519,9 @@ class Subscriber extends EventManager {
     });
 
     OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
-        _ua.normalizeTarget(_target), _ua, _params, headers, body);
+        ua.normalizeTarget(_target), ua, _params, headers, body);
 
-    RequestSender request_sender = RequestSender(_ua, request, manager);
+    RequestSender request_sender = RequestSender(ua, request, manager);
 
     request_sender.send();
 
@@ -457,62 +530,6 @@ class Subscriber extends EventManager {
       'extraHeaders': headers,
       'eventHandlers': manager,
     });
-
-    print(s);
-  }
-
-  void _dialogTerminated(int terminationCode,
-      [String? reason, int? retryAfter]) {
-    // To prevent duplicate emit terminated event.
-    if (_state == C.STATE_TERMINATED) {
-      return;
-    }
-
-    _state = C.STATE_TERMINATED;
-
-    // Clear timers.
-    clearTimeout(_expires_timer);
-    clearTimeout(_unsubscribe_timeout_timer);
-
-    if (_dialog != null) {
-      _dialog!.terminate();
-      _dialog = null;
-    }
-
-    logger.debug('emit "terminated" code=$terminationCode');
-    emit(EventTerminated(
-        TerminationCode: terminationCode,
-        reason: reason,
-        retryAfter: retryAfter));
-  }
-
-  void _scheduleSubscribe(int expires) {
-    /*
-      If the expires time is less than 140 seconds we do not support Chrome intensive timer throttling mode. 
-      In this case, the re-subscribe is sent 5 seconds before the subscription expiration.
-
-      When Chrome is in intensive timer throttling mode, in the worst case, 
-	  the timer will be 60 seconds late.
-      We give the server 10 seconds to make sure it will execute the command even if it is heavily loaded. 
-      As a result, we order the time no later than 70 seconds before the subscription expiration.
-      Resulting time calculated as half time interval + (half interval - 70) * random.
-
-      E.g. expires is 140, re-subscribe will be ordered to send in 70 seconds.
-	       expires is 600, re-subscribe will be ordered to send in 300 + (0 .. 230) seconds.
-	 */
-
-    num timeout = 10;
-
-    _expires_timestamp = DateTime.now().add(Duration(seconds: expires));
-
-    logger.debug('next SUBSCRIBE will be sent in $timeout sec');
-
-    clearTimeout(_expires_timer);
-
-    _expires_timer = setTimeout(() {
-      _expires_timer = null;
-      _sendSubsequentSubscribe(null, _headers);
-    }, timeout.toInt() * 1000);
   }
 
   int _stateStringToNumber(String? strState) {
@@ -532,7 +549,16 @@ class Subscriber extends EventManager {
     }
   }
 
-  void _handlePresence(EventOnPresence event) {
-    emit(event);
+  /**
+   * Expose C object.
+   */
+  static C getC() {
+    return C();
   }
+}
+
+class SubscriptionId {
+  String target;
+  String event;
+  SubscriptionId(this.target, this.event);
 }

@@ -293,4 +293,9 @@ class _MyRegisterWidget extends State<RegisterWidget>
   void onNewMessage(SIPMessageRequest msg) {
     // NO OP
   }
+
+  @override
+  void onNewNotify(Notify ntf) {
+    // TODO: implement onNewNotify
+  }
 }

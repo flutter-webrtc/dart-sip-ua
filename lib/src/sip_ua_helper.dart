@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:xml/xml.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
@@ -7,7 +6,8 @@ import 'package:sip_ua/src/event_manager/internal_events.dart';
 import 'package:sip_ua/src/event_manager/subscriber_events.dart';
 
 import 'package:sip_ua/src/rtc_session/refer_subscriber.dart';
-import 'package:sip_ua/src/subscriber.dart';
+import 'package:sip_ua/src/sip_message.dart';
+import 'subscriber.dart';
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'event_manager/event_manager.dart';
@@ -332,12 +332,11 @@ class SIPUAHelper extends EventManager {
     return _ua!.sendMessage(target, body, options);
   }
 
-  void subscribe(String target) {
-    var s = _ua!.subscribe(
-        target, "Presence", "application/sdp, application/dtmf-relay");
+  void subscribe(String target, String event, String contentType) {
+    Subscriber s = _ua!.subscribe(target, event, contentType);
 
-    s.on(EventOnPresence(), (EventOnPresence event) {
-      _notifyPresenceListeners(event);
+    s.on(EventNotify(), (EventNotify event) {
+      _notifyNotifyListeners(event);
     });
 
     s.subscribe();
@@ -388,15 +387,9 @@ class SIPUAHelper extends EventManager {
     }
   }
 
-  void _notifyPresenceListeners(EventOnPresence event) {
-    // TODO: Error handling
-    XmlDocument body = XmlDocument.parse(event.request!.body!);
-    XmlElement stateNode = body.firstElementChild!.getElement('note')!;
-    XmlElement extNode = body.firstElementChild!.getElement('tuple')!;
-    PresenceStates state = parseState(stateNode.innerText)!;
-    String ext = extNode.getAttribute('id')!;
+  void _notifyNotifyListeners(EventNotify event) {
     for (SipUaHelperListener listener in _sipUaHelperListeners) {
-      listener.onNewPresence(Presence(ext, state));
+      listener.onNewNotify(Notify(request: event.request));
     }
   }
 }
@@ -607,53 +600,18 @@ class SIPMessageRequest {
   Message? message;
 }
 
-class Notify {
-  Notify({this.notify});
-  EventNotify? notify;
-}
-
 abstract class SipUaHelperListener {
   void transportStateChanged(TransportState state);
   void registrationStateChanged(RegistrationState state);
   void callStateChanged(Call call, CallState state);
-  //For SIP messaga coming
+  //For SIP message coming
   void onNewMessage(SIPMessageRequest msg);
-  void onNewPresence(Presence prs);
+  void onNewNotify(Notify ntf);
 }
 
-class Presence {
-  Presence(this.ext, this.state);
-  String ext;
-  PresenceStates state;
-}
-
-enum PresenceStates {
-  Ready,
-  OnThePhone,
-  Ringing,
-  OnHold,
-  Unavailable,
-  NotOnline,
-  _None
-}
-
-PresenceStates? parseState(String s) {
-  switch (s) {
-    case 'Ready':
-      return PresenceStates.Ready;
-    case 'OnThePhone':
-      return PresenceStates.OnThePhone;
-    case 'Ringing':
-      return PresenceStates.Ringing;
-    case 'OnHold':
-      return PresenceStates.OnHold;
-    case 'Unavailable':
-      return PresenceStates.Unavailable;
-    case 'NotOnline':
-      return PresenceStates.NotOnline;
-    default:
-      return null;
-  }
+class Notify {
+  Notify({this.request});
+  IncomingRequest? request;
 }
 
 class RegisterParams {

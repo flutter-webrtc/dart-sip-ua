@@ -581,4 +581,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void onNewMessage(SIPMessageRequest msg) {
     // NO OP
   }
+
+  @override
+  void onNewNotify(Notify ntf) {
+    // TODO: implement onNewNotify
+  }
 }
