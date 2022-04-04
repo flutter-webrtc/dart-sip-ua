@@ -11,6 +11,7 @@ import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
 import 'message.dart';
+import 'options.dart';
 import 'parser.dart' as Parser;
 import 'registrator.dart';
 import 'rtc_session.dart';
@@ -91,8 +92,8 @@ class UA extends EventManager {
     _dynConfiguration = DynamicSettings();
     _dialogs = <String, Dialog>{};
 
-    // User actions outside any session/dialog (MESSAGE).
-    _applicants = <Message>{};
+    // User actions outside any session/dialog (MESSAGE/OPTIONS).
+    _applicants = <Applicant>{};
 
     _sessions = <String?, RTCSession>{};
     _transport = null;
@@ -128,7 +129,7 @@ class UA extends EventManager {
   Settings? _configuration;
   DynamicSettings? _dynConfiguration;
   late Map<String, Dialog> _dialogs;
-  late Set<Message> _applicants;
+  late Set<Applicant> _applicants;
   Map<String?, RTCSession> _sessions = <String?, RTCSession>{};
   Transport? _transport;
   Contact? _contact;
@@ -310,9 +311,9 @@ class UA extends EventManager {
     });
 
     // Run  _close_ on every applicant.
-    for (Message message in _applicants) {
+    for (Applicant applicant in _applicants) {
       try {
-        message.close();
+        applicant.close();
       } catch (error) {}
     }
 
@@ -442,9 +443,25 @@ class UA extends EventManager {
   }
 
   /**
+   *  Options
+   */
+  void newOptions(Options message, String originator, dynamic request) {
+    _applicants.add(message);
+    emit(EventNewOptions(
+        message: message, originator: originator, request: request));
+  }
+
+  /**
    *  Message destroyed.
    */
   void destroyMessage(Message message) {
+    _applicants.remove(message);
+  }
+
+  /**
+   *  Options destroyed.
+   */
+  void destroyOptions(Options message) {
     _applicants.remove(message);
   }
 
@@ -882,4 +899,8 @@ class UA extends EventManager {
       }
     }
   }
+}
+
+mixin Applicant {
+  void close();
 }
