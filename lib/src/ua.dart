@@ -262,6 +262,24 @@ class UA extends EventManager {
   }
 
   /**
+   * Send a Options.
+   *
+   * -param {String} target
+   * -param {String} body
+   * -param {Object} [options]
+   *
+   * -throws {TypeError}
+   *
+   */
+  Options sendOptions(
+      String target, String body, Map<String, dynamic>? options) {
+    logger.debug('sendOptions()');
+    Options message = Options(this);
+    message.send(target, body, options);
+    return message;
+  }
+
+  /**
    * Terminate ongoing sessions.
    */
   void terminateSessions(Map<String, Object> options) {
@@ -565,7 +583,13 @@ class UA extends EventManager {
      * They are processed as if they had been received outside the dialog.
      */
     if (method == SipMethod.OPTIONS) {
-      request.reply(200);
+      if (!hasListeners(EventNewOptions())) {
+        request.reply(200);
+        return;
+      }
+      Options message = Options(this);
+      message.init_incoming(request);
+      return;
     } else if (method == SipMethod.MESSAGE) {
       if (!hasListeners(EventNewMessage())) {
         request.reply(405);
