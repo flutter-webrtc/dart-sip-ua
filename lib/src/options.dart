@@ -98,7 +98,7 @@ class Options extends EventManager with Applicant {
     _newOptions('remote', request);
 
     // Reply with a 200 OK if the user didn't reply.
-    if (_is_replied == null) {
+    if (_is_replied == null || _is_replied == false) {
       _is_replied = true;
       request.reply(200);
     }
