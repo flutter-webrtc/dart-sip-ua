@@ -332,6 +332,19 @@ class UA extends EventManager {
       }
     });
 
+    // Run _terminate on ever subscription
+    _subscribers.forEach((String? key, _) {
+      if (_subscribers.containsKey(key)) {
+        logger.debug('closing subscription $key');
+        try {
+          Subscriber subscriber = _subscribers[key]!;
+          subscriber.terminate(null);
+        } catch (error, s) {
+          Log.e(error.toString(), null, s);
+        }
+      }
+    });
+
     // Run  _close_ on every applicant.
     for (Message message in _applicants) {
       try {
