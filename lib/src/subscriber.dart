@@ -364,7 +364,7 @@ class Subscriber extends EventManager implements Owner {
     if (response.status_code >= 200 && response.status_code! < 300) {
       // Create dialog
       if (_dialog == null) {
-        _id = response.call_id! + response.from_tag! + response.to_tag!;
+        _id = response.call_id!;
         try {
           Dialog dialog = Dialog(this, response, 'UAC');
           _dialog = dialog;
@@ -386,7 +386,7 @@ class Subscriber extends EventManager implements Owner {
         }
       } else {
         ua.destroySubscriber(this);
-        _id = response.call_id! + response.from_tag! + response.to_tag!;
+        _id = response.call_id!;
         ua.newSubscriber(sub: this);
       }
 

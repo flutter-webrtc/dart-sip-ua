@@ -708,20 +708,10 @@ class UA extends EventManager {
   // ============
 
   Subscriber? _findSubscriber(String call_id, String from_tag, String to_tag) {
-    String id = call_id + from_tag + to_tag;
+    String id = call_id;
     Subscriber? sub = _subscribers[id];
 
-    if (sub != null) {
-      return sub;
-    } else {
-      id = call_id + to_tag + from_tag;
-      sub = _subscribers[id];
-      if (sub != null) {
-        return sub;
-      } else {
-        return null;
-      }
-    }
+    return sub;
   }
 
   /**
