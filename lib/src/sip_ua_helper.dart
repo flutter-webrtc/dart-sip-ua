@@ -442,7 +442,7 @@ class Call {
 
   void hangup([Map<String, dynamic>? options]) {
     assert(_session != null, 'ERROR(hangup): rtc session is invalid!');
-    _session.terminate(options as Map<String, Object>?);
+    _session.terminate(options);
   }
 
   void hold() {
