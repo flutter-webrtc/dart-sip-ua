@@ -3,14 +3,17 @@ import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
 
-import 'package:sip_ua/src/rtc_session/refer_subscriber.dart';
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'event_manager/event_manager.dart';
+import 'event_manager/subscriber_events.dart';
 import 'logger.dart';
 import 'message.dart';
 import 'rtc_session.dart';
+import 'rtc_session/refer_subscriber.dart';
+import 'sip_message.dart';
 import 'stack_trace_nj.dart';
+import 'subscriber.dart';
 import 'transports/websocket_interface.dart';
 import 'ua.dart';
 
@@ -328,6 +331,16 @@ class SIPUAHelper extends EventManager {
     return _ua!.sendMessage(target, body, options);
   }
 
+  void subscribe(String target, String event, String contentType) {
+    Subscriber s = _ua!.subscribe(target, event, contentType);
+
+    s.on(EventNotify(), (EventNotify event) {
+      _notifyNotifyListeners(event);
+    });
+
+    s.subscribe();
+  }
+
   void terminateSessions(Map<String, dynamic> options) {
     _ua!.terminateSessions(options as Map<String, Object>);
   }
@@ -370,6 +383,12 @@ class SIPUAHelper extends EventManager {
   void _notifyNewMessageListeners(SIPMessageRequest msg) {
     for (SipUaHelperListener listener in _sipUaHelperListeners) {
       listener.onNewMessage(msg);
+    }
+  }
+
+  void _notifyNotifyListeners(EventNotify event) {
+    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+      listener.onNewNotify(Notify(request: event.request));
     }
   }
 }
@@ -422,7 +441,7 @@ class Call {
 
   void hangup([Map<String, dynamic>? options]) {
     assert(_session != null, 'ERROR(hangup): rtc session is invalid!');
-    _session.terminate(options as Map<String, Object>?);
+    _session.terminate(options);
   }
 
   void hold() {
@@ -584,8 +603,14 @@ abstract class SipUaHelperListener {
   void transportStateChanged(TransportState state);
   void registrationStateChanged(RegistrationState state);
   void callStateChanged(Call call, CallState state);
-  //For SIP messaga coming
+  //For SIP message coming
   void onNewMessage(SIPMessageRequest msg);
+  void onNewNotify(Notify ntf);
+}
+
+class Notify {
+  Notify({this.request});
+  IncomingRequest? request;
 }
 
 class RegisterParams {

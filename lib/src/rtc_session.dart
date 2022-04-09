@@ -64,7 +64,7 @@ class RFC4028Timers {
   Timer? timer;
 }
 
-class RTCSession extends EventManager {
+class RTCSession extends EventManager implements Owner {
   RTCSession(UA? ua) {
     logger.debug('new');
 
@@ -194,6 +194,9 @@ class RTCSession extends EventManager {
   dynamic get request => _request;
 
   RTCPeerConnection? get connection => _connection;
+
+  @override
+  int get TerminatedCode => C.STATUS_TERMINATED;
 
   RTCDTMFSender get dtmfSender =>
       _connection!.createDtmfSender(_localMediaStream!.getAudioTracks()[0]);
