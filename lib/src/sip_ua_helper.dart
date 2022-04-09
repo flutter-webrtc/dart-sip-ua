@@ -2,19 +2,18 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
-import 'package:sip_ua/src/event_manager/internal_events.dart';
-import 'package:sip_ua/src/event_manager/subscriber_events.dart';
 
-import 'package:sip_ua/src/rtc_session/refer_subscriber.dart';
-import 'package:sip_ua/src/sip_message.dart';
-import 'subscriber.dart';
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'event_manager/event_manager.dart';
+import 'event_manager/subscriber_events.dart';
 import 'logger.dart';
 import 'message.dart';
 import 'rtc_session.dart';
+import 'rtc_session/refer_subscriber.dart';
+import 'sip_message.dart';
 import 'stack_trace_nj.dart';
+import 'subscriber.dart';
 import 'transports/websocket_interface.dart';
 import 'ua.dart';
 

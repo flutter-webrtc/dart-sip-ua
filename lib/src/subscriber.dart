@@ -1,24 +1,20 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/constants.dart';
-import 'package:sip_ua/src/dialog.dart';
-import 'package:sip_ua/src/event_manager/internal_events.dart';
-import 'package:sip_ua/src/event_manager/subscriber_events.dart';
-import 'package:sip_ua/src/exceptions.dart';
-import 'package:sip_ua/src/grammar.dart';
-import 'package:sip_ua/src/logger.dart';
-import 'package:sip_ua/src/request_sender.dart';
-import 'package:sip_ua/src/rtc_session.dart';
-import 'package:sip_ua/src/sanity_check.dart';
-import 'package:sip_ua/src/sip_message.dart';
-import 'package:sip_ua/src/timers.dart';
-import 'package:sip_ua/src/ua.dart';
-import 'package:sip_ua/src/utils.dart';
 
+import 'constants.dart';
+import 'dialog.dart';
 import 'event_manager/event_manager.dart';
+import 'event_manager/internal_events.dart';
+import 'event_manager/subscriber_events.dart';
+import 'exceptions.dart';
+import 'grammar.dart';
+import 'logger.dart';
+import 'request_sender.dart';
+import 'sip_message.dart';
+import 'timers.dart';
+import 'ua.dart';
+import 'utils.dart';
 
 /**
  * Termination codes.
