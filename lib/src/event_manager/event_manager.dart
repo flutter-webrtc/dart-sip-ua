@@ -4,6 +4,7 @@ import 'events.dart';
 export 'call_events.dart';
 export 'events.dart';
 export 'message_events.dart';
+export 'options_events.dart';
 export 'refer_events.dart';
 export 'register_events.dart';
 export 'transport_events.dart';
