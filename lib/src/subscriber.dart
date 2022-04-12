@@ -267,7 +267,7 @@ class Subscriber extends EventManager implements Owner {
       dynamic reason = subsState.reason;
       dynamic retryAfter = null;
 
-      if (subsState.params && subsState.params['retry-after'] != null) {
+      if (subsState.params != null && subsState.params['retry-after'] != null) {
         retryAfter = parseInt(subsState.params['retry-after'], 10);
       }
 
