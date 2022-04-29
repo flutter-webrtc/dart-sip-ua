@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sip_ua/sip_ua.dart';
+import 'package:flutter/foundation.dart';
+
 
 import 'widgets/action_button.dart';
 
@@ -36,7 +41,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
     _textController = TextEditingController(text: _dest);
     _textController!.text = _dest!;
 
-    this.setState(() {});
+    setState(() {});
   }
 
   void _bindEventListeners() {
@@ -46,8 +51,12 @@ class _MyDialPadWidget extends State<DialPadWidget>
   Future<Widget?> _handleCall(BuildContext context,
       [bool voiceonly = false]) async {
     var dest = _textController?.text;
+    if(defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
+      await Permission.microphone.request();
+      await Permission.camera.request();
+    }
     if (dest == null || dest.isEmpty) {
-      showDialog<Null>(
+      showDialog<void>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
@@ -92,7 +101,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
   void _handleBackSpace([bool deleteAll = false]) {
     var text = _textController!.text;
     if (text.isNotEmpty) {
-      this.setState(() {
+      setState(() {
         text = deleteAll ? '' : text.substring(0, text.length - 1);
         _textController!.text = text;
       });
@@ -100,7 +109,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
   }
 
   void _handleNum(String number) {
-    this.setState(() {
+    setState(() {
       _textController!.text += number;
     });
   }
@@ -136,8 +145,8 @@ class _MyDialPadWidget extends State<DialPadWidget>
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: row
                     .map((label) => ActionButton(
-                          title: '${label.keys.first}',
-                          subTitle: '${label.values.first}',
+                          title: label.keys.first,
+                          subTitle: label.values.first,
                           onPressed: () => _handleNum(label.keys.first),
                           number: true,
                         ))
@@ -275,7 +284,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
                     padding: const EdgeInsets.all(6.0),
                     child: Center(
                         child: Text(
-                      'Received Message: ${receivedMsg}',
+                      'Received Message: $receivedMsg',
                       style: TextStyle(fontSize: 14, color: Colors.black54),
                     )),
                   ),
@@ -290,7 +299,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   @override
   void registrationStateChanged(RegistrationState state) {
-    this.setState(() {});
+    setState(() {});
   }
 
   @override
@@ -314,6 +323,5 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   @override
   void onNewNotify(Notify ntf) {
-    // TODO: implement onNewNotify
   }
 }
