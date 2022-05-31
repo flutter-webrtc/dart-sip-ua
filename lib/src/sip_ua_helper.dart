@@ -18,8 +18,8 @@ import 'transports/websocket_interface.dart';
 import 'ua.dart';
 
 class SIPUAHelper extends EventManager {
-  SIPUAHelper() {
-    Log.loggingLevel = Level.debug;
+  SIPUAHelper({Level logLevel = Level.debug}) {
+    Log.loggingLevel = logLevel;
   }
 
   UA? _ua;
