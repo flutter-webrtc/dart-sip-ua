@@ -44,7 +44,7 @@ class SIPUAHelper extends EventManager {
   }
 
   bool get connecting {
-    if (_ua != null&&_ua!.transport!=null) {
+    if (_ua != null && _ua!.transport != null) {
       return _ua!.transport!.isConnecting();
     }
     return false;
