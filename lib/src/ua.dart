@@ -154,6 +154,9 @@ class UA extends EventManager {
 
   TransactionBag get transactions => _transactions;
 
+  // Flag that indicates whether UA is currently stopping
+  bool _stopping = false;
+
   // ============
   //  High Level API
   // ============
@@ -364,6 +367,8 @@ class UA extends EventManager {
       }
     });
 
+    _stopping = true;
+
     // Run  _close_ on every applicant.
     for (Applicant applicant in _applicants) {
       try {
@@ -505,6 +510,9 @@ class UA extends EventManager {
    *  Message
    */
   void newMessage(Message message, String originator, dynamic request) {
+    if (_stopping) {
+      return;
+    }
     _applicants.add(message);
     emit(EventNewMessage(
         message: message, originator: originator, request: request));
@@ -514,7 +522,11 @@ class UA extends EventManager {
    *  Options
    */
   void newOptions(Options message, String originator, dynamic request) {
+    if (_stopping) {
+      return;
+    }
     _applicants.add(message);
+
     emit(EventNewOptions(
         message: message, originator: originator, request: request));
   }
@@ -523,6 +535,9 @@ class UA extends EventManager {
    *  Message destroyed.
    */
   void destroyMessage(Message message) {
+    if (_stopping) {
+      return;
+    }
     _applicants.remove(message);
   }
 
@@ -530,6 +545,9 @@ class UA extends EventManager {
    *  Options destroyed.
    */
   void destroyOptions(Options message) {
+    if (_stopping) {
+      return;
+    }
     _applicants.remove(message);
   }
 

@@ -112,7 +112,7 @@ class InviteClientTransaction extends TransactionBase {
     transport!.send(ack);
   }
 
-  void cancel(String reason) {
+  void cancel(String? reason) {
     // Send only if a provisional response (>100) has been received.
     if (state != TransactionState.PROCEEDING) {
       return;
