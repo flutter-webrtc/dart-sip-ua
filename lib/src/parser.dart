@@ -87,9 +87,8 @@ IncomingMessage? parseMessage(String data, UA? ua) {
     }
     contentLength ??= 0;
     if (contentLength > 0) {
-      List<int> encoded = utf8.encode(data);
-      List<int> content =
-          encoded.sublist(bodyStart, bodyStart + contentLength as int);
+      List<int> encoded = utf8.encode(data.substring(bodyStart));
+      List<int> content = encoded.sublist(0, contentLength as int);
       message.body = utf8.decode(content);
     }
   } else {
