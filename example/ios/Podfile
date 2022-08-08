@@ -34,5 +34,12 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    # snippet begin
+    if target.name == "WebRTC-SDK"
+      target.build_configurations.each do |build_configuration|
+        build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = '$(inherited) i386'
+      end
+    end
+    # snippet end
   end
 end
