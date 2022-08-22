@@ -57,7 +57,7 @@ class InviteClientTransaction extends TransactionBase {
     clearTimeout(M);
 
     if (state != TransactionState.ACCEPTED) {
-      logger.debug('transport error occurred, deleting transaction $id');
+      logger.d('transport error occurred, deleting transaction $id');
       _eventHandlers.emit(EventOnTransportError());
     }
 
@@ -67,7 +67,7 @@ class InviteClientTransaction extends TransactionBase {
 
   // RFC 6026 7.2.
   void timer_M() {
-    logger.debug('Timer M expired for transaction $id');
+    logger.d('Timer M expired for transaction $id');
 
     if (state == TransactionState.ACCEPTED) {
       clearTimeout(B);
@@ -78,7 +78,7 @@ class InviteClientTransaction extends TransactionBase {
 
   // RFC 3261 17.1.1.
   void timer_B() {
-    logger.debug('Timer B expired for transaction $id');
+    logger.d('Timer B expired for transaction $id');
     if (state == TransactionState.CALLING) {
       stateChanged(TransactionState.TERMINATED);
       ua!.destroyTransaction(this);
@@ -87,7 +87,7 @@ class InviteClientTransaction extends TransactionBase {
   }
 
   void timer_D() {
-    logger.debug('Timer D expired for transaction $id');
+    logger.d('Timer D expired for transaction $id');
     clearTimeout(B);
     stateChanged(TransactionState.TERMINATED);
     ua!.destroyTransaction(this);

@@ -181,7 +181,7 @@ bool rfc3261_8_2_2_2() {
 // Sanity Check functions for responses.
 bool rfc3261_8_1_3_3() {
   if (message.getHeaders('via').length > 1) {
-    logger.debug(
+    logger.d(
         'more than one Via header field present in the response, dropping the response');
 
     return false;
@@ -201,7 +201,7 @@ bool rfc3261_18_3_response() {
   }
 
   if (len < contentLength) {
-    logger.debug(
+    logger.d(
         'message body length is lower than the value in Content-Length header field, dropping the response');
 
     return false;
@@ -222,8 +222,8 @@ bool minimumHeaders() {
 
   for (String header in mandatoryHeaders) {
     if (!message.hasHeader(header)) {
-      logger.debug(
-          'missing mandatory header field : $header, dropping the response');
+      logger
+          .d('missing mandatory header field : $header, dropping the response');
 
       return false;
     }

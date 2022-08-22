@@ -22,7 +22,7 @@ class WebSocketImpl {
   void connect(
       {Iterable<String>? protocols,
       required WebSocketSettings webSocketSettings}) async {
-    logger.info('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
+    logger.i('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
       if (webSocketSettings.allowBadCertificate) {
         /// Allow self-signed certificate, for test only.
@@ -46,7 +46,7 @@ class WebSocketImpl {
   void send(dynamic data) {
     if (_socket != null) {
       _socket!.add(data);
-      logger.debug('send: \n\n$data');
+      logger.d('send: \n\n$data');
     }
   }
 
@@ -73,7 +73,7 @@ class WebSocketImpl {
 
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) {
-        logger.warn('Allow self-signed certificate => $host:$port. ');
+        logger.w('Allow self-signed certificate => $host:$port. ');
         return true;
       };
 
@@ -106,7 +106,7 @@ class WebSocketImpl {
 
       return webSocket;
     } catch (e) {
-      logger.error('error $e');
+      logger.e('error $e');
       throw e;
     }
   }

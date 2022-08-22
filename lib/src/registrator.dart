@@ -122,7 +122,7 @@ class Registrator {
 
   void register() {
     if (_registering) {
-      logger.debug('Register request in progress...');
+      logger.d('Register request in progress...');
       return;
     }
 
@@ -132,7 +132,7 @@ class Registrator {
         .add('Contact: $_contact;expires=$_expires$_extraContactParams');
     extraHeaders.add('Expires: $_expires');
 
-    logger.warn(_contact);
+    logger.w(_contact);
 
     OutgoingRequest request = OutgoingRequest(
         SipMethod.REGISTER,
@@ -180,7 +180,7 @@ class Registrator {
           _registering = false;
 
           if (!event.response!.hasHeader('Contact')) {
-            logger.debug(
+            logger.d(
                 'no Contact header in response to REGISTER, response ignored');
             return;
           }
@@ -194,7 +194,7 @@ class Registrator {
               (dynamic element) => element.uri.user == _ua!.contact!.uri!.user);
 
           if (contact == null) {
-            logger.debug('no Contact header pointing to us, response ignored');
+            logger.d('no Contact header pointing to us, response ignored');
             return;
           }
 
@@ -256,8 +256,7 @@ class Registrator {
             register();
           } else {
             // This response MUST contain a Min-Expires header field.
-            logger.debug(
-                '423 response received for REGISTER without Min-Expires');
+            logger.d('423 response received for REGISTER without Min-Expires');
 
             _registrationFailure(
                 event.response, DartSIP_C.CausesType.SIP_FAILURE_CODE);
@@ -277,7 +276,7 @@ class Registrator {
 
   void unregister(bool unregister_all) {
     if (_registered == null) {
-      logger.debug('already unregistered');
+      logger.d('already unregistered');
 
       return;
     }

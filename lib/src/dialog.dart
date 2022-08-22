@@ -87,7 +87,7 @@ class Dialog {
     }
 
     _ua!.newDialog(this);
-    logger.debug(
+    logger.d(
         '$type dialog created with status ${_state == DialogStatus.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
@@ -113,7 +113,7 @@ class Dialog {
   void update(dynamic message, String type) {
     _state = DialogStatus.STATUS_CONFIRMED;
 
-    logger.debug('dialog ${_id.toString()}  changed to CONFIRMED state');
+    logger.d('dialog ${_id.toString()}  changed to CONFIRMED state');
 
     if (type == 'UAC') {
       // RFC 3261 13.2.2.4.
@@ -122,7 +122,7 @@ class Dialog {
   }
 
   void terminate() {
-    logger.debug('dialog ${_id.toString()} deleted');
+    logger.d('dialog ${_id.toString()} deleted');
     _ua!.destroyDialog(this);
   }
 
