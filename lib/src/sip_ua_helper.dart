@@ -18,8 +18,10 @@ import 'transports/websocket_interface.dart';
 import 'ua.dart';
 
 class SIPUAHelper extends EventManager {
-  SIPUAHelper() {
-    Log.loggingLevel = Level.debug;
+  SIPUAHelper({Logger? customLogger}) {
+    if (customLogger != null) {
+      logger = customLogger;
+    }
   }
 
   UA? _ua;
@@ -30,6 +32,7 @@ class SIPUAHelper extends EventManager {
   RegistrationState _registerState =
       RegistrationState(state: RegistrationStateEnum.NONE);
 
+  /// Sets the logging level for the default logger. Has no effect if custom logger is supplied.
   set loggingLevel(Level loggingLevel) => Log.loggingLevel = loggingLevel;
 
   bool? get registered {
