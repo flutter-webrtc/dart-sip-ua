@@ -554,6 +554,10 @@ class Call {
     }
     return peerHasMediaLine;
   }
+
+  Future<List<StatsReport>>? getStats([MediaStreamTrack? track]) {
+    return peerConnection?.getStats(track);
+  }
 }
 
 class CallState {
