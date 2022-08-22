@@ -154,7 +154,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void registrationStateChanged(RegistrationState state) {}
 
   void _cleanUp() {
-    if(_localStream == null) return;
+    if (_localStream == null) return;
     _localStream?.getTracks().forEach((track) {
       track.stop();
     });
