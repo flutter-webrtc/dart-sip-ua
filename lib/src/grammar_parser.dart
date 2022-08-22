@@ -17187,7 +17187,7 @@ class GrammarParser {
             _failure(_expect83);
           }
           if (success) {
-            final $1 = $$;
+            final $1 = $$[2];
             final $start = startPos1;
             var pos0 = _startPos;
             $$ = ((offset, expires) {
@@ -17492,7 +17492,7 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect114);
     }
-    return $$;
+    return data;
   }
 
   dynamic _parse_substate_value() {
@@ -22477,7 +22477,7 @@ class GrammarParser {
     if (!success && _cursor > _testing) {
       _failure(_expect113);
     }
-    return $$;
+    return data;
   }
 
   dynamic parse_Supported() {
