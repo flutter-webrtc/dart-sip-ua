@@ -17,7 +17,7 @@ function create() {
         echo "Create flutter project: name=$FLUTTER_APP_PROJECT_NAME, org=$FLUTTER_APP_ORG ..."
         flutter config --enable-macos-desktop
         flutter config --enable-web
-        flutter create --android-language java --androidx --ios-language objc --project-name $FLUTTER_APP_PROJECT_NAME --org $FLUTTER_APP_ORG .
+        flutter create --android-language java --ios-language objc --project-name $FLUTTER_APP_PROJECT_NAME --org $FLUTTER_APP_ORG .
         add_permission_label
     else
         echo "Project [$FLUTTER_APP_PROJECT_NAME] already exists!"
@@ -45,7 +45,7 @@ function add_permission_label() {
     python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />'
     python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />'
     python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />'
-if [ -d "macos" ]; then
+    python add-line.py -i ../android/app/src/main/AndroidManifest.xml -s "<application" -t '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />'
     echo ""
     echo "Add permission labels to macOS."
     echo ""
@@ -67,7 +67,6 @@ if [ -d "macos" ]; then
     python add-line.py -i ../macos/Runner/Release.entitlements -s '</dict>' -t '       <true/>'
     python add-line.py -i ../macos/Runner/Release.entitlements -s '</dict>' -t '       <key>com.apple.security.network.client</key>'
     python add-line.py -i ../macos/Runner/Release.entitlements -s '</dict>' -t '       <true/>'
-fi
 }
 
 if [ "$CMD" == "create" ];

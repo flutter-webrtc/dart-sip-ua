@@ -46,6 +46,13 @@ class SIPUAHelper extends EventManager {
     return false;
   }
 
+  bool get connecting {
+    if (_ua != null && _ua!.transport != null) {
+      return _ua!.transport!.isConnecting();
+    }
+    return false;
+  }
+
   RegistrationState get registerState => _registerState;
 
   void stop() async {
@@ -311,7 +318,7 @@ class SIPUAHelper extends EventManager {
       'rtcAnswerConstraints': <String, dynamic>{
         'mandatory': <String, dynamic>{
           'OfferToReceiveAudio': true,
-          'OfferToReceiveVideo': true,
+          'OfferToReceiveVideo': !voiceonly,
         },
         'optional': <dynamic>[],
       },

@@ -1,9 +1,9 @@
 %{
   import 'dart:core';
-  import 'constants.dart';
-  import 'uri.dart';
-  import 'name_addr_header.dart';
+  import 'dart:convert';
   import 'data.dart';
+  import 'name_addr_header.dart';
+  import 'uri.dart';
 
 }%
 
@@ -305,7 +305,11 @@ TEXT_UTF8_TRIM  <- TEXT_UTF8char+ ( LWS* TEXT_UTF8char)* {
 
 TEXT_UTF8char   <- [\x21-\x7E] / UTF8_NONASCII
 
-UTF8_NONASCII   <- [\u0080-\uFFFF]
+UTF8_NONASCII   <- [\xC0-\xDF] UTF8_CONT
+                  / [\xE0-\xEF] UTF8_CONT UTF8_CONT
+                  / [\xF0-\xF7] UTF8_CONT UTF8_CONT UTF8_CONT
+                  / [\xF8-\xFb] UTF8_CONT UTF8_CONT UTF8_CONT UTF8_CONT
+                  / [\xFC-\xFD] UTF8_CONT UTF8_CONT UTF8_CONT UTF8_CONT UTF8_CONT
 
 UTF8_CONT       <- [\x80-\xBF]
 

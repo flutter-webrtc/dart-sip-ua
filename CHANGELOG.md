@@ -1,6 +1,10 @@
 # Changelog
 
 --------------------------------------------
+[0.5.2] - 2022.08.05
+
+* chore: Fix hold/unhold.
+
 [0.5.1] - 2022.02.13
 
 * chore: Fix compilation error for web.
