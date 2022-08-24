@@ -28,7 +28,7 @@ class ReferNotifier {
   bool? _active;
 
   void notify(int? code, [String? reason]) {
-    logger.debug('notify()');
+    logger.d('notify()');
 
     if (_active == false) {
       return;

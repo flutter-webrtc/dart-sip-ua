@@ -210,9 +210,9 @@ class Options extends EventManager with Applicant {
 
   void _failed(String originator, int? status_code, String cause,
       String? reason_phrase) {
-    logger.debug('OPTIONS failed');
+    logger.d('OPTIONS failed');
     close();
-    logger.debug('emit "failed"');
+    logger.d('emit "failed"');
     emit(EventCallFailed(
         originator: originator,
         cause: ErrorCause(
@@ -222,11 +222,11 @@ class Options extends EventManager with Applicant {
   }
 
   void _succeeded(String originator, IncomingResponse? response) {
-    logger.debug('OPTIONS succeeded');
+    logger.d('OPTIONS succeeded');
 
     close();
 
-    logger.debug('emit "succeeded"');
+    logger.d('emit "succeeded"');
 
     emit(EventSucceeded(originator: originator, response: response));
   }

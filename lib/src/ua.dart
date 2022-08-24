@@ -85,7 +85,7 @@ class Contact {
  */
 class UA extends EventManager {
   UA(Settings? configuration) {
-    logger.debug('new() [configuration:${configuration.toString()}]');
+    logger.d('new() [configuration:${configuration.toString()}]');
 
     _cache = <String, dynamic>{'credentials': <dynamic>{}};
 
@@ -166,12 +166,12 @@ class UA extends EventManager {
    * Resume UA after being closed.
    */
   void start() {
-    logger.debug('start()');
+    logger.d('start()');
 
     if (_status == C.STATUS_INIT) {
       _transport!.connect();
     } else if (_status == C.STATUS_USER_CLOSED) {
-      logger.debug('restarting UA');
+      logger.d('restarting UA');
 
       // Disconnect.
       if (_closeTimer != null) {
@@ -184,9 +184,9 @@ class UA extends EventManager {
       _status = C.STATUS_INIT;
       _transport!.connect();
     } else if (_status == C.STATUS_READY) {
-      logger.debug('UA is in READY status, not restarted');
+      logger.d('UA is in READY status, not restarted');
     } else {
-      logger.debug(
+      logger.d(
           'ERROR: connection is down, Auto-Recovery system is trying to reconnect');
     }
 
@@ -198,7 +198,7 @@ class UA extends EventManager {
    * Register.
    */
   void register() {
-    logger.debug('register()');
+    logger.d('register()');
     _dynConfiguration!.register = true;
     _registrator.register();
   }
@@ -207,7 +207,7 @@ class UA extends EventManager {
    * Unregister.
    */
   void unregister({bool all = false}) {
-    logger.debug('unregister()');
+    logger.d('unregister()');
 
     _dynConfiguration!.register = false;
     _registrator.unregister(all);
@@ -226,7 +226,7 @@ class UA extends EventManager {
     Map<String, dynamic> requestParams = const <String, dynamic>{},
     List<String> extraHeaders = const <String>[],
   ]) {
-    logger.debug('subscribe()');
+    logger.d('subscribe()');
 
     return Subscriber(this, target, eventName, accept, expires, contentType,
         allowEvents, requestParams, extraHeaders);
@@ -263,7 +263,7 @@ class UA extends EventManager {
    *
    */
   RTCSession call(String target, Map<String, dynamic> options) {
-    logger.debug('call()');
+    logger.d('call()');
     RTCSession session = RTCSession(this);
     session.connect(target, options);
     return session;
@@ -281,7 +281,7 @@ class UA extends EventManager {
    */
   Message sendMessage(
       String target, String body, Map<String, dynamic>? options) {
-    logger.debug('sendMessage()');
+    logger.d('sendMessage()');
     Message message = Message(this);
     message.send(target, body, options);
     return message;
@@ -299,7 +299,7 @@ class UA extends EventManager {
    */
   Options sendOptions(
       String target, String body, Map<String, dynamic>? options) {
-    logger.debug('sendOptions()');
+    logger.d('sendOptions()');
     Options message = Options(this);
     message.send(target, body, options);
     return message;
@@ -309,7 +309,7 @@ class UA extends EventManager {
    * Terminate ongoing sessions.
    */
   void terminateSessions(Map<String, Object> options) {
-    logger.debug('terminateSessions()');
+    logger.d('terminateSessions()');
     _sessions.forEach((String? key, _) {
       if (!_sessions[key]!.isEnded()) {
         _sessions[key]!.terminate(options);
@@ -322,13 +322,13 @@ class UA extends EventManager {
    *
    */
   void stop() {
-    logger.debug('stop()');
+    logger.d('stop()');
 
     // Remove dynamic settings.
     _dynConfiguration = null;
 
     if (_status == C.STATUS_USER_CLOSED) {
-      logger.debug('UA already closed');
+      logger.d('UA already closed');
 
       return;
     }
@@ -342,7 +342,7 @@ class UA extends EventManager {
     // Run  _terminate_ on every Session.
     _sessions.forEach((String? key, _) {
       if (_sessions.containsKey(key)) {
-        logger.debug('closing session $key');
+        logger.d('closing session $key');
         try {
           RTCSession rtcSession = _sessions[key]!;
           if (!rtcSession.isEnded()) {
@@ -357,7 +357,7 @@ class UA extends EventManager {
     // Run _terminate on ever subscription
     _subscribers.forEach((String? key, _) {
       if (_subscribers.containsKey(key)) {
-        logger.debug('closing subscription $key');
+        logger.d('closing subscription $key');
         try {
           Subscriber subscriber = _subscribers[key]!;
           subscriber.terminate(null);
@@ -383,7 +383,7 @@ class UA extends EventManager {
       _transport!.disconnect();
     } else {
       _closeTimer = setTimeout(() {
-        logger.info('Closing connection');
+        logger.i('Closing connection');
         _closeTimer = null;
         _transport!.disconnect();
       }, 2000);
@@ -411,7 +411,7 @@ class UA extends EventManager {
         return _configuration!.ha1;
 
       default:
-        logger.error('get() | cannot get "$parameter" parameter in runtime');
+        logger.e('get() | cannot get "$parameter" parameter in runtime');
 
         return null;
     }
@@ -450,7 +450,7 @@ class UA extends EventManager {
         }
 
       default:
-        logger.error('set() | cannot set "$parameter" parameter in runtime');
+        logger.e('set() | cannot set "$parameter" parameter in runtime');
 
         return false;
     }
@@ -614,7 +614,7 @@ class UA extends EventManager {
     // Check that request URI points to us.
     if (request.ruri!.user != _configuration!.uri.user &&
         request.ruri!.user != _contact!.uri!.user) {
-      logger.debug('Request-URI does not point to us');
+      logger.d('Request-URI does not point to us');
       if (request.method != SipMethod.ACK) {
         request.reply_sl(404);
       }
@@ -709,7 +709,7 @@ class UA extends EventManager {
               session.init_incoming(request);
             }
           } else {
-            logger.error('INVITE received but WebRTC is not supported');
+            logger.e('INVITE received but WebRTC is not supported');
             request.reply(488);
           }
           break;
@@ -723,7 +723,7 @@ class UA extends EventManager {
           if (session != null) {
             session.receiveRequest(request);
           } else {
-            logger.debug('received CANCEL request for a non existent session');
+            logger.d('received CANCEL request for a non existent session');
           }
           break;
         case SipMethod.ACK:
@@ -758,8 +758,7 @@ class UA extends EventManager {
         if (sub != null) {
           sub.receiveRequest(request);
         } else {
-          logger
-              .debug('received NOTIFY request for a non existent subscription');
+          logger.d('received NOTIFY request for a non existent subscription');
           request.reply(481, 'Subscription does not exist');
         }
       }
@@ -868,7 +867,7 @@ class UA extends EventManager {
       _transport!.ondisconnect = onTransportDisconnect;
       _transport!.ondata = onTransportData;
     } catch (e) {
-      logger.error('Failed to _loadConfig: ${e.toString()}');
+      logger.e('Failed to _loadConfig: ${e.toString()}');
       throw Exceptions.ConfigurationError('sockets', _configuration!.sockets);
     }
 
@@ -922,13 +921,13 @@ class UA extends EventManager {
 
 // Transport connecting event.
   void onTransportConnecting(WebSocketInterface? socket, int? attempts) {
-    logger.debug('Transport connecting');
+    logger.d('Transport connecting');
     emit(EventSocketConnecting(socket: socket));
   }
 
 // Transport connected event.
   void onTransportConnect(Transport transport) {
-    logger.debug('Transport connected');
+    logger.d('Transport connected');
     if (_status == C.STATUS_USER_CLOSED) {
       return;
     }

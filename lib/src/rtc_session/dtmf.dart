@@ -138,7 +138,7 @@ class DTMF extends EventManager {
     _duration ??= C.DEFAULT_DURATION;
 
     if (_tone == null) {
-      logger.debug('invalid INFO DTMF received, discarded');
+      logger.d('invalid INFO DTMF received, discarded');
     } else {
       _session.newDTMF('remote', this, request);
     }

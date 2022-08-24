@@ -252,18 +252,18 @@ void load(Settings src, Settings? dst) {
     // Check Mandatory parameters.
     checks.mandatory
         .forEach((String parameter, Null Function(Settings, Settings?) fun) {
-      logger.info('Check mandatory parameter => $parameter.');
+      logger.i('Check mandatory parameter => $parameter.');
       fun(src, dst);
     });
 
     // Check Optional parameters.
     checks.optional
         .forEach((String parameter, Null Function(Settings, Settings?) fun) {
-      logger.debug('Check optional parameter => $parameter.');
+      logger.d('Check optional parameter => $parameter.');
       fun(src, dst);
     });
   } catch (e) {
-    logger.error('Failed to load config: ${e.toString()}');
+    logger.e('Failed to load config: ${e.toString()}');
     throw e;
   }
 }

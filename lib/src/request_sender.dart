@@ -101,7 +101,7 @@ class RequestSender {
 
       // Verify it seems a valid challenge.
       if (challenge == null) {
-        logger.debug(
+        logger.d(
             '${response.status_code} with wrong or missing challenge, cannot authenticate');
         _eventHandlers.emit(EventOnReceiveResponse(response: response));
 

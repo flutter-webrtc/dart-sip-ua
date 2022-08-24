@@ -31,7 +31,7 @@ class NonInviteServerTransaction extends TransactionBase {
   }
 
   void timer_J() {
-    logger.debug('Timer J expired for transaction $id');
+    logger.d('Timer J expired for transaction $id');
     stateChanged(TransactionState.TERMINATED);
     ua!.destroyTransaction(this);
   }
@@ -41,7 +41,7 @@ class NonInviteServerTransaction extends TransactionBase {
     if (transportError == null) {
       transportError = true;
 
-      logger.debug('transport error occurred, deleting transaction $id');
+      logger.d('transport error occurred, deleting transaction $id');
 
       clearTimeout(J);
       stateChanged(TransactionState.TERMINATED);

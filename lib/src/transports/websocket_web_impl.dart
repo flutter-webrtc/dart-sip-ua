@@ -20,7 +20,7 @@ class WebSocketImpl {
   void connect(
       {Iterable<String>? protocols,
       required WebSocketSettings webSocketSettings}) async {
-    logger.info('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
+    logger.i('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
       _socket = WebSocket(_url, 'sip');
       _socket!.onOpen.listen((Event e) {
@@ -49,9 +49,9 @@ class WebSocketImpl {
   void send(dynamic data) {
     if (_socket != null && _socket!.readyState == WebSocket.OPEN) {
       _socket!.send(data);
-      logger.debug('send: \n\n$data');
+      logger.d('send: \n\n$data');
     } else {
-      logger.error('WebSocket not connected, message $data not sent');
+      logger.e('WebSocket not connected, message $data not sent');
     }
   }
 

@@ -33,7 +33,7 @@ class AckClientTransaction extends TransactionBase {
 
   @override
   void onTransportError() {
-    logger.debug('transport error occurred for transaction $id');
+    logger.d('transport error occurred for transaction $id');
     _eventHandlers.emit(EventOnTransportError());
   }
 }
