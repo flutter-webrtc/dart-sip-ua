@@ -38,7 +38,7 @@ class C {
 class Transport {
   Transport(dynamic sockets,
       [Map<String, int> recovery_options = C.recovery_options]) {
-    logger.debug('new()');
+    logger.d('new()');
 
     status = C.STATUS_DISCONNECTED;
 
@@ -108,14 +108,14 @@ class Transport {
   String? get sip_uri => socket!.sip_uri;
 
   void connect() {
-    logger.debug('connect()');
+    logger.d('connect()');
 
     if (isConnected()) {
-      logger.debug('Transport is already connected');
+      logger.d('Transport is already connected');
 
       return;
     } else if (isConnecting()) {
-      logger.debug('Transport is connecting');
+      logger.d('Transport is connecting');
 
       return;
     }
@@ -135,7 +135,7 @@ class Transport {
   }
 
   void disconnect() {
-    logger.debug('close()');
+    logger.d('close()');
 
     _close_requested = true;
     _recover_attempts = 0;
@@ -164,10 +164,10 @@ class Transport {
   }
 
   bool send(dynamic data) {
-    logger.debug('send()');
+    logger.d('send()');
 
     if (!isConnected()) {
-      logger.error(
+      logger.e(
           'unable to send message, transport is not connected. Current state is $status',
           null,
           StackTraceNJ());
@@ -175,7 +175,7 @@ class Transport {
     }
 
     String message = data.toString();
-    //logger.debug('sending message:\n\n$message\n');
+    //logger.d('sending message:\n\n$message\n');
     return socket!.send(message);
   }
 
@@ -203,7 +203,7 @@ class Transport {
       k = _recovery_options['max_interval']!;
     }
 
-    logger.debug(
+    logger.d(
         'reconnection attempt: $_recover_attempts. next connection attempt in $k seconds');
 
     _recovery_timer = setTimeout(() {
@@ -291,7 +291,7 @@ class Transport {
   void _onData(dynamic data) {
     // CRLF Keep Alive response from server. Ignore it.
     if (data == '\r\n') {
-      logger.debug('received message with CRLF Keep Alive response');
+      logger.d('received message with CRLF Keep Alive response');
       return;
     }
     // Binary message.
@@ -299,18 +299,18 @@ class Transport {
       try {
         data = String.fromCharCodes(data);
       } catch (evt) {
-        logger.debug(
+        logger.d(
             'received binary message [${data.runtimeType}]failed to be converted into string,'
             ' message discarded');
         return;
       }
 
-      logger.debug('received binary message:\n\n$data\n');
+      logger.d('received binary message:\n\n$data\n');
     }
 
     // Text message.
     else {
-      logger.debug('received text message:\n\n$data\n');
+      logger.d('received text message:\n\n$data\n');
     }
 
     ondata(this, data);

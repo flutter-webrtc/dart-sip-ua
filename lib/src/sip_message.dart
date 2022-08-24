@@ -272,7 +272,7 @@ class OutgoingRequest {
     msg += 'User-Agent: $userAgent\r\n';
 
     if (body != null) {
-      logger.debug('Outgoing Message: ' + body!);
+      logger.d('Outgoing Message: ' + body!);
       //Here we should calculate the real content length for UTF8
       List<int> encoded = utf8.encode(body!);
       int length = encoded.length;
@@ -439,10 +439,10 @@ class IncomingMessage {
     name = utils.headerize(name);
 
     if (headers![name] == null) {
-      logger.debug('header "$name" not present');
+      logger.d('header "$name" not present');
       return null;
     } else if (idx >= headers![name].length) {
-      logger.debug('not so many "$name" headers present');
+      logger.d('not so many "$name" headers present');
       return null;
     }
 
@@ -457,7 +457,7 @@ class IncomingMessage {
     dynamic parsed = Grammar.parse(value, name.replaceAll('-', '_'));
     if (parsed == -1) {
       headers![name].splice(idx, 1); // delete from headers
-      logger.debug('error parsing "$name" header field with value "$value"');
+      logger.d('error parsing "$name" header field with value "$value"');
       return null;
     } else {
       header['parsed'] = parsed;

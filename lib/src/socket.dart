@@ -26,24 +26,24 @@ bool isSocket(dynamic socket) {
   }
 
   if (socket == null) {
-    logger.error('null DartSIP.Socket instance');
+    logger.e('null DartSIP.Socket instance');
     return false;
   }
 
   // Check Properties.
   try {
     if (!Utils.isString(socket.url)) {
-      logger.error('missing or invalid DartSIP.Socket url property');
+      logger.e('missing or invalid DartSIP.Socket url property');
       throw Error();
     }
 
     if (!Utils.isString(socket.via_transport)) {
-      logger.error('missing or invalid DartSIP.Socket via_transport property');
+      logger.e('missing or invalid DartSIP.Socket via_transport property');
       throw Error();
     }
 
     if (Grammar.parse(socket.sip_uri, 'SIP_URI') == -1) {
-      logger.error('missing or invalid DartSIP.Socket sip_uri property');
+      logger.e('missing or invalid DartSIP.Socket sip_uri property');
       throw Error();
     }
   } catch (e) {

@@ -18,7 +18,7 @@ class ReferSubscriber extends EventManager {
   int? get id => _id;
 
   void sendRefer(URI target, Map<String, dynamic> options) {
-    logger.debug('sendRefer()');
+    logger.d('sendRefer()');
 
     List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
@@ -78,7 +78,7 @@ class ReferSubscriber extends EventManager {
   }
 
   void receiveNotify(IncomingRequest request) {
-    logger.debug('receiveNotify()');
+    logger.d('receiveNotify()');
 
     if (request.body == null) {
       return;
@@ -88,8 +88,8 @@ class ReferSubscriber extends EventManager {
     dynamic parsed = Grammar.parse(status_line, 'Status_Line');
 
     if (parsed == -1) {
-      logger.debug(
-          'receiveNotify() | error parsing NOTIFY body: "${request.body}"');
+      logger
+          .d('receiveNotify() | error parsing NOTIFY body: "${request.body}"');
       return;
     }
 
@@ -110,17 +110,17 @@ class ReferSubscriber extends EventManager {
   }
 
   void _requestSucceeded(IncomingMessage? response) {
-    logger.debug('REFER succeeded');
+    logger.d('REFER succeeded');
 
-    logger.debug('emit "requestSucceeded"');
+    logger.d('emit "requestSucceeded"');
 
     emit(EventReferRequestSucceeded(response: response));
   }
 
   void _requestFailed(IncomingMessage? response, dynamic cause) {
-    logger.debug('REFER failed');
+    logger.d('REFER failed');
 
-    logger.debug('emit "requestFailed"');
+    logger.d('emit "requestFailed"');
 
     emit(EventReferRequestFailed(response: response, cause: cause));
   }

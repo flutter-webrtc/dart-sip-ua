@@ -50,7 +50,7 @@ class NonInviteClientTransaction extends TransactionBase {
 
   @override
   void onTransportError() {
-    logger.debug('transport error occurred, deleting transaction $id');
+    logger.d('transport error occurred, deleting transaction $id');
     clearTimeout(F);
     clearTimeout(K);
     stateChanged(TransactionState.TERMINATED);
@@ -59,7 +59,7 @@ class NonInviteClientTransaction extends TransactionBase {
   }
 
   void timer_F() {
-    logger.debug('Timer F expired for transaction $id');
+    logger.d('Timer F expired for transaction $id');
     stateChanged(TransactionState.TERMINATED);
     ua!.destroyTransaction(this);
     _eventHandlers.emit(EventOnRequestTimeout());
