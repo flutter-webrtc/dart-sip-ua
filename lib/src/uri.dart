@@ -69,11 +69,11 @@ class URI {
   int? get port => _port;
 
   set port(int? value) {
-    _port = (value == 0
+    _port = value == 0
         ? value
         : (value != null)
             ? utils.parseInt(value.toString(), 10)
-            : null)!;
+            : null;
   }
 
   void setParam(String? key, dynamic value) {
