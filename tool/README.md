@@ -1,9 +1,10 @@
-## NOTE
+# NOTE
 
 `grammar_parser.dart` is generated from `grammar.peg` using the [peg](https://github.com/cloudwebrtc/peg) tool.
 Since the peg tool does not support `dart 2.x`, you need to use `dart 1.24.3`.
 
-# Generate steps:
+## Generate steps
+
 - Install `Dart 1.24.3`.
 
   `brew install dart@1`
@@ -23,3 +24,12 @@ Since the peg tool does not support `dart 2.x`, you need to use `dart 1.24.3`.
 - Generate grammar parser
 
   `./tool/generate_grammar.sh`
+
+## or use Docker
+
+- Install `Docker`.
+
+- Generate grammar parser
+  `git clone https://github.com/flutter-webrtc/dart-sip-ua`
+  `cd dart-sip-ua`
+  `make peg && make grammar`
