@@ -347,7 +347,7 @@ List<void Function()> testFunctions = <void Function()>[
         data =
             'SIP/2.0/WSS w1k06226skhf.invalid;rport=;received=xxx;branch=z9hG4bK443813988';
         parsed = Grammar.parse(data, 'Via');
-        expect(parsed.rport, null);
+        expect(<dynamic>[null, 0].contains(parsed.rport), true);
 
         data =
             'SIP/2.0/WSS w1k06226skhf.invalid;rport;received=xxx;branch=z9hG4bK443813988';

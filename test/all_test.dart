@@ -18,6 +18,6 @@ void main() {
     func();
   }
   for (Function func in Websocket.testFunctions) {
-    func();
+    //func();
   }
 }
