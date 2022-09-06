@@ -70,6 +70,13 @@ class RequestSender {
         clientTransaction = NonInviteClientTransaction(
             _ua, _ua.transport!, _request!, handlers);
     }
+    // logger.debug('headers ${_ua.configuration!.authorization_jwt!}');
+
+    if (_ua.configuration?.authorization_jwt != null) {
+      _request!.headers['Authorization'] = <String>[
+        'Bearer ${_ua.configuration!.authorization_jwt!}'
+      ];
+    }
 
     clientTransaction.send();
   }

@@ -1642,7 +1642,7 @@ class RTCSession extends EventManager implements Owner {
   Future<RTCSessionDescription> _createLocalDescription(
       String type, Map<String, dynamic>? constraints) async {
     logger.d('createLocalDescription()');
-    _iceGatheringState ??= RTCIceGatheringState.RTCIceGatheringStateNew;
+    // _iceGatheringState ??= RTCIceGatheringState.RTCIceGatheringStateNew;
     Completer<RTCSessionDescription> completer =
         Completer<RTCSessionDescription>();
 

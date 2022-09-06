@@ -119,6 +119,7 @@ class SIPUAHelper extends EventManager {
     _settings!.sockets = <WebSocketInterface>[socket];
     _settings!.uri = uaSettings.uri;
     _settings!.password = uaSettings.password;
+    _settings!.authorization_jwt = uaSettings.authorization_jwt;
     _settings!.ha1 = uaSettings.ha1;
     _settings!.display_name = uaSettings.displayName;
     _settings!.authorization_user = uaSettings.authorizationUser;
@@ -130,6 +131,7 @@ class SIPUAHelper extends EventManager {
     _settings!.dtmf_mode = uaSettings.dtmfMode;
     _settings!.session_timers = uaSettings.sessionTimers;
     _settings!.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
+    _settings!.extra_Headers = uaSettings.extra_Headers;
 
     try {
       _ua = UA(_settings);
@@ -676,12 +678,16 @@ class UaSettings {
   String? password;
   String? ha1;
   String? displayName;
+  String? authorization_jwt;
 
   /// DTMF mode, in band (rfc2833) or out of band (sip info)
   DtmfMode dtmfMode = DtmfMode.INFO;
 
   /// Session Timers
   bool sessionTimers = true;
+
+  // extra register headers
+  List<String>? extra_Headers;
 
   /// ICE Gathering Timeout, default 500ms
   int iceGatheringTimeout = 500;

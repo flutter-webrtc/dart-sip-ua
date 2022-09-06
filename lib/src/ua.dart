@@ -409,6 +409,8 @@ class UA extends EventManager {
 
       case 'ha1':
         return _configuration!.ha1;
+      // case 'authorization_jwt':
+      //   return _configuration!.authorization_jwt;
 
       default:
         logger.e('get() | cannot get "$parameter" parameter in runtime');
@@ -442,6 +444,12 @@ class UA extends EventManager {
           _configuration!.password = null;
           break;
         }
+
+      // case 'authorization_jwt':
+      //   {
+      //     _configuration!.authorization_jwt = value.toString();
+      //     break;
+      //   }
 
       case 'display_name':
         {

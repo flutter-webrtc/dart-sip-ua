@@ -41,6 +41,15 @@ class OutgoingRequest {
     if (extraHeaders != null)
       this.extraHeaders = utils.cloneArray(extraHeaders);
 
+    if (ua?.configuration?.extra_Headers != null) {
+      // List<String>? test = <String>[];
+      // extraHeaders = extraHeaders ?? <dynamic>[];
+      logger.d('extra_Headers1: ' + extraHeaders.toString());
+      List<String> test = ua?.configuration?.extra_Headers ?? <String>[];
+      logger.d('extra_Headers: ' + test.toString());
+      this.extraHeaders.addAll(test);
+    }
+
     // Fill the Common SIP Request Headers.
 
     // Route.
@@ -554,6 +563,12 @@ class IncomingRequest extends IncomingMessage {
     reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';
     if (extraHeaders != null) extraHeaders = utils.cloneArray(extraHeaders);
 
+    if (ua?.configuration?.extra_Headers != null) {
+      List<String> test = ua?.configuration?.extra_Headers ?? <String>[];
+      logger.d('extra_Headers: ' + test.toString());
+      extraHeaders?.addAll(test);
+    }
+
     String response = 'SIP/2.0 $code $reason\r\n';
 
     if (method == SipMethod.INVITE && code > 100 && code <= 200) {
@@ -671,6 +686,13 @@ class IncomingRequest extends IncomingMessage {
       to += ';tag=${utils.newTag()}';
     } else if (to_tag != null && !s('to').hasParam('tag')) {
       to += ';tag=$to_tag';
+    }
+
+    if (ua?.configuration?.extra_Headers != null) {
+      // for  (ua?.configuration?.extra_Headers)
+      // {
+      //   response += header.trim();
+      // }
     }
 
     response += 'To: $to\r\n';

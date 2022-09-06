@@ -16,6 +16,8 @@ class Settings {
   String? password;
   String? realm;
   String? ha1;
+// insted of regular password auth use jwt
+  String? authorization_jwt;
 
   // SIP account.
   String? display_name;
@@ -39,6 +41,9 @@ class Settings {
   int? register_expires = 600;
   dynamic registrar_server;
   Map<String, dynamic>? register_extra_contact_uri_params;
+
+  //Extra register headers
+  List<String>? extra_Headers;
 
   // Dtmf mode
   DtmfMode dtmf_mode = DtmfMode.INFO;
@@ -115,6 +120,13 @@ class Checks {
         return;
       } else {
         dst!.authorization_user = authorization_user;
+      }
+    },
+    'authorization_jwt': (Settings src, Settings? dst) {
+      dynamic authorization_jwt = src.authorization_jwt;
+      if (authorization_jwt == null) return;
+      if (authorization_jwt! is String) {
+        dst?.authorization_jwt = authorization_jwt;
       }
     },
     'user_agent': (Settings src, Settings? dst) {
@@ -224,6 +236,11 @@ class Checks {
       } else {
         dst!.registrar_server = parsed;
       }
+    },
+    'extra_Headers': (Settings src, Settings? dst) {
+      List<String>? extraHeaders = src.extra_Headers;
+      if (extraHeaders == null) return;
+      dst!.extra_Headers = extraHeaders;
     },
     'register_extra_contact_uri_params': (Settings src, Settings? dst) {
       Map<String, dynamic>? register_extra_contact_uri_params =

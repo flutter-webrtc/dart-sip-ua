@@ -56,6 +56,8 @@ class Registrator {
     // Custom headers for REGISTER and un-REGISTER.
     _extraHeaders = <String>[];
 
+    _extra_Headers = <String>[];
+
     // Custom Contact header params for REGISTER and un-REGISTER.
     _extraContactParams = '';
 
@@ -83,6 +85,7 @@ class Registrator {
   late String _contact;
   List<String>? _extraHeaders;
   late String _extraContactParams;
+  List<String>? _extra_Headers;
 
   bool? get registered => _registered;
 
