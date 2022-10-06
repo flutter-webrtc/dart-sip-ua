@@ -39,44 +39,6 @@ class C {
 }
 
 class Subscriber extends EventManager implements Owner {
-  String? _id;
-
-  final String _target;
-
-  late int _expires;
-
-  String? _contentType;
-
-  late Map<String, dynamic> _params;
-
-  late int _state;
-
-  late Dialog? _dialog;
-
-  DateTime? _expires_timestamp;
-
-  Timer? _expires_timer;
-
-  late bool _terminated;
-
-  Timer? _unsubscribe_timeout_timer;
-
-  late Map<String, dynamic> _data;
-
-  late String _event_name;
-
-  num? _event_id;
-
-  late List<dynamic> _headers;
-
-  late List<Map<String, dynamic>> _queue;
-
-  @override
-  late Function(IncomingRequest p1) receiveRequest;
-
-  @override
-  UA ua;
-
   Subscriber(this.ua, this._target, String eventName, String accept,
       [int expires = 900,
       String? contentType,
@@ -149,14 +111,51 @@ class Subscriber extends EventManager implements Owner {
     // To enqueue subscribes created before receive initial subscribe OK.
     _queue = <Map<String, dynamic>>[];
   }
+  String? _id;
+
+  final String _target;
+
+  late int _expires;
+
+  String? _contentType;
+
+  late Map<String, dynamic> _params;
+
+  late int _state;
+
+  late Dialog? _dialog;
+
+  DateTime? _expires_timestamp;
+
+  Timer? _expires_timer;
+
+  late bool _terminated;
+
+  Timer? _unsubscribe_timeout_timer;
+
+  late Map<String, dynamic> _data;
+
+  late String _event_name;
+
+  num? _event_id;
+
+  late List<dynamic> _headers;
+
+  late List<Map<String, dynamic>> _queue;
+
+  @override
+  late Function(IncomingRequest p1) receiveRequest;
+
+  @override
+  UA ua;
   String? get id => _id;
 
+  @override
   int? get status => _state;
 
   @override
   int get TerminatedCode => C.STATE_TERMINATED;
 
-  @override
   void onRequestTimeout() {
     _dialogTerminated(C.SUBSCRIBE_RESPONSE_TIMEOUT);
   }
@@ -165,7 +164,6 @@ class Subscriber extends EventManager implements Owner {
    * User API
    */
 
-  @override
   void onTransportError() {
     _dialogTerminated(C.SUBSCRIBE_TRANSPORT_ERROR);
   }
@@ -337,7 +335,7 @@ class Subscriber extends EventManager implements Owner {
     clearTimeout(_unsubscribe_timeout_timer);
 
     if (_dialog != null) {
-      _dialog!.terminate();
+      _dialog?.terminate();
       _dialog = null;
     }
 
@@ -357,7 +355,7 @@ class Subscriber extends EventManager implements Owner {
       throw ArgumentError('Incoming response was null');
     }
 
-    if (response.status_code >= 200 && response.status_code! < 300) {
+    if (response.status_code >= 200 && response.status_code < 300) {
       // Create dialog
       if (_dialog == null) {
         _id = response.call_id!;
@@ -382,7 +380,7 @@ class Subscriber extends EventManager implements Owner {
         }
       } else {
         ua.destroySubscriber(this);
-        _id = response.call_id!;
+        _id = response.call_id;
         ua.newSubscriber(sub: this);
       }
 
@@ -403,7 +401,7 @@ class Subscriber extends EventManager implements Owner {
 
       int? expires = parseInt(expires_value!, 10);
 
-      if (expires! > 0) {
+      if (expires != null && expires > 0) {
         _scheduleSubscribe(expires);
       }
     } else if (response.status_code == 401 || response.status_code == 407) {
@@ -501,7 +499,7 @@ class Subscriber extends EventManager implements Owner {
       headers.add('Content-Type: $_contentType');
     }
 
-    var manager = EventManager();
+    EventManager manager = EventManager();
     manager.on(EventOnReceiveResponse(), (EventOnReceiveResponse response) {
       _receiveSubscribeResponse(response.response);
     });
@@ -521,7 +519,7 @@ class Subscriber extends EventManager implements Owner {
 
     request_sender.send();
 
-    var s = _dialog!.sendRequest(SipMethod.SUBSCRIBE, <String, dynamic>{
+    _dialog?.sendRequest(SipMethod.SUBSCRIBE, <String, dynamic>{
       'body': body,
       'extraHeaders': headers,
       'eventHandlers': manager,
@@ -554,7 +552,7 @@ class Subscriber extends EventManager implements Owner {
 }
 
 class SubscriptionId {
+  SubscriptionId(this.target, this.event);
   String target;
   String event;
-  SubscriptionId(this.target, this.event);
 }
