@@ -118,6 +118,7 @@ class SIPUAHelper extends EventManager {
     _settings!.uri = uaSettings.uri;
     _settings!.password = uaSettings.password;
     _settings!.ha1 = uaSettings.ha1;
+    _settings!.registrar_server = uaSettings.registrar_server;
     _settings!.display_name = uaSettings.displayName;
     _settings!.authorization_user = uaSettings.authorizationUser;
     _settings!.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
@@ -670,6 +671,7 @@ class UaSettings {
   String? password;
   String? ha1;
   String? displayName;
+  dynamic registrar_server;
 
   /// DTMF mode, in band (rfc2833) or out of band (sip info)
   DtmfMode dtmfMode = DtmfMode.INFO;
