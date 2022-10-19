@@ -1,6 +1,15 @@
 # Changelog
 
 --------------------------------------------
+[0.5.3] - 2022.10.19
+
+* Bump version for flutter-webrtc
+* Fix nullability in subscriber
+* Fix flutter test
+* Fix subscription parsing grammar
+* Added ability to supply custom logger
+* Added ability to get call statistics
+
 [0.5.2] - 2022.08.05
 
 * chore: Fix hold/unhold.
