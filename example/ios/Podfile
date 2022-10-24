@@ -37,6 +37,7 @@ post_install do |installer|
     # snippet begin
     if target.name == "WebRTC-SDK"
       target.build_configurations.each do |build_configuration|
+        build_configuration.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
         build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = '$(inherited) i386'
       end
     end
