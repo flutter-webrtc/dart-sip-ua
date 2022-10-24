@@ -1,15 +1,15 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_webrtc (0.9.0):
+  - flutter_webrtc (0.9.4):
     - Flutter
-    - WebRTC-SDK (= 97.4692.07)
+    - WebRTC-SDK (= 104.5112.02)
   - path_provider_ios (0.0.1):
     - Flutter
   - permission_handler_apple (9.0.4):
     - Flutter
   - shared_preferences_ios (0.0.1):
     - Flutter
-  - WebRTC-SDK (97.4692.07)
+  - WebRTC-SDK (104.5112.02)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -36,11 +36,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
-  flutter_webrtc: 82a3f058c7c149bad88bb204362fbec5dfe35a64
+  flutter_webrtc: aa130dfe1eca6625c2e2e51ce830abb495bdb06e
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
   permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
   shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
-  WebRTC-SDK: e16ed5e9f54d2a983d5f1f479a4b55f20da202fe
+  WebRTC-SDK: e0589abeb63db07a4ca1f45c82ba0f1a72e61622
 
 PODFILE CHECKSUM: efb121b19c3136b58e92a756d245e82b37ec629f
 
