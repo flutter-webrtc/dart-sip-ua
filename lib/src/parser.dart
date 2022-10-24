@@ -68,7 +68,7 @@ IncomingMessage? parseMessage(String data, UA? ua) {
     parsed = parseHeader(message, data, headerStart, headerEnd);
 
     if (parsed != true) {
-      logger.e('parseMessage() |' + parsed['error']);
+      logger.e('parseMessage() |${parsed['error']}');
       return null;
     }
 

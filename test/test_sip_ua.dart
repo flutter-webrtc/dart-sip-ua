@@ -20,17 +20,17 @@ void main() {
     try {
       ua = UA(configuration);
       ua.on(EventSocketConnecting(), (EventSocketConnecting data) {
-        print('connecting => ' + data.toString());
+        print('connecting => $data');
       });
 
       ua.on<EventSocketConnected>(EventSocketConnected,
           (EventSocketConnected data) {
-        print('connected => ' + data.toString());
+        print('connected => $data');
       });
 
       ua.on<EventSocketDisconnected>(EventSocketDisconnected,
           (EventSocketDisconnected data) {
-        print('disconnected => ' + data.toString());
+        print('disconnected => $data');
       });
       ua.start();
     } catch (e) {

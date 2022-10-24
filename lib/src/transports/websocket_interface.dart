@@ -8,7 +8,7 @@ import 'websocket_dart_impl.dart'
 
 class WebSocketInterface implements Socket {
   WebSocketInterface(String url, [WebSocketSettings? webSocketSettings]) {
-    logger.d('new() [url:' + url + ']');
+    logger.d('new() [url:$url]');
     _url = url;
     dynamic parsed_url = Grammar.parse(url, 'absoluteURI');
     if (parsed_url == -1) {
@@ -125,7 +125,7 @@ class WebSocketInterface implements Socket {
         _ws!.close();
       }
     } catch (error) {
-      logger.e('close() | error closing the WebSocket: ' + error.toString());
+      logger.e('close() | error closing the WebSocket: $error');
     }
   }
 
@@ -139,7 +139,7 @@ class WebSocketInterface implements Socket {
       _ws!.send(message);
       return true;
     } catch (error) {
-      logger.e('send() | error sending message: ' + error.toString());
+      logger.e('send() | error sending message: $error');
       throw error;
     }
   }

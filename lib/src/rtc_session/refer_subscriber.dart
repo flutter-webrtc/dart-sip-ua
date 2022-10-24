@@ -38,9 +38,8 @@ class ReferSubscriber extends EventManager {
     }
 
     // Refer-To header field.
-    String referTo = 'Refer-To: <$target' +
-        (replaces.isNotEmpty ? '?Replaces=$replaces' : '') +
-        '>';
+    String referTo =
+        'Refer-To: <$target${replaces.isNotEmpty ? '?Replaces=$replaces' : ''}>';
 
     extraHeaders.add(referTo);
 

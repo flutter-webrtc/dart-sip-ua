@@ -134,40 +134,40 @@ class SIPUAHelper extends EventManager {
     try {
       _ua = UA(_settings);
       _ua!.on(EventSocketConnecting(), (EventSocketConnecting event) {
-        logger.d('connecting => ' + event.toString());
+        logger.d('connecting => $event');
         _notifyTransportStateListeners(
             TransportState(TransportStateEnum.CONNECTING));
       });
 
       _ua!.on(EventSocketConnected(), (EventSocketConnected event) {
-        logger.d('connected => ' + event.toString());
+        logger.d('connected => $event');
         _notifyTransportStateListeners(
             TransportState(TransportStateEnum.CONNECTED));
       });
 
       _ua!.on(EventSocketDisconnected(), (EventSocketDisconnected event) {
-        logger.d('disconnected => ' + (event.cause.toString()));
+        logger.d('disconnected => ${event.cause}');
         _notifyTransportStateListeners(TransportState(
             TransportStateEnum.DISCONNECTED,
             cause: event.cause));
       });
 
       _ua!.on(EventRegistered(), (EventRegistered event) {
-        logger.d('registered => ' + event.cause.toString());
+        logger.d('registered => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.REGISTERED, cause: event.cause);
         _notifyRegsistrationStateListeners(_registerState);
       });
 
       _ua!.on(EventUnregister(), (EventUnregister event) {
-        logger.d('unregistered => ' + event.cause.toString());
+        logger.d('unregistered => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.UNREGISTERED, cause: event.cause);
         _notifyRegsistrationStateListeners(_registerState);
       });
 
       _ua!.on(EventRegistrationFailed(), (EventRegistrationFailed event) {
-        logger.d('registrationFailed => ' + (event.cause.toString()));
+        logger.d('registrationFailed => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.REGISTRATION_FAILED,
             cause: event.cause);
@@ -175,7 +175,7 @@ class SIPUAHelper extends EventManager {
       });
 
       _ua!.on(EventNewRTCSession(), (EventNewRTCSession event) {
-        logger.d('newRTCSession => ' + event.toString());
+        logger.d('newRTCSession => $event');
         RTCSession session = event.session!;
         if (session.direction == 'incoming') {
           // Set event handlers.
@@ -189,7 +189,7 @@ class SIPUAHelper extends EventManager {
       });
 
       _ua!.on(EventNewMessage(), (EventNewMessage event) {
-        logger.d('newMessage => ' + event.toString());
+        logger.d('newMessage => $event');
         //Only notify incoming message to listener
         if (event.message!.direction == 'incoming') {
           SIPMessageRequest message =
@@ -223,7 +223,7 @@ class SIPUAHelper extends EventManager {
           CallState(CallStateEnum.PROGRESS, originator: event.originator));
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
-      logger.d('call failed with cause: ' + (event.cause.toString()));
+      logger.d('call failed with cause: ${event.cause}');
       _notifyCallStateListeners(
           event,
           CallState(CallStateEnum.FAILED,
@@ -231,7 +231,7 @@ class SIPUAHelper extends EventManager {
       _calls.remove(event.id);
     });
     handlers.on(EventCallEnded(), (EventCallEnded event) {
-      logger.d('call ended with cause: ' + (event.cause.toString()));
+      logger.d('call ended with cause: ${event.cause}');
       _notifyCallStateListeners(
           event,
           CallState(CallStateEnum.ENDED,

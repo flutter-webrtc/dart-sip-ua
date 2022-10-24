@@ -180,6 +180,7 @@ class RTCSession extends EventManager implements Owner {
   String? _tones;
   Future<void> dtmfFuture = (Completer<void>()..complete()).future;
 
+  @override
   late Function(IncomingRequest) receiveRequest;
 
   /**
@@ -213,8 +214,10 @@ class RTCSession extends EventManager implements Owner {
 
   DateTime? get end_time => _end_time;
 
+  @override
   UA? get ua => _ua;
 
+  @override
   int? get status => _status;
 
   bool isInProgress() {

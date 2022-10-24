@@ -52,7 +52,7 @@ class Subscriber extends EventManager implements Owner {
     // Used to subscribe with body.
     _contentType = contentType;
 
-    _params = Map.from(requestParams);
+    _params = Map<String, dynamic>.from(requestParams);
 
     _params['from_tag'] = newTag();
 

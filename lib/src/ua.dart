@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'data.dart';
-import 'subscriber.dart';
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
+import 'data.dart';
 import 'dialog.dart';
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
@@ -18,6 +17,7 @@ import 'registrator.dart';
 import 'rtc_session.dart';
 import 'sanity_check.dart';
 import 'sip_message.dart';
+import 'subscriber.dart';
 import 'timers.dart';
 import 'transactions/invite_client.dart';
 import 'transactions/invite_server.dart';

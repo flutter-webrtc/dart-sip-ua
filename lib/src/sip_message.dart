@@ -272,7 +272,7 @@ class OutgoingRequest {
     msg += 'User-Agent: $userAgent\r\n';
 
     if (body != null) {
-      logger.d('Outgoing Message: ' + body!);
+      logger.d('Outgoing Message: ${body!}');
       //Here we should calculate the real content length for UTF8
       List<int> encoded = utf8.encode(body!);
       int length = encoded.length;
