@@ -42,37 +42,7 @@ class Math {
   }
 }
 
-int str_utf8_length(String string) =>
-    unescape(encodeURIComponent(string)).length;
-
-// Used by 'hasMethods'.
-bool isFunction(dynamic fn) {
-  if (fn != null) {
-    return fn is Function;
-  } else {
-    return false;
-  }
-}
-
-bool isString(dynamic str) {
-  if (str != null) {
-    return str is String;
-  } else {
-    return false;
-  }
-}
-
-bool isNaN(dynamic input) {
-  return input.isNaN;
-}
-
-int? parseInt(String input, int radix) {
-  return int.tryParse(input, radix: radix) ?? null;
-}
-
-double? parseFloat(String input) {
-  return double.tryParse(input) ?? null;
-}
+int str_utf8_length(String string) => Uri.encodeComponent(string).length;
 
 String decodeURIComponent(String str) {
   try {
@@ -82,28 +52,12 @@ String decodeURIComponent(String str) {
   }
 }
 
-String encodeURIComponent(String str) {
-  return Uri.encodeComponent(str);
-}
-
-String unescape(String str) {
-  // TODO(cloudwebrtc):  ???
-  return str;
-}
-
 bool isDecimal(dynamic input) =>
     input != null &&
-    ((input is num && !isNaN(input)) ||
+    (input is num && !input.isNaN ||
         (input is! num &&
-            (parseFloat(input) != null || parseInt(input, 10) != null)));
-
-bool isEmpty(dynamic value) {
-  return value == null ||
-      value == '' ||
-      value == null ||
-      (value is List && value.isEmpty) ||
-      (value is num && isNaN(value));
-}
+            (double.tryParse(input) != null ||
+                int.tryParse(input, radix: 10) != null)));
 
 // Used by 'newTag'.
 String createRandomToken(int size, {int base = 32}) {
@@ -131,7 +85,7 @@ dynamic hostType(String host) {
 *
 * Used by 'normalizeTarget'.
 */
-String escapeUser(String user) => encodeURIComponent(decodeURIComponent(user))
+String escapeUser(String user) => Uri.encodeComponent(decodeURIComponent(user))
     .replaceAll(RegExp(r'%3A', caseSensitive: false), ':')
     .replaceAll(RegExp(r'%2B', caseSensitive: false), '+')
     .replaceAll(RegExp(r'%3F', caseSensitive: false), '?')

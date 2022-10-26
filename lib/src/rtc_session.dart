@@ -904,10 +904,7 @@ class RTCSession extends EventManager implements Owner {
     }
 
     // Check duration.
-    if (duration != null && !utils.isDecimal(duration)) {
-      throw Exceptions.TypeError(
-          'Invalid tone duration: ${duration.toString()}');
-    } else if (duration == null) {
+    if (duration == null) {
       duration = RTCSession_DTMF.C.DEFAULT_DURATION;
     } else if (duration < RTCSession_DTMF.C.MIN_DURATION) {
       logger.d(
@@ -923,10 +920,7 @@ class RTCSession extends EventManager implements Owner {
     options['duration'] = duration;
 
     // Check interToneGap.
-    if (interToneGap != null && !utils.isDecimal(interToneGap)) {
-      throw Exceptions.TypeError(
-          'Invalid interToneGap: ${interToneGap.toString()}');
-    } else if (interToneGap == null) {
+    if (interToneGap == null) {
       interToneGap = RTCSession_DTMF.C.DEFAULT_INTER_TONE_GAP;
     } else if (interToneGap < RTCSession_DTMF.C.MIN_INTER_TONE_GAP) {
       logger.d(
@@ -2130,7 +2124,7 @@ class RTCSession extends EventManager implements Owner {
           ReferSubscriber? referSubscriber;
 
           if (request.event!.params!['id'] != null) {
-            id = utils.parseInt(request.event!.params!['id'], 10);
+            id = int.tryParse(request.event!.params!['id'], radix: 10);
             referSubscriber = _referSubscribers[id];
           } else if (_referSubscribers.length == 1) {
             referSubscriber =

@@ -34,7 +34,7 @@ class ReferSubscriber extends EventManager {
       replaces = options['replaces'].call_id;
       replaces += ';to-tag=${options['replaces'].to_tag}';
       replaces += ';from-tag=${options['replaces'].from_tag}';
-      replaces = Utils.encodeURIComponent(replaces);
+      replaces = Uri.encodeComponent(replaces);
     }
 
     // Refer-To header field.

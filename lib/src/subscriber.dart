@@ -266,7 +266,7 @@ class Subscriber extends EventManager implements Owner {
       dynamic retryAfter = null;
 
       if (subsState.params != null && subsState.params['retry-after'] != null) {
-        retryAfter = parseInt(subsState.params['retry-after'], 10);
+        retryAfter = int.tryParse(subsState.params['retry-after'], radix: 10);
       }
 
       _dialogTerminated(C.RECEIVE_FINAL_NOTIFY, reason, retryAfter);
@@ -399,7 +399,7 @@ class Subscriber extends EventManager implements Owner {
         expires_value = '900';
       }
 
-      int? expires = parseInt(expires_value!, 10);
+      int? expires = int.tryParse(expires_value!, radix: 10);
 
       if (expires != null && expires > 0) {
         _scheduleSubscribe(expires);
