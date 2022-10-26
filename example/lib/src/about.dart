@@ -14,7 +14,7 @@ class AboutWidget extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   Text(
-                      '\Github:\nhttps://github.com/cloudwebrtc/dart-sip-ua.git')
+                      'GitHub:\nhttps://github.com/cloudwebrtc/dart-sip-ua.git')
                 ],
               ),
             ),

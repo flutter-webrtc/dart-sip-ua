@@ -11,12 +11,13 @@ class RegisterWidget extends StatefulWidget {
 
 class _MyRegisterWidget extends State<RegisterWidget>
     implements SipUaHelperListener {
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _wsUriController = TextEditingController();
-  TextEditingController _sipUriController = TextEditingController();
-  TextEditingController _displayNameController = TextEditingController();
-  TextEditingController _authorizationUserController = TextEditingController();
-  Map<String, String> _wsExtraHeaders = {
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _wsUriController = TextEditingController();
+  final TextEditingController _sipUriController = TextEditingController();
+  final TextEditingController _displayNameController = TextEditingController();
+  final TextEditingController _authorizationUserController =
+      TextEditingController();
+  final Map<String, String> _wsExtraHeaders = {
     // 'Origin': ' https://tryit.jssip.net',
     // 'Host': 'tryit.jssip.net:10443'
   };
@@ -296,6 +297,6 @@ class _MyRegisterWidget extends State<RegisterWidget>
 
   @override
   void onNewNotify(Notify ntf) {
-    // TODO: implement onNewNotify
+    // NO OP
   }
 }
