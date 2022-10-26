@@ -23,11 +23,11 @@ class InviteClientTransaction extends TransactionBase {
 
     String via = 'SIP/2.0/${transport.via_transport}';
 
-    via += ' ${ua.configuration!.via_host};branch=$id';
+    via += ' ${ua.configuration.via_host};branch=$id';
 
     this.request.setHeader('via', via);
 
-    this.ua!.newTransaction(this);
+    this.ua.newTransaction(this);
   }
   late EventManager _eventHandlers;
 
@@ -62,7 +62,7 @@ class InviteClientTransaction extends TransactionBase {
     }
 
     stateChanged(TransactionState.TERMINATED);
-    ua!.destroyTransaction(this);
+    ua.destroyTransaction(this);
   }
 
   // RFC 6026 7.2.
@@ -72,7 +72,7 @@ class InviteClientTransaction extends TransactionBase {
     if (state == TransactionState.ACCEPTED) {
       clearTimeout(B);
       stateChanged(TransactionState.TERMINATED);
-      ua!.destroyTransaction(this);
+      ua.destroyTransaction(this);
     }
   }
 
@@ -81,7 +81,7 @@ class InviteClientTransaction extends TransactionBase {
     logger.d('Timer B expired for transaction $id');
     if (state == TransactionState.CALLING) {
       stateChanged(TransactionState.TERMINATED);
-      ua!.destroyTransaction(this);
+      ua.destroyTransaction(this);
       _eventHandlers.emit(EventOnRequestTimeout());
     }
   }
@@ -90,7 +90,7 @@ class InviteClientTransaction extends TransactionBase {
     logger.d('Timer D expired for transaction $id');
     clearTimeout(B);
     stateChanged(TransactionState.TERMINATED);
-    ua!.destroyTransaction(this);
+    ua.destroyTransaction(this);
   }
 
   void sendACK(IncomingMessage response) {

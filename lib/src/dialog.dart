@@ -86,20 +86,20 @@ class Dialog {
       _ack_seqnum = null;
     }
 
-    _ua!.newDialog(this);
+    _ua.newDialog(this);
     logger.d(
         '$type dialog created with status ${_state == DialogStatus.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
   Owner? _owner;
-  UA? _ua;
+  late UA _ua;
   bool uac_pending_reply = false;
   bool uas_pending_reply = false;
   int? _state;
   int? _remote_seqnum;
   URI? _local_uri;
   URI? _remote_uri;
-  URI? _remote_target;
+  late URI _remote_target;
   List<dynamic>? _route_set;
   int? _ack_seqnum;
   Id? _id;
@@ -123,7 +123,7 @@ class Dialog {
 
   void terminate() {
     logger.d('dialog ${_id.toString()} deleted');
-    _ua!.destroyDialog(this);
+    _ua.destroyDialog(this);
   }
 
   OutgoingRequest sendRequest(SipMethod method, Map<String, dynamic>? options) {
@@ -268,5 +268,5 @@ abstract class Owner {
   Function(IncomingRequest) get receiveRequest;
   int? get status;
   int get TerminatedCode;
-  UA? get ua;
+  UA get ua;
 }

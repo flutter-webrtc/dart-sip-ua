@@ -456,7 +456,7 @@ class Subscriber extends EventManager implements Owner {
     _state = C.STATE_NOTIFY_WAIT;
 
     OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
-        ua.normalizeTarget(_target), ua, _params, headers, body);
+        ua.normalizeTarget(_target)!, ua, _params, headers, body);
 
     EventManager handler = EventManager();
 
@@ -513,7 +513,7 @@ class Subscriber extends EventManager implements Owner {
     });
 
     OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
-        ua.normalizeTarget(_target), ua, _params, headers, body);
+        ua.normalizeTarget(_target)!, ua, _params, headers, body);
 
     RequestSender request_sender = RequestSender(ua, request, manager);
 

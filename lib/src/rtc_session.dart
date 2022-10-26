@@ -65,7 +65,7 @@ class RFC4028Timers {
 }
 
 class RTCSession extends EventManager implements Owner {
-  RTCSession(UA? ua) {
+  RTCSession(UA ua) {
     logger.d('new');
 
     _id = null;
@@ -123,8 +123,8 @@ class RTCSession extends EventManager implements Owner {
 
     // Session Timers (RFC 4028).
     _sessionTimers = RFC4028Timers(
-        _ua!.configuration!.session_timers,
-        _ua!.configuration!.session_timers_refresh_method,
+        _ua.configuration.session_timers,
+        _ua.configuration.session_timers_refresh_method,
         DartSIP_C.SESSION_EXPIRES,
         null,
         false,
@@ -141,7 +141,7 @@ class RTCSession extends EventManager implements Owner {
   }
 
   String? _id;
-  UA? _ua;
+  late UA _ua;
   dynamic _request;
   late bool _late_sdp;
   Map<String, dynamic>? _rtcOfferConstraints;
@@ -215,7 +215,7 @@ class RTCSession extends EventManager implements Owner {
   DateTime? get end_time => _end_time;
 
   @override
-  UA? get ua => _ua;
+  UA get ua => _ua;
 
   @override
   int? get status => _status;
@@ -303,7 +303,7 @@ class RTCSession extends EventManager implements Owner {
     //}
 
     // Check target validity.
-    target = _ua!.normalizeTarget(target);
+    target = _ua.normalizeTarget(target);
     if (target == null) {
       throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
@@ -330,15 +330,15 @@ class RTCSession extends EventManager implements Owner {
     Map<String, dynamic> requestParams = <String, dynamic>{
       'from_tag': _from_tag
     };
-    _ua!.contact!.anonymous = anonymous;
-    _ua!.contact!.outbound = true;
-    _contact = _ua!.contact.toString();
+    _ua.contact!.anonymous = anonymous;
+    _ua.contact!.outbound = true;
+    _contact = _ua.contact.toString();
 
     if (anonymous) {
       requestParams['from_display_name'] = 'Anonymous';
       requestParams['from_uri'] = URI('sip', 'anonymous', 'anonymous.invalid');
       extraHeaders
-          .add('P-Preferred-Identity: ${_ua!.configuration!.uri.toString()}');
+          .add('P-Preferred-Identity: ${_ua.configuration.uri.toString()}');
       extraHeaders.add('Privacy: id');
     }
 
@@ -389,7 +389,7 @@ class RTCSession extends EventManager implements Owner {
     _from_tag = request.from_tag;
     _id = request.call_id! + _from_tag!;
     _request = request;
-    _contact = _ua!.contact.toString();
+    _contact = _ua.contact.toString();
 
     // Get the Expires header value if exists.
     if (request.hasHeader('expires')) {
@@ -420,7 +420,7 @@ class RTCSession extends EventManager implements Owner {
       request.reply(408);
       _failed('local', null, null, null, 408, DartSIP_C.CausesType.NO_ANSWER,
           'No Answer');
-    }, _ua!.configuration!.no_answer_timeout);
+    }, _ua.configuration.no_answer_timeout);
 
     /* Set expiresTimer
      * RFC3261 13.3.1
@@ -852,7 +852,7 @@ class RTCSession extends EventManager implements Owner {
           _dialog = dialog;
 
           // Restore the dialog into 'ua' so the ACK can reach 'this' session.
-          _ua!.newDialog(dialog);
+          _ua.newDialog(dialog);
         } else {
           sendRequest(SipMethod.BYE,
               <String, dynamic>{'extraHeaders': extraHeaders, 'body': body});
@@ -875,7 +875,7 @@ class RTCSession extends EventManager implements Owner {
 
     options = options ?? <String, dynamic>{};
 
-    DtmfMode mode = _ua!.configuration!.dtmf_mode;
+    DtmfMode mode = _ua.configuration.dtmf_mode;
 
     // sensible defaults
     int duration = options['duration'] ?? RTCSession_DTMF.C.DEFAULT_DURATION;
@@ -1215,7 +1215,7 @@ class RTCSession extends EventManager implements Owner {
     }
 
     // Check target validity.
-    target = _ua!.normalizeTarget(target);
+    target = _ua.normalizeTarget(target);
     if (target == null) {
       throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
@@ -1535,7 +1535,7 @@ class RTCSession extends EventManager implements Owner {
     // Terminate REFER subscribers.
     _referSubscribers.clear();
 
-    _ua!.destroyRTCSession(this);
+    _ua.destroyRTCSession(this);
   }
 
   /**
@@ -1712,7 +1712,7 @@ class RTCSession extends EventManager implements Owner {
            *  Because trickle ICE is not defined in the sip protocol, the delay of
            * initiating a call to answer the call waiting will be unacceptable.
            */
-          setTimeout(() => ready(), ua!.configuration!.ice_gathering_timeout);
+          setTimeout(() => ready(), ua.configuration.ice_gathering_timeout);
         }
       }
     };
@@ -2221,7 +2221,7 @@ class RTCSession extends EventManager implements Owner {
       _receiveInviteResponse(event.response);
     });
 
-    RequestSender request_sender = RequestSender(_ua!, _request, handlers);
+    RequestSender request_sender = RequestSender(_ua, _request, handlers);
 
     // In future versions, unified-plan will be used by default
     String? sdpSemantics = 'unified-plan';
@@ -2926,7 +2926,7 @@ class RTCSession extends EventManager implements Owner {
 
   void _newRTCSession(String originator, dynamic request) {
     logger.d('newRTCSession()');
-    _ua!.newRTCSession(originator: originator, session: this, request: request);
+    _ua.newRTCSession(originator: originator, session: this, request: request);
   }
 
   void _connecting(dynamic request) {

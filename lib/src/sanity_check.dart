@@ -91,7 +91,7 @@ bool rfc3261_8_2_2_1() {
 
 bool rfc3261_16_3_4() {
   if (message.to_tag == null) {
-    if (message.call_id!.substring(0, 5) == ua.configuration!.jssip_id) {
+    if (message.call_id!.substring(0, 5) == ua.configuration.jssip_id) {
       reply(482);
 
       return false;

@@ -28,9 +28,9 @@ class Options extends EventManager with Applicant {
     _data = <String, dynamic>{};
   }
 
-  UA? _ua;
+  late UA _ua;
   dynamic _request;
-  bool? _closed;
+  late bool _closed;
   String? _direction;
   NameAddrHeader? _local_identity;
   NameAddrHeader? _remote_identity;
@@ -53,7 +53,7 @@ class Options extends EventManager with Applicant {
     }
 
     // Check target validity.
-    URI? normalized = _ua!.normalizeTarget(target);
+    URI normalized = _ua.normalizeTarget(target)!;
     if (normalized == null) {
       throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
@@ -85,7 +85,7 @@ class Options extends EventManager with Applicant {
       _receiveResponse(event.response);
     });
 
-    RequestSender request_sender = RequestSender(_ua!, _request, handlers);
+    RequestSender request_sender = RequestSender(_ua, _request, handlers);
 
     _newOptions('local', _request);
 
@@ -187,7 +187,7 @@ class Options extends EventManager with Applicant {
   @override
   void close() {
     _closed = true;
-    _ua!.destroyOptions(this);
+    _ua.destroyOptions(this);
   }
 
   /**
@@ -205,7 +205,7 @@ class Options extends EventManager with Applicant {
       _remote_identity = request.to;
     }
 
-    _ua!.newOptions(this, originator, request);
+    _ua.newOptions(this, originator, request);
   }
 
   void _failed(String originator, int? status_code, String cause,

@@ -25,7 +25,7 @@ class SIPUAHelper extends EventManager {
   }
 
   UA? _ua;
-  Settings? _settings;
+  Settings _settings = Settings();
   late UaSettings _uaSettings;
   final Map<String?, Call> _calls = <String?, Call>{};
 
@@ -35,7 +35,7 @@ class SIPUAHelper extends EventManager {
   /// Sets the logging level for the default logger. Has no effect if custom logger is supplied.
   set loggingLevel(Level loggingLevel) => Log.loggingLevel = loggingLevel;
 
-  bool? get registered {
+  bool get registered {
     if (_ua != null) {
       return _ua!.isRegistered();
     }
@@ -74,7 +74,7 @@ class SIPUAHelper extends EventManager {
 
   void unregister([bool all = true]) {
     if (_ua != null) {
-      assert(registered!, 'ERROR: you must call register first.');
+      assert(registered, 'ERROR: you must call register first.');
       _ua!.unregister(all: all);
     } else {
       Log.e('ERROR: unregister called, you must call start first.');
@@ -113,23 +113,24 @@ class SIPUAHelper extends EventManager {
 
     _uaSettings = uaSettings;
 
+    // Reset settings
     _settings = Settings();
     WebSocketInterface socket = WebSocketInterface(
         uaSettings.webSocketUrl, uaSettings.webSocketSettings);
-    _settings!.sockets = <WebSocketInterface>[socket];
-    _settings!.uri = uaSettings.uri;
-    _settings!.password = uaSettings.password;
-    _settings!.ha1 = uaSettings.ha1;
-    _settings!.display_name = uaSettings.displayName;
-    _settings!.authorization_user = uaSettings.authorizationUser;
-    _settings!.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
-    _settings!.register = uaSettings.register;
-    _settings!.register_expires = uaSettings.register_expires;
-    _settings!.register_extra_contact_uri_params =
+    _settings.sockets = <WebSocketInterface>[socket];
+    _settings.uri = uaSettings.uri;
+    _settings.password = uaSettings.password;
+    _settings.ha1 = uaSettings.ha1;
+    _settings.display_name = uaSettings.displayName;
+    _settings.authorization_user = uaSettings.authorizationUser;
+    _settings.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
+    _settings.register = uaSettings.register;
+    _settings.register_expires = uaSettings.register_expires;
+    _settings.register_extra_contact_uri_params =
         uaSettings.registerParams.extraContactUriParams;
-    _settings!.dtmf_mode = uaSettings.dtmfMode;
-    _settings!.session_timers = uaSettings.sessionTimers;
-    _settings!.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
+    _settings.dtmf_mode = uaSettings.dtmfMode;
+    _settings.session_timers = uaSettings.sessionTimers;
+    _settings.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
 
     try {
       _ua = UA(_settings);
@@ -351,7 +352,7 @@ class SIPUAHelper extends EventManager {
   }
 
   void terminateSessions(Map<String, dynamic> options) {
-    _ua!.terminateSessions(options as Map<String, Object>);
+    _ua!.terminateSessions(options);
   }
 
   final Set<SipUaHelperListener> _sipUaHelperListeners =

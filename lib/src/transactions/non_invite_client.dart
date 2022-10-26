@@ -21,7 +21,7 @@ class NonInviteClientTransaction extends TransactionBase {
 
     String via = 'SIP/2.0/${transport.via_transport}';
 
-    via += ' ${ua.configuration!.via_host};branch=$id';
+    via += ' ${ua.configuration.via_host};branch=$id';
 
     request.setHeader('via', via);
 
@@ -54,20 +54,20 @@ class NonInviteClientTransaction extends TransactionBase {
     clearTimeout(F);
     clearTimeout(K);
     stateChanged(TransactionState.TERMINATED);
-    ua!.destroyTransaction(this);
+    ua.destroyTransaction(this);
     _eventHandlers.emit(EventOnTransportError());
   }
 
   void timer_F() {
     logger.d('Timer F expired for transaction $id');
     stateChanged(TransactionState.TERMINATED);
-    ua!.destroyTransaction(this);
+    ua.destroyTransaction(this);
     _eventHandlers.emit(EventOnRequestTimeout());
   }
 
   void timer_K() {
     stateChanged(TransactionState.TERMINATED);
-    ua!.destroyTransaction(this);
+    ua.destroyTransaction(this);
   }
 
   @override

@@ -129,26 +129,26 @@ class UA extends EventManager {
   }
 
   late Map<String?, Subscriber> _subscribers;
-  Map<String, dynamic>? _cache;
-  Settings? _configuration;
+  late Map<String, dynamic> _cache;
+  late Settings _configuration;
   DynamicSettings? _dynConfiguration;
   late Map<String, Dialog> _dialogs;
   late Set<Applicant> _applicants;
   Map<String?, RTCSession> _sessions = <String?, RTCSession>{};
   Transport? _transport;
   Contact? _contact;
-  int? _status;
+  late int _status;
   int? _error;
   TransactionBag _transactions = TransactionBag();
   Map<String, dynamic>? _data;
   Timer? _closeTimer;
-  dynamic _registrator;
+  late Registrator _registrator;
 
-  int? get status => _status;
+  int get status => _status;
 
   Contact? get contact => _contact;
 
-  Settings? get configuration => _configuration;
+  Settings get configuration => _configuration;
 
   Transport? get transport => _transport;
 
@@ -191,7 +191,7 @@ class UA extends EventManager {
     }
 
     // Set dynamic configuration.
-    _dynConfiguration!.register = _configuration!.register;
+    _dynConfiguration!.register = _configuration.register;
   }
 
   /**
@@ -242,7 +242,7 @@ class UA extends EventManager {
   /**
    * Registration state.
    */
-  bool? isRegistered() {
+  bool isRegistered() {
     return _registrator.registered;
   }
 
@@ -308,7 +308,7 @@ class UA extends EventManager {
   /**
    * Terminate ongoing sessions.
    */
-  void terminateSessions(Map<String, Object> options) {
+  void terminateSessions(Map<String, dynamic> options) {
     logger.d('terminateSessions()');
     _sessions.forEach((String? key, _) {
       if (!_sessions[key]!.isEnded()) {
@@ -396,7 +396,7 @@ class UA extends EventManager {
    * -returns {DartSIP.URI|null}
    */
   URI? normalizeTarget(String? target) {
-    return Utils.normalizeTarget(target, _configuration!.hostport_params);
+    return Utils.normalizeTarget(target, _configuration.hostport_params);
   }
 
   /**
@@ -405,10 +405,10 @@ class UA extends EventManager {
   String? get(String parameter) {
     switch (parameter) {
       case 'realm':
-        return _configuration!.realm;
+        return _configuration.realm;
 
       case 'ha1':
-        return _configuration!.ha1;
+        return _configuration.ha1;
 
       default:
         logger.e('get() | cannot get "$parameter" parameter in runtime');
@@ -425,27 +425,27 @@ class UA extends EventManager {
     switch (parameter) {
       case 'password':
         {
-          _configuration!.password = value.toString();
+          _configuration.password = value.toString();
           break;
         }
 
       case 'realm':
         {
-          _configuration!.realm = value.toString();
+          _configuration.realm = value.toString();
           break;
         }
 
       case 'ha1':
         {
-          _configuration!.ha1 = value.toString();
+          _configuration.ha1 = value.toString();
           // Delete the plain SIP password.
-          _configuration!.password = null;
+          _configuration.password = null;
           break;
         }
 
       case 'display_name':
         {
-          _configuration!.display_name = value;
+          _configuration.display_name = value;
           break;
         }
 
@@ -612,7 +612,7 @@ class UA extends EventManager {
     DartSIP_C.SipMethod? method = request.method;
 
     // Check that request URI points to us.
-    if (request.ruri!.user != _configuration!.uri.user &&
+    if (request.ruri!.user != _configuration.uri.user &&
         request.ruri!.user != _contact!.uri!.user) {
       logger.d('Request-URI does not point to us');
       if (request.method != SipMethod.ACK) {
@@ -834,31 +834,31 @@ class UA extends EventManager {
     // Post Configuration Process.
 
     // Allow passing 0 number as display_name.
-    if (_configuration!.display_name is num &&
-        (_configuration!.display_name as num?) == 0) {
-      _configuration!.display_name = '0';
+    if (_configuration.display_name is num &&
+        (_configuration.display_name as num?) == 0) {
+      _configuration.display_name = '0';
     }
 
     // Instance-id for GRUU.
-    _configuration!.instance_id ??= Utils.newUUID();
+    _configuration.instance_id ??= Utils.newUUID();
 
     // Jssip_id instance parameter. Static random tag of length 5.
-    _configuration!.jssip_id = Utils.createRandomToken(5);
+    _configuration.jssip_id = Utils.createRandomToken(5);
 
     // String containing _configuration.uri without scheme and user.
-    URI hostport_params = _configuration!.uri.clone();
+    URI hostport_params = _configuration.uri.clone();
 
     hostport_params.user = null;
-    _configuration!.hostport_params = hostport_params
+    _configuration.hostport_params = hostport_params
         .toString()
         .replaceAll(RegExp(r'sip:', caseSensitive: false), '');
 
     // Transport.
     try {
-      _transport = Transport(_configuration!.sockets, <String, int>{
+      _transport = Transport(_configuration.sockets, <String, int>{
         // Recovery options.
-        'max_interval': _configuration!.connection_recovery_max_interval,
-        'min_interval': _configuration!.connection_recovery_min_interval
+        'max_interval': _configuration.connection_recovery_max_interval,
+        'min_interval': _configuration.connection_recovery_min_interval
       });
 
       // Transport event callbacks.
@@ -868,50 +868,50 @@ class UA extends EventManager {
       _transport!.ondata = onTransportData;
     } catch (e) {
       logger.e('Failed to _loadConfig: ${e.toString()}');
-      throw Exceptions.ConfigurationError('sockets', _configuration!.sockets);
+      throw Exceptions.ConfigurationError('sockets', _configuration.sockets);
     }
 
     String transport = 'ws';
 
-    if (_configuration!.sockets!.isNotEmpty) {
-      transport = _configuration!.sockets!.first.via_transport.toLowerCase();
+    if (_configuration.sockets!.isNotEmpty) {
+      transport = _configuration.sockets!.first.via_transport.toLowerCase();
     }
 
     // Remove sockets instance from configuration object.
     // TODO(cloudwebrtc):  need dispose??
-    _configuration!.sockets = null;
+    _configuration.sockets = null;
 
     // Check whether authorization_user is explicitly defined.
     // Take '_configuration.uri.user' value if not.
-    _configuration!.authorization_user ??= _configuration!.uri.user;
+    _configuration.authorization_user ??= _configuration.uri.user;
 
     // If no 'registrar_server' is set use the 'uri' value without user portion and
     // without URI params/headers.
-    if (_configuration!.registrar_server == null) {
-      URI registrar_server = _configuration!.uri.clone();
+    if (_configuration.registrar_server == null) {
+      URI registrar_server = _configuration.uri.clone();
       registrar_server.user = null;
       registrar_server.clearParams();
       registrar_server.clearHeaders();
-      _configuration!.registrar_server = registrar_server;
+      _configuration.registrar_server = registrar_server;
     }
 
     // User no_answer_timeout.
-    _configuration!.no_answer_timeout *= 1000;
+    _configuration.no_answer_timeout *= 1000;
 
     // Via Host.
-    if (_configuration!.contact_uri != null) {
-      _configuration!.via_host = _configuration!.contact_uri.host;
+    if (_configuration.contact_uri != null) {
+      _configuration.via_host = _configuration.contact_uri.host;
     }
     // Contact URI.
     else {
-      _configuration!.contact_uri = URI(
+      _configuration.contact_uri = URI(
           'sip',
           Utils.createRandomToken(8),
-          _configuration!.via_host,
+          _configuration.via_host,
           null,
           <dynamic, dynamic>{'transport': transport});
     }
-    _contact = Contact(_configuration!.contact_uri);
+    _contact = Contact(_configuration.contact_uri);
     return;
   }
 
