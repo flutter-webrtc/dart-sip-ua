@@ -78,9 +78,7 @@ class Checks {
       List<WebSocketInterface> copy = <WebSocketInterface>[];
       if (sockets is List && sockets!.length > 0) {
         for (WebSocketInterface socket in sockets) {
-          if (Socket.isSocket(socket)) {
-            copy.add(socket);
-          }
+          copy.add(socket);
         }
       } else {
         throw Exceptions.ConfigurationError('sockets', sockets);

@@ -36,7 +36,7 @@ class C {
  * @socket DartSIP::Socket instance
  */
 class Transport {
-  Transport(dynamic sockets,
+  Transport(List<WebSocketInterface>? sockets,
       [Map<String, int> recovery_options = C.recovery_options]) {
     logger.d('new()');
 
@@ -58,21 +58,7 @@ class Transport {
       throw Exceptions.TypeError('Invalid argument. null \'sockets\' argument');
     }
 
-    if (sockets is! List) {
-      sockets = <WebSocketInterface>[sockets];
-    }
-
-    for (dynamic socket in sockets) {
-      if (!Socket.isSocket(socket)) {
-        throw Exceptions.TypeError(
-            'Invalid argument. invalid \'DartSIP.Socket\' instance');
-      }
-
-      if (socket.weight != null && socket.weight is! num) {
-        throw Exceptions.TypeError(
-            'Invalid argument. \'weight\' attribute is not a number');
-      }
-
+    for (WebSocketInterface socket in sockets) {
       _socketsMap.add(<String, dynamic>{
         'socket': socket,
         'weight': socket.weight ?? 0,
