@@ -156,14 +156,14 @@ class SIPUAHelper extends EventManager {
         logger.d('registered => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.REGISTERED, cause: event.cause);
-        _notifyRegsistrationStateListeners(_registerState);
+        _notifyRegistrationStateListeners(_registerState);
       });
 
       _ua!.on(EventUnregister(), (EventUnregister event) {
         logger.d('unregistered => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.UNREGISTERED, cause: event.cause);
-        _notifyRegsistrationStateListeners(_registerState);
+        _notifyRegistrationStateListeners(_registerState);
       });
 
       _ua!.on(EventRegistrationFailed(), (EventRegistrationFailed event) {
@@ -171,7 +171,7 @@ class SIPUAHelper extends EventManager {
         _registerState = RegistrationState(
             state: RegistrationStateEnum.REGISTRATION_FAILED,
             cause: event.cause);
-        _notifyRegsistrationStateListeners(_registerState);
+        _notifyRegistrationStateListeners(_registerState);
       });
 
       _ua!.on(EventNewRTCSession(), (EventNewRTCSession event) {
@@ -271,7 +271,7 @@ class SIPUAHelper extends EventManager {
               audio: event.audio, video: event.video));
     });
     handlers.on(EventStream(), (EventStream event) async {
-      // Wating for callscreen ready.
+      // Waiting for callscreen ready.
       Timer(Duration(milliseconds: 100), () {
         _notifyCallStateListeners(
             event,
@@ -371,7 +371,7 @@ class SIPUAHelper extends EventManager {
     }
   }
 
-  void _notifyRegsistrationStateListeners(RegistrationState state) {
+  void _notifyRegistrationStateListeners(RegistrationState state) {
     for (SipUaHelperListener listener in _sipUaHelperListeners) {
       listener.registrationStateChanged(state);
     }
@@ -469,7 +469,7 @@ class Call {
   }
 
   void unmute([bool audio = true, bool video = true]) {
-    assert(_session != null, 'ERROR(umute): rtc session is invalid!');
+    assert(_session != null, 'ERROR(unmute): rtc session is invalid!');
     _session.unmute(audio, video);
   }
 

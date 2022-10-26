@@ -43,7 +43,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
 
   void _loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
-    this.setState(() {
+    setState(() {
       _wsUriController.text =
           _preferences.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
       _sipUriController.text =
@@ -66,13 +66,13 @@ class _MyRegisterWidget extends State<RegisterWidget>
 
   @override
   void registrationStateChanged(RegistrationState state) {
-    this.setState(() {
+    setState(() {
       _registerState = state;
     });
   }
 
   void _alert(BuildContext context, String alertFieldName) {
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
