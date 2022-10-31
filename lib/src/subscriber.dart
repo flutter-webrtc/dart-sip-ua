@@ -108,7 +108,7 @@ class Subscriber extends EventManager implements Owner {
 
   int _state = C.STATE_INIT;
 
-  late Dialog? _dialog;
+  Dialog? _dialog;
 
   DateTime? _expires_timestamp;
 
