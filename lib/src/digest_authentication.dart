@@ -9,11 +9,11 @@ class Challenge {
     return Challenge(map['algorithm'], map['realm'], map['nonce'],
         map['opaque'], map['stale'], map['qop']);
   }
-  String? algorithm;
-  String? realm;
-  String? nonce;
-  String? opaque;
-  bool? stale;
+  String algorithm;
+  String realm;
+  String nonce;
+  String opaque;
+  bool stale;
   dynamic qop; // String or List<dynamic>
 }
 

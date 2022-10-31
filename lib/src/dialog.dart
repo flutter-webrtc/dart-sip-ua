@@ -24,13 +24,13 @@ class Id {
     return Id(map['call_id'], map['local_tag'], map['remote_tag']);
   }
 
-  String? call_id;
-  String? local_tag;
-  String? remote_tag;
+  String call_id;
+  String local_tag;
+  String remote_tag;
 
   @override
   String toString() {
-    return call_id! + local_tag! + remote_tag!;
+    return call_id + local_tag + remote_tag;
   }
 }
 
@@ -38,7 +38,7 @@ class Id {
 class Dialog {
   Dialog(Owner owner, dynamic message, String type, [int? state]) {
     state = state ?? DialogStatus.STATUS_CONFIRMED;
-    _owner = owner;
+
     _ua = owner.ua;
 
     if (!message.hasHeader('contact')) {
@@ -91,21 +91,21 @@ class Dialog {
         '$type dialog created with status ${_state == DialogStatus.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
-  Owner? _owner;
+  late Owner _owner;
   late UA _ua;
   bool uac_pending_reply = false;
   bool uas_pending_reply = false;
-  int? _state;
+  late int _state;
   int? _remote_seqnum;
   URI? _local_uri;
   URI? _remote_uri;
-  late URI _remote_target;
+  URI? _remote_target;
   List<dynamic>? _route_set;
   int? _ack_seqnum;
   Id? _id;
   num? local_seqnum;
 
-  UA? get ua => _ua;
+  UA get ua => _ua;
   Id? get id => _id;
 
   Owner? get owner => _owner;
@@ -165,7 +165,7 @@ class Dialog {
       _ack_seqnum = request.cseq;
     }
 
-    _owner!.receiveRequest(request);
+    _owner.receiveRequest(request);
   }
 
   // RFC 3261 12.2.1.1.
@@ -266,7 +266,7 @@ class Dialog {
 
 abstract class Owner {
   Function(IncomingRequest) get receiveRequest;
-  int? get status;
+  int get status;
   int get TerminatedCode;
   UA get ua;
 }

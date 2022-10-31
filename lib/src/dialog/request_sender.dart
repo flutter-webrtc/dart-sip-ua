@@ -15,7 +15,7 @@ class DialogRequestSender {
   DialogRequestSender(
       Dialog dialog, OutgoingRequest request, EventManager eventHandlers) {
     _dialog = dialog;
-    _ua = dialog.ua!;
+    _ua = dialog.ua;
     _request = request;
     _eventHandlers = eventHandlers;
 

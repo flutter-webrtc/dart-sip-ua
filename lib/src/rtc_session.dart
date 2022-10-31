@@ -156,7 +156,7 @@ class RTCSession extends EventManager implements Owner {
   late bool _is_canceled;
   late RFC4028Timers _sessionTimers;
   String? _cancel_reason;
-  int? _status;
+  late int _status;
   Dialog? _dialog;
   RTCPeerConnection? _connection;
   RTCIceGatheringState? _iceGatheringState;
@@ -218,7 +218,7 @@ class RTCSession extends EventManager implements Owner {
   UA get ua => _ua;
 
   @override
-  int? get status => _status;
+  int get status => _status;
 
   bool isInProgress() {
     switch (_status) {

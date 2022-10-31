@@ -151,7 +151,7 @@ class Subscriber extends EventManager implements Owner {
   String? get id => _id;
 
   @override
-  int? get status => _state;
+  int get status => _state;
 
   @override
   int get TerminatedCode => C.STATE_TERMINATED;
