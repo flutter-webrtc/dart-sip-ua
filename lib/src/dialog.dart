@@ -36,10 +36,10 @@ class Id {
 
 // RFC 3261 12.1.
 class Dialog {
-  Dialog(Owner owner, dynamic message, String type, [int? state]) {
+  Dialog(this._owner, dynamic message, String type, [int? state]) {
     state = state ?? DialogStatus.STATUS_CONFIRMED;
 
-    _ua = owner.ua;
+    _ua = _owner.ua;
 
     if (!message.hasHeader('contact')) {
       throw Exceptions.TypeError(
@@ -91,11 +91,11 @@ class Dialog {
         '$type dialog created with status ${_state == DialogStatus.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
-  late Owner _owner;
+  Owner _owner;
   late UA _ua;
   bool uac_pending_reply = false;
   bool uas_pending_reply = false;
-  late int _state;
+  int? _state;
   int? _remote_seqnum;
   URI? _local_uri;
   URI? _remote_uri;
