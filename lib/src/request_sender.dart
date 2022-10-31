@@ -37,7 +37,7 @@ class RequestSender {
   DigestAuthentication? _auth;
   late bool _challenged;
   late bool _staled;
-  late TransactionBase clientTransaction;
+  TransactionBase? clientTransaction;
 
   /**
   * Create the client transaction and send the message.
@@ -71,7 +71,7 @@ class RequestSender {
             _ua, _ua.transport!, _request!, handlers);
     }
 
-    clientTransaction.send();
+    clientTransaction?.send();
   }
 
   /**
