@@ -26,7 +26,7 @@ class SIPUAHelper extends EventManager {
 
   UA? _ua;
   Settings _settings = Settings();
-  late UaSettings _uaSettings;
+  UaSettings? _uaSettings;
   final Map<String?, Call> _calls = <String?, Call>{};
 
   RegistrationState _registerState =
@@ -295,7 +295,7 @@ class SIPUAHelper extends EventManager {
       'extraHeaders': <dynamic>[],
       'pcConfig': <String, dynamic>{
         'sdpSemantics': 'unified-plan',
-        'iceServers': _uaSettings.iceServers
+        'iceServers': _uaSettings?.iceServers
       },
       'mediaConstraints': <String, dynamic>{
         'audio': true,
