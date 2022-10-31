@@ -91,7 +91,7 @@ class Dialog {
         '$type dialog created with status ${_state == DialogStatus.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
-  Owner _owner;
+  final Owner _owner;
   late UA _ua;
   bool uac_pending_reply = false;
   bool uas_pending_reply = false;
@@ -173,7 +173,7 @@ class Dialog {
       SipMethod method, List<dynamic> extraHeaders, String? body) {
     extraHeaders = Utils.cloneArray(extraHeaders);
 
-    local_seqnum ??= Utils.Math.floor(Utils.Math.randomDouble() * 10000);
+    local_seqnum ??= (Utils.Math.randomDouble() * 10000).floor();
 
     num? cseq = (method == SipMethod.CANCEL || method == SipMethod.ACK)
         ? local_seqnum

@@ -93,8 +93,7 @@ class OutgoingRequest {
     setHeader('call-id', call_id);
 
     // CSeq.
-    num cseq =
-        params['cseq'] ?? utils.Math.floor(utils.Math.randomDouble() * 10000);
+    num cseq = params['cseq'] ?? (utils.Math.randomDouble() * 10000).floor();
 
     this.cseq = cseq as int?;
     setHeader('cseq', '$cseq ${SipMethodHelper.getName(method)}');

@@ -882,7 +882,7 @@ class RTCSession extends EventManager implements Owner {
           '"duration" value is greater than the maximum allowed, setting it to ${RTCSession_DTMF.C.MAX_DURATION} milliseconds');
       duration = RTCSession_DTMF.C.MAX_DURATION;
     } else {
-      duration = utils.Math.abs(duration) as int;
+      duration = duration.abs();
     }
     options['duration'] = duration;
 
@@ -894,7 +894,7 @@ class RTCSession extends EventManager implements Owner {
           '"interToneGap" value is lower than the minimum allowed, setting it to ${RTCSession_DTMF.C.MIN_INTER_TONE_GAP} milliseconds');
       interToneGap = RTCSession_DTMF.C.MIN_INTER_TONE_GAP;
     } else {
-      interToneGap = utils.Math.abs(interToneGap) as int;
+      interToneGap = interToneGap.abs();
     }
 
     options['interToneGap'] = interToneGap;

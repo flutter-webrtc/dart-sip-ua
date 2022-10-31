@@ -10,7 +10,7 @@ import 'transaction_base.dart';
 class AckClientTransaction extends TransactionBase {
   AckClientTransaction(UA ua, Transport transport, OutgoingRequest request,
       EventManager eventHandlers) {
-    id = 'z9hG4bK${Math.floor(Math.random() * 10000000)}';
+    id = 'z9hG4bK${(Math.random() * 10000000).floor()}';
     this.transport = transport;
     this.request = request;
     _eventHandlers = eventHandlers;

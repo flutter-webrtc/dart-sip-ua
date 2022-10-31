@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:sip_ua/src/event_manager/events.dart';
 import 'exceptions.dart' as Exceptions;
@@ -171,8 +172,7 @@ class Transport {
   void _reconnect(bool error) {
     _recover_attempts = _recover_attempts + 1;
 
-    num k =
-        Math.floor((Math.randomDouble() * Math.pow(2, _recover_attempts)) + 1);
+    num k = ((Math.randomDouble() * pow(2, _recover_attempts)) + 1).floor();
 
     if (k < _recovery_options['min_interval']!) {
       k = _recovery_options['min_interval']!;
@@ -227,7 +227,7 @@ class Transport {
       return;
     }
 
-    num idx = Math.floor(Math.randomDouble() * candidates.length);
+    num idx = (Math.randomDouble() * candidates.length).floor();
 
     socket = candidates[idx as int]['socket'];
   }
