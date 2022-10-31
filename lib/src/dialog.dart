@@ -91,7 +91,7 @@ class Dialog {
         '$type dialog created with status ${_state == DialogStatus.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
-  final Owner _owner;
+  Owner _owner;
   late UA _ua;
   bool uac_pending_reply = false;
   bool uas_pending_reply = false;
