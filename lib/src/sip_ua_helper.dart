@@ -367,13 +367,17 @@ class SIPUAHelper extends EventManager {
   }
 
   void _notifyTransportStateListeners(TransportState state) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.transportStateChanged(state);
     }
   }
 
   void _notifyRegistrationStateListeners(RegistrationState state) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.registrationStateChanged(state);
     }
   }
@@ -385,19 +389,25 @@ class SIPUAHelper extends EventManager {
       return;
     }
     call.state = state.state;
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.callStateChanged(call, state);
     }
   }
 
   void _notifyNewMessageListeners(SIPMessageRequest msg) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.onNewMessage(msg);
     }
   }
 
   void _notifyNotifyListeners(EventNotify event) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.onNewNotify(Notify(request: event.request));
     }
   }
