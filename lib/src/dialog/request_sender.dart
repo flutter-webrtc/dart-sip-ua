@@ -15,7 +15,7 @@ class DialogRequestSender {
   DialogRequestSender(
       Dialog dialog, OutgoingRequest request, EventManager eventHandlers) {
     _dialog = dialog;
-    _ua = dialog.ua!;
+    _ua = dialog.ua;
     _request = request;
     _eventHandlers = eventHandlers;
 
@@ -54,16 +54,17 @@ class DialogRequestSender {
     // RFC3261 14.2 Modifying an Existing Session -UAC BEHAVIOR-.
     if ((_request.method == SipMethod.INVITE ||
             (_request.method == SipMethod.UPDATE && _request.body != null)) &&
-        request_sender.clientTransaction.state != TransactionState.TERMINATED) {
+        request_sender.clientTransaction?.state !=
+            TransactionState.TERMINATED) {
       _dialog.uac_pending_reply = true;
-      EventManager eventHandlers = request_sender.clientTransaction;
+      EventManager eventHandlers = request_sender.clientTransaction!;
       late void Function(EventStateChanged data) stateChanged;
       stateChanged = (EventStateChanged data) {
-        if (request_sender.clientTransaction.state ==
+        if (request_sender.clientTransaction?.state ==
                 TransactionState.ACCEPTED ||
-            request_sender.clientTransaction.state ==
+            request_sender.clientTransaction?.state ==
                 TransactionState.COMPLETED ||
-            request_sender.clientTransaction.state ==
+            request_sender.clientTransaction?.state ==
                 TransactionState.TERMINATED) {
           eventHandlers.remove(EventStateChanged(), stateChanged);
           _dialog.uac_pending_reply = false;

@@ -78,7 +78,7 @@ List<void Function()> testFunctions = <void Function()>[
         });
         WebSocketInterface socket =
             WebSocketInterface('ws://127.0.0.1:4041/sip');
-        Transport trasnport = Transport(socket);
+        Transport trasnport = Transport(<WebSocketInterface>[socket]);
 
         trasnport.onconnecting = (WebSocketInterface? socket, int? attempt) {
           expect(trasnport.isConnecting(), true);

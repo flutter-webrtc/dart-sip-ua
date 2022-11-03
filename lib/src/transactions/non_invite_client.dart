@@ -13,7 +13,7 @@ import 'transaction_base.dart';
 class NonInviteClientTransaction extends TransactionBase {
   NonInviteClientTransaction(UA ua, Transport transport,
       OutgoingRequest request, EventManager eventHandlers) {
-    id = 'z9hG4bK${Math.floor(Math.random())}';
+    id = 'z9hG4bK${Math.random().floor()}';
     this.ua = ua;
     this.transport = transport;
     this.request = request;

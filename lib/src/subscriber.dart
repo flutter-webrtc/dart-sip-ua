@@ -64,18 +64,6 @@ class Subscriber extends EventManager implements Owner {
     //  _params['cseq'] = Math.floor((Math.random() * 10000) + 1);
     //}
 
-    _state = C.STATE_INIT;
-
-    _dialog = null;
-
-    _expires_timer = null;
-
-    _expires_timestamp = null;
-
-    _terminated = false;
-
-    _unsubscribe_timeout_timer = null;
-
     dynamic parsed = Grammar.parse(eventName, 'Event');
 
     if (parsed == -1) {
@@ -107,9 +95,6 @@ class Subscriber extends EventManager implements Owner {
     }
 
     receiveRequest = receiveNotifyRequest;
-
-    // To enqueue subscribes created before receive initial subscribe OK.
-    _queue = <Map<String, dynamic>>[];
   }
   String? _id;
 
@@ -121,15 +106,15 @@ class Subscriber extends EventManager implements Owner {
 
   late Map<String, dynamic> _params;
 
-  late int _state;
+  int _state = C.STATE_INIT;
 
-  late Dialog? _dialog;
+  Dialog? _dialog;
 
   DateTime? _expires_timestamp;
 
   Timer? _expires_timer;
 
-  late bool _terminated;
+  bool _terminated = false;
 
   Timer? _unsubscribe_timeout_timer;
 
@@ -141,7 +126,8 @@ class Subscriber extends EventManager implements Owner {
 
   late List<dynamic> _headers;
 
-  late List<Map<String, dynamic>> _queue;
+  // To enqueue subscribes created before receive initial subscribe OK.
+  final List<Map<String, dynamic>> _queue = <Map<String, dynamic>>[];
 
   @override
   late Function(IncomingRequest p1) receiveRequest;
@@ -151,7 +137,7 @@ class Subscriber extends EventManager implements Owner {
   String? get id => _id;
 
   @override
-  int? get status => _state;
+  int get status => _state;
 
   @override
   int get TerminatedCode => C.STATE_TERMINATED;

@@ -65,62 +65,8 @@ class RFC4028Timers {
 }
 
 class RTCSession extends EventManager implements Owner {
-  RTCSession(UA ua) {
+  RTCSession(this._ua) {
     logger.d('new');
-
-    _id = null;
-    _ua = ua;
-    _status = C.STATUS_NULL;
-    _dialog = null;
-    _earlyDialogs = <String?, Dialog>{};
-    _contact = null;
-    _from_tag = null;
-    _to_tag = null;
-
-    // The RTCPeerConnection instance (public attribute).
-    _connection = null;
-
-    // Incoming/Outgoing request being currently processed.
-    _request = null;
-
-    // Cancel state for initial outgoing request.
-    _is_canceled = false;
-    _cancel_reason = '';
-
-    // RTCSession confirmation flag.
-    _is_confirmed = false;
-
-    // Is late SDP being negotiated.
-    _late_sdp = false;
-
-    // Default rtcOfferConstraints and rtcAnswerConstrainsts (passed in connect() or answer()).
-    _rtcOfferConstraints = null;
-    _rtcAnswerConstraints = null;
-
-    // Local MediaStream.
-    _localMediaStream = null;
-    _localMediaStreamLocallyGenerated = false;
-
-    // Flag to indicate PeerConnection ready for actions.
-    _rtcReady = true;
-
-    // SIP Timers.
-    _timers = SIPTimers();
-
-    // Session info.
-    _direction = null;
-    _local_identity = null;
-    _remote_identity = null;
-    _start_time = null;
-    _end_time = null;
-    _tones = null;
-
-    // Mute/Hold state.
-    _audioMuted = false;
-    _videoMuted = false;
-    _localHold = false;
-    _remoteHold = false;
-
     // Session Timers (RFC 4028).
     _sessionTimers = RFC4028Timers(
         _ua.configuration.session_timers,
@@ -131,53 +77,74 @@ class RTCSession extends EventManager implements Owner {
         false,
         null);
 
-    // Map of ReferSubscriber instances indexed by the REFER's CSeq number.
-    _referSubscribers = <int?, ReferSubscriber>{};
-
-    // Custom session empty object for high level use.
-    data = <String, dynamic>{};
-
     receiveRequest = _receiveRequest;
   }
 
+  final UA _ua;
+
   String? _id;
-  late UA _ua;
-  dynamic _request;
-  late bool _late_sdp;
-  Map<String, dynamic>? _rtcOfferConstraints;
-  Map<String, dynamic>? _rtcAnswerConstraints;
-  MediaStream? _localMediaStream;
-  Map<String, dynamic>? data;
-  late Map<String?, Dialog> _earlyDialogs;
+  int _status = C.STATUS_NULL;
+  Dialog? _dialog;
+  final Map<String?, Dialog> _earlyDialogs = <String?, Dialog>{};
+  String? _contact;
   String? _from_tag;
   String? _to_tag;
-  late SIPTimers _timers;
-  late bool _is_confirmed;
-  late bool _is_canceled;
-  late RFC4028Timers _sessionTimers;
-  String? _cancel_reason;
-  int? _status;
-  Dialog? _dialog;
-  RTCPeerConnection? _connection;
-  RTCIceGatheringState? _iceGatheringState;
-  late bool _localMediaStreamLocallyGenerated;
-  late bool _rtcReady;
-  String? _direction;
 
-  late Map<int?, ReferSubscriber> _referSubscribers;
+  // The RTCPeerConnection instance (public attribute).
+  RTCPeerConnection? _connection;
+
+  // Incoming/Outgoing request being currently processed.
+  dynamic _request;
+
+  // Cancel state for initial outgoing request.
+  bool _is_canceled = false;
+  String? _cancel_reason = '';
+
+  // RTCSession confirmation flag.
+  bool _is_confirmed = false;
+
+  // Is late SDP being negotiated.
+  bool _late_sdp = false;
+
+  // Default rtcOfferConstraints and rtcAnswerConstrainsts (passed in connect() or answer()).
+  Map<String, dynamic>? _rtcOfferConstraints;
+  Map<String, dynamic>? _rtcAnswerConstraints;
+
+  // Local MediaStream.
+  MediaStream? _localMediaStream;
+  bool _localMediaStreamLocallyGenerated = false;
+
+  // Flag to indicate PeerConnection ready for actions.
+  bool _rtcReady = true;
+
+  // SIP Timers.
+  final SIPTimers _timers = SIPTimers();
+
+  // Session info.
+  String? _direction;
+  NameAddrHeader? _local_identity;
+  NameAddrHeader? _remote_identity;
   DateTime? _start_time;
   DateTime? _end_time;
+  String? _tones;
 
+  // Mute/Hold state.
   bool? _audioMuted;
   bool? _videoMuted;
   bool? _localHold;
   bool? _remoteHold;
 
-  NameAddrHeader? _local_identity;
-  NameAddrHeader? _remote_identity;
+  late RFC4028Timers _sessionTimers;
 
-  String? _contact;
-  String? _tones;
+  // Map of ReferSubscriber instances indexed by the REFER's CSeq number.
+  final Map<int?, ReferSubscriber> _referSubscribers =
+      <int?, ReferSubscriber>{};
+
+  // Custom session empty object for high level use.
+  Map<String, dynamic>? data = <String, dynamic>{};
+
+  RTCIceGatheringState? _iceGatheringState;
+
   Future<void> dtmfFuture = (Completer<void>()..complete()).future;
 
   @override
@@ -218,7 +185,7 @@ class RTCSession extends EventManager implements Owner {
   UA get ua => _ua;
 
   @override
-  int? get status => _status;
+  int get status => _status;
 
   bool isInProgress() {
     switch (_status) {
@@ -915,7 +882,7 @@ class RTCSession extends EventManager implements Owner {
           '"duration" value is greater than the maximum allowed, setting it to ${RTCSession_DTMF.C.MAX_DURATION} milliseconds');
       duration = RTCSession_DTMF.C.MAX_DURATION;
     } else {
-      duration = utils.Math.abs(duration) as int;
+      duration = duration.abs();
     }
     options['duration'] = duration;
 
@@ -927,7 +894,7 @@ class RTCSession extends EventManager implements Owner {
           '"interToneGap" value is lower than the minimum allowed, setting it to ${RTCSession_DTMF.C.MIN_INTER_TONE_GAP} milliseconds');
       interToneGap = RTCSession_DTMF.C.MIN_INTER_TONE_GAP;
     } else {
-      interToneGap = utils.Math.abs(interToneGap) as int;
+      interToneGap = interToneGap.abs();
     }
 
     options['interToneGap'] = interToneGap;

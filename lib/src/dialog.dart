@@ -24,22 +24,22 @@ class Id {
     return Id(map['call_id'], map['local_tag'], map['remote_tag']);
   }
 
-  String? call_id;
-  String? local_tag;
-  String? remote_tag;
+  String call_id;
+  String local_tag;
+  String remote_tag;
 
   @override
   String toString() {
-    return call_id! + local_tag! + remote_tag!;
+    return call_id + local_tag + remote_tag;
   }
 }
 
 // RFC 3261 12.1.
 class Dialog {
-  Dialog(Owner owner, dynamic message, String type, [int? state]) {
+  Dialog(this._owner, dynamic message, String type, [int? state]) {
     state = state ?? DialogStatus.STATUS_CONFIRMED;
-    _owner = owner;
-    _ua = owner.ua;
+
+    _ua = _owner.ua;
 
     if (!message.hasHeader('contact')) {
       throw Exceptions.TypeError(
@@ -91,7 +91,7 @@ class Dialog {
         '$type dialog created with status ${_state == DialogStatus.STATUS_EARLY ? 'EARLY' : 'CONFIRMED'}');
   }
 
-  Owner? _owner;
+  final Owner _owner;
   late UA _ua;
   bool uac_pending_reply = false;
   bool uas_pending_reply = false;
@@ -99,13 +99,13 @@ class Dialog {
   int? _remote_seqnum;
   URI? _local_uri;
   URI? _remote_uri;
-  late URI _remote_target;
+  URI? _remote_target;
   List<dynamic>? _route_set;
   int? _ack_seqnum;
   Id? _id;
   num? local_seqnum;
 
-  UA? get ua => _ua;
+  UA get ua => _ua;
   Id? get id => _id;
 
   Owner? get owner => _owner;
@@ -165,7 +165,7 @@ class Dialog {
       _ack_seqnum = request.cseq;
     }
 
-    _owner!.receiveRequest(request);
+    _owner.receiveRequest(request);
   }
 
   // RFC 3261 12.2.1.1.
@@ -173,7 +173,7 @@ class Dialog {
       SipMethod method, List<dynamic> extraHeaders, String? body) {
     extraHeaders = Utils.cloneArray(extraHeaders);
 
-    local_seqnum ??= Utils.Math.floor(Utils.Math.randomDouble() * 10000);
+    local_seqnum ??= (Utils.Math.randomDouble() * 10000).floor();
 
     num? cseq = (method == SipMethod.CANCEL || method == SipMethod.ACK)
         ? local_seqnum
@@ -266,7 +266,7 @@ class Dialog {
 
 abstract class Owner {
   Function(IncomingRequest) get receiveRequest;
-  int? get status;
+  int get status;
   int get TerminatedCode;
   UA get ua;
 }

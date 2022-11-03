@@ -12,6 +12,7 @@ import 'uri.dart';
 
 final JsonDecoder decoder = JsonDecoder();
 final JsonEncoder encoder = JsonEncoder();
+final DartMath.Random _random = DartMath.Random();
 
 bool test100(String statusCode) {
   return statusCode.contains(RegExp(r'^100$'));
@@ -26,20 +27,8 @@ bool test2XX(String statusCode) {
 }
 
 class Math {
-  static final DartMath.Random _random = DartMath.Random();
-  static num floor(num n) {
-    return n.floor();
-  }
-
-  static num abs(num n) {
-    return n.abs();
-  }
-
   static double randomDouble() => _random.nextDouble();
   static int random() => _random.nextInt(0x7FFFFFFF);
-  static num pow(num a, num b) {
-    return DartMath.pow(a, b);
-  }
 }
 
 int str_utf8_length(String string) => Uri.encodeComponent(string).length;

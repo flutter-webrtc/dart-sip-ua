@@ -26,7 +26,7 @@ class SIPUAHelper extends EventManager {
 
   UA? _ua;
   Settings _settings = Settings();
-  late UaSettings _uaSettings;
+  UaSettings? _uaSettings;
   final Map<String?, Call> _calls = <String?, Call>{};
 
   RegistrationState _registerState =
@@ -295,7 +295,7 @@ class SIPUAHelper extends EventManager {
       'extraHeaders': <dynamic>[],
       'pcConfig': <String, dynamic>{
         'sdpSemantics': 'unified-plan',
-        'iceServers': _uaSettings.iceServers
+        'iceServers': _uaSettings?.iceServers
       },
       'mediaConstraints': <String, dynamic>{
         'audio': true,
@@ -367,13 +367,17 @@ class SIPUAHelper extends EventManager {
   }
 
   void _notifyTransportStateListeners(TransportState state) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.transportStateChanged(state);
     }
   }
 
   void _notifyRegistrationStateListeners(RegistrationState state) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.registrationStateChanged(state);
     }
   }
@@ -385,19 +389,25 @@ class SIPUAHelper extends EventManager {
       return;
     }
     call.state = state.state;
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.callStateChanged(call, state);
     }
   }
 
   void _notifyNewMessageListeners(SIPMessageRequest msg) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.onNewMessage(msg);
     }
   }
 
   void _notifyNotifyListeners(EventNotify event) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.onNewNotify(Notify(request: event.request));
     }
   }

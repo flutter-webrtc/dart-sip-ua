@@ -42,6 +42,7 @@ class C {
   static const int NETWORK_ERROR = 2;
 }
 
+// TODO(Perondas): Figure out what this is
 final bool hasRTCPeerConnection = true;
 
 class DynamicSettings {
@@ -84,35 +85,8 @@ class Contact {
  * @throws {TypeError} If no configuration is given.
  */
 class UA extends EventManager {
-  UA(Settings? configuration) {
+  UA(Settings configuration) {
     logger.d('new() [configuration:${configuration.toString()}]');
-
-    _cache = <String, dynamic>{'credentials': <dynamic>{}};
-
-    _configuration = Settings();
-    _dynConfiguration = DynamicSettings();
-    _dialogs = <String, Dialog>{};
-
-    // User actions outside any session/dialog (MESSAGE/OPTIONS).
-    _applicants = <Applicant>{};
-
-    _sessions = <String?, RTCSession>{};
-    _transport = null;
-    _contact = null;
-    _status = C.STATUS_INIT;
-    _error = null;
-    _transactions = TransactionBag();
-
-    // Custom UA empty object for high level use.
-    _data = <String, dynamic>{};
-
-    _closeTimer = null;
-
-    // Check configuration argument.
-    if (configuration == null) {
-      throw Exceptions.ConfigurationError('Not enough arguments');
-    }
-
     // Load configuration.
     try {
       _loadConfig(configuration);
@@ -124,23 +98,31 @@ class UA extends EventManager {
 
     // Initialize registrator.
     _registrator = Registrator(this);
-
-    _subscribers = <String?, Subscriber>{};
   }
 
-  late Map<String?, Subscriber> _subscribers;
-  late Map<String, dynamic> _cache;
-  late Settings _configuration;
-  DynamicSettings? _dynConfiguration;
-  late Map<String, Dialog> _dialogs;
-  late Set<Applicant> _applicants;
-  Map<String?, RTCSession> _sessions = <String?, RTCSession>{};
+  final Map<String?, Subscriber> _subscribers = <String?, Subscriber>{};
+  final Map<String, dynamic> _cache = <String, dynamic>{
+    'credentials': <dynamic>{}
+  };
+
+  final Settings _configuration = Settings();
+  DynamicSettings? _dynConfiguration = DynamicSettings();
+
+  final Map<String, Dialog> _dialogs = <String, Dialog>{};
+
+  // User actions outside any session/dialog (MESSAGE/OPTIONS).
+  final Set<Applicant> _applicants = <Applicant>{};
+
+  final Map<String?, RTCSession> _sessions = <String?, RTCSession>{};
   Transport? _transport;
   Contact? _contact;
-  late int _status;
+  int _status = C.STATUS_INIT;
   int? _error;
-  TransactionBag _transactions = TransactionBag();
-  Map<String, dynamic>? _data;
+  final TransactionBag _transactions = TransactionBag();
+
+// Custom UA empty object for high level use.
+  final Map<String, dynamic> _data = <String, dynamic>{};
+
   Timer? _closeTimer;
   late Registrator _registrator;
 
@@ -855,7 +837,7 @@ class UA extends EventManager {
 
     // Transport.
     try {
-      _transport = Transport(_configuration.sockets, <String, int>{
+      _transport = Transport(_configuration.sockets!, <String, int>{
         // Recovery options.
         'max_interval': _configuration.connection_recovery_max_interval,
         'min_interval': _configuration.connection_recovery_min_interval

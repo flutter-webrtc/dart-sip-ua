@@ -93,8 +93,7 @@ class OutgoingRequest {
     setHeader('call-id', call_id);
 
     // CSeq.
-    num cseq =
-        params['cseq'] ?? utils.Math.floor(utils.Math.randomDouble() * 10000);
+    num cseq = params['cseq'] ?? (utils.Math.randomDouble() * 10000).floor();
 
     this.cseq = cseq as int?;
     setHeader('cseq', '$cseq ${SipMethodHelper.getName(method)}');
@@ -103,7 +102,7 @@ class OutgoingRequest {
   UA ua;
   Map<String?, dynamic> headers = <String?, dynamic>{};
   SipMethod method;
-  URI ruri;
+  URI? ruri;
   String? body;
   List<dynamic> extraHeaders = <dynamic>[];
   NameAddrHeader? to;
@@ -304,7 +303,7 @@ class OutgoingRequest {
 }
 
 class InitialOutgoingInviteRequest extends OutgoingRequest {
-  InitialOutgoingInviteRequest(URI ruri, UA ua,
+  InitialOutgoingInviteRequest(URI? ruri, UA ua,
       [Map<String, dynamic>? params, List<dynamic>? extraHeaders, String? body])
       : super(SipMethod.INVITE, ruri, ua, params, extraHeaders, body) {
     transaction = null;
