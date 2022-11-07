@@ -52,7 +52,7 @@ class Subscriber extends EventManager implements Owner {
     // Used to subscribe with body.
     _contentType = contentType;
 
-    _params = Map.from(requestParams);
+    _params = Map<String, dynamic>.from(requestParams);
 
     _params['from_tag'] = newTag();
 
@@ -63,18 +63,6 @@ class Subscriber extends EventManager implements Owner {
     //if (_params['cseq'] == null) {
     //  _params['cseq'] = Math.floor((Math.random() * 10000) + 1);
     //}
-
-    _state = C.STATE_INIT;
-
-    _dialog = null;
-
-    _expires_timer = null;
-
-    _expires_timestamp = null;
-
-    _terminated = false;
-
-    _unsubscribe_timeout_timer = null;
 
     dynamic parsed = Grammar.parse(eventName, 'Event');
 
@@ -107,9 +95,6 @@ class Subscriber extends EventManager implements Owner {
     }
 
     receiveRequest = receiveNotifyRequest;
-
-    // To enqueue subscribes created before receive initial subscribe OK.
-    _queue = <Map<String, dynamic>>[];
   }
   String? _id;
 
@@ -121,15 +106,15 @@ class Subscriber extends EventManager implements Owner {
 
   late Map<String, dynamic> _params;
 
-  late int _state;
+  int _state = C.STATE_INIT;
 
-  late Dialog? _dialog;
+  Dialog? _dialog;
 
   DateTime? _expires_timestamp;
 
   Timer? _expires_timer;
 
-  late bool _terminated;
+  bool _terminated = false;
 
   Timer? _unsubscribe_timeout_timer;
 
@@ -141,7 +126,8 @@ class Subscriber extends EventManager implements Owner {
 
   late List<dynamic> _headers;
 
-  late List<Map<String, dynamic>> _queue;
+  // To enqueue subscribes created before receive initial subscribe OK.
+  final List<Map<String, dynamic>> _queue = <Map<String, dynamic>>[];
 
   @override
   late Function(IncomingRequest p1) receiveRequest;
@@ -151,7 +137,7 @@ class Subscriber extends EventManager implements Owner {
   String? get id => _id;
 
   @override
-  int? get status => _state;
+  int get status => _state;
 
   @override
   int get TerminatedCode => C.STATE_TERMINATED;
@@ -266,7 +252,7 @@ class Subscriber extends EventManager implements Owner {
       dynamic retryAfter = null;
 
       if (subsState.params != null && subsState.params['retry-after'] != null) {
-        retryAfter = parseInt(subsState.params['retry-after'], 10);
+        retryAfter = int.tryParse(subsState.params['retry-after'], radix: 10);
       }
 
       _dialogTerminated(C.RECEIVE_FINAL_NOTIFY, reason, retryAfter);
@@ -399,7 +385,7 @@ class Subscriber extends EventManager implements Owner {
         expires_value = '900';
       }
 
-      int? expires = parseInt(expires_value!, 10);
+      int? expires = int.tryParse(expires_value!, radix: 10);
 
       if (expires != null && expires > 0) {
         _scheduleSubscribe(expires);
@@ -456,7 +442,7 @@ class Subscriber extends EventManager implements Owner {
     _state = C.STATE_NOTIFY_WAIT;
 
     OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
-        ua.normalizeTarget(_target), ua, _params, headers, body);
+        ua.normalizeTarget(_target)!, ua, _params, headers, body);
 
     EventManager handler = EventManager();
 
@@ -513,7 +499,7 @@ class Subscriber extends EventManager implements Owner {
     });
 
     OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
-        ua.normalizeTarget(_target), ua, _params, headers, body);
+        ua.normalizeTarget(_target)!, ua, _params, headers, body);
 
     RequestSender request_sender = RequestSender(ua, request, manager);
 

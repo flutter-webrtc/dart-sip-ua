@@ -12,30 +12,18 @@ import 'uri.dart';
 import 'utils.dart' as Utils;
 
 class Options extends EventManager with Applicant {
-  Options(UA ua) {
-    _ua = ua;
-    _request = null;
-    _closed = false;
+  Options(this._ua);
 
-    _direction = null;
-    _local_identity = null;
-    _remote_identity = null;
-
-    // Whether an incoming Options has been replied.
-    _is_replied = false;
-
-    // Custom Options empty object for high level use.
-    _data = <String, dynamic>{};
-  }
-
-  UA? _ua;
+  final UA _ua;
   dynamic _request;
-  bool? _closed;
+  bool _closed = false;
   String? _direction;
   NameAddrHeader? _local_identity;
   NameAddrHeader? _remote_identity;
-  bool? _is_replied;
-  Map<String, dynamic>? _data;
+  // Whether an incoming Options has been replied.
+  bool _is_replied = false;
+  // Custom Options empty object for high level use.
+  final Map<String, dynamic> _data = <String, dynamic>{};
   String? get direction => _direction;
 
   NameAddrHeader? get local_identity => _local_identity;
@@ -53,7 +41,7 @@ class Options extends EventManager with Applicant {
     }
 
     // Check target validity.
-    URI? normalized = _ua!.normalizeTarget(target);
+    URI normalized = _ua.normalizeTarget(target)!;
     if (normalized == null) {
       throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
@@ -85,7 +73,7 @@ class Options extends EventManager with Applicant {
       _receiveResponse(event.response);
     });
 
-    RequestSender request_sender = RequestSender(_ua!, _request, handlers);
+    RequestSender request_sender = RequestSender(_ua, _request, handlers);
 
     _newOptions('local', _request);
 
@@ -98,7 +86,7 @@ class Options extends EventManager with Applicant {
     _newOptions('remote', request);
 
     // Reply with a 200 OK if the user didn't reply.
-    if (_is_replied == null || _is_replied == false) {
+    if (!_is_replied) {
       _is_replied = true;
       request.reply(200);
     }
@@ -119,7 +107,7 @@ class Options extends EventManager with Applicant {
           '"accept" not supported for outgoing Options');
     }
 
-    if (_is_replied != null) {
+    if (_is_replied) {
       throw AssertionError('incoming Options already replied');
     }
 
@@ -142,7 +130,7 @@ class Options extends EventManager with Applicant {
           '"reject" not supported for outgoing Options');
     }
 
-    if (_is_replied != null) {
+    if (_is_replied) {
       throw AssertionError('incoming Options already replied');
     }
 
@@ -187,7 +175,7 @@ class Options extends EventManager with Applicant {
   @override
   void close() {
     _closed = true;
-    _ua!.destroyOptions(this);
+    _ua.destroyOptions(this);
   }
 
   /**
@@ -205,7 +193,7 @@ class Options extends EventManager with Applicant {
       _remote_identity = request.to;
     }
 
-    _ua!.newOptions(this, originator, request);
+    _ua.newOptions(this, originator, request);
   }
 
   void _failed(String originator, int? status_code, String cause,

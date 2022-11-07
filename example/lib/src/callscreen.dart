@@ -36,11 +36,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   CallStateEnum _state = CallStateEnum.NONE;
   SIPUAHelper? get helper => widget._helper;
 
-  bool get voiceonly =>
+  bool get voiceOnly =>
       (_localStream == null || _localStream!.getVideoTracks().isEmpty) &&
       (_remoteStream == null || _remoteStream!.getVideoTracks().isEmpty);
 
-  String? get remote_identity => call!.remote_identity;
+  String? get remoteIdentity => call!.remote_identity;
 
   String get direction => call!.direction;
 
@@ -65,7 +65,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
       Duration duration = Duration(seconds: timer.tick);
       if (mounted) {
-        this.setState(() {
+        setState(() {
           _timeLabel = [duration.inMinutes, duration.inSeconds]
               .map((seg) => seg.remainder(60).toString().padLeft(2, '0'))
               .join(':');
@@ -102,21 +102,21 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         callState.state == CallStateEnum.UNHOLD) {
       _hold = callState.state == CallStateEnum.HOLD;
       _holdOriginator = callState.originator;
-      this.setState(() {});
+      setState(() {});
       return;
     }
 
     if (callState.state == CallStateEnum.MUTED) {
       if (callState.audio!) _audioMuted = true;
       if (callState.video!) _videoMuted = true;
-      this.setState(() {});
+      setState(() {});
       return;
     }
 
     if (callState.state == CallStateEnum.UNMUTED) {
       if (callState.audio!) _audioMuted = false;
       if (callState.video!) _videoMuted = false;
-      this.setState(() {});
+      setState(() {});
       return;
     }
 
@@ -154,7 +154,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void registrationStateChanged(RegistrationState state) {}
 
   void _cleanUp() {
-    if(_localStream == null) return;
+    if (_localStream == null) return;
     _localStream?.getTracks().forEach((track) {
       track.stop();
     });
@@ -188,7 +188,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       _remoteStream = stream;
     }
 
-    this.setState(() {
+    setState(() {
       _resizeLocalVideo();
     });
   }
@@ -211,14 +211,14 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _handleAccept() async {
-    bool remote_has_video = call!.remote_has_video;
+    bool remoteHasVideo = call!.remote_has_video;
     final mediaConstraints = <String, dynamic>{
       'audio': true,
-      'video': remote_has_video
+      'video': remoteHasVideo
     };
     MediaStream mediaStream;
 
-    if (kIsWeb && remote_has_video) {
+    if (kIsWeb && remoteHasVideo) {
       mediaStream =
           await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
       mediaConstraints['video'] = false;
@@ -226,11 +226,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           await navigator.mediaDevices.getUserMedia(mediaConstraints);
       mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
-      mediaConstraints['video'] = remote_has_video;
+      mediaConstraints['video'] = remoteHasVideo;
       mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
 
-    call!.answer(helper!.buildCallOptions(!remote_has_video),
+    call!.answer(helper!.buildCallOptions(!remoteHasVideo),
         mediaStream: mediaStream);
   }
 
@@ -264,9 +264,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     }
   }
 
-  late String _tansfer_target;
+  late String _transferTarget;
   void _handleTransfer() {
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -275,7 +275,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           content: TextField(
             onChanged: (String text) {
               setState(() {
-                _tansfer_target = text;
+                _transferTarget = text;
               });
             },
             decoration: InputDecoration(
@@ -287,7 +287,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             TextButton(
               child: Text('Ok'),
               onPressed: () {
-                call!.refer(_tansfer_target);
+                call!.refer(_transferTarget);
                 Navigator.of(context).pop();
               },
             ),
@@ -309,7 +309,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _handleKeyPad() {
-    this.setState(() {
+    setState(() {
       _showNumPad = !_showNumPad;
     });
   }
@@ -324,7 +324,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   List<Widget> _buildNumPad() {
-    var lables = [
+    var labels = [
       [
         {'1': ''},
         {'2': 'abc'},
@@ -347,15 +347,15 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       ],
     ];
 
-    return lables
+    return labels
         .map((row) => Padding(
             padding: const EdgeInsets.all(3),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: row
                     .map((label) => ActionButton(
-                          title: '${label.keys.first}',
-                          subTitle: '${label.values.first}',
+                          title: label.keys.first,
+                          subTitle: label.values.first,
                           onPressed: () => _handleDtmf(label.keys.first),
                           number: true,
                         ))
@@ -406,7 +406,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             onPressed: () => _muteAudio(),
           ));
 
-          if (voiceonly) {
+          if (voiceOnly) {
             advanceActions.add(ActionButton(
               title: "keypad",
               icon: Icons.dialpad,
@@ -420,7 +420,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             ));
           }
 
-          if (voiceonly) {
+          if (voiceOnly) {
             advanceActions.add(ActionButton(
               title: _speakerOn ? 'speaker off' : 'speaker on',
               icon: _speakerOn ? Icons.volume_off : Icons.volume_up,
@@ -501,13 +501,13 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   Widget _buildContent() {
     var stackWidgets = <Widget>[];
 
-    if (!voiceonly && _remoteStream != null) {
+    if (!voiceOnly && _remoteStream != null) {
       stackWidgets.add(Center(
         child: RTCVideoView(_remoteRenderer!),
       ));
     }
 
-    if (!voiceonly && _localStream != null) {
+    if (!voiceOnly && _localStream != null) {
       stackWidgets.add(Container(
         child: AnimatedContainer(
           child: RTCVideoView(_localRenderer!),
@@ -523,7 +523,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
     stackWidgets.addAll([
       Positioned(
-        top: voiceonly ? 48 : 6,
+        top: voiceOnly ? 48 : 6,
         left: 0,
         right: 0,
         child: Center(
@@ -535,9 +535,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
                 child: Padding(
                     padding: const EdgeInsets.all(6),
                     child: Text(
-                      (voiceonly ? 'VOICE CALL' : 'VIDEO CALL') +
+                      (voiceOnly ? 'VOICE CALL' : 'VIDEO CALL') +
                           (_hold
-                              ? ' PAUSED BY ${this._holdOriginator!.toUpperCase()}'
+                              ? ' PAUSED BY ${_holdOriginator!.toUpperCase()}'
                               : ''),
                       style: TextStyle(fontSize: 24, color: Colors.black54),
                     ))),
@@ -545,7 +545,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
                 child: Padding(
                     padding: const EdgeInsets.all(6),
                     child: Text(
-                      '$remote_identity',
+                      '$remoteIdentity',
                       style: TextStyle(fontSize: 18, color: Colors.black54),
                     ))),
             Center(
@@ -585,6 +585,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   @override
   void onNewNotify(Notify ntf) {
-    // TODO: implement onNewNotify
+    // NO OP
   }
 }

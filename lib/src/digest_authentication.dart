@@ -57,7 +57,7 @@ class DigestAuthentication {
         return _ha1;
 
       default:
-        logger.e('get() | cannot get ' + parameter.toString() + ' parameter');
+        logger.e('get() | cannot get $parameter parameter');
 
         return null;
     }

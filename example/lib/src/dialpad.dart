@@ -1,13 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sip_ua/sip_ua.dart';
-import 'package:flutter/foundation.dart';
-
 
 import 'widgets/action_button.dart';
 
@@ -49,9 +45,10 @@ class _MyDialPadWidget extends State<DialPadWidget>
   }
 
   Future<Widget?> _handleCall(BuildContext context,
-      [bool voiceonly = false]) async {
+      [bool voiceOnly = false]) async {
     var dest = _textController?.text;
-    if(defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
       await Permission.microphone.request();
       await Permission.camera.request();
     }
@@ -81,7 +78,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
     MediaStream mediaStream;
 
-    if (kIsWeb && !voiceonly) {
+    if (kIsWeb && !voiceOnly) {
       mediaStream =
           await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
       mediaConstraints['video'] = false;
@@ -89,11 +86,11 @@ class _MyDialPadWidget extends State<DialPadWidget>
           await navigator.mediaDevices.getUserMedia(mediaConstraints);
       mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
-      mediaConstraints['video'] = !voiceonly;
+      mediaConstraints['video'] = !voiceOnly;
       mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
 
-    helper!.call(dest, voiceonly: voiceonly, mediaStream: mediaStream);
+    helper!.call(dest, voiceonly: voiceOnly, mediaStream: mediaStream);
     _preferences.setString('dest', dest);
     return null;
   }
@@ -115,7 +112,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
   }
 
   List<Widget> _buildNumPad() {
-    var lables = [
+    var labels = [
       [
         {'1': ''},
         {'2': 'abc'},
@@ -138,7 +135,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
       ],
     ];
 
-    return lables
+    return labels
         .map((row) => Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -322,6 +319,5 @@ class _MyDialPadWidget extends State<DialPadWidget>
   }
 
   @override
-  void onNewNotify(Notify ntf) {
-  }
+  void onNewNotify(Notify ntf) {}
 }

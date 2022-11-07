@@ -25,8 +25,8 @@ class SIPUAHelper extends EventManager {
   }
 
   UA? _ua;
-  Settings? _settings;
-  late UaSettings _uaSettings;
+  Settings _settings = Settings();
+  UaSettings? _uaSettings;
   final Map<String?, Call> _calls = <String?, Call>{};
 
   RegistrationState _registerState =
@@ -35,7 +35,7 @@ class SIPUAHelper extends EventManager {
   /// Sets the logging level for the default logger. Has no effect if custom logger is supplied.
   set loggingLevel(Level loggingLevel) => Log.loggingLevel = loggingLevel;
 
-  bool? get registered {
+  bool get registered {
     if (_ua != null) {
       return _ua!.isRegistered();
     }
@@ -74,7 +74,7 @@ class SIPUAHelper extends EventManager {
 
   void unregister([bool all = true]) {
     if (_ua != null) {
-      assert(registered!, 'ERROR: you must call register first.');
+      assert(registered, 'ERROR: you must call register first.');
       _ua!.unregister(all: all);
     } else {
       Log.e('ERROR: unregister called, you must call start first.');
@@ -113,69 +113,70 @@ class SIPUAHelper extends EventManager {
 
     _uaSettings = uaSettings;
 
+    // Reset settings
     _settings = Settings();
     WebSocketInterface socket = WebSocketInterface(
         uaSettings.webSocketUrl, uaSettings.webSocketSettings);
-    _settings!.sockets = <WebSocketInterface>[socket];
-    _settings!.uri = uaSettings.uri;
-    _settings!.password = uaSettings.password;
-    _settings!.ha1 = uaSettings.ha1;
-    _settings!.display_name = uaSettings.displayName;
-    _settings!.authorization_user = uaSettings.authorizationUser;
-    _settings!.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
-    _settings!.register = uaSettings.register;
-    _settings!.register_expires = uaSettings.register_expires;
-    _settings!.register_extra_contact_uri_params =
+    _settings.sockets = <WebSocketInterface>[socket];
+    _settings.uri = uaSettings.uri;
+    _settings.password = uaSettings.password;
+    _settings.ha1 = uaSettings.ha1;
+    _settings.display_name = uaSettings.displayName;
+    _settings.authorization_user = uaSettings.authorizationUser;
+    _settings.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
+    _settings.register = uaSettings.register;
+    _settings.register_expires = uaSettings.register_expires;
+    _settings.register_extra_contact_uri_params =
         uaSettings.registerParams.extraContactUriParams;
-    _settings!.dtmf_mode = uaSettings.dtmfMode;
-    _settings!.session_timers = uaSettings.sessionTimers;
-    _settings!.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
+    _settings.dtmf_mode = uaSettings.dtmfMode;
+    _settings.session_timers = uaSettings.sessionTimers;
+    _settings.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
 
     try {
       _ua = UA(_settings);
       _ua!.on(EventSocketConnecting(), (EventSocketConnecting event) {
-        logger.d('connecting => ' + event.toString());
+        logger.d('connecting => $event');
         _notifyTransportStateListeners(
             TransportState(TransportStateEnum.CONNECTING));
       });
 
       _ua!.on(EventSocketConnected(), (EventSocketConnected event) {
-        logger.d('connected => ' + event.toString());
+        logger.d('connected => $event');
         _notifyTransportStateListeners(
             TransportState(TransportStateEnum.CONNECTED));
       });
 
       _ua!.on(EventSocketDisconnected(), (EventSocketDisconnected event) {
-        logger.d('disconnected => ' + (event.cause.toString()));
+        logger.d('disconnected => ${event.cause}');
         _notifyTransportStateListeners(TransportState(
             TransportStateEnum.DISCONNECTED,
             cause: event.cause));
       });
 
       _ua!.on(EventRegistered(), (EventRegistered event) {
-        logger.d('registered => ' + event.cause.toString());
+        logger.d('registered => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.REGISTERED, cause: event.cause);
-        _notifyRegsistrationStateListeners(_registerState);
+        _notifyRegistrationStateListeners(_registerState);
       });
 
       _ua!.on(EventUnregister(), (EventUnregister event) {
-        logger.d('unregistered => ' + event.cause.toString());
+        logger.d('unregistered => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.UNREGISTERED, cause: event.cause);
-        _notifyRegsistrationStateListeners(_registerState);
+        _notifyRegistrationStateListeners(_registerState);
       });
 
       _ua!.on(EventRegistrationFailed(), (EventRegistrationFailed event) {
-        logger.d('registrationFailed => ' + (event.cause.toString()));
+        logger.d('registrationFailed => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.REGISTRATION_FAILED,
             cause: event.cause);
-        _notifyRegsistrationStateListeners(_registerState);
+        _notifyRegistrationStateListeners(_registerState);
       });
 
       _ua!.on(EventNewRTCSession(), (EventNewRTCSession event) {
-        logger.d('newRTCSession => ' + event.toString());
+        logger.d('newRTCSession => $event');
         RTCSession session = event.session!;
         if (session.direction == 'incoming') {
           // Set event handlers.
@@ -189,7 +190,7 @@ class SIPUAHelper extends EventManager {
       });
 
       _ua!.on(EventNewMessage(), (EventNewMessage event) {
-        logger.d('newMessage => ' + event.toString());
+        logger.d('newMessage => $event');
         //Only notify incoming message to listener
         if (event.message!.direction == 'incoming') {
           SIPMessageRequest message =
@@ -223,7 +224,7 @@ class SIPUAHelper extends EventManager {
           CallState(CallStateEnum.PROGRESS, originator: event.originator));
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
-      logger.d('call failed with cause: ' + (event.cause.toString()));
+      logger.d('call failed with cause: ${event.cause}');
       _notifyCallStateListeners(
           event,
           CallState(CallStateEnum.FAILED,
@@ -231,7 +232,7 @@ class SIPUAHelper extends EventManager {
       _calls.remove(event.id);
     });
     handlers.on(EventCallEnded(), (EventCallEnded event) {
-      logger.d('call ended with cause: ' + (event.cause.toString()));
+      logger.d('call ended with cause: ${event.cause}');
       _notifyCallStateListeners(
           event,
           CallState(CallStateEnum.ENDED,
@@ -271,7 +272,7 @@ class SIPUAHelper extends EventManager {
               audio: event.audio, video: event.video));
     });
     handlers.on(EventStream(), (EventStream event) async {
-      // Wating for callscreen ready.
+      // Waiting for callscreen ready.
       Timer(Duration(milliseconds: 100), () {
         _notifyCallStateListeners(
             event,
@@ -294,7 +295,7 @@ class SIPUAHelper extends EventManager {
       'extraHeaders': <dynamic>[],
       'pcConfig': <String, dynamic>{
         'sdpSemantics': 'unified-plan',
-        'iceServers': _uaSettings.iceServers
+        'iceServers': _uaSettings?.iceServers
       },
       'mediaConstraints': <String, dynamic>{
         'audio': true,
@@ -351,7 +352,7 @@ class SIPUAHelper extends EventManager {
   }
 
   void terminateSessions(Map<String, dynamic> options) {
-    _ua!.terminateSessions(options as Map<String, Object>);
+    _ua!.terminateSessions(options);
   }
 
   final Set<SipUaHelperListener> _sipUaHelperListeners =
@@ -366,13 +367,17 @@ class SIPUAHelper extends EventManager {
   }
 
   void _notifyTransportStateListeners(TransportState state) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.transportStateChanged(state);
     }
   }
 
-  void _notifyRegsistrationStateListeners(RegistrationState state) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+  void _notifyRegistrationStateListeners(RegistrationState state) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.registrationStateChanged(state);
     }
   }
@@ -384,19 +389,25 @@ class SIPUAHelper extends EventManager {
       return;
     }
     call.state = state.state;
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.callStateChanged(call, state);
     }
   }
 
   void _notifyNewMessageListeners(SIPMessageRequest msg) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.onNewMessage(msg);
     }
   }
 
   void _notifyNotifyListeners(EventNotify event) {
-    for (SipUaHelperListener listener in _sipUaHelperListeners) {
+    // Copy to prevent concurrent modification exception
+    var _listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in _listeners) {
       listener.onNewNotify(Notify(request: event.request));
     }
   }
@@ -469,7 +480,7 @@ class Call {
   }
 
   void unmute([bool audio = true, bool video = true]) {
-    assert(_session != null, 'ERROR(umute): rtc session is invalid!');
+    assert(_session != null, 'ERROR(unmute): rtc session is invalid!');
     _session.unmute(audio, video);
   }
 

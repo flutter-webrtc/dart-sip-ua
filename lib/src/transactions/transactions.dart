@@ -13,7 +13,7 @@ class TransactionBag {
   }
 
   String _buildKey(Type type, String id) {
-    return type.toString() + ':' + id;
+    return '$type:$id';
   }
 
   void addTransaction(TransactionBase transaction) {
@@ -69,10 +69,10 @@ class TransactionBag {
  *  _true_  retransmission
  *  _false_ request
  */
-bool checkTransaction(TransactionBag _transactions, IncomingRequest request) {
+bool checkTransaction(TransactionBag transactions, IncomingRequest request) {
   switch (request.method) {
     case SipMethod.INVITE:
-      InviteServerTransaction? tr = _transactions.getTransaction(
+      InviteServerTransaction? tr = transactions.getTransaction(
           InviteServerTransaction, request.via_branch!);
       if (tr != null) {
         switch (tr.state) {
@@ -92,7 +92,7 @@ bool checkTransaction(TransactionBag _transactions, IncomingRequest request) {
       }
       break;
     case SipMethod.ACK:
-      InviteServerTransaction? tr = _transactions.getTransaction(
+      InviteServerTransaction? tr = transactions.getTransaction(
           InviteServerTransaction, request.via_branch!);
 
       // RFC 6026 7.1.
@@ -114,7 +114,7 @@ bool checkTransaction(TransactionBag _transactions, IncomingRequest request) {
       }
       break;
     case SipMethod.CANCEL:
-      InviteServerTransaction? tr = _transactions.getTransaction(
+      InviteServerTransaction? tr = transactions.getTransaction(
           InviteServerTransaction, request.via_branch!);
       if (tr != null) {
         request.reply_sl(200);
@@ -129,7 +129,7 @@ bool checkTransaction(TransactionBag _transactions, IncomingRequest request) {
       }
     default:
       // Non-INVITE Server Transaction RFC 3261 17.2.2.
-      NonInviteServerTransaction? tr = _transactions.getTransaction(
+      NonInviteServerTransaction? tr = transactions.getTransaction(
           NonInviteServerTransaction, request.via_branch!);
       if (tr != null) {
         switch (tr.state) {

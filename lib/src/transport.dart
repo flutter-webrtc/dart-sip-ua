@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:sip_ua/src/event_manager/events.dart';
 import 'exceptions.dart' as Exceptions;
@@ -36,43 +37,18 @@ class C {
  * @socket DartSIP::Socket instance
  */
 class Transport {
-  Transport(dynamic sockets,
+  Transport(List<WebSocketInterface> sockets,
       [Map<String, int> recovery_options = C.recovery_options]) {
     logger.d('new()');
 
-    status = C.STATUS_DISCONNECTED;
-
-    // Current socket.
-    socket = null;
-
-    // Socket collection.
-    _socketsMap = <Map<String, dynamic>>[];
-
     _recovery_options = recovery_options;
-    _recover_attempts = 0;
-    _recovery_timer = null;
 
-    _close_requested = false;
-
-    if (sockets == null) {
-      throw Exceptions.TypeError('Invalid argument. null \'sockets\' argument');
+    // We must recieve at least 1 socket
+    if (sockets.length == 0) {
+      throw Exceptions.TypeError('invalid argument: sockets');
     }
 
-    if (sockets is! List) {
-      sockets = <WebSocketInterface>[sockets];
-    }
-
-    for (dynamic socket in sockets) {
-      if (!Socket.isSocket(socket)) {
-        throw Exceptions.TypeError(
-            'Invalid argument. invalid \'DartSIP.Socket\' instance');
-      }
-
-      if (socket.weight != null && socket.weight is! num) {
-        throw Exceptions.TypeError(
-            'Invalid argument. \'weight\' attribute is not a number');
-      }
-
+    for (WebSocketInterface socket in sockets) {
       _socketsMap.add(<String, dynamic>{
         'socket': socket,
         'weight': socket.weight ?? 0,
@@ -84,13 +60,15 @@ class Transport {
     _getSocket();
   }
 
-  int? status;
-  WebSocketInterface? socket;
-  late List<Map<String, dynamic>> _socketsMap;
+  int status = C.STATUS_DISCONNECTED;
+  // Current socket.
+  late WebSocketInterface socket;
+  // Socket collection.
+  final List<Map<String, dynamic>> _socketsMap = <Map<String, dynamic>>[];
   late Map<String, int> _recovery_options;
-  int? _recover_attempts;
+  int _recover_attempts = 0;
   Timer? _recovery_timer;
-  late bool _close_requested;
+  bool _close_requested = false;
 
   late void Function(WebSocketInterface? socket, int? attempts) onconnecting;
   late void Function(WebSocketInterface? socket, ErrorCause cause) ondisconnect;
@@ -101,11 +79,11 @@ class Transport {
    * Instance Methods
    */
 
-  String get via_transport => socket!.via_transport;
+  String get via_transport => socket.via_transport;
 
-  String? get url => socket!.url;
+  String? get url => socket.url;
 
-  String? get sip_uri => socket!.sip_uri;
+  String? get sip_uri => socket.sip_uri;
 
   void connect() {
     logger.d('connect()');
@@ -126,10 +104,10 @@ class Transport {
 
     if (!_close_requested) {
       // Bind socket event callbacks.
-      socket!.onconnect = _onConnect;
-      socket!.ondisconnect = _onDisconnect;
-      socket!.ondata = _onData;
-      socket!.connect();
+      socket.onconnect = _onConnect;
+      socket.ondisconnect = _onDisconnect;
+      socket.ondata = _onData;
+      socket.connect();
     }
     return;
   }
@@ -148,13 +126,13 @@ class Transport {
     }
 
     // Unbind socket event callbacks.
-    socket!.onconnect = () => () {};
-    socket!.ondisconnect = (WebSocketInterface socket, bool error,
+    socket.onconnect = () => () {};
+    socket.ondisconnect = (WebSocketInterface socket, bool error,
             int? closeCode, String? reason) =>
         () {};
-    socket!.ondata = (dynamic data) => () {};
+    socket.ondata = (dynamic data) => () {};
 
-    socket!.disconnect();
+    socket.disconnect();
     ondisconnect(
         socket,
         ErrorCause(
@@ -176,7 +154,7 @@ class Transport {
 
     String message = data.toString();
     //logger.d('sending message:\n\n$message\n');
-    return socket!.send(message);
+    return socket.send(message);
   }
 
   bool isConnected() {
@@ -192,10 +170,9 @@ class Transport {
    */
 
   void _reconnect(bool error) {
-    _recover_attempts = _recover_attempts! + 1;
+    _recover_attempts = _recover_attempts + 1;
 
-    num k =
-        Math.floor((Math.randomDouble() * Math.pow(2, _recover_attempts!)) + 1);
+    num k = ((Math.randomDouble() * pow(2, _recover_attempts)) + 1).floor();
 
     if (k < _recovery_options['min_interval']!) {
       k = _recovery_options['min_interval']!;
@@ -220,6 +197,12 @@ class Transport {
    * get the next available socket with higher weight
    */
   void _getSocket() {
+    // If we dont have at least 1 socket to try and use, thiw will loop endlessly
+
+    if (_socketsMap.length == 0) {
+      throw Exceptions.TypeError('invalid argument: too few sockets');
+    }
+
     List<Map<String, dynamic>> candidates = <Map<String, dynamic>>[];
 
     for (Map<String, dynamic> socket in _socketsMap) {
@@ -244,7 +227,7 @@ class Transport {
       return;
     }
 
-    num idx = Math.floor(Math.randomDouble() * candidates.length);
+    num idx = (Math.randomDouble() * candidates.length).floor();
 
     socket = candidates[idx as int]['socket'];
   }

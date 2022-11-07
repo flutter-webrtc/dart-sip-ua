@@ -10,14 +10,14 @@ import 'transaction_base.dart';
 class AckClientTransaction extends TransactionBase {
   AckClientTransaction(UA ua, Transport transport, OutgoingRequest request,
       EventManager eventHandlers) {
-    id = 'z9hG4bK${Math.floor(Math.random() * 10000000)}';
+    id = 'z9hG4bK${(Math.random() * 10000000).floor()}';
     this.transport = transport;
     this.request = request;
     _eventHandlers = eventHandlers;
 
     String via = 'SIP/2.0/${transport.via_transport}';
 
-    via += ' ${ua.configuration!.via_host};branch=$id';
+    via += ' ${ua.configuration.via_host};branch=$id';
 
     request.setHeader('via', via);
   }

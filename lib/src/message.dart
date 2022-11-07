@@ -12,30 +12,18 @@ import 'uri.dart';
 import 'utils.dart' as Utils;
 
 class Message extends EventManager with Applicant {
-  Message(UA ua) {
-    _ua = ua;
-    _request = null;
-    _closed = false;
+  Message(this._ua);
 
-    _direction = null;
-    _local_identity = null;
-    _remote_identity = null;
-
-    // Whether an incoming message has been replied.
-    _is_replied = false;
-
-    // Custom message empty object for high level use.
-    _data = <String, dynamic>{};
-  }
-
-  UA? _ua;
+  final UA _ua;
   dynamic _request;
-  bool? _closed;
+  bool _closed = false;
   String? _direction;
   NameAddrHeader? _local_identity;
   NameAddrHeader? _remote_identity;
-  bool? _is_replied;
-  Map<String, dynamic>? _data;
+  // Whether an incoming message has been replied.
+  bool _is_replied = false;
+  // Custom message empty object for high level use.
+  final Map<String, dynamic>? _data = <String, dynamic>{};
   String? get direction => _direction;
 
   NameAddrHeader? get local_identity => _local_identity;
@@ -53,7 +41,7 @@ class Message extends EventManager with Applicant {
     }
 
     // Check target validity.
-    URI? normalized = _ua!.normalizeTarget(target);
+    URI? normalized = _ua.normalizeTarget(target);
     if (normalized == null) {
       throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
@@ -85,7 +73,7 @@ class Message extends EventManager with Applicant {
       _receiveResponse(event.response);
     });
 
-    RequestSender request_sender = RequestSender(_ua!, _request, handlers);
+    RequestSender request_sender = RequestSender(_ua, _request, handlers);
 
     _newMessage('local', _request);
 
@@ -98,7 +86,7 @@ class Message extends EventManager with Applicant {
     _newMessage('remote', request);
 
     // Reply with a 200 OK if the user didn't reply.
-    if (_is_replied == null) {
+    if (!_is_replied) {
       _is_replied = true;
       request.reply(200);
     }
@@ -119,7 +107,7 @@ class Message extends EventManager with Applicant {
           '"accept" not supported for outgoing Message');
     }
 
-    if (_is_replied != null) {
+    if (_is_replied) {
       throw AssertionError('incoming Message already replied');
     }
 
@@ -142,7 +130,7 @@ class Message extends EventManager with Applicant {
           '"reject" not supported for outgoing Message');
     }
 
-    if (_is_replied != null) {
+    if (_is_replied) {
       throw AssertionError('incoming Message already replied');
     }
 
@@ -155,7 +143,7 @@ class Message extends EventManager with Applicant {
   }
 
   void _receiveResponse(IncomingResponse? response) {
-    if (_closed != null) {
+    if (_closed) {
       return;
     }
     if (RegExp(r'^1[0-9]{2}$').hasMatch(response!.status_code)) {
@@ -169,7 +157,7 @@ class Message extends EventManager with Applicant {
   }
 
   void _onRequestTimeout() {
-    if (_closed != null) {
+    if (_closed) {
       return;
     }
     _failed(
@@ -177,7 +165,7 @@ class Message extends EventManager with Applicant {
   }
 
   void _onTransportError() {
-    if (_closed != null) {
+    if (_closed) {
       return;
     }
     _failed('system', 500, DartSIP_C.CausesType.CONNECTION_ERROR,
@@ -187,7 +175,7 @@ class Message extends EventManager with Applicant {
   @override
   void close() {
     _closed = true;
-    _ua!.destroyMessage(this);
+    _ua.destroyMessage(this);
   }
 
   /**
@@ -205,7 +193,7 @@ class Message extends EventManager with Applicant {
       _remote_identity = request.to;
     }
 
-    _ua!.newMessage(this, originator, request);
+    _ua.newMessage(this, originator, request);
   }
 
   void _failed(String originator, int? status_code, String cause,
