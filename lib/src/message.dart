@@ -146,9 +146,10 @@ class Message extends EventManager with Applicant {
     if (_closed) {
       return;
     }
-    if (RegExp(r'^1[0-9]{2}$').hasMatch(response!.status_code)) {
+    if (RegExp(r'^1[0-9]{2}$').hasMatch(response!.status_code.toString())) {
       // Ignore provisional responses.
-    } else if (RegExp(r'^2[0-9]{2}$').hasMatch(response.status_code)) {
+    } else if (RegExp(r'^2[0-9]{2}$')
+        .hasMatch(response.status_code.toString())) {
       _succeeded('remote', response);
     } else {
       String cause = Utils.sipErrorCause(response.status_code);
