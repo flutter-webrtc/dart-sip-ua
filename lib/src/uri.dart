@@ -72,7 +72,7 @@ class URI {
     _port = value == 0
         ? value
         : (value != null)
-            ? utils.parseInt(value.toString(), 10)
+            ? int.tryParse(value.toString(), radix: 10)
             : null;
   }
 

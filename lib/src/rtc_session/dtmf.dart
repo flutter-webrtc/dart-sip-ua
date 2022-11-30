@@ -130,7 +130,7 @@ class DTMF extends EventManager {
       if (body.length >= 2) {
         if ((body[1]).contains(RegExp(reg_duration))) {
           _duration =
-              Utils.parseInt(body[1].replaceAll(reg_duration, '\$2'), 10);
+              int.tryParse(body[1].replaceAll(reg_duration, '\$2'), radix: 10);
         }
       }
     }

@@ -34,19 +34,18 @@ class ReferSubscriber extends EventManager {
       replaces = options['replaces'].call_id;
       replaces += ';to-tag=${options['replaces'].to_tag}';
       replaces += ';from-tag=${options['replaces'].from_tag}';
-      replaces = Utils.encodeURIComponent(replaces);
+      replaces = Uri.encodeComponent(replaces);
     }
 
     // Refer-To header field.
-    String referTo = 'Refer-To: <$target' +
-        (replaces.isNotEmpty ? '?Replaces=$replaces' : '') +
-        '>';
+    String referTo =
+        'Refer-To: <$target${replaces.isNotEmpty ? '?Replaces=$replaces' : ''}>';
 
     extraHeaders.add(referTo);
 
     // Referred-By header field.
     String referredBy =
-        'Referred-By: <${_session.ua!.configuration!.uri.scheme}:${_session.ua!.configuration!.uri.user}@${_session.ua!.configuration!.uri.host}>';
+        'Referred-By: <${_session.ua.configuration.uri.scheme}:${_session.ua.configuration.uri.user}@${_session.ua.configuration.uri.host}>';
 
     extraHeaders.add(referredBy);
     extraHeaders.add('Contact: ${_session.contact}');

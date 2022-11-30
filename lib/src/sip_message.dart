@@ -55,8 +55,8 @@ class OutgoingRequest {
     // Route.
     if (params['route_set'] != null) {
       setHeader('route', params['route_set']);
-    } else if (ua!.configuration!.use_preloaded_route) {
-      setHeader('route', '<${ua!.transport!.sip_uri};lr>');
+    } else if (ua.configuration.use_preloaded_route) {
+      setHeader('route', '<${ua.transport!.sip_uri};lr>');
     }
 
     // Via.
@@ -77,7 +77,7 @@ class OutgoingRequest {
     setHeader('to', to.toString());
 
     // From.
-    dynamic from_uri = params['from_uri'] ?? ua!.configuration!.uri;
+    dynamic from_uri = params['from_uri'] ?? ua.configuration.uri;
     Map<String, dynamic> from_params = <String, dynamic>{
       'tag': params['from_tag'] ?? utils.newTag()
     };
@@ -85,8 +85,8 @@ class OutgoingRequest {
 
     if (params['from_display_name'] != null) {
       display_name = params['from_display_name'];
-    } else if (ua!.configuration!.display_name != null) {
-      display_name = ua!.configuration!.display_name;
+    } else if (ua.configuration.display_name != null) {
+      display_name = ua.configuration.display_name;
     } else {
       display_name = null;
     }
@@ -96,22 +96,21 @@ class OutgoingRequest {
 
     // Call-ID.
     String call_id = params['call_id'] ??
-        (ua!.configuration!.jssip_id! + utils.createRandomToken(15));
+        (ua.configuration.jssip_id! + utils.createRandomToken(15));
 
     this.call_id = call_id;
     setHeader('call-id', call_id);
 
     // CSeq.
-    num cseq =
-        params['cseq'] ?? utils.Math.floor(utils.Math.randomDouble() * 10000);
+    num cseq = params['cseq'] ?? (utils.Math.randomDouble() * 10000).floor();
 
     this.cseq = cseq as int?;
     setHeader('cseq', '$cseq ${SipMethodHelper.getName(method)}');
   }
 
-  UA? ua;
+  UA ua;
   Map<String?, dynamic> headers = <String?, dynamic>{};
-  SipMethod? method;
+  SipMethod method;
   URI? ruri;
   String? body;
   List<dynamic> extraHeaders = <dynamic>[];
@@ -252,17 +251,17 @@ class OutgoingRequest {
         supported.add('gruu');
         break;
       case SipMethod.INVITE:
-        if (ua!.configuration!.session_timers) {
+        if (ua.configuration.session_timers) {
           supported.add('timer');
         }
-        if (ua!.contact!.pub_gruu != null || ua!.contact!.temp_gruu != null) {
+        if (ua.contact!.pub_gruu != null || ua.contact!.temp_gruu != null) {
           supported.add('gruu');
         }
         supported.add('ice');
         supported.add('replaces');
         break;
       case SipMethod.UPDATE:
-        if (ua!.configuration!.session_timers) {
+        if (ua.configuration.session_timers) {
           supported.add('timer');
         }
         supported.add('ice');
@@ -273,7 +272,7 @@ class OutgoingRequest {
 
     supported.add('outbound');
 
-    String userAgent = ua!.configuration!.user_agent;
+    String userAgent = ua.configuration.user_agent;
 
     // Allow.
     msg += 'Allow: ${DartSIP_C.ALLOWED_METHODS}\r\n';
@@ -281,7 +280,7 @@ class OutgoingRequest {
     msg += 'User-Agent: $userAgent\r\n';
 
     if (body != null) {
-      logger.d('Outgoing Message: ' + body!);
+      logger.d('Outgoing Message: ${body!}');
       //Here we should calculate the real content length for UTF8
       List<int> encoded = utf8.encode(body!);
       int length = encoded.length;
@@ -313,7 +312,7 @@ class OutgoingRequest {
 }
 
 class InitialOutgoingInviteRequest extends OutgoingRequest {
-  InitialOutgoingInviteRequest(URI? ruri, UA? ua,
+  InitialOutgoingInviteRequest(URI? ruri, UA ua,
       [Map<String, dynamic>? params, List<dynamic>? extraHeaders, String? body])
       : super(SipMethod.INVITE, ruri, ua, params, extraHeaders, body) {
     transaction = null;
@@ -604,7 +603,7 @@ class IncomingRequest extends IncomingMessage {
     // Supported.
     switch (method) {
       case SipMethod.INVITE:
-        if (ua!.configuration!.session_timers) {
+        if (ua!.configuration.session_timers) {
           supported.add('timer');
         }
         if (ua!.contact!.pub_gruu != null || ua!.contact!.temp_gruu != null) {
@@ -614,7 +613,7 @@ class IncomingRequest extends IncomingMessage {
         supported.add('replaces');
         break;
       case SipMethod.UPDATE:
-        if (ua!.configuration!.session_timers) {
+        if (ua!.configuration.session_timers) {
           supported.add('timer');
         }
         if (body != null) {

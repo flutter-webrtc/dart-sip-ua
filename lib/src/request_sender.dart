@@ -37,7 +37,7 @@ class RequestSender {
   DigestAuthentication? _auth;
   late bool _challenged;
   late bool _staled;
-  late TransactionBase clientTransaction;
+  TransactionBase? clientTransaction;
 
   /**
   * Create the client transaction and send the message.
@@ -78,7 +78,7 @@ class RequestSender {
       ];
     }
 
-    clientTransaction.send();
+    clientTransaction?.send();
   }
 
   /**
@@ -95,8 +95,7 @@ class RequestSender {
     * Authenticate once. _challenged_ flag used to avoid infinite authentications.
     */
     if ((status_code == 401 || status_code == 407) &&
-        (_ua.configuration!.password != null ||
-            _ua.configuration!.ha1 != null)) {
+        (_ua.configuration.password != null || _ua.configuration.ha1 != null)) {
       // Get and parse the appropriate WWW-Authenticate or Proxy-Authenticate header.
       if (response.status_code == 401) {
         challenge = response.parseHeader('www-authenticate');
@@ -117,15 +116,15 @@ class RequestSender {
 
       if (!_challenged || (!_staled && challenge.stale == true)) {
         _auth ??= DigestAuthentication(Credentials.fromMap(<String, dynamic>{
-          'username': _ua.configuration!.authorization_user,
-          'password': _ua.configuration!.password,
-          'realm': _ua.configuration!.realm,
-          'ha1': _ua.configuration!.ha1
+          'username': _ua.configuration.authorization_user,
+          'password': _ua.configuration.password,
+          'realm': _ua.configuration.realm,
+          'ha1': _ua.configuration.ha1
         }));
 
         // Verify that the challenge is really valid.
         if (!_auth!.authenticate(
-            _request!.method!,
+            _request!.method,
             Challenge.fromMap(<String, dynamic>{
               'algorithm': challenge.algorithm,
               'realm': challenge.realm,

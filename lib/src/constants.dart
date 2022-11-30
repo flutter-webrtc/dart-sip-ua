@@ -1,4 +1,4 @@
-const String USER_AGENT = 'dart-sip-ua v0.2.2';
+const String USER_AGENT = 'dart-sip-ua v0.5.3';
 
 // SIP scheme.
 const String SIP = 'sip';

@@ -43,7 +43,7 @@ class InviteServerTransaction extends TransactionBase {
     }
 
     stateChanged(TransactionState.TERMINATED);
-    ua!.destroyTransaction(this);
+    ua.destroyTransaction(this);
   }
 
   void timer_I() {
@@ -56,7 +56,7 @@ class InviteServerTransaction extends TransactionBase {
 
     if (state == TransactionState.ACCEPTED) {
       stateChanged(TransactionState.TERMINATED);
-      ua!.destroyTransaction(this);
+      ua.destroyTransaction(this);
     }
   }
 
@@ -77,7 +77,7 @@ class InviteServerTransaction extends TransactionBase {
       clearTimeout(I);
 
       stateChanged(TransactionState.TERMINATED);
-      ua!.destroyTransaction(this);
+      ua.destroyTransaction(this);
     }
   }
 

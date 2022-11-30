@@ -37,8 +37,8 @@ List<void Function()> testFunctions = <void Function()>[
         String uriData =
             'siP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2';
         URI uri = URI.parse(uriData);
-        print('uriData => ' + uriData);
-        print('uri => ' + uri.toString());
+        print('uriData => $uriData');
+        print('uri => $uri');
         expect(uri.scheme, 'sip');
         expect(uri.user, 'aliCE');
         expect(uri.port, 6060);
@@ -52,7 +52,7 @@ List<void Function()> testFunctions = <void Function()>[
         expect(uri.getHeader('x-header-1'), <String>['AaA1', 'AAA2']);
         expect(uri.getHeader('X-HEADER-2'), <String>['BbB']);
         expect(uri.getHeader('nooo'), null);
-        print('uri => ' + uri.toString());
+        print('uri => $uri');
         expect(uri.toString(),
             'sip:aliCE@versatica.com:6060;transport=tcp;foo=ABc;baz?X-Header-1=AaA1&X-Header-1=AAA2&X-Header-2=BbB');
         expect(uri.toAor(show_port: true), 'sip:aliCE@versatica.com:6060');
@@ -76,7 +76,7 @@ List<void Function()> testFunctions = <void Function()>[
         String data =
             'Foo    Foo Bar\tBaz<SIP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2>;QWE=QWE;ASd';
         NameAddrHeader name = NameAddrHeader.parse(data);
-        print('name => ' + name.toString());
+        print('name => $name');
 
         expect(name.display_name, 'Foo Foo Bar Baz');
       }),
@@ -84,7 +84,7 @@ List<void Function()> testFunctions = <void Function()>[
         String data =
             '"Foo"<SIP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2>;QWE=QWE;ASd';
         NameAddrHeader name = NameAddrHeader.parse(data);
-        print('name => ' + name.toString());
+        print('name => $name');
 
         expect(name.display_name, 'Foo');
       }),
@@ -92,7 +92,7 @@ List<void Function()> testFunctions = <void Function()>[
         String data =
             '<SIP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2>;QWE=QWE;ASd';
         NameAddrHeader name = NameAddrHeader.parse(data);
-        print('name => ' + name.toString());
+        print('name => $name');
 
         expect(name.display_name, null);
       }),
@@ -101,7 +101,7 @@ List<void Function()> testFunctions = <void Function()>[
             '  "Iñaki ðđøþ foo \\"bar\\" \\\\\\\\ \\\\ \\\\d \\\\\\\\d \\\\\' \\\\\\"sdf\\\\\\""  '
             '<SIP:%61liCE@versaTICA.Com:6060;TRansport=TCp;Foo=ABc;baz?X-Header-1=AaA1&X-Header-2=BbB&x-header-1=AAA2>;QWE=QWE;ASd';
         NameAddrHeader name = NameAddrHeader.parse(data);
-        print('name => ' + name.toString());
+        print('name => $name');
         expect(name.display_name,
             'Iñaki ðđøþ foo \\"bar\\" \\\\\\\\ \\\\ \\\\d \\\\\\\\d \\\\\' \\\\\\"sdf\\\\\\"');
       }),
@@ -109,7 +109,7 @@ List<void Function()> testFunctions = <void Function()>[
         String data =
             '"Iñaki @ł€" <SIP:+1234@ALIAX.net;Transport=WS>;+sip.Instance="abCD", sip:bob@biloxi.COM;headerParam, <sip:DOMAIN.com:5>';
         dynamic contacts = Grammar.parse(data, 'Contact');
-        print('contacts => ' + contacts.toString());
+        print('contacts => $contacts');
 
         expect(contacts.length, 3);
         dynamic c1 = contacts[0]['parsed'];
@@ -186,7 +186,7 @@ List<void Function()> testFunctions = <void Function()>[
             'SIP /  3.0 \r\n / UDP [1:ab::FF]:6060 ;\r\n  BRanch=1234;Param1=Foo;paRAM2;param3=Bar';
         dynamic via = Grammar.parse(data, 'Via');
 
-        print('via => ' + via.toString());
+        print('via => $via');
 
         expect(via.protocol, 'SIP');
         expect(via.transport, 'UDP');
@@ -205,7 +205,7 @@ List<void Function()> testFunctions = <void Function()>[
         String data = '123456  CHICKEN';
         dynamic cseq = Grammar.parse(data, 'CSeq');
 
-        print('cseq => ' + cseq.toString());
+        print('cseq => $cseq');
 
         expect(cseq.cseq, 123456);
         expect(cseq.method_str, 'CHICKEN');
@@ -215,7 +215,7 @@ List<void Function()> testFunctions = <void Function()>[
             'Digest realm =  "[1:ABCD::abc]", nonce =  "31d0a89ed7781ce6877de5cb032bf114", qop="AUTH,autH-INt", algorithm =  md5  ,  stale =  TRUE , opaque = "00000188"';
         dynamic auth = Grammar.parse(data, 'challenge');
 
-        print('auth => ' + auth.toString());
+        print('auth => $auth');
         expect(auth.realm, '[1:ABCD::abc]');
         expect(auth.nonce, '31d0a89ed7781ce6877de5cb032bf114');
         expect(auth.qop[0], 'auth');
@@ -228,7 +228,7 @@ List<void Function()> testFunctions = <void Function()>[
         String data =
             'Digest algorithm="MD5",qop="auth",realm="some.sip.domain.com",nonce="217384172034871293047102934",otherk1="other_v1"';
         dynamic auth = Grammar.parse(data, 'challenge');
-        print('auth => ' + auth.toString());
+        print('auth => $auth');
         expect(auth.realm, 'some.sip.domain.com');
         expect(auth.nonce, '217384172034871293047102934');
         expect(auth.qop[0], 'auth');
@@ -239,7 +239,7 @@ List<void Function()> testFunctions = <void Function()>[
         String data = 'Presence;Param1=QWe;paraM2';
         dynamic event = Grammar.parse(data, 'Event');
 
-        print('event => ' + event.toString());
+        print('event => $event');
 
         expect(event.event, 'presence');
         expect(event.params['param1'], 'QWe');
@@ -252,7 +252,7 @@ List<void Function()> testFunctions = <void Function()>[
         data = '180;refresher=uac';
         session_expires = Grammar.parse(data, 'Session_Expires');
 
-        print('session_expires => ' + session_expires.toString());
+        print('session_expires => $session_expires');
 
         expect(session_expires.expires, 180);
         expect(session_expires.refresher, 'uac');
@@ -260,7 +260,7 @@ List<void Function()> testFunctions = <void Function()>[
         data = '210  ;   refresher  =  UAS ; foo  =  bar';
         session_expires = Grammar.parse(data, 'Session_Expires');
 
-        print('session_expires => ' + session_expires.toString());
+        print('session_expires => $session_expires');
 
         expect(session_expires.expires, 210);
         expect(session_expires.refresher, 'uas');
@@ -272,7 +272,7 @@ List<void Function()> testFunctions = <void Function()>[
         data = 'SIP  ; cause = 488 ; text = "Wrong SDP"';
         reason = Grammar.parse(data, 'Reason');
 
-        print('reason => ' + reason.toString());
+        print('reason => $reason');
 
         expect(reason.protocol, 'sip');
         expect(reason.cause, 488);
@@ -281,7 +281,7 @@ List<void Function()> testFunctions = <void Function()>[
         data = 'ISUP; cause=500 ; LALA = foo';
         reason = Grammar.parse(data, 'Reason');
 
-        print('reason => ' + reason.toString());
+        print('reason => $reason');
 
         expect(reason.protocol, 'isup');
         expect(reason.cause, 500);
@@ -295,7 +295,7 @@ List<void Function()> testFunctions = <void Function()>[
         data = 'sip:alice@versatica.com';
         parsed = Grammar.parse(data, 'Refer_To');
 
-        print('refer-to => ' + parsed.toString());
+        print('refer-to => $parsed');
 
         expect(parsed.uri.scheme, 'sip');
         expect(parsed.uri.user, 'alice');
@@ -305,7 +305,7 @@ List<void Function()> testFunctions = <void Function()>[
             '<sip:bob@versatica.com?Accept-Contact=sip:bobsdesk.versatica.com>';
         parsed = Grammar.parse(data, 'Refer_To');
 
-        print('refer-to => ' + parsed.toString());
+        print('refer-to => $parsed');
 
         expect(parsed.uri.scheme, 'sip');
         expect(parsed.uri.user, 'bob');
@@ -319,7 +319,7 @@ List<void Function()> testFunctions = <void Function()>[
 
         parsed = Grammar.parse(data, 'Replaces');
 
-        print('replaces => ' + parsed.toString());
+        print('replaces => $parsed');
 
         expect(parsed.call_id, '5t2gpbrbi72v79p1i8mr');
         expect(parsed.to_tag, '03aq91cl9n');
@@ -331,7 +331,7 @@ List<void Function()> testFunctions = <void Function()>[
 
         parsed = Grammar.parse(data, 'absoluteURI');
 
-        print('absoluteURI => ' + parsed.toString());
+        print('absoluteURI => $parsed');
 
         expect(parsed.scheme, 'ws');
         expect(parsed.port, 4040);
@@ -357,7 +357,7 @@ List<void Function()> testFunctions = <void Function()>[
   () => test('Parser: contact with none-domain.', () {
         String data = 'hello <sip:asterisk@8c2d06b92042:5060;transport=ws>';
         dynamic contacts = Grammar.parse(data, 'Contact');
-        print('contacts => ' + contacts.toString());
+        print('contacts => $contacts');
         dynamic c0 = contacts[0]['parsed'];
         expect(c0.uri.host, '8c2d06b92042');
       })

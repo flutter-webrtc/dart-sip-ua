@@ -65,121 +65,89 @@ class RFC4028Timers {
 }
 
 class RTCSession extends EventManager implements Owner {
-  RTCSession(UA? ua) {
+  RTCSession(this._ua) {
     logger.d('new');
-
-    _id = null;
-    _ua = ua;
-    _status = C.STATUS_NULL;
-    _dialog = null;
-    _earlyDialogs = <String?, Dialog>{};
-    _contact = null;
-    _from_tag = null;
-    _to_tag = null;
-
-    // The RTCPeerConnection instance (public attribute).
-    _connection = null;
-
-    // Incoming/Outgoing request being currently processed.
-    _request = null;
-
-    // Cancel state for initial outgoing request.
-    _is_canceled = false;
-    _cancel_reason = '';
-
-    // RTCSession confirmation flag.
-    _is_confirmed = false;
-
-    // Is late SDP being negotiated.
-    _late_sdp = false;
-
-    // Default rtcOfferConstraints and rtcAnswerConstrainsts (passed in connect() or answer()).
-    _rtcOfferConstraints = null;
-    _rtcAnswerConstraints = null;
-
-    // Local MediaStream.
-    _localMediaStream = null;
-    _localMediaStreamLocallyGenerated = false;
-
-    // Flag to indicate PeerConnection ready for actions.
-    _rtcReady = true;
-
-    // SIP Timers.
-    _timers = SIPTimers();
-
-    // Session info.
-    _direction = null;
-    _local_identity = null;
-    _remote_identity = null;
-    _start_time = null;
-    _end_time = null;
-    _tones = null;
-
-    // Mute/Hold state.
-    _audioMuted = false;
-    _videoMuted = false;
-    _localHold = false;
-    _remoteHold = false;
-
     // Session Timers (RFC 4028).
     _sessionTimers = RFC4028Timers(
-        _ua!.configuration!.session_timers,
-        _ua!.configuration!.session_timers_refresh_method,
+        _ua.configuration.session_timers,
+        _ua.configuration.session_timers_refresh_method,
         DartSIP_C.SESSION_EXPIRES,
         null,
         false,
         false,
         null);
 
-    // Map of ReferSubscriber instances indexed by the REFER's CSeq number.
-    _referSubscribers = <int?, ReferSubscriber>{};
-
-    // Custom session empty object for high level use.
-    data = <String, dynamic>{};
-
     receiveRequest = _receiveRequest;
   }
 
+  final UA _ua;
+
   String? _id;
-  UA? _ua;
-  dynamic _request;
-  late bool _late_sdp;
-  Map<String, dynamic>? _rtcOfferConstraints;
-  Map<String, dynamic>? _rtcAnswerConstraints;
-  MediaStream? _localMediaStream;
-  Map<String, dynamic>? data;
-  late Map<String?, Dialog> _earlyDialogs;
+  int _status = C.STATUS_NULL;
+  Dialog? _dialog;
+  final Map<String?, Dialog> _earlyDialogs = <String?, Dialog>{};
+  String? _contact;
   String? _from_tag;
   String? _to_tag;
-  late SIPTimers _timers;
-  late bool _is_confirmed;
-  late bool _is_canceled;
-  late RFC4028Timers _sessionTimers;
-  String? _cancel_reason;
-  int? _status;
-  Dialog? _dialog;
-  RTCPeerConnection? _connection;
-  RTCIceGatheringState? _iceGatheringState;
-  late bool _localMediaStreamLocallyGenerated;
-  late bool _rtcReady;
-  String? _direction;
 
-  late Map<int?, ReferSubscriber> _referSubscribers;
+  // The RTCPeerConnection instance (public attribute).
+  RTCPeerConnection? _connection;
+
+  // Incoming/Outgoing request being currently processed.
+  dynamic _request;
+
+  // Cancel state for initial outgoing request.
+  bool _is_canceled = false;
+  String? _cancel_reason = '';
+
+  // RTCSession confirmation flag.
+  bool _is_confirmed = false;
+
+  // Is late SDP being negotiated.
+  bool _late_sdp = false;
+
+  // Default rtcOfferConstraints and rtcAnswerConstrainsts (passed in connect() or answer()).
+  Map<String, dynamic>? _rtcOfferConstraints;
+  Map<String, dynamic>? _rtcAnswerConstraints;
+
+  // Local MediaStream.
+  MediaStream? _localMediaStream;
+  bool _localMediaStreamLocallyGenerated = false;
+
+  // Flag to indicate PeerConnection ready for actions.
+  bool _rtcReady = true;
+
+  // SIP Timers.
+  final SIPTimers _timers = SIPTimers();
+
+  // Session info.
+  String? _direction;
+  NameAddrHeader? _local_identity;
+  NameAddrHeader? _remote_identity;
   DateTime? _start_time;
   DateTime? _end_time;
+  String? _tones;
 
+  // Mute/Hold state.
   bool? _audioMuted;
   bool? _videoMuted;
   bool? _localHold;
   bool? _remoteHold;
 
-  NameAddrHeader? _local_identity;
-  NameAddrHeader? _remote_identity;
+  late RFC4028Timers _sessionTimers;
 
-  String? _contact;
-  String? _tones;
+  // Map of ReferSubscriber instances indexed by the REFER's CSeq number.
+  final Map<int?, ReferSubscriber> _referSubscribers =
+      <int?, ReferSubscriber>{};
+
+  // Custom session empty object for high level use.
+  Map<String, dynamic>? data = <String, dynamic>{};
+
+  RTCIceGatheringState? _iceGatheringState;
+
   Future<void> dtmfFuture = (Completer<void>()..complete()).future;
 
+  @override
   late Function(IncomingRequest) receiveRequest;
 
   /**
@@ -213,9 +181,11 @@ class RTCSession extends EventManager implements Owner {
 
   DateTime? get end_time => _end_time;
 
-  UA? get ua => _ua;
+  @override
+  UA get ua => _ua;
 
-  int? get status => _status;
+  @override
+  int get status => _status;
 
   bool isInProgress() {
     switch (_status) {
@@ -300,7 +270,7 @@ class RTCSession extends EventManager implements Owner {
     //}
 
     // Check target validity.
-    target = _ua!.normalizeTarget(target);
+    target = _ua.normalizeTarget(target);
     if (target == null) {
       throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
@@ -327,15 +297,15 @@ class RTCSession extends EventManager implements Owner {
     Map<String, dynamic> requestParams = <String, dynamic>{
       'from_tag': _from_tag
     };
-    _ua!.contact!.anonymous = anonymous;
-    _ua!.contact!.outbound = true;
-    _contact = _ua!.contact.toString();
+    _ua.contact!.anonymous = anonymous;
+    _ua.contact!.outbound = true;
+    _contact = _ua.contact.toString();
 
     if (anonymous) {
       requestParams['from_display_name'] = 'Anonymous';
       requestParams['from_uri'] = URI('sip', 'anonymous', 'anonymous.invalid');
       extraHeaders
-          .add('P-Preferred-Identity: ${_ua!.configuration!.uri.toString()}');
+          .add('P-Preferred-Identity: ${_ua.configuration.uri.toString()}');
       extraHeaders.add('Privacy: id');
     }
 
@@ -386,7 +356,7 @@ class RTCSession extends EventManager implements Owner {
     _from_tag = request.from_tag;
     _id = request.call_id! + _from_tag!;
     _request = request;
-    _contact = _ua!.contact.toString();
+    _contact = _ua.contact.toString();
 
     // Get the Expires header value if exists.
     if (request.hasHeader('expires')) {
@@ -417,7 +387,7 @@ class RTCSession extends EventManager implements Owner {
       request.reply(408);
       _failed('local', null, null, null, 408, DartSIP_C.CausesType.NO_ANSWER,
           'No Answer');
-    }, _ua!.configuration!.no_answer_timeout);
+    }, _ua.configuration.no_answer_timeout);
 
     /* Set expiresTimer
      * RFC3261 13.3.1
@@ -849,7 +819,7 @@ class RTCSession extends EventManager implements Owner {
           _dialog = dialog;
 
           // Restore the dialog into 'ua' so the ACK can reach 'this' session.
-          _ua!.newDialog(dialog);
+          _ua.newDialog(dialog);
         } else {
           sendRequest(SipMethod.BYE,
               <String, dynamic>{'extraHeaders': extraHeaders, 'body': body});
@@ -872,7 +842,7 @@ class RTCSession extends EventManager implements Owner {
 
     options = options ?? <String, dynamic>{};
 
-    DtmfMode mode = _ua!.configuration!.dtmf_mode;
+    DtmfMode mode = _ua.configuration.dtmf_mode;
 
     // sensible defaults
     int duration = options['duration'] ?? RTCSession_DTMF.C.DEFAULT_DURATION;
@@ -901,10 +871,7 @@ class RTCSession extends EventManager implements Owner {
     }
 
     // Check duration.
-    if (duration != null && !utils.isDecimal(duration)) {
-      throw Exceptions.TypeError(
-          'Invalid tone duration: ${duration.toString()}');
-    } else if (duration == null) {
+    if (duration == null) {
       duration = RTCSession_DTMF.C.DEFAULT_DURATION;
     } else if (duration < RTCSession_DTMF.C.MIN_DURATION) {
       logger.d(
@@ -915,22 +882,19 @@ class RTCSession extends EventManager implements Owner {
           '"duration" value is greater than the maximum allowed, setting it to ${RTCSession_DTMF.C.MAX_DURATION} milliseconds');
       duration = RTCSession_DTMF.C.MAX_DURATION;
     } else {
-      duration = utils.Math.abs(duration) as int;
+      duration = duration.abs();
     }
     options['duration'] = duration;
 
     // Check interToneGap.
-    if (interToneGap != null && !utils.isDecimal(interToneGap)) {
-      throw Exceptions.TypeError(
-          'Invalid interToneGap: ${interToneGap.toString()}');
-    } else if (interToneGap == null) {
+    if (interToneGap == null) {
       interToneGap = RTCSession_DTMF.C.DEFAULT_INTER_TONE_GAP;
     } else if (interToneGap < RTCSession_DTMF.C.MIN_INTER_TONE_GAP) {
       logger.d(
           '"interToneGap" value is lower than the minimum allowed, setting it to ${RTCSession_DTMF.C.MIN_INTER_TONE_GAP} milliseconds');
       interToneGap = RTCSession_DTMF.C.MIN_INTER_TONE_GAP;
     } else {
-      interToneGap = utils.Math.abs(interToneGap) as int;
+      interToneGap = interToneGap.abs();
     }
 
     options['interToneGap'] = interToneGap;
@@ -1212,7 +1176,7 @@ class RTCSession extends EventManager implements Owner {
     }
 
     // Check target validity.
-    target = _ua!.normalizeTarget(target);
+    target = _ua.normalizeTarget(target);
     if (target == null) {
       throw Exceptions.TypeError('Invalid target: $originalTarget');
     }
@@ -1532,7 +1496,7 @@ class RTCSession extends EventManager implements Owner {
     // Terminate REFER subscribers.
     _referSubscribers.clear();
 
-    _ua!.destroyRTCSession(this);
+    _ua.destroyRTCSession(this);
   }
 
   /**
@@ -1709,7 +1673,7 @@ class RTCSession extends EventManager implements Owner {
            *  Because trickle ICE is not defined in the sip protocol, the delay of
            * initiating a call to answer the call waiting will be unacceptable.
            */
-          setTimeout(() => ready(), ua!.configuration!.ice_gathering_timeout);
+          setTimeout(() => ready(), ua.configuration.ice_gathering_timeout);
         }
       }
     };
@@ -2127,7 +2091,7 @@ class RTCSession extends EventManager implements Owner {
           ReferSubscriber? referSubscriber;
 
           if (request.event!.params!['id'] != null) {
-            id = utils.parseInt(request.event!.params!['id'], 10);
+            id = int.tryParse(request.event!.params!['id'], radix: 10);
             referSubscriber = _referSubscribers[id];
           } else if (_referSubscribers.length == 1) {
             referSubscriber =
@@ -2218,7 +2182,7 @@ class RTCSession extends EventManager implements Owner {
       _receiveInviteResponse(event.response);
     });
 
-    RequestSender request_sender = RequestSender(_ua!, _request, handlers);
+    RequestSender request_sender = RequestSender(_ua, _request, handlers);
 
     // In future versions, unified-plan will be used by default
     String? sdpSemantics = 'unified-plan';
@@ -2923,7 +2887,7 @@ class RTCSession extends EventManager implements Owner {
 
   void _newRTCSession(String originator, dynamic request) {
     logger.d('newRTCSession()');
-    _ua!.newRTCSession(originator: originator, session: this, request: request);
+    _ua.newRTCSession(originator: originator, session: this, request: request);
   }
 
   void _connecting(dynamic request) {
