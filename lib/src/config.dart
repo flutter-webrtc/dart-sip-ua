@@ -240,6 +240,9 @@ class Checks {
       if (dtmf_mode == null) return;
       dst!.dtmf_mode = dtmf_mode;
     },
+    'ice_gathering_timeout': (Settings src, Settings? dst) {
+      dst!.ice_gathering_timeout = src.ice_gathering_timeout;
+    }
   };
 }
 
