@@ -129,10 +129,10 @@ class RTCSession extends EventManager implements Owner {
   String? _tones;
 
   // Mute/Hold state.
-  bool? _audioMuted;
-  bool? _videoMuted;
-  bool? _localHold;
-  bool? _remoteHold;
+  bool _audioMuted = false;
+  bool _videoMuted = false;
+  bool _localHold = false;
+  bool _remoteHold = false;
 
   late RFC4028Timers _sessionTimers;
 
@@ -955,23 +955,22 @@ class RTCSession extends EventManager implements Owner {
    */
   void mute([bool audio = true, bool video = true]) {
     logger.d('mute()');
+    bool changed = false;
 
-    bool audioMuted = false, videoMuted = false;
-
-    if (_audioMuted == false && audio) {
-      audioMuted = true;
+    if (!_audioMuted && audio) {
       _audioMuted = true;
+      changed = true;
       _toggleMuteAudio(true);
     }
 
-    if (_videoMuted == false && video) {
-      videoMuted = true;
+    if (!_videoMuted && video) {
       _videoMuted = true;
+      changed = true;
       _toggleMuteVideo(true);
     }
 
-    if (audioMuted == true || videoMuted == true) {
-      _onmute(audioMuted, videoMuted);
+    if (changed) {
+      _onmute(_audioMuted, _videoMuted);
     }
   }
 
@@ -980,29 +979,28 @@ class RTCSession extends EventManager implements Owner {
    */
   void unmute([bool audio = true, bool video = true]) {
     logger.d('unmute()');
-
-    bool audioUnMuted = false, videoUnMuted = false;
+    bool changed = false;
 
     if (_audioMuted == true && audio) {
-      audioUnMuted = true;
       _audioMuted = false;
 
       if (_localHold == false) {
+        changed = true;
         _toggleMuteAudio(false);
       }
     }
 
     if (_videoMuted == true && video) {
-      videoUnMuted = true;
       _videoMuted = false;
 
       if (_localHold == false) {
+        changed = true;
         _toggleMuteVideo(false);
       }
     }
 
-    if (audioUnMuted == true || videoUnMuted == true) {
-      _onunmute(audioUnMuted, videoUnMuted);
+    if (changed) {
+      _onunmute(!_audioMuted, !_videoMuted);
     }
   }
 
