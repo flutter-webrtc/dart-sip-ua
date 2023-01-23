@@ -122,6 +122,7 @@ class RTCSession extends EventManager implements Owner {
 
   // Session info.
   String? _direction;
+  String? _w2cCallMe;
   NameAddrHeader? _local_identity;
   NameAddrHeader? _remote_identity;
   DateTime? _start_time;
@@ -172,6 +173,8 @@ class RTCSession extends EventManager implements Owner {
   String? get contact => _contact;
 
   String? get direction => _direction;
+
+  String? get w2cCallMe => _w2cCallMe;
 
   NameAddrHeader? get local_identity => _local_identity;
 
@@ -342,6 +345,7 @@ class RTCSession extends EventManager implements Owner {
       [Function(RTCSession)? initCallback]) {
     logger.d('init_incoming()');
 
+    _w2cCallMe = request.getHeader('X-w2c-call-me');
     int? expires;
     String? contentType = request.getHeader('Content-Type');
 
