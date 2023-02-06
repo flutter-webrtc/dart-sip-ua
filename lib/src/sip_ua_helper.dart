@@ -62,7 +62,7 @@ class SIPUAHelper extends EventManager {
     if (_ua != null) {
       _ua!.stop();
     } else {
-      Log.w('ERROR: stop called but not started, call start first.');
+      logger.w('ERROR: stop called but not started, call start first.');
     }
   }
 
@@ -77,7 +77,7 @@ class SIPUAHelper extends EventManager {
       assert(registered, 'ERROR: you must call register first.');
       _ua!.unregister(all: all);
     } else {
-      Log.e('ERROR: unregister called, you must call start first.');
+      logger.e('ERROR: unregister called, you must call start first.');
     }
   }
 
