@@ -7,7 +7,11 @@ import 'websocket_dart_impl.dart'
     if (dart.library.js) 'websocket_web_impl.dart';
 
 class WebSocketInterface implements Socket {
-  WebSocketInterface(String url, [WebSocketSettings? webSocketSettings]) {
+  final int _messageDelay;
+
+  WebSocketInterface(String url,
+      {required int messageDelay, WebSocketSettings? webSocketSettings})
+      : _messageDelay = messageDelay {
     logger.d('new() [url:$url]');
     _url = url;
     dynamic parsed_url = Grammar.parse(url, 'absoluteURI');
@@ -83,7 +87,7 @@ class WebSocketInterface implements Socket {
     }
     logger.d('connecting to WebSocket $_url');
     try {
-      _ws = WebSocketImpl(_url!);
+      _ws = WebSocketImpl(_url!, _messageDelay);
 
       _ws!.onOpen = () {
         _closed = false;

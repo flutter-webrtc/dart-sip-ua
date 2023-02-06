@@ -116,9 +116,10 @@ class SIPUAHelper extends EventManager {
     // Reset settings
     _settings = Settings();
     WebSocketInterface socket = WebSocketInterface(
-        uaSettings.webSocketUrl, uaSettings.webSocketSettings);
+        uaSettings.webSocketUrl, messageDelay: _settings.sip_message_delay, webSocketSettings: uaSettings.webSocketSettings);
     _settings.sockets = <WebSocketInterface>[socket];
     _settings.uri = uaSettings.uri;
+    _settings.sip_message_delay = uaSettings.sip_message_delay;
     _settings.realm = uaSettings.realm;
     _settings.password = uaSettings.password;
     _settings.ha1 = uaSettings.ha1;
@@ -698,7 +699,8 @@ class UaSettings {
 
   /// ICE Gathering Timeout, default 500ms
   int iceGatheringTimeout = 500;
-
+  /// Sip Message Delay (in millisecond) (default 0).
+  int sip_message_delay = 0;
   List<Map<String, String>> iceServers = <Map<String, String>>[
     <String, String>{'url': 'stun:stun.l.google.com:19302'},
 // turn server configuration example.
