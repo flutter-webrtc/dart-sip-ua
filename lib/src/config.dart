@@ -66,7 +66,6 @@ class Settings {
   int sip_message_delay = 0;
 }
 
-
 // Configuration checks.
 class Checks {
   Map<String, Null Function(Settings src, Settings? dst)> mandatory =

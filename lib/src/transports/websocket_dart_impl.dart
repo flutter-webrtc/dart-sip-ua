@@ -22,7 +22,7 @@ class WebSocketImpl {
   void connect(
       {Iterable<String>? protocols,
       required WebSocketSettings webSocketSettings}) async {
-      handleQueue();
+    handleQueue();
     logger.i('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
       if (webSocketSettings.allowBadCertificate) {
@@ -43,6 +43,7 @@ class WebSocketImpl {
       onClose?.call(500, e.toString());
     }
   }
+
   final StreamController<dynamic> queue = StreamController<dynamic>.broadcast();
   void handleQueue() async {
     queue.stream.asyncMap((dynamic event) async {
