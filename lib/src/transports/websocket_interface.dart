@@ -110,7 +110,7 @@ class WebSocketInterface implements Socket {
           protocols: <String>[_websocket_protocol],
           webSocketSettings: _webSocketSettings);
     } catch (e, s) {
-      Log.e(e.toString(), null, s);
+      logger.e(e.toString(), null, s);
       _connected = false;
       logger.e('WebSocket $_url error: $e');
     }
