@@ -7,7 +7,7 @@ import 'stack_trace_nj.dart';
 Logger logger = Log();
 
 class Log extends Logger {
-  Log(): super(printer: MyLogPrinter('.')) {
+  Log() : super(printer: MyLogPrinter('.')) {
     StackTraceNJ frames = StackTraceNJ();
 
     if (frames.frames != null) {
