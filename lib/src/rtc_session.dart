@@ -2354,7 +2354,7 @@ class RTCSession extends EventManager implements Owner {
           RTCSessionDescription(response.body, 'answer');
 
       try {
-        _connection!.setRemoteDescription(answer);
+        await _connection!.setRemoteDescription(answer);
       } catch (error) {
         logger.e(
             'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
