@@ -2701,14 +2701,14 @@ class RTCSession extends EventManager implements Owner {
    * Correctly set the SDP direction attributes if the call is on local hold
    */
   String? _mangleOffer(String? sdpInput) {
-    if (!_localHold! && !_remoteHold!) {
+    if (!_localHold && !_remoteHold) {
       return sdpInput;
     }
 
     Map<String, dynamic> sdp = sdp_transform.parse(sdpInput!);
 
     // Local hold.
-    if (_localHold! && !_remoteHold!) {
+    if (_localHold && !_remoteHold) {
       logger.d('mangleOffer() | me on hold, mangling offer');
       for (Map<String, dynamic> m in sdp['media']) {
         if (holdMediaTypes.indexOf(m['type']) == -1) {
@@ -2724,7 +2724,7 @@ class RTCSession extends EventManager implements Owner {
       }
     }
     // Local and remote hold.
-    else if (_localHold! && _remoteHold!) {
+    else if (_localHold && _remoteHold) {
       logger.d('mangleOffer() | both on hold, mangling offer');
       for (Map<String, dynamic> m in sdp['media']) {
         if (holdMediaTypes.indexOf(m['type']) == -1) {
@@ -2734,7 +2734,7 @@ class RTCSession extends EventManager implements Owner {
       }
     }
     // Remote hold.
-    else if (_remoteHold!) {
+    else if (_remoteHold) {
       logger.d('mangleOffer() | remote on hold, mangling offer');
       for (Map<String, dynamic> m in sdp['media']) {
         if (holdMediaTypes.indexOf(m['type']) == -1) {
@@ -2756,16 +2756,16 @@ class RTCSession extends EventManager implements Owner {
   void _setLocalMediaStatus() {
     bool enableAudio = true, enableVideo = true;
 
-    if (_localHold! || _remoteHold!) {
+    if (_localHold || _remoteHold) {
       enableAudio = false;
       enableVideo = false;
     }
 
-    if (_audioMuted!) {
+    if (_audioMuted) {
       enableAudio = false;
     }
 
-    if (_videoMuted!) {
+    if (_videoMuted) {
       enableVideo = false;
     }
 

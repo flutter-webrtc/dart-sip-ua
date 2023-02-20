@@ -7,8 +7,6 @@ import 'websocket_dart_impl.dart'
     if (dart.library.js) 'websocket_web_impl.dart';
 
 class WebSocketInterface implements Socket {
-  final int _messageDelay;
-
   WebSocketInterface(String url,
       {required int messageDelay, WebSocketSettings? webSocketSettings})
       : _messageDelay = messageDelay {
@@ -34,6 +32,7 @@ class WebSocketInterface implements Socket {
     }
     _webSocketSettings = webSocketSettings ?? WebSocketSettings();
   }
+  final int _messageDelay;
 
   String? _url;
   String? _sip_uri;

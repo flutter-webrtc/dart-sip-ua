@@ -17,7 +17,7 @@ void main() {
   for (Function func in DigestAuthentication.testFunctions) {
     func();
   }
-  for (Function func in Websocket.testFunctions) {
-    //func();
-  }
+  //for (Function _func in Websocket.testFunctions) {
+  //func();
+  //}
 }

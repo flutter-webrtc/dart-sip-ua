@@ -371,7 +371,7 @@ class SIPUAHelper extends EventManager {
 
   void _notifyTransportStateListeners(TransportState state) {
     // Copy to prevent concurrent modification exception
-    var _listeners = _sipUaHelperListeners.toList();
+    List<SipUaHelperListener> _listeners = _sipUaHelperListeners.toList();
     for (SipUaHelperListener listener in _listeners) {
       listener.transportStateChanged(state);
     }
@@ -379,7 +379,7 @@ class SIPUAHelper extends EventManager {
 
   void _notifyRegistrationStateListeners(RegistrationState state) {
     // Copy to prevent concurrent modification exception
-    var _listeners = _sipUaHelperListeners.toList();
+    List<SipUaHelperListener> _listeners = _sipUaHelperListeners.toList();
     for (SipUaHelperListener listener in _listeners) {
       listener.registrationStateChanged(state);
     }
@@ -393,7 +393,7 @@ class SIPUAHelper extends EventManager {
     }
     call.state = state.state;
     // Copy to prevent concurrent modification exception
-    var _listeners = _sipUaHelperListeners.toList();
+    List<SipUaHelperListener> _listeners = _sipUaHelperListeners.toList();
     for (SipUaHelperListener listener in _listeners) {
       listener.callStateChanged(call, state);
     }
@@ -401,7 +401,7 @@ class SIPUAHelper extends EventManager {
 
   void _notifyNewMessageListeners(SIPMessageRequest msg) {
     // Copy to prevent concurrent modification exception
-    var _listeners = _sipUaHelperListeners.toList();
+    List<SipUaHelperListener> _listeners = _sipUaHelperListeners.toList();
     for (SipUaHelperListener listener in _listeners) {
       listener.onNewMessage(msg);
     }
@@ -409,7 +409,7 @@ class SIPUAHelper extends EventManager {
 
   void _notifyNotifyListeners(EventNotify event) {
     // Copy to prevent concurrent modification exception
-    var _listeners = _sipUaHelperListeners.toList();
+    List<SipUaHelperListener> _listeners = _sipUaHelperListeners.toList();
     for (SipUaHelperListener listener in _listeners) {
       listener.onNewNotify(Notify(request: event.request));
     }
