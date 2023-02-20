@@ -12,7 +12,7 @@ void main() {
     Completer<dynamic> completer = Completer<dynamic>();
     config.Settings configuration = config.Settings();
     configuration.sockets = <WebSocketInterface>[
-      WebSocketInterface('ws://127.0.0.1:5070/sip')
+      WebSocketInterface('ws://127.0.0.1:5070/sip', messageDelay: 0)
     ];
     configuration.authorization_user = '100';
     configuration.password = '100';

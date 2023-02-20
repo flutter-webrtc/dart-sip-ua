@@ -29,7 +29,7 @@ List<void Function()> testFunctions = <void Function()>[
         });
 
         WebSocketInterface client =
-            WebSocketInterface('ws://127.0.0.1:4040/sip');
+            WebSocketInterface('ws://127.0.0.1:4040/sip', messageDelay: 0);
 
         expect(client.url, 'ws://127.0.0.1:4040/sip');
         expect(client.via_transport, 'WS');
@@ -77,7 +77,7 @@ List<void Function()> testFunctions = <void Function()>[
           }
         });
         WebSocketInterface socket =
-            WebSocketInterface('ws://127.0.0.1:4041/sip');
+            WebSocketInterface('ws://127.0.0.1:4041/sip', messageDelay: 0);
         Transport trasnport = Transport(<WebSocketInterface>[socket]);
 
         trasnport.onconnecting = (WebSocketInterface? socket, int? attempt) {
