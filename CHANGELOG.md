@@ -1,6 +1,17 @@
 # Changelog
 
 --------------------------------------------
+[0.5.4] - 2023.02.20
+
+* Bump version for flutter-webrtc
+* Fixed error handling in _receiveInviteResponse #344
+* Updated logger #342
+* Websocket message queue using streams and Delay between messages #335
+* Fixed bugs in message.dart & rtc_session.dart #332
+* Allow setting ice_gathering_timeout option #330
+* Add realm option to SIPUAHelper settings #331
+* Code quality #326
+
 [0.5.3] - 2022.10.19
 
 * Bump version for flutter-webrtc
