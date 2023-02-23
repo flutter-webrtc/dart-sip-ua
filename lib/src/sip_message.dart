@@ -309,7 +309,7 @@ class InitialOutgoingInviteRequest extends OutgoingRequest {
     transaction = null;
   }
 
-  void cancel(String reason) {
+  void cancel(String? reason) {
     transaction.cancel(reason);
   }
 
