@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
+import 'package:sip_ua/src/map_helper.dart';
 
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -84,9 +85,13 @@ class SIPUAHelper extends EventManager {
   Future<bool> call(String target,
       {bool voiceonly = false,
       MediaStream? mediaStream,
-      List<String>? headers}) async {
+      List<String>? headers,
+      Map<String, dynamic>? customOptions}) async {
     if (_ua != null && _ua!.isConnected()) {
       Map<String, dynamic> options = buildCallOptions(voiceonly);
+      if (customOptions != null) {
+        options = MapHelper.merge(options, customOptions);
+      }
       if (mediaStream != null) {
         options['mediaStream'] = mediaStream;
       }

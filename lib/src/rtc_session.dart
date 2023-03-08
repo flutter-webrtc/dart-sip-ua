@@ -1611,11 +1611,19 @@ class RTCSession extends EventManager implements Owner {
     Completer<RTCSessionDescription> completer =
         Completer<RTCSessionDescription>();
 
+
     constraints = constraints ??
         <String, dynamic>{
           'mandatory': <String, dynamic>{},
           'optional': <dynamic>[],
         };
+        
+    List<Future<RTCSessionDescription> Function(RTCSessionDescription)>
+        _modifiers = constraints['offerModifiers'] ??
+            <Future<RTCSessionDescription> Function(RTCSessionDescription)>[];
+
+    constraints['offerModifier'] = null;
+
 
     if (type != 'offer' && type != 'answer') {
       completer.completeError(Exceptions.TypeError(
@@ -1646,6 +1654,11 @@ class RTCSession extends EventManager implements Owner {
 
     // Add 'pc.onicencandidate' event handler to resolve on last candidate.
     bool finished = false;
+
+    for (Future<RTCSessionDescription> Function(RTCSessionDescription) modifier
+        in _modifiers) {
+      desc = await modifier(desc);
+    }
 
     Future<void> ready() async {
       if (!finished && _status != C.STATUS_TERMINATED) {
