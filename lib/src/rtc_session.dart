@@ -1550,8 +1550,11 @@ class RTCSession extends EventManager implements Owner {
   }
 
   void _iceRestart() async {
-    Map<String, dynamic> offerConstraints =
-        _rtcOfferConstraints ?? <String, dynamic>{};
+    Map<String, dynamic> offerConstraints = _rtcOfferConstraints ??
+        <String, dynamic>{
+          'mandatory': <String, dynamic>{},
+          'optional': <dynamic>[],
+        };
     offerConstraints['mandatory']['IceRestart'] = true;
     renegotiate(offerConstraints);
   }
@@ -1608,11 +1611,17 @@ class RTCSession extends EventManager implements Owner {
     Completer<RTCSessionDescription> completer =
         Completer<RTCSessionDescription>();
 
+    constraints = constraints ??
+        <String, dynamic>{
+          'mandatory': <String, dynamic>{},
+          'optional': <dynamic>[],
+        };
+
     List<Future<RTCSessionDescription> Function(RTCSessionDescription)>
-        _modifiers = constraints?['offerModifiers'] ??
+        _modifiers = constraints['offerModifiers'] ??
             <Future<RTCSessionDescription> Function(RTCSessionDescription)>[];
 
-    constraints?['offerModifiers'] = null;
+    constraints['offerModifiers'] = null;
 
     if (type != 'offer' && type != 'answer') {
       completer.completeError(Exceptions.TypeError(
@@ -1623,7 +1632,7 @@ class RTCSession extends EventManager implements Owner {
     late RTCSessionDescription desc;
     if (type == 'offer') {
       try {
-        desc = await _connection!.createOffer(constraints!);
+        desc = await _connection!.createOffer(constraints);
       } catch (error) {
         logger.e(
             'emit "peerconnection:createofferfailed" [error:${error.toString()}]');
@@ -1632,7 +1641,7 @@ class RTCSession extends EventManager implements Owner {
       }
     } else {
       try {
-        desc = await _connection!.createAnswer(constraints!);
+        desc = await _connection!.createAnswer(constraints);
       } catch (error) {
         logger.e(
             'emit "peerconnection:createanswerfailed" [error:${error.toString()}]');
