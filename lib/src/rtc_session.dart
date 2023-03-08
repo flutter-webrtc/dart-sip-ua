@@ -1609,7 +1609,7 @@ class RTCSession extends EventManager implements Owner {
         Completer<RTCSessionDescription>();
 
     List<Future<RTCSessionDescription> Function(RTCSessionDescription)>
-        _modifiers = constraints?['offerModifiers'] ??
+        modifiers = constraints?['offerModifiers'] ??
             <Future<RTCSessionDescription> Function(RTCSessionDescription)>[];
 
     constraints?['offerModifiers'] = null;
@@ -1645,7 +1645,7 @@ class RTCSession extends EventManager implements Owner {
     bool finished = false;
 
     for (Future<RTCSessionDescription> Function(RTCSessionDescription) modifier
-        in _modifiers) {
+        in modifiers) {
       desc = await modifier(desc);
     }
 
