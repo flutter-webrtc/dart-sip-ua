@@ -1611,6 +1611,12 @@ class RTCSession extends EventManager implements Owner {
     Completer<RTCSessionDescription> completer =
         Completer<RTCSessionDescription>();
 
+    constraints = constraints ??
+        <String, dynamic>{
+          'mandatory': <String, dynamic>{},
+          'optional': <String, dynamic>{},
+        };
+
     if (type != 'offer' && type != 'answer') {
       completer.completeError(Exceptions.TypeError(
           'createLocalDescription() | invalid type "$type"'));
