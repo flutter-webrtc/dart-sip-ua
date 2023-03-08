@@ -23,7 +23,7 @@ class Message extends EventManager with Applicant {
   // Whether an incoming message has been replied.
   bool _is_replied = false;
   // Custom message empty object for high level use.
-  final Map<String, dynamic>? _data = <String, dynamic>{};
+  final Map<String, dynamic> _data = <String, dynamic>{};
   String? get direction => _direction;
 
   NameAddrHeader? get local_identity => _local_identity;

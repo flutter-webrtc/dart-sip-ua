@@ -1654,7 +1654,7 @@ class RTCSession extends EventManager implements Owner {
     bool finished = false;
 
     for (Future<RTCSessionDescription> Function(RTCSessionDescription) modifier
-        in _modifiers) {
+        in modifiers) {
       desc = await modifier(desc);
     }
 

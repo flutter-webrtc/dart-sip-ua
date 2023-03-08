@@ -1,6 +1,14 @@
 # Changelog
 
 --------------------------------------------
+[0.5.5] - 2023.03.08
+
+* Bump version for intl & lints
+* Update websocket_web_impl.dart (#345)
+* fix(hangup): set cancel reason nullable (#346)
+* Add sdp transformers (#350)
+* Hold fix (#351)
+
 [0.5.4] - 2023.02.20
 
 * Bump version for flutter-webrtc
