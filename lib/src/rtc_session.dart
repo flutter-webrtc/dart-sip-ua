@@ -1550,8 +1550,11 @@ class RTCSession extends EventManager implements Owner {
   }
 
   void _iceRestart() async {
-    Map<String, dynamic> offerConstraints =
-        _rtcOfferConstraints ?? <String, dynamic>{};
+    Map<String, dynamic> offerConstraints = _rtcOfferConstraints ??
+        <String, dynamic>{
+          'mandatory': <String, dynamic>{},
+          'optional': <String, dynamic>{},
+        };
     offerConstraints['mandatory']['IceRestart'] = true;
     renegotiate(offerConstraints);
   }
