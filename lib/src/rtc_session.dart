@@ -1553,7 +1553,7 @@ class RTCSession extends EventManager implements Owner {
     Map<String, dynamic> offerConstraints = _rtcOfferConstraints ??
         <String, dynamic>{
           'mandatory': <String, dynamic>{},
-          'optional': <String, dynamic>{},
+          'optional': <dynamic>[],
         };
     offerConstraints['mandatory']['IceRestart'] = true;
     renegotiate(offerConstraints);
@@ -1614,7 +1614,7 @@ class RTCSession extends EventManager implements Owner {
     constraints = constraints ??
         <String, dynamic>{
           'mandatory': <String, dynamic>{},
-          'optional': <String, dynamic>{},
+          'optional': <dynamic>[],
         };
 
     if (type != 'offer' && type != 'answer') {
@@ -1626,7 +1626,7 @@ class RTCSession extends EventManager implements Owner {
     late RTCSessionDescription desc;
     if (type == 'offer') {
       try {
-        desc = await _connection!.createOffer(constraints!);
+        desc = await _connection!.createOffer(constraints);
       } catch (error) {
         logger.e(
             'emit "peerconnection:createofferfailed" [error:${error.toString()}]');
@@ -1635,7 +1635,7 @@ class RTCSession extends EventManager implements Owner {
       }
     } else {
       try {
-        desc = await _connection!.createAnswer(constraints!);
+        desc = await _connection!.createAnswer(constraints);
       } catch (error) {
         logger.e(
             'emit "peerconnection:createanswerfailed" [error:${error.toString()}]');
