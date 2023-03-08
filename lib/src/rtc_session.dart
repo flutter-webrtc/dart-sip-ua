@@ -1618,7 +1618,7 @@ class RTCSession extends EventManager implements Owner {
         };
 
     List<Future<RTCSessionDescription> Function(RTCSessionDescription)>
-        _modifiers = constraints['offerModifiers'] ??
+        modifiers = constraints['offerModifiers'] ??
             <Future<RTCSessionDescription> Function(RTCSessionDescription)>[];
 
     constraints['offerModifiers'] = null;
