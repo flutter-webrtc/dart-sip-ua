@@ -1612,7 +1612,7 @@ class RTCSession extends EventManager implements Owner {
         _modifiers = constraints?['offerModifiers'] ??
             <Future<RTCSessionDescription> Function(RTCSessionDescription)>[];
 
-    constraints?['offerModifier'] = null;
+    constraints?['offerModifiers'] = null;
 
     if (type != 'offer' && type != 'answer') {
       completer.completeError(Exceptions.TypeError(
