@@ -4,6 +4,7 @@
 [0.5.6] - 2023.04.17
 
 * Reverted version constraint on intl
+* Bumped version of flutter_webrtc
 
 [0.5.5] - 2023.03.08
 
