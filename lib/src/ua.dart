@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:sip_ua/src/event_manager/data_events.dart';
+
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -987,6 +989,7 @@ class UA extends EventManager {
           break;
       }
     }
+    emit(EventReceivedData(data: messageData));
   }
 }
 
