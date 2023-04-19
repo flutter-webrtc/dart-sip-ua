@@ -509,7 +509,11 @@ class Call {
 
   void sendMessage(String body, [Map<String, dynamic>? options]) {
     assert(_session != null, 'ERROR(sendInfo): rtc session is invalid');
-    _session.sendRequest(DartSIP_C.SipMethod.MESSAGE, options);
+
+    options?.putIfAbsent('body', () => body);
+
+    _session.sendRequest(DartSIP_C.SipMethod.MESSAGE,
+        options ?? <String, dynamic>{'body': body});
   }
 
   String? get remote_display_name {
