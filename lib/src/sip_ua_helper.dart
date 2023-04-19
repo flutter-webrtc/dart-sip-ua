@@ -508,7 +508,7 @@ class Call {
   }
 
   void sendMessage(String body, [Map<String, dynamic>? options]) {
-    assert(_session != null, 'ERROR(sendInfo): rtc session is invalid');
+    assert(_session != null, 'ERROR(sendMessage): rtc session is invalid');
 
     options?.putIfAbsent('body', () => body);
 
