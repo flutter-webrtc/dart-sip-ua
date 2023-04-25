@@ -345,8 +345,8 @@ class SIPUAHelper extends EventManager {
   }
 
   Message sendMessage(String target, String body,
-      [Map<String, dynamic>? options]) {
-    return _ua!.sendMessage(target, body, options);
+      [Map<String, dynamic>? options, Map<String, dynamic>? params]) {
+    return _ua!.sendMessage(target, body, options, params);
   }
 
   void subscribe(String target, String event, String contentType) {
