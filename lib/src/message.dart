@@ -32,7 +32,8 @@ class Message extends EventManager with Applicant {
 
   Map<String, dynamic>? get data => _data;
 
-  void send(String target, String body, [Map<String, dynamic>? options]) {
+  void send(String target, String body,
+      [Map<String, dynamic>? options, Map<String, dynamic>? params]) {
     String originalTarget = target;
     options = options ?? <String, dynamic>{};
 
@@ -56,8 +57,8 @@ class Message extends EventManager with Applicant {
 
     extraHeaders.add('Content-Type: $contentType');
 
-    _request =
-        OutgoingRequest(SipMethod.MESSAGE, normalized, _ua, null, extraHeaders);
+    _request = OutgoingRequest(
+        SipMethod.MESSAGE, normalized, _ua, params, extraHeaders);
     if (body != null) {
       _request.body = body;
     }

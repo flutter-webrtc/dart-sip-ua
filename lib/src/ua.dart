@@ -195,7 +195,7 @@ class UA extends EventManager {
     _registrator.unregister(all);
   }
 
-  /** 
+  /**
    * Create subscriber instance
    */
   Subscriber subscribe(
@@ -261,11 +261,11 @@ class UA extends EventManager {
    * -throws {TypeError}
    *
    */
-  Message sendMessage(
-      String target, String body, Map<String, dynamic>? options) {
+  Message sendMessage(String target, String body, Map<String, dynamic>? options,
+      Map<String, dynamic>? params) {
     logger.d('sendMessage()');
     Message message = Message(this);
-    message.send(target, body, options);
+    message.send(target, body, options, params);
     return message;
   }
 
@@ -897,9 +897,9 @@ class UA extends EventManager {
     return;
   }
 
-/**
- * Transport event handlers
- */
+  /**
+   * Transport event handlers
+   */
 
 // Transport connecting event.
   void onTransportConnecting(WebSocketInterface? socket, int? attempts) {
