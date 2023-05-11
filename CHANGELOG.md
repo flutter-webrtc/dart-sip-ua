@@ -1,6 +1,11 @@
 # Changelog
 
 --------------------------------------------
+[0.5.8] - 2023.05.11
+* Allow await on helper start call (#365)
+* Adding params support for sendMessage (#366)
+* Set intl version to the one used by flutter
+
 [0.5.7] - 2023.05.11
 * Add sendMessage to Call
 * Bump version of intl
