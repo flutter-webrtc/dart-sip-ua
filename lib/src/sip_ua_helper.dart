@@ -110,7 +110,7 @@ class SIPUAHelper extends EventManager {
     return _calls[id];
   }
 
-  void start(UaSettings uaSettings) async {
+  Future<void> start(UaSettings uaSettings) async {
     if (_ua != null) {
       logger.w('UA instance already exist!, stopping UA and creating a one...');
       _ua!.stop();
