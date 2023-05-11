@@ -123,12 +123,12 @@ class DTMF extends EventManager {
       List<String> body = request.body!.split('\n');
 
       if (body.length >= 1) {
-        if ((body[0]).contains(RegExp(reg_tone))) {
+        if (body[0].contains(RegExp(reg_tone))) {
           _tone = body[0].replaceAll(reg_tone, '\$2');
         }
       }
       if (body.length >= 2) {
-        if ((body[1]).contains(RegExp(reg_duration))) {
+        if (body[1].contains(RegExp(reg_duration))) {
           _duration =
               int.tryParse(body[1].replaceAll(reg_duration, '\$2'), radix: 10);
         }

@@ -1,6 +1,10 @@
 # Changelog
 
 --------------------------------------------
+[0.5.7] - 2023.05.11
+* Add sendMessage to Call
+* Bump version of intl
+
 [0.5.6] - 2023.04.17
 
 * Reverted version constraint on intl
