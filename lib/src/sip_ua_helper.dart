@@ -228,8 +228,10 @@ class SIPUAHelper extends EventManager {
     });
     handlers.on(EventCallProgress(), (EventCallProgress event) {
       logger.d('call is in progress');
-      _notifyCallStateListeners(event,
-          CallState(CallStateEnum.PROGRESS, originator: event.originator));
+      _notifyCallStateListeners(
+          event,
+          CallState(CallStateEnum.PROGRESS,
+              originator: event.originator, cause: event.cause));
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
       logger.d('call failed with cause: ${event.cause}');
