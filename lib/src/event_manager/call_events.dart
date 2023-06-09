@@ -31,10 +31,12 @@ class EventCallEnded extends CallEvent {
 }
 
 class EventCallProgress extends CallEvent {
-  EventCallProgress({RTCSession? session, this.originator, this.response})
+  EventCallProgress(
+      {RTCSession? session, this.originator, this.response, this.cause})
       : super(session);
   String? originator;
   dynamic response;
+  ErrorCause? cause;
 }
 
 class EventCallConfirmed extends CallEvent {

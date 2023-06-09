@@ -2361,7 +2361,7 @@ class RTCSession extends EventManager implements Owner {
       }
 
       _status = C.STATUS_1XX_RECEIVED;
-      _progress('remote', response);
+      _progress('remote', response, int.parse(status_code));
 
       if (response.body == null || response.body!.isEmpty) {
         return;
@@ -2916,11 +2916,17 @@ class RTCSession extends EventManager implements Owner {
     emit(EventCallConnecting(session: this, request: request));
   }
 
-  void _progress(String originator, dynamic response) {
+  void _progress(String originator, dynamic response, [int? status_code]) {
     logger.d('session progress');
     logger.d('emit "progress"');
+
+    ErrorCause errorCause = ErrorCause(status_code: status_code);
+
     emit(EventCallProgress(
-        session: this, originator: originator, response: response));
+        session: this,
+        originator: originator,
+        response: response,
+        cause: errorCause));
   }
 
   void _accepted(String originator, [dynamic message]) {
