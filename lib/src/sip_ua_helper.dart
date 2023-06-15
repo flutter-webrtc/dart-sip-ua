@@ -139,7 +139,8 @@ class SIPUAHelper extends EventManager {
     _settings.dtmf_mode = uaSettings.dtmfMode;
     _settings.session_timers = uaSettings.sessionTimers;
     _settings.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
-    _settings.session_timers_refresh_method = uaSettings.sessionTimersRefreshMethod;
+    _settings.session_timers_refresh_method =
+        uaSettings.sessionTimersRefreshMethod;
 
     try {
       _ua = UA(_settings);
