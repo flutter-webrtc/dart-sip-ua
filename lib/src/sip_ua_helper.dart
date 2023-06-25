@@ -139,6 +139,8 @@ class SIPUAHelper extends EventManager {
     _settings.dtmf_mode = uaSettings.dtmfMode;
     _settings.session_timers = uaSettings.sessionTimers;
     _settings.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
+    _settings.session_timers_refresh_method =
+        uaSettings.sessionTimersRefreshMethod;
 
     try {
       _ua = UA(_settings);
@@ -728,4 +730,9 @@ class UaSettings {
 //      'credential': 'change_to_real_secret'
 //    },
   ];
+
+  /// Controls which kind of messages are to be sent to keep a SIP session
+  /// alive.
+  /// Defaults to "UPDATE"
+  DartSIP_C.SipMethod sessionTimersRefreshMethod = DartSIP_C.SipMethod.UPDATE;
 }
