@@ -88,7 +88,9 @@ class RTCSession extends EventManager implements Owner {
   final Map<String?, Dialog> _earlyDialogs = <String?, Dialog>{};
   String? _contact;
   String? _from_tag;
+  String? get from_tag => _from_tag;
   String? _to_tag;
+  String? get to_tag => _to_tag;
 
   // The RTCPeerConnection instance (public attribute).
   RTCPeerConnection? _connection;
