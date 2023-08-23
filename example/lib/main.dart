@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sip_ua/sip_ua.dart';
 
-
 import 'src/about.dart';
 import 'src/callscreen.dart';
 import 'src/dialpad.dart';
@@ -57,6 +56,18 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',
+        inputDecorationTheme: InputDecorationTheme(
+          hintStyle: TextStyle(color: Colors.grey),
+          contentPadding: EdgeInsets.all(10.0),
+          border: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.black12)),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.all(16),
+            textStyle: TextStyle(fontSize: 18),
+          ),
+        ),
       ),
       initialRoute: '/',
       onGenerateRoute: _onGenerateRoute,
