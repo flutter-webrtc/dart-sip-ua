@@ -362,7 +362,15 @@ class RTCSession extends EventManager implements Owner {
 
     // Get the Expires header value if exists.
     if (request.hasHeader('expires')) {
-      expires = request.getHeader('expires') * 1000;
+      try {
+        expires = (request.getHeader('expires') is num
+                ? request.getHeader('expires')
+                : num.tryParse(request.getHeader('expires'))!) *
+            1000;
+      } catch (e) {
+        logger.e(
+            'Invalid Expires header value: ${request.getHeader('expires')}, error $e');
+      }
     }
 
     /* Set the to_tag before
