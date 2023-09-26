@@ -46,15 +46,12 @@ class DTMF extends EventManager {
     _direction = 'outgoing';
 
     // Check RTCSession Status.
-    if (_session.status != rtc.C.STATUS_CONFIRMED &&
-        _session.status != rtc.C.STATUS_WAITING_FOR_ACK) {
+    if (_session.status != rtc.C.STATUS_CONFIRMED && _session.status != rtc.C.STATUS_WAITING_FOR_ACK) {
       throw Exceptions.InvalidStateError(_session.status);
     }
 
     print(options);
-    List<dynamic> extraHeaders = options['extraHeaders'] != null
-        ? Utils.cloneArray(options['extraHeaders'])
-        : <dynamic>[];
+    List<dynamic> extraHeaders = options['extraHeaders'] != null ? Utils.cloneArray(options['extraHeaders']) : <dynamic>[];
 
     _eventHandlers = options['eventHandlers'] ?? EventManager();
 
@@ -71,8 +68,7 @@ class DTMF extends EventManager {
 
     if (_mode == DtmfMode.RFC2833) {
       RTCDTMFSender dtmfSender = _session.dtmfSender;
-      dtmfSender.insertDTMF(_tone!,
-          duration: _duration!, interToneGap: _interToneGap!);
+      dtmfSender.insertDTMF(_tone!, duration: _duration!, interToneGap: _interToneGap!);
     } else if (_mode == DtmfMode.INFO) {
       extraHeaders.add('Content-Type: application/dtmf-relay');
 
@@ -102,11 +98,7 @@ class DTMF extends EventManager {
         _session.onDialogError();
       });
 
-      _session.sendRequest(SipMethod.INFO, <String, dynamic>{
-        'extraHeaders': extraHeaders,
-        'eventHandlers': handlers,
-        'body': body
-      });
+      _session.sendRequest(SipMethod.INFO, <String, dynamic>{'extraHeaders': extraHeaders, 'eventHandlers': handlers, 'body': body});
     }
   }
 
@@ -123,14 +115,13 @@ class DTMF extends EventManager {
       List<String> body = request.body!.split('\n');
 
       if (body.length >= 1) {
-        if ((body[0]).contains(RegExp(reg_tone))) {
+        if (body[0].contains(RegExp(reg_tone))) {
           _tone = body[0].replaceAll(reg_tone, '\$2');
         }
       }
       if (body.length >= 2) {
-        if ((body[1]).contains(RegExp(reg_duration))) {
-          _duration =
-              int.tryParse(body[1].replaceAll(reg_duration, '\$2'), radix: 10);
+        if (body[1].contains(RegExp(reg_duration))) {
+          _duration = int.tryParse(body[1].replaceAll(reg_duration, '\$2'), radix: 10);
         }
       }
     }

@@ -14,8 +14,7 @@ class DialPadWidget extends StatefulWidget {
   _MyDialPadWidget createState() => _MyDialPadWidget();
 }
 
-class _MyDialPadWidget extends State<DialPadWidget>
-    implements SipUaHelperListener {
+class _MyDialPadWidget extends State<DialPadWidget> implements SipUaHelperListener {
   String? _dest;
   SIPUAHelper? get helper => widget._helper;
   TextEditingController? _textController;
@@ -44,11 +43,9 @@ class _MyDialPadWidget extends State<DialPadWidget>
     helper!.addSipUaHelperListener(this);
   }
 
-  Future<Widget?> _handleCall(BuildContext context,
-      [bool voiceOnly = false]) async {
+  Future<Widget?> _handleCall(BuildContext context, [bool voiceOnly = false]) async {
     var dest = _textController?.text;
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS) {
+    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
       await Permission.microphone.request();
       await Permission.camera.request();
     }
@@ -74,16 +71,14 @@ class _MyDialPadWidget extends State<DialPadWidget>
       return null;
     }
 
-    final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
+    final mediaConstraints = <String, dynamic>{'audio': true, 'video': false};
 
     MediaStream mediaStream;
 
     if (kIsWeb && !voiceOnly) {
-      mediaStream =
-          await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+      mediaStream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
       mediaConstraints['video'] = false;
-      MediaStream userStream =
-          await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      MediaStream userStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
       mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
       mediaConstraints['video'] = !voiceOnly;
@@ -155,28 +150,20 @@ class _MyDialPadWidget extends State<DialPadWidget>
     return [
       Container(
           width: 360,
-          child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                    width: 360,
-                    child: TextField(
-                      keyboardType: TextInputType.text,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 24, color: Colors.black54),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                      ),
-                      controller: _textController,
-                    )),
-              ])),
-      Container(
-          width: 300,
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: _buildNumPad())),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+            Container(
+                width: 360,
+                child: TextField(
+                  keyboardType: TextInputType.text,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 24, color: Colors.black54),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                  ),
+                  controller: _textController,
+                )),
+          ])),
+      Container(width: 300, child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, children: _buildNumPad())),
       Container(
           width: 300,
           child: Padding(
@@ -265,33 +252,30 @@ class _MyDialPadWidget extends State<DialPadWidget>
         ),
         body: Align(
             alignment: Alignment(0, 0),
-            child: Column(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Center(
+                    child: Text(
+                  'Status: ${EnumHelper.getName(helper!.registerState.state)}',
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                )),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Center(
+                    child: Text(
+                  'Received Message: $receivedMsg',
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                )),
+              ),
+              Container(
+                  child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Center(
-                        child: Text(
-                      'Status: ${EnumHelper.getName(helper!.registerState.state)}',
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
-                    )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Center(
-                        child: Text(
-                      'Received Message: $receivedMsg',
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
-                    )),
-                  ),
-                  Container(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: _buildDialPad(),
-                  )),
-                ])));
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: _buildDialPad(),
+              )),
+            ])));
   }
 
   @override
@@ -320,4 +304,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   @override
   void onNewNotify(Notify ntf) {}
+
+  @override
+  void receivedData(data) {}
 }
