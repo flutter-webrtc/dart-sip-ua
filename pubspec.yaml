@@ -17,6 +17,7 @@ dependencies:
   recase: ^4.0.0
   sdp_transform: ^0.3.2
   uuid: ^3.0.2
+  intl: ^0.18.0
 
 
 dev_dependencies:
