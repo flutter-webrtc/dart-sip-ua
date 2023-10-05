@@ -121,7 +121,7 @@ class SIPUAHelper extends EventManager {
 
     // Reset settings
     _settings = Settings();
-    WebSocketInterface socket = WebSocketInterface(uaSettings.webSocketUrl,
+    WebSocketInterface socket = uaSettings.webSocketInterface ?? WebSocketInterface(uaSettings.webSocketUrl,
         messageDelay: _settings.sip_message_delay,
         webSocketSettings: uaSettings.webSocketSettings);
     _settings.sockets = <WebSocketInterface>[socket];
@@ -730,4 +730,7 @@ class UaSettings {
 //      'credential': 'change_to_real_secret'
 //    },
   ];
+
+  /// Override default [WebSocketInterface]
+  WebSocketInterface? webSocketInterface;
 }
