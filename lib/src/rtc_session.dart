@@ -790,10 +790,9 @@ class RTCSession extends EventManager implements Owner {
         if (_status == C.STATUS_WAITING_FOR_ACK &&
             _direction == 'incoming' &&
             _request.server_transaction.state != TransactionState.TERMINATED) {
-          /// Save the dialog for later restoration.
           Dialog dialog = _dialog!;
 
-          // Send the BYE as soon as the ACK is received...
+          /*// Send the BYE as soon as the ACK is received...
           receiveRequest = (IncomingMessage request) {
             if (request.method == SipMethod.ACK) {
               sendRequest(SipMethod.BYE, <String, dynamic>{
@@ -802,10 +801,22 @@ class RTCSession extends EventManager implements Owner {
               });
               dialog.terminate();
             }
-          };
+          };*/
 
+          sendRequest(SipMethod.BYE,
+              <String, dynamic>{'extraHeaders': extraHeaders, 'body': body});
+          reason_phrase = reason_phrase ?? 'Terminated by local';
+          status_code = status_code ?? 200;
+          dialog.terminate();
+          _ended(
+              'local',
+              null,
+              ErrorCause(
+                  cause: cause as String?,
+                  status_code: status_code,
+                  reason_phrase: reason_phrase));
           // .., or when the INVITE transaction times out
-          _request.server_transaction.on(EventStateChanged(),
+          /*_request.server_transaction.on(EventStateChanged(),
               (EventStateChanged state) {
             if (_request.server_transaction.state ==
                 TransactionState.TERMINATED) {
@@ -829,7 +840,7 @@ class RTCSession extends EventManager implements Owner {
           _dialog = dialog;
 
           // Restore the dialog into 'ua' so the ACK can reach 'this' session.
-          _ua.newDialog(dialog);
+          _ua.newDialog(dialog);*/
         } else {
           sendRequest(SipMethod.BYE,
               <String, dynamic>{'extraHeaders': extraHeaders, 'body': body});
