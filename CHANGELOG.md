@@ -1,6 +1,10 @@
 # Changelog
 
 --------------------------------------------
+[1.0.2]
+* Expose _to_tag and _from_tag from RTCSession
+
+
 [0.5.6] - 2023.04.17
 
 * Reverted version constraint on intl
