@@ -1,7 +1,7 @@
 # Changelog
 
 --------------------------------------------
-[1.0.2]
+[1.0.3]
 * Expose _to_tag and _from_tag from RTCSession
 
 
