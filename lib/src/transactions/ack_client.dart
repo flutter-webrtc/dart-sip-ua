@@ -2,14 +2,14 @@ import 'package:sip_ua/src/sip_message.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
-import '../transport.dart';
+import '../socket_transport.dart';
 import '../ua.dart';
 import '../utils.dart';
 import 'transaction_base.dart';
 
 class AckClientTransaction extends TransactionBase {
-  AckClientTransaction(UA ua, Transport transport, OutgoingRequest request,
-      EventManager eventHandlers) {
+  AckClientTransaction(UA ua, SocketTransport transport,
+      OutgoingRequest request, EventManager eventHandlers) {
     id = 'z9hG4bK${(Math.random() * 10000000).floor()}';
     this.transport = transport;
     this.request = request;
