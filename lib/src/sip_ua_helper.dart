@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
+import 'package:sip_ua/sip_ua.dart';
 import 'package:sip_ua/src/map_helper.dart';
 
+import 'package:sip_ua/src/transports/socket_interface.dart';
+import 'package:sip_ua/src/transports/tcp_socket.dart';
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'event_manager/event_manager.dart';
@@ -15,7 +18,7 @@ import 'rtc_session/refer_subscriber.dart';
 import 'sip_message.dart';
 import 'stack_trace_nj.dart';
 import 'subscriber.dart';
-import 'transports/websocket_interface.dart';
+import 'transports/web_socket.dart';
 import 'ua.dart';
 
 class SIPUAHelper extends EventManager {
@@ -51,9 +54,11 @@ class SIPUAHelper extends EventManager {
   }
 
   bool get connecting {
-    if (_ua != null && _ua!.transport != null) {
-      return _ua!.transport!.isConnecting();
-    }
+    if (_ua == null) return false;
+
+    if (_ua!.socketTransport != null)
+      return _ua!.socketTransport!.isConnecting();
+
     return false;
   }
 
@@ -120,10 +125,23 @@ class SIPUAHelper extends EventManager {
 
     // Reset settings
     _settings = Settings();
-    WebSocketInterface socket = WebSocketInterface(uaSettings.webSocketUrl,
-        messageDelay: _settings.sip_message_delay,
-        webSocketSettings: uaSettings.webSocketSettings);
-    _settings.sockets = <WebSocketInterface>[socket];
+
+    _settings.sockets = <SocketInterface>[];
+
+    if (uaSettings.transportType == TransportType.TCP) {
+      _settings.sockets!.add(TcpSocket(
+          uaSettings.host ?? '0.0.0.0', uaSettings.port ?? '5060',
+          messageDelay: 1));
+    }
+
+    if (uaSettings.transportType == TransportType.WS) {
+      _settings.sockets!.add(WebSocket(
+          uaSettings.webSocketUrl ?? 'wss://tryit.jssip.net:10443',
+          messageDelay: _settings.sip_message_delay,
+          webSocketSettings: uaSettings.webSocketSettings));
+    }
+
+    _settings.transportType = uaSettings.transportType!;
     _settings.uri = uaSettings.uri;
     _settings.sip_message_delay = uaSettings.sip_message_delay;
     _settings.realm = uaSettings.realm;
@@ -684,14 +702,26 @@ class WebSocketSettings {
   String? transport_scheme;
 }
 
+class TcpSocketSettings {
+  /// Add additional HTTP headers, such as:'Origin','Host' or others
+  Map<String, dynamic> extraHeaders = <String, dynamic>{};
+
+  /// `User Agent` field for dart http client.
+  String? userAgent;
+
+  /// Don‘t check the server certificate
+  /// for self-signed certificate.
+  bool allowBadCertificate = false;
+}
+
 enum DtmfMode {
   INFO,
   RFC2833,
 }
 
 class UaSettings {
-  late String webSocketUrl;
   WebSocketSettings webSocketSettings = WebSocketSettings();
+  TcpSocketSettings tcpSocketSettings = TcpSocketSettings();
 
   /// May not need to register if on a static IP, just Auth
   /// Default is true
@@ -705,7 +735,10 @@ class UaSettings {
 
   /// `User Agent` field for sip message.
   String? userAgent;
+  String? host;
+  String? port;
   String? uri;
+  String? webSocketUrl;
   String? realm;
   String? authorizationUser;
   String? password;
@@ -713,6 +746,8 @@ class UaSettings {
   String? displayName;
   String? instanceId;
   String? registrarServer;
+
+  TransportType? transportType;
 
   /// DTMF mode, in band (rfc2833) or out of band (sip info)
   DtmfMode dtmfMode = DtmfMode.INFO;

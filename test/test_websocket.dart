@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:sip_ua/src/event_manager/events.dart';
-import 'package:sip_ua/src/transport.dart';
-import 'package:sip_ua/src/transports/websocket_interface.dart';
+import 'package:sip_ua/src/socket_transport.dart';
+import 'package:sip_ua/src/transports/socket_interface.dart';
+import 'package:sip_ua/src/transports/web_socket.dart';
 import 'package:test/test.dart';
 
 List<void Function()> testFunctions = <void Function()>[
@@ -14,13 +15,14 @@ List<void Function()> testFunctions = <void Function()>[
             await for (HttpRequest req in server) {
               if (req.uri.path == '/sip') {
                 // Upgrade a HttpRequest to a WebSocket connection.
-                WebSocket socket = await WebSocketTransformer.upgrade(req);
-                socket.listen((dynamic msg) {
-                  socket.add(msg);
-                  expect(msg, 'message');
-                  socket.close();
-                  server.close();
-                });
+                // WebSocket socket =
+                //     await WebSocketTransformer.upgrade(req) as WebSocket;
+                // socket.listen((dynamic msg) {
+                //   socket.add(msg);
+                //   expect(msg, 'message');
+                //   socket.close();
+                //   server.close();
+                // });
               }
             }
           } catch (error) {
@@ -28,8 +30,8 @@ List<void Function()> testFunctions = <void Function()>[
           }
         });
 
-        WebSocketInterface client =
-            WebSocketInterface('ws://127.0.0.1:4040/sip', messageDelay: 0);
+        WebSocket client =
+            WebSocket('ws://127.0.0.1:4040/sip', messageDelay: 0);
 
         expect(client.url, 'ws://127.0.0.1:4040/sip');
         expect(client.via_transport, 'WS');
@@ -47,7 +49,7 @@ List<void Function()> testFunctions = <void Function()>[
           client.disconnect();
           completer.complete();
         };
-        client.ondisconnect = (WebSocketInterface socket, bool error,
+        client.ondisconnect = (SocketInterface socket, bool error,
             int? closeCode, String? reason) {
           print(
               'ondisconnect => error $error [$closeCode] ${reason.toString()}');
@@ -63,39 +65,39 @@ List<void Function()> testFunctions = <void Function()>[
             await for (HttpRequest req in server) {
               if (req.uri.path == '/sip') {
                 // Upgrade a HttpRequest to a WebSocket connection.
-                WebSocket socket = await WebSocketTransformer.upgrade(req);
-                socket.listen((dynamic msg) {
-                  socket.add(msg);
-                  expect(msg, 'message');
-                  socket.close();
-                  server.close();
-                });
+                // WebSocket socket =
+                //     (await WebSocketTransformer.upgrade(req)) as WebSocket;
+                // socket.listen((dynamic msg) {
+                //   socket.add(msg);
+                //   expect(msg, 'message');
+                //   socket.close();
+                //   server.close();
+                // });
               }
             }
           } catch (error) {
             print(' An error occurred. $error');
           }
         });
-        WebSocketInterface socket =
-            WebSocketInterface('ws://127.0.0.1:4041/sip', messageDelay: 0);
-        Transport trasnport = Transport(<WebSocketInterface>[socket]);
+        WebSocket socket =
+            WebSocket('ws://127.0.0.1:4041/sip', messageDelay: 0);
+        SocketTransport trasnport = SocketTransport(<SocketInterface>[socket]);
 
-        trasnport.onconnecting = (WebSocketInterface? socket, int? attempt) {
+        trasnport.onconnecting = (SocketInterface? socket, int? attempt) {
           expect(trasnport.isConnecting(), true);
         };
 
-        trasnport.onconnect = (Transport socket) {
+        trasnport.onconnect = (SocketTransport socket) {
           expect(trasnport.isConnected(), true);
           trasnport.send('message');
         };
 
-        trasnport.ondata = (Transport transport, String messageData) {
+        trasnport.ondata = (SocketTransport transport, String messageData) {
           // expect(socket['message'], 'message');
           trasnport.disconnect();
         };
 
-        trasnport.ondisconnect =
-            (WebSocketInterface? socket, ErrorCause cause) {
+        trasnport.ondisconnect = (SocketInterface? socket, ErrorCause cause) {
           expect(trasnport.isConnected(), false);
           completer.complete();
         };

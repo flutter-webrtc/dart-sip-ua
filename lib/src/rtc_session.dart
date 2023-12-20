@@ -1,8 +1,9 @@
 import 'dart:async';
-
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
-
+import 'package:sdp_transform/sdp_transform.dart';
 import 'package:sip_ua/sip_ua.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
@@ -1950,27 +1951,28 @@ class RTCSession extends EventManager implements Owner {
   }
 
   Future<RTCSessionDescription> _processInDialogSdpOffer(
-      dynamic request) async {
+      IncomingRequest request) async {
     logger.d('_processInDialogSdpOffer()');
 
-    Map<String, dynamic> sdp = request.parseSDP();
+    Map<String, dynamic>? sdp = request.parseSDP();
 
     bool hold = false;
+    if (sdp != null) {
+      for (Map<String, dynamic> m in sdp['media']) {
+        if (holdMediaTypes.indexOf(m['type']) == -1) {
+          continue;
+        }
 
-    for (Map<String, dynamic> m in sdp['media']) {
-      if (holdMediaTypes.indexOf(m['type']) == -1) {
-        continue;
-      }
+        String direction = m['direction'] ?? sdp['direction'] ?? 'sendrecv';
 
-      String direction = m['direction'] ?? sdp['direction'] ?? 'sendrecv';
-
-      if (direction == 'sendonly' || direction == 'inactive') {
-        hold = true;
-      }
-      // If at least one of the streams is active don't emit 'hold'.
-      else {
-        hold = false;
-        break;
+        if (direction == 'sendonly' || direction == 'inactive') {
+          hold = true;
+        }
+        // If at least one of the streams is active don't emit 'hold'.
+        else {
+          hold = false;
+          break;
+        }
       }
     }
 
@@ -2461,7 +2463,7 @@ class RTCSession extends EventManager implements Owner {
    * Send Re-INVITE
    */
   void _sendReinvite([Map<String, dynamic>? options]) async {
-    logger.d('sendReinvite()');
+    logger.d('sendReinvite() to hold');
 
     options = options ?? <String, dynamic>{};
 
@@ -2504,9 +2506,11 @@ class RTCSession extends EventManager implements Owner {
 
       // Must have SDP answer.
       if (response!.body == null || response.body!.isEmpty) {
+        logger.d('onsucceeded: response.body is null or empty');
         onFailed();
         return;
       } else if (response.getHeader('Content-Type') != 'application/sdp') {
+        logger.d('onsucceeded: content type isnt application/sdp');
         onFailed();
         return;
       }
@@ -2559,7 +2563,7 @@ class RTCSession extends EventManager implements Owner {
         'eventHandlers': handlers
       });
     } catch (e, s) {
-      logger.e(e.toString(), null, s);
+      logger.e('calling failed ${e.toString()}', null, s);
       onFailed();
     }
   }

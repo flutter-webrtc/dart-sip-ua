@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:sip_ua/src/socket_transport.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'event_manager/event_manager.dart';
@@ -10,7 +11,6 @@ import 'name_addr_header.dart';
 import 'request_sender.dart';
 import 'sip_message.dart';
 import 'timers.dart';
-import 'transport.dart';
 import 'ua.dart';
 import 'uri.dart';
 import 'utils.dart' as utils;
@@ -24,7 +24,7 @@ class UnHandledResponse {
 }
 
 class Registrator {
-  Registrator(UA ua, [Transport? transport]) {
+  Registrator(UA ua, [SocketTransport? transport]) {
     int reg_id = 1; // Force reg_id to 1.
 
     _ua = ua;
@@ -71,7 +71,7 @@ class Registrator {
   }
 
   late UA _ua;
-  Transport? _transport;
+  SocketTransport? _transport;
   late URI _registrar;
   int? _expires;
   String? _call_id;
@@ -86,7 +86,7 @@ class Registrator {
 
   bool get registered => _registered;
 
-  Transport? get transport => _transport;
+  SocketTransport? get transport => _transport;
 
   void setExtraHeaders(List<String>? extraHeaders) {
     _extraHeaders = extraHeaders ?? <String>[];
