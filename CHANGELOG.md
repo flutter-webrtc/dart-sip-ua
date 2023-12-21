@@ -1,6 +1,9 @@
 # Changelog
 
 --------------------------------------------
+[1.0.4]
+* Fixed renegotiation if statement for useUpdate
+
 [1.0.3]
 * Expose _to_tag and _from_tag from RTCSession
 

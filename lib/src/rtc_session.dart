@@ -955,7 +955,7 @@ class RTCSession extends EventManager implements Owner {
       terminate(<String, dynamic>{'cause': DartSIP_C.CausesType.WEBRTC_ERROR, 'status_code': 500, 'reason_phrase': 'Hold Failed'});
     });
 
-    if (options['useUpdate'] != null) {
+    if (options['useUpdate'] == true) {
       _sendUpdate(<String, dynamic>{'sdpOffer': true, 'eventHandlers': handlers, 'extraHeaders': options['extraHeaders']});
     } else {
       _sendReinvite(<String, dynamic>{'eventHandlers': handlers, 'extraHeaders': options['extraHeaders']});
@@ -1444,7 +1444,9 @@ class RTCSession extends EventManager implements Owner {
 
     List<Future<RTCSessionDescription> Function(RTCSessionDescription)> modifiers = constraints['offerModifiers'] ?? <Future<RTCSessionDescription> Function(RTCSessionDescription)>[];
 
-    constraints['offerModifiers'] = null;
+    if (constraints['offerModifiers'] != null) {
+      constraints['offerModifiers'] = null;
+    }
 
     if (type != 'offer' && type != 'answer') {
       completer.completeError(Exceptions.TypeError('createLocalDescription() | invalid type "$type"'));
