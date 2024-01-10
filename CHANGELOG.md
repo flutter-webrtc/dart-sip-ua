@@ -1,6 +1,9 @@
 # Changelog
 
 --------------------------------------------
+[1.0.5]
+* Renegotiation issues fix
+
 [1.0.4]
 * Fixed renegotiation if statement for useUpdate
 

@@ -1031,7 +1031,7 @@ class RTCSession extends EventManager implements Owner {
 
     _setLocalMediaStatus();
 
-    if (options['useUpdate'] != null) {
+    if (options['useUpdate'] == true) {
       _sendUpdate(<String, dynamic>{'sdpOffer': true, 'eventHandlers': handlers, 'rtcOfferConstraints': rtcOfferConstraints, 'extraHeaders': options['extraHeaders']});
     } else {
       _sendReinvite(<String, dynamic>{'eventHandlers': handlers, 'rtcOfferConstraints': rtcOfferConstraints, 'extraHeaders': options['extraHeaders']});
