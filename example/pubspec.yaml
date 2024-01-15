@@ -24,13 +24,13 @@ dependencies:
   sip_ua:
     path: ../
   shared_preferences: ^2.2.0
-  permission_handler: ^10.4.3
+  permission_handler: ^11.1.0
   flutter_webrtc: ^0.9.40
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  lints: ^2.1.1
+  lints: ^3.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

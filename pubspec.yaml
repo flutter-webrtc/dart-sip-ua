@@ -11,15 +11,15 @@ dependencies:
   crypto: ^3.0.3
   flutter_webrtc: ^0.9.47
   intl: ^0.19.0
-  logger: ^1.0.0
-  parser_error: ^0.2.0
+  logger: ^2.0.2+1
   path: ^1.6.4
   random_string: ^2.3.1
   recase: ^4.1.0
   sdp_transform: ^0.3.2
+  text: ^0.2.0
   uuid: ^4.2.1
 
 
 dev_dependencies:
-  lints: ^2.0.1
+  lints: ^3.0.0
   test: ^1.6.7
