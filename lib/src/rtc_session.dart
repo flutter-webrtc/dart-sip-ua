@@ -646,6 +646,7 @@ class RTCSession extends EventManager implements Owner {
    */
   void terminate([Map<String, dynamic>? options]) {
     logger.d('terminate()');
+    logger.d('cause: ${options?['cause']}, status_code: ${options?['status_code']}, reason_phrase: ${options?['reason_phrase']}');
 
     options = options ?? <String, dynamic>{};
 
@@ -1401,7 +1402,7 @@ class RTCSession extends EventManager implements Owner {
       if (state == RTCIceConnectionState.RTCIceConnectionStateFailed) {
         terminate(<String, dynamic>{'cause': DartSIP_C.CausesType.RTP_TIMEOUT, 'status_code': 408, 'reason_phrase': DartSIP_C.CausesType.RTP_TIMEOUT});
       } else if (state == RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
-        _iceRestart();
+        //_iceRestart(); -> HANDLE THIS IN YOUR APP
       }
     };
 
