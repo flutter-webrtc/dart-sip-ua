@@ -1,6 +1,9 @@
 # Changelog
 
 --------------------------------------------
+[1.0.7]
+* Remove _iceRestart when transport is disconnected 
+
 [1.0.5]
 * Renegotiation issues fix
 
