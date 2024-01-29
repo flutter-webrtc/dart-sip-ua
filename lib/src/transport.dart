@@ -37,8 +37,7 @@ class C {
  * @socket DartSIP::Socket instance
  */
 class Transport {
-  Transport(List<WebSocketInterface> sockets,
-      [Map<String, int> recovery_options = C.recovery_options]) {
+  Transport(List<WebSocketInterface> sockets, [Map<String, int> recovery_options = C.recovery_options]) {
     logger.d('new()');
 
     _recovery_options = recovery_options;
@@ -49,11 +48,7 @@ class Transport {
     }
 
     for (WebSocketInterface socket in sockets) {
-      _socketsMap.add(<String, dynamic>{
-        'socket': socket,
-        'weight': socket.weight ?? 0,
-        'status': C.SOCKET_STATUS_READY
-      });
+      _socketsMap.add(<String, dynamic>{'socket': socket, 'weight': socket.weight ?? 0, 'status': C.SOCKET_STATUS_READY});
     }
 
     // Get the socket with higher weight.
@@ -127,28 +122,17 @@ class Transport {
 
     // Unbind socket event callbacks.
     socket.onconnect = () => () {};
-    socket.ondisconnect = (WebSocketInterface socket, bool error,
-            int? closeCode, String? reason) =>
-        () {};
+    socket.ondisconnect = (WebSocketInterface socket, bool error, int? closeCode, String? reason) => () {};
     socket.ondata = (dynamic data) => () {};
 
     socket.disconnect();
-    ondisconnect(
-        socket,
-        ErrorCause(
-            cause: 'disconnect',
-            status_code: 0,
-            reason_phrase: 'close by local'));
+    ondisconnect(socket, ErrorCause(cause: 'disconnect', status_code: 0, reason_phrase: 'close by local'));
   }
 
   bool send(dynamic data) {
     logger.d('send()');
-
     if (!isConnected()) {
-      logger.e(
-          'unable to send message, transport is not connected. Current state is $status',
-          null,
-          StackTraceNJ());
+      logger.e('unable to send message, transport is not connected. Current state is $status', null, StackTraceNJ());
       return false;
     }
 
@@ -180,8 +164,7 @@ class Transport {
       k = _recovery_options['max_interval']!;
     }
 
-    logger.d(
-        'reconnection attempt: $_recover_attempts. next connection attempt in $k seconds');
+    logger.d('reconnection attempt: $_recover_attempts. next connection attempt in $k seconds');
 
     _recovery_timer = setTimeout(() {
       if (!_close_requested && !(isConnected() || isConnecting())) {
@@ -248,13 +231,9 @@ class Transport {
     onconnect(this);
   }
 
-  void _onDisconnect(
-      WebSocketInterface socket, bool error, int? closeCode, String? reason) {
+  void _onDisconnect(WebSocketInterface socket, bool error, int? closeCode, String? reason) {
     status = C.STATUS_DISCONNECTED;
-    ondisconnect(
-        socket,
-        ErrorCause(
-            cause: 'error', status_code: closeCode, reason_phrase: reason));
+    ondisconnect(socket, ErrorCause(cause: 'error', status_code: closeCode, reason_phrase: reason));
 
     if (_close_requested) {
       return;
@@ -282,8 +261,7 @@ class Transport {
       try {
         data = String.fromCharCodes(data);
       } catch (evt) {
-        logger.d(
-            'received binary message [${data.runtimeType}]failed to be converted into string,'
+        logger.d('received binary message [${data.runtimeType}]failed to be converted into string,'
             ' message discarded');
         return;
       }

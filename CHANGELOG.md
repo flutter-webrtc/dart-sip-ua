@@ -1,9 +1,12 @@
 # Changelog
 
----
+[1.0.8]
+- Fix merge conflicts
+
+[1.0.7]
+- Remove _iceRestart when transport is disconnected 
 
 [1.0.6]
-
 - Reinvite not successfull fix
 
 [1.0.5]
