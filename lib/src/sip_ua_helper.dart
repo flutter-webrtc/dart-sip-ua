@@ -143,6 +143,7 @@ class SIPUAHelper extends EventManager {
         uaSettings.sessionTimersRefreshMethod;
     _settings.instance_id = uaSettings.instanceId;
     _settings.registrar_server = uaSettings.registrarServer;
+    _settings.contact_uri = uaSettings.contact_uri;
 
     try {
       _ua = UA(_settings);
@@ -713,6 +714,7 @@ class UaSettings {
   String? displayName;
   String? instanceId;
   String? registrarServer;
+  String? contact_uri;
 
   /// DTMF mode, in band (rfc2833) or out of band (sip info)
   DtmfMode dtmfMode = DtmfMode.INFO;

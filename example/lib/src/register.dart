@@ -124,6 +124,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
     settings.displayName = _displayNameController.text;
     settings.userAgent = 'Dart SIP Client v1.0.0';
     settings.dtmfMode = DtmfMode.RFC2833;
+    settings.contact_uri = 'sip:${_sipUriController.text}';
 
     helper!.start(settings);
   }
