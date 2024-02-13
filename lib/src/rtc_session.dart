@@ -303,6 +303,16 @@ class RTCSession extends EventManager implements Owner {
     _ua.contact!.outbound = true;
     _contact = _ua.contact.toString();
 
+    bool isFromUriOptionPresent = options['from_uri'] != null;
+
+    //set from_uri and from_display_name if present
+    if (isFromUriOptionPresent) {
+      requestParams['from_display_name'] = options['from_display_name'] ?? '';
+      requestParams['from_uri'] = URI.parse(options['from_uri']);
+      extraHeaders
+        .add('P-Preferred-Identity: ${_ua.configuration.uri.toString()}');
+    }
+
     if (anonymous) {
       requestParams['from_display_name'] = 'Anonymous';
       requestParams['from_uri'] = URI('sip', 'anonymous', 'anonymous.invalid');
