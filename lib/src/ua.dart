@@ -733,11 +733,7 @@ class UA extends EventManager {
           _findDialog(request.call_id!, request.from_tag!, request.to_tag!);
 
       if (dialog != null) {
-        try {
-          dialog.receiveRequest(request);
-        } catch (e) {
-          logger.e('Error: failed to handle request. ${e.toString()}');
-        }
+        dialog.receiveRequest(request);
       } else if (method == SipMethod.NOTIFY) {
         Subscriber? sub = _findSubscriber(
             request.call_id!, request.from_tag!, request.to_tag!);
