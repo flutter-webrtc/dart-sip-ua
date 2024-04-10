@@ -134,6 +134,7 @@ class SIPUAHelper extends EventManager {
     _settings.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
     _settings.register = uaSettings.register;
     _settings.register_expires = uaSettings.register_expires;
+    _settings.register_extra_headers = uaSettings.registerParams.extraHeaders;
     _settings.register_extra_contact_uri_params =
         uaSettings.registerParams.extraContactUriParams;
     _settings.dtmf_mode = uaSettings.dtmfMode;
@@ -664,6 +665,7 @@ class RegisterParams {
   /// Allow extra headers and Contact Params to be sent on REGISTER
   /// Mainly used for RFC8599 Support
   /// https://github.com/cloudwebrtc/dart-sip-ua/issues/89
+  List<String> extraHeaders = [];
   Map<String, dynamic> extraContactUriParams = <String, dynamic>{};
 }
 

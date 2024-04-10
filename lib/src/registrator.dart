@@ -54,7 +54,7 @@ class Registrator {
     _contact += ';+sip.ice';
 
     // Custom headers for REGISTER and un-REGISTER.
-    _extraHeaders = <String>[];
+    _extraHeaders = ua.configuration.register_extra_headers;
 
     // Custom Contact header params for REGISTER and un-REGISTER.
     _extraContactParams = '';
