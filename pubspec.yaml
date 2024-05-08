@@ -21,6 +21,6 @@ dependencies:
 
 
 dev_dependencies:
-  lints: ^3.0.0
   import_sorter: ^4.6.0
+  lints: ^3.0.0
   test: any

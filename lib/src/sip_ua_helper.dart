@@ -686,7 +686,7 @@ class RegisterParams {
   /// Allow extra headers and Contact Params to be sent on REGISTER
   /// Mainly used for RFC8599 Support
   /// https://github.com/cloudwebrtc/dart-sip-ua/issues/89
-  List<String> extraHeaders = [];
+  List<String> extraHeaders = <String>[];
   Map<String, dynamic> extraContactUriParams = <String, dynamic>{};
 }
 

@@ -660,7 +660,8 @@ class UA extends EventManager {
         return;
       }
     } else if (method == SipMethod.SUBSCRIBE) {
-      if (listeners['newSubscribe']?.length == 0) {
+      // ignore: collection_methods_unrelated_type
+      if (listeners['newSubscribe'] == null) {
         request.reply(405);
 
         return;
