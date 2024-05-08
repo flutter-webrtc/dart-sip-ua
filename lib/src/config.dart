@@ -1,11 +1,12 @@
 import 'package:sip_ua/sip_ua.dart';
+import 'package:sip_ua/src/transports/socket_interface.dart';
+import 'package:sip_ua/src/transports/tcp_socket.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'exceptions.dart' as Exceptions;
 import 'grammar.dart';
 import 'logger.dart';
-import 'socket.dart' as Socket;
-import 'transports/websocket_interface.dart';
+import 'transports/web_socket.dart';
 import 'uri.dart';
 import 'utils.dart' as Utils;
 
@@ -43,8 +44,10 @@ class Settings {
   // Dtmf mode
   DtmfMode dtmf_mode = DtmfMode.INFO;
 
+  TransportType? transportType;
+
   // Connection options.
-  List<WebSocketInterface>? sockets = <WebSocketInterface>[];
+  List<SIPUASocketInterface>? sockets = <SIPUASocketInterface>[];
   int connection_recovery_max_interval = 30;
   int connection_recovery_min_interval = 2;
 
@@ -71,16 +74,17 @@ class Checks {
   Map<String, Null Function(Settings src, Settings? dst)> mandatory =
       <String, Null Function(Settings src, Settings? dst)>{
     'sockets': (Settings src, Settings? dst) {
-      List<WebSocketInterface>? sockets = src.sockets;
+      List<SIPUASocketInterface>? sockets = src.sockets;
+
       /* Allow defining sockets parameter as:
        *  Socket: socket
        *  List of Socket: [socket1, socket2]
        *  List of Objects: [{socket: socket1, weight:1}, {socket: Socket2, weight:0}]
        *  List of Objects and Socket: [{socket: socket1}, socket2]
        */
-      List<WebSocketInterface> copy = <WebSocketInterface>[];
+      List<SIPUASocketInterface> copy = <SIPUASocketInterface>[];
       if (sockets is List && sockets!.length > 0) {
-        for (WebSocketInterface socket in sockets) {
+        for (SIPUASocketInterface socket in sockets) {
           copy.add(socket);
         }
       } else {
@@ -105,6 +109,13 @@ class Checks {
       } else {
         dst!.uri = parsed;
       }
+    },
+    'transport_type': (Settings src, Settings? dst) {
+      dynamic transportType = src.transportType;
+      if (src.transportType == null && dst!.transportType == null) {
+        throw Exceptions.ConfigurationError('transport type', null);
+      }
+      dst!.transportType = transportType;
     }
   };
   Map<String, Null Function(Settings src, Settings? dst)> optional =

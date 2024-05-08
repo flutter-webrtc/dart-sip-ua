@@ -59,16 +59,16 @@ class RequestSender {
 
     switch (_method) {
       case SipMethod.INVITE:
-        clientTransaction =
-            InviteClientTransaction(_ua, _ua.transport!, _request!, handlers);
+        clientTransaction = InviteClientTransaction(
+            _ua, _ua.socketTransport!, _request!, handlers);
         break;
       case SipMethod.ACK:
-        clientTransaction =
-            AckClientTransaction(_ua, _ua.transport!, _request!, handlers);
+        clientTransaction = AckClientTransaction(
+            _ua, _ua.socketTransport!, _request!, handlers);
         break;
       default:
         clientTransaction = NonInviteClientTransaction(
-            _ua, _ua.transport!, _request!, handlers);
+            _ua, _ua.socketTransport!, _request!, handlers);
     }
 
     clientTransaction?.send();
