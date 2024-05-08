@@ -39,6 +39,7 @@ class Settings {
   bool? register = true;
   int? register_expires = 600;
   dynamic registrar_server;
+  List<String>? register_extra_headers;
   Map<String, dynamic>? register_extra_contact_uri_params;
 
   // Dtmf mode
@@ -236,6 +237,11 @@ class Checks {
       } else {
         dst!.registrar_server = parsed;
       }
+    },
+    'register_extra_headers': (src, dst) {
+      var register_extra_headers = src?.register_extra_headers;
+      if (register_extra_headers == null) return;
+      dst?.register_extra_headers = register_extra_headers;
     },
     'register_extra_contact_uri_params': (Settings src, Settings? dst) {
       Map<String, dynamic>? register_extra_contact_uri_params =
