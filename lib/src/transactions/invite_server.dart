@@ -4,13 +4,13 @@ import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import '../sip_message.dart';
 import '../timers.dart';
-import '../transport.dart';
+import '../socket_transport.dart';
 import '../ua.dart';
 import 'transaction_base.dart';
 
 class InviteServerTransaction extends TransactionBase {
   InviteServerTransaction(
-      UA ua, Transport? transport, IncomingRequest request) {
+      UA ua, SocketTransport? transport, IncomingRequest request) {
     id = request.via_branch;
     this.ua = ua;
     this.transport = transport;
