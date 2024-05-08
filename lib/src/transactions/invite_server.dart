@@ -3,8 +3,8 @@ import 'dart:async';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import '../sip_message.dart';
-import '../timers.dart';
 import '../socket_transport.dart';
+import '../timers.dart';
 import '../ua.dart';
 import 'transaction_base.dart';
 

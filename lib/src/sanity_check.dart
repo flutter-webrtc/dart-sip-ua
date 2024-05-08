@@ -2,9 +2,9 @@ import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'logger.dart';
 import 'sip_message.dart';
+import 'socket_transport.dart';
 import 'transactions/invite_server.dart';
 import 'transactions/non_invite_server.dart';
-import 'socket_transport.dart';
 import 'ua.dart';
 import 'utils.dart' as Utils;
 

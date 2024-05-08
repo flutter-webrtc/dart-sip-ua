@@ -1,11 +1,12 @@
 import 'dart:async';
 
+import 'package:test/test.dart';
+
 import 'package:sip_ua/src/config.dart' as config;
 import 'package:sip_ua/src/event_manager/event_manager.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'package:sip_ua/src/transports/web_socket.dart';
 import 'package:sip_ua/src/ua.dart';
-import 'package:test/test.dart';
 
 late UA ua;
 void main() {
