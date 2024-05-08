@@ -105,7 +105,8 @@ class SIPUAHelper extends EventManager {
       _ua!.call(target, options);
       return true;
     } else {
-      logger.e('Not connected, you will need to register.', StackTraceNJ());
+      logger.e('Not connected, you will need to register.',
+          stackTrace: StackTraceNJ());
     }
     return false;
   }
@@ -234,7 +235,7 @@ class SIPUAHelper extends EventManager {
 
       _ua!.start();
     } catch (e, s) {
-      logger.e(e.toString(), e, s);
+      logger.e(e.toString(), error: e, stackTrace: s);
     }
   }
 

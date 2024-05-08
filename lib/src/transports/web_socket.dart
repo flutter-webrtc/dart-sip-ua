@@ -108,7 +108,7 @@ class SIPUAWebSocket extends SIPUASocketInterface {
           protocols: <String>[_websocket_protocol],
           webSocketSettings: _webSocketSettings);
     } catch (e, s) {
-      logger.e(e.toString(), e, s);
+      logger.e(e.toString(), error: e, stackTrace: s);
       _connected = false;
       logger.e('WebSocket $_url error: $e');
     }
