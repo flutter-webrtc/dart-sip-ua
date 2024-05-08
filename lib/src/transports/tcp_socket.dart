@@ -97,7 +97,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
           protocols: <String>[_tcp_socket_protocol],
           tcpSocketSettings: _tcpSocketSettings);
     } catch (e, s) {
-      logger.e(e.toString(), null, s);
+      logger.e(e.toString(), stackTrace: s);
       _connected = false;
       logger.e('TcpSocket error: $e');
     }

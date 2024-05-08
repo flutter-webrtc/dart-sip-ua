@@ -130,8 +130,7 @@ class SocketTransport {
     if (!isConnected()) {
       logger.e(
           'unable to send message, transport is not connected. Current state is $status',
-          null,
-          StackTraceNJ());
+          stackTrace: StackTraceNJ());
 
       return false;
     }
