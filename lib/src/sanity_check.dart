@@ -2,9 +2,9 @@ import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'logger.dart';
 import 'sip_message.dart';
+import 'socket_transport.dart';
 import 'transactions/invite_server.dart';
 import 'transactions/non_invite_server.dart';
-import 'transport.dart';
 import 'ua.dart';
 import 'utils.dart' as Utils;
 
@@ -28,9 +28,9 @@ const List<bool Function()> responses = <bool Function()>[
 // local variables.
 late IncomingMessage message;
 late UA ua;
-late Transport transport;
+late SocketTransport transport;
 
-bool sanityCheck(IncomingMessage m, UA u, Transport t) {
+bool sanityCheck(IncomingMessage m, UA u, SocketTransport t) {
   message = m;
   ua = u;
   transport = t;

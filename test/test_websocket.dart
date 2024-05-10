@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:sip_ua/src/event_manager/events.dart';
-import 'package:sip_ua/src/transport.dart';
-import 'package:sip_ua/src/transports/websocket_interface.dart';
 import 'package:test/test.dart';
+
+import 'package:sip_ua/src/event_manager/events.dart';
+import 'package:sip_ua/src/socket_transport.dart';
+import 'package:sip_ua/src/transports/socket_interface.dart';
+import 'package:sip_ua/src/transports/web_socket.dart';
 
 List<void Function()> testFunctions = <void Function()>[
   () => test(' WebSocket: EchoTest', () async {
@@ -28,8 +30,8 @@ List<void Function()> testFunctions = <void Function()>[
           }
         });
 
-        WebSocketInterface client =
-            WebSocketInterface('ws://127.0.0.1:4040/sip', messageDelay: 0);
+        SIPUAWebSocket client =
+            SIPUAWebSocket('ws://127.0.0.1:4040/sip', messageDelay: 0);
 
         expect(client.url, 'ws://127.0.0.1:4040/sip');
         expect(client.via_transport, 'WS');
@@ -47,7 +49,7 @@ List<void Function()> testFunctions = <void Function()>[
           client.disconnect();
           completer.complete();
         };
-        client.ondisconnect = (WebSocketInterface socket, bool error,
+        client.ondisconnect = (SIPUASocketInterface socket, bool error,
             int? closeCode, String? reason) {
           print(
               'ondisconnect => error $error [$closeCode] ${reason.toString()}');
@@ -76,26 +78,27 @@ List<void Function()> testFunctions = <void Function()>[
             print(' An error occurred. $error');
           }
         });
-        WebSocketInterface socket =
-            WebSocketInterface('ws://127.0.0.1:4041/sip', messageDelay: 0);
-        Transport trasnport = Transport(<WebSocketInterface>[socket]);
+        SIPUAWebSocket socket =
+            SIPUAWebSocket('ws://127.0.0.1:4041/sip', messageDelay: 0);
+        SocketTransport trasnport =
+            SocketTransport(<SIPUASocketInterface>[socket]);
 
-        trasnport.onconnecting = (WebSocketInterface? socket, int? attempt) {
+        trasnport.onconnecting = (SIPUASocketInterface? socket, int? attempt) {
           expect(trasnport.isConnecting(), true);
         };
 
-        trasnport.onconnect = (Transport socket) {
+        trasnport.onconnect = (SocketTransport socket) {
           expect(trasnport.isConnected(), true);
           trasnport.send('message');
         };
 
-        trasnport.ondata = (Transport transport, String messageData) {
+        trasnport.ondata = (SocketTransport transport, String messageData) {
           // expect(socket['message'], 'message');
           trasnport.disconnect();
         };
 
         trasnport.ondisconnect =
-            (WebSocketInterface? socket, ErrorCause cause) {
+            (SIPUASocketInterface? socket, ErrorCause cause) {
           expect(trasnport.isConnected(), false);
           completer.complete();
         };

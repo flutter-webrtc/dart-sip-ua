@@ -69,7 +69,7 @@ class EventManager {
       targets.remove(listener);
       targets.add(listener);
     } catch (e, s) {
-      logger.e(e.toString(), null, s);
+      logger.e(e.toString(), error: e, stackTrace: s);
     }
   }
 
@@ -108,7 +108,7 @@ class EventManager {
           //   logger.w("invoking $event on $target");
           target(event);
         } catch (e, s) {
-          logger.e(e.toString(), null, s);
+          logger.e(e.toString(), error: e, stackTrace: s);
         }
       }
     }

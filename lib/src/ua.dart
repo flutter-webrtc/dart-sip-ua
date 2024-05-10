@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:sip_ua/src/transport_type.dart';
+import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -17,6 +19,7 @@ import 'registrator.dart';
 import 'rtc_session.dart';
 import 'sanity_check.dart';
 import 'sip_message.dart';
+import 'socket_transport.dart';
 import 'subscriber.dart';
 import 'timers.dart';
 import 'transactions/invite_client.dart';
@@ -25,8 +28,7 @@ import 'transactions/non_invite_client.dart';
 import 'transactions/non_invite_server.dart';
 import 'transactions/transaction_base.dart';
 import 'transactions/transactions.dart';
-import 'transport.dart';
-import 'transports/websocket_interface.dart';
+import 'transports/web_socket.dart';
 import 'uri.dart';
 import 'utils.dart' as Utils;
 
@@ -114,11 +116,11 @@ class UA extends EventManager {
   final Set<Applicant> _applicants = <Applicant>{};
 
   final Map<String?, RTCSession> _sessions = <String?, RTCSession>{};
-  Transport? _transport;
+  SocketTransport? _socketTransport;
   Contact? _contact;
   int _status = C.STATUS_INIT;
   int? _error;
-  final TransactionBag _transactions = TransactionBag();
+  late TransactionBag _transactions;
 
 // Custom UA empty object for high level use.
   final Map<String, dynamic> _data = <String, dynamic>{};
@@ -132,7 +134,7 @@ class UA extends EventManager {
 
   Settings get configuration => _configuration;
 
-  Transport? get transport => _transport;
+  SocketTransport? get socketTransport => _socketTransport;
 
   TransactionBag get transactions => _transactions;
 
@@ -150,8 +152,10 @@ class UA extends EventManager {
   void start() {
     logger.d('start()');
 
+    _transactions = TransactionBag();
+
     if (_status == C.STATUS_INIT) {
-      _transport!.connect();
+      _socketTransport!.connect();
     } else if (_status == C.STATUS_USER_CLOSED) {
       logger.d('restarting UA');
 
@@ -159,12 +163,12 @@ class UA extends EventManager {
       if (_closeTimer != null) {
         clearTimeout(_closeTimer);
         _closeTimer = null;
-        _transport!.disconnect();
+        _socketTransport!.disconnect();
       }
 
       // Reconnect.
       _status = C.STATUS_INIT;
-      _transport!.connect();
+      _socketTransport!.connect();
     } else if (_status == C.STATUS_READY) {
       logger.d('UA is in READY status, not restarted');
     } else {
@@ -232,7 +236,7 @@ class UA extends EventManager {
    * Connection state.
    */
   bool isConnected() {
-    return _transport!.isConnected();
+    return _socketTransport!.isConnected();
   }
 
   /**
@@ -330,8 +334,8 @@ class UA extends EventManager {
           if (!rtcSession.isEnded()) {
             rtcSession.terminate();
           }
-        } catch (error, s) {
-          logger.e(error.toString(), null, s);
+        } catch (e, s) {
+          logger.e(e.toString(), error: e, stackTrace: s);
         }
       }
     });
@@ -343,8 +347,8 @@ class UA extends EventManager {
         try {
           Subscriber subscriber = _subscribers[key]!;
           subscriber.terminate(null);
-        } catch (error, s) {
-          logger.e(error.toString(), null, s);
+        } catch (e, s) {
+          logger.e(e.toString(), error: e, stackTrace: s);
         }
       }
     });
@@ -362,12 +366,12 @@ class UA extends EventManager {
 
     int num_transactions = _transactions.countTransactions();
     if (num_transactions == 0 && num_sessions == 0) {
-      _transport!.disconnect();
+      _socketTransport!.disconnect();
     } else {
       _closeTimer = setTimeout(() {
         logger.i('Closing connection');
         _closeTimer = null;
-        _transport!.disconnect();
+        _socketTransport!.disconnect();
       }, 2000);
     }
   }
@@ -619,11 +623,11 @@ class UA extends EventManager {
     // Create the server transaction.
     if (method == SipMethod.INVITE) {
       /* eslint-disable no-*/
-      InviteServerTransaction(this, _transport, request);
+      InviteServerTransaction(this, _socketTransport, request);
       /* eslint-enable no-*/
     } else if (method != SipMethod.ACK && method != SipMethod.CANCEL) {
       /* eslint-disable no-*/
-      NonInviteServerTransaction(this, _transport, request);
+      NonInviteServerTransaction(this, _socketTransport, request);
       /* eslint-enable no-*/
     }
 
@@ -656,7 +660,8 @@ class UA extends EventManager {
         return;
       }
     } else if (method == SipMethod.SUBSCRIBE) {
-      if (listeners['newSubscribe']?.length == 0) {
+      // ignore: collection_methods_unrelated_type
+      if (listeners['newSubscribe'] == null) {
         request.reply(405);
 
         return;
@@ -835,28 +840,23 @@ class UA extends EventManager {
         .toString()
         .replaceAll(RegExp(r'sip:', caseSensitive: false), '');
 
-    // Transport.
+    // Websockets Transport
+
     try {
-      _transport = Transport(_configuration.sockets!, <String, int>{
+      _socketTransport = SocketTransport(_configuration.sockets!, <String, int>{
         // Recovery options.
         'max_interval': _configuration.connection_recovery_max_interval,
         'min_interval': _configuration.connection_recovery_min_interval
       });
 
       // Transport event callbacks.
-      _transport!.onconnecting = onTransportConnecting;
-      _transport!.onconnect = onTransportConnect;
-      _transport!.ondisconnect = onTransportDisconnect;
-      _transport!.ondata = onTransportData;
+      _socketTransport!.onconnecting = onTransportConnecting;
+      _socketTransport!.onconnect = onTransportConnect;
+      _socketTransport!.ondisconnect = onTransportDisconnect;
+      _socketTransport!.ondata = onTransportData;
     } catch (e) {
       logger.e('Failed to _loadConfig: ${e.toString()}');
       throw Exceptions.ConfigurationError('sockets', _configuration.sockets);
-    }
-
-    String transport = 'ws';
-
-    if (_configuration.sockets!.isNotEmpty) {
-      transport = _configuration.sockets!.first.via_transport.toLowerCase();
     }
 
     // Remove sockets instance from configuration object.
@@ -880,6 +880,8 @@ class UA extends EventManager {
     // User no_answer_timeout.
     _configuration.no_answer_timeout *= 1000;
 
+    String transport = _configuration.transportType?.name ?? 'WS';
+
     // Via Host.
     if (_configuration.contact_uri != null) {
       _configuration.via_host = _configuration.contact_uri.host;
@@ -902,13 +904,13 @@ class UA extends EventManager {
    */
 
 // Transport connecting event.
-  void onTransportConnecting(WebSocketInterface? socket, int? attempts) {
+  void onTransportConnecting(SIPUASocketInterface? socket, int? attempts) {
     logger.d('Transport connecting');
     emit(EventSocketConnecting(socket: socket));
   }
 
 // Transport connected event.
-  void onTransportConnect(Transport transport) {
+  void onTransportConnect(SocketTransport transport) {
     logger.d('Transport connected');
     if (_status == C.STATUS_USER_CLOSED) {
       return;
@@ -924,7 +926,7 @@ class UA extends EventManager {
   }
 
 // Transport disconnected event.
-  void onTransportDisconnect(WebSocketInterface? socket, ErrorCause cause) {
+  void onTransportDisconnect(SIPUASocketInterface? socket, ErrorCause cause) {
     // Run _onTransportError_ callback on every client transaction using _transport_.
     _transactions.removeAll().forEach((TransactionBase transaction) {
       transaction.onTransportError();
@@ -942,7 +944,7 @@ class UA extends EventManager {
   }
 
 // Transport data event.
-  void onTransportData(Transport transport, String messageData) {
+  void onTransportData(SocketTransport transport, String messageData) {
     IncomingMessage? message = Parser.parseMessage(messageData, this);
 
     if (message == null) {

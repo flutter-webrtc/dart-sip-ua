@@ -1,0 +1,1 @@
+enum TransportType { TCP, WS }
