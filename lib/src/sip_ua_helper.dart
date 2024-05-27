@@ -471,14 +471,11 @@ enum CallStateEnum {
 
 class Call {
   Call(this._id, this._session, this.state);
-
   final String? _id;
   final RTCSession _session;
 
   String? get id => _id;
-
   RTCPeerConnection? get peerConnection => _session.connection;
-
   RTCSession get session => _session;
   CallStateEnum state;
 
@@ -632,7 +629,6 @@ class CallState {
       this.stream,
       this.cause,
       this.refer});
-
   CallStateEnum state;
   ErrorCause? cause;
   String? originator;
@@ -651,7 +647,6 @@ enum RegistrationStateEnum {
 
 class RegistrationState {
   RegistrationState({this.state, this.cause});
-
   RegistrationStateEnum? state;
   ErrorCause? cause;
 }
@@ -665,14 +660,12 @@ enum TransportStateEnum {
 
 class TransportState {
   TransportState(this.state, {this.cause});
-
   TransportStateEnum state;
   ErrorCause? cause;
 }
 
 class SIPMessageRequest {
   SIPMessageRequest(this.message, this.originator, this.request);
-
   dynamic request;
   String? originator;
   Message? message;
@@ -680,20 +673,15 @@ class SIPMessageRequest {
 
 abstract class SipUaHelperListener {
   void transportStateChanged(TransportState state);
-
   void registrationStateChanged(RegistrationState state);
-
   void callStateChanged(Call call, CallState state);
-
   //For SIP message coming
   void onNewMessage(SIPMessageRequest msg);
-
   void onNewNotify(Notify ntf);
 }
 
 class Notify {
   Notify({this.request});
-
   IncomingRequest? request;
 }
 
