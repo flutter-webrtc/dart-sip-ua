@@ -220,7 +220,15 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     bool remoteHasVideo = call!.remote_has_video;
     final mediaConstraints = <String, dynamic>{
       'audio': true,
-      'video': remoteHasVideo
+      'video': <String, dynamic>{
+        'mandatory': <String, dynamic>{
+          'minWidth': '640',
+          'minHeight': '480',
+          'minFrameRate': '30',
+        },
+        'facingMode': 'user',
+        'optional': <dynamic>[],
+      }
     };
     MediaStream mediaStream;
 
@@ -232,7 +240,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           await navigator.mediaDevices.getUserMedia(mediaConstraints);
       mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
-      mediaConstraints['video'] = remoteHasVideo;
+      if (!remoteHasVideo) {
+        mediaConstraints['video'] = false;
+      }
       mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
 
