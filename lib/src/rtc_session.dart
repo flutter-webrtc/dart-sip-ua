@@ -848,6 +848,7 @@ class RTCSession extends EventManager implements Owner {
     int duration = options['duration'] ?? RTCSession_DTMF.C.DEFAULT_DURATION;
     int interToneGap =
         options['interToneGap'] ?? RTCSession_DTMF.C.DEFAULT_INTER_TONE_GAP;
+    int sendInterval = options['sendInterval'] ?? duration + interToneGap;
 
     if (tones == null) {
       throw Exceptions.TypeError('Not enough arguments');
@@ -931,7 +932,7 @@ class RTCSession extends EventManager implements Owner {
 
           dtmf.send(tone, options);
           await Future<void>.delayed(
-              Duration(milliseconds: duration + interToneGap), () {});
+              Duration(milliseconds: sendInterval), () {});
         });
       }
     }
