@@ -2,33 +2,15 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:sip_ua/src/event_manager/events.dart';
+import 'package:sip_ua/src/transport_constants.dart';
+import 'package:sip_ua/src/transports/socket_interface.dart';
+import 'package:sip_ua/src/transports/tcp_socket.dart';
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
-import 'socket.dart' as Socket;
 import 'stack_trace_nj.dart';
 import 'timers.dart';
-import 'transports/websocket_interface.dart';
+import 'transports/web_socket.dart';
 import 'utils.dart';
-
-/**
- * Constants
- */
-class C {
-  // Transport status.
-  static const int STATUS_CONNECTED = 0;
-  static const int STATUS_CONNECTING = 1;
-  static const int STATUS_DISCONNECTED = 2;
-
-  // Socket status.
-  static const int SOCKET_STATUS_READY = 0;
-  static const int SOCKET_STATUS_ERROR = 1;
-
-  // Recovery options.
-  static const Map<String, int> recovery_options = <String, int>{
-    'min_interval': 2, // minimum interval in seconds between recover attempts
-    'max_interval': 30 // maximum interval in seconds between recover attempts
-  };
-}
 
 /*
  * Manages one or multiple DartSIP.Socket instances.
@@ -36,33 +18,33 @@ class C {
  *
  * @socket DartSIP::Socket instance
  */
-class Transport {
-  Transport(List<WebSocketInterface> sockets,
+class SocketTransport {
+  SocketTransport(List<SIPUASocketInterface>? sockets,
       [Map<String, int> recovery_options = C.recovery_options]) {
-    logger.d('new()');
+    logger.d('Socket Transport new()');
 
     _recovery_options = recovery_options;
 
     // We must recieve at least 1 socket
-    if (sockets.length == 0) {
-      throw Exceptions.TypeError('invalid argument: sockets');
+    if (sockets!.length == 0) {
+      throw Exceptions.TypeError(
+          'invalid argument: Must recieve atleast 1 web socket');
     }
 
-    for (WebSocketInterface socket in sockets) {
+    for (SIPUASocketInterface socket in sockets) {
       _socketsMap.add(<String, dynamic>{
         'socket': socket,
         'weight': socket.weight ?? 0,
         'status': C.SOCKET_STATUS_READY
       });
     }
-
     // Get the socket with higher weight.
     _getSocket();
   }
 
   int status = C.STATUS_DISCONNECTED;
   // Current socket.
-  late WebSocketInterface socket;
+  late SIPUASocketInterface socket;
   // Socket collection.
   final List<Map<String, dynamic>> _socketsMap = <Map<String, dynamic>>[];
   late Map<String, int> _recovery_options;
@@ -70,10 +52,11 @@ class Transport {
   Timer? _recovery_timer;
   bool _close_requested = false;
 
-  late void Function(WebSocketInterface? socket, int? attempts) onconnecting;
-  late void Function(WebSocketInterface? socket, ErrorCause cause) ondisconnect;
-  late void Function(Transport transport) onconnect;
-  late void Function(Transport transport, String messageData) ondata;
+  late void Function(SIPUASocketInterface? socket, int? attempts) onconnecting;
+  late void Function(SIPUASocketInterface? socket, ErrorCause cause)
+      ondisconnect;
+  late void Function(SocketTransport transport) onconnect;
+  late void Function(SocketTransport transport, String messageData) ondata;
 
   /**
    * Instance Methods
@@ -86,7 +69,7 @@ class Transport {
   String? get sip_uri => socket.sip_uri;
 
   void connect() {
-    logger.d('connect()');
+    logger.d('Transport connect()');
 
     if (isConnected()) {
       logger.d('Transport is already connected');
@@ -113,7 +96,7 @@ class Transport {
   }
 
   void disconnect() {
-    logger.d('close()');
+    logger.d('Transport close()');
 
     _close_requested = true;
     _recover_attempts = 0;
@@ -127,7 +110,7 @@ class Transport {
 
     // Unbind socket event callbacks.
     socket.onconnect = () => () {};
-    socket.ondisconnect = (WebSocketInterface socket, bool error,
+    socket.ondisconnect = (SIPUASocketInterface socket, bool error,
             int? closeCode, String? reason) =>
         () {};
     socket.ondata = (dynamic data) => () {};
@@ -142,18 +125,17 @@ class Transport {
   }
 
   bool send(dynamic data) {
-    logger.d('send()');
+    logger.d('Socket Transport send()');
 
     if (!isConnected()) {
       logger.e(
           'unable to send message, transport is not connected. Current state is $status',
-          error: e,
           stackTrace: StackTraceNJ());
+
       return false;
     }
-
     String message = data.toString();
-    //logger.d('sending message:\n\n$message\n');
+    message.split('fingerprint');
     return socket.send(message);
   }
 
@@ -249,7 +231,7 @@ class Transport {
   }
 
   void _onDisconnect(
-      WebSocketInterface socket, bool error, int? closeCode, String? reason) {
+      SIPUASocketInterface socket, bool error, int? closeCode, String? reason) {
     status = C.STATUS_DISCONNECTED;
     ondisconnect(
         socket,
@@ -275,8 +257,10 @@ class Transport {
     // CRLF Keep Alive response from server. Ignore it.
     if (data == '\r\n') {
       logger.d('received message with CRLF Keep Alive response');
+
       return;
     }
+
     // Binary message.
     else if (data is! String) {
       try {
@@ -287,7 +271,6 @@ class Transport {
             ' message discarded');
         return;
       }
-
       logger.d('received binary message:\n\n$data\n');
     }
 

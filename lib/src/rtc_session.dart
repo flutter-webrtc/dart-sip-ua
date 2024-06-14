@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
+import 'package:sdp_transform/sdp_transform.dart';
 
 import 'package:sip_ua/sip_ua.dart';
 import 'constants.dart' as DartSIP_C;
@@ -1962,27 +1965,28 @@ class RTCSession extends EventManager implements Owner {
   }
 
   Future<RTCSessionDescription> _processInDialogSdpOffer(
-      dynamic request) async {
+      IncomingRequest request) async {
     logger.d('_processInDialogSdpOffer()');
 
-    Map<String, dynamic> sdp = request.parseSDP();
+    Map<String, dynamic>? sdp = request.parseSDP();
 
     bool hold = false;
+    if (sdp != null) {
+      for (Map<String, dynamic> m in sdp['media']) {
+        if (holdMediaTypes.indexOf(m['type']) == -1) {
+          continue;
+        }
 
-    for (Map<String, dynamic> m in sdp['media']) {
-      if (holdMediaTypes.indexOf(m['type']) == -1) {
-        continue;
-      }
+        String direction = m['direction'] ?? sdp['direction'] ?? 'sendrecv';
 
-      String direction = m['direction'] ?? sdp['direction'] ?? 'sendrecv';
-
-      if (direction == 'sendonly' || direction == 'inactive') {
-        hold = true;
-      }
-      // If at least one of the streams is active don't emit 'hold'.
-      else {
-        hold = false;
-        break;
+        if (direction == 'sendonly' || direction == 'inactive') {
+          hold = true;
+        }
+        // If at least one of the streams is active don't emit 'hold'.
+        else {
+          hold = false;
+          break;
+        }
       }
     }
 

@@ -51,7 +51,6 @@ class DTMF extends EventManager {
       throw Exceptions.InvalidStateError(_session.status);
     }
 
-    print(options);
     List<dynamic> extraHeaders = options['extraHeaders'] != null
         ? Utils.cloneArray(options['extraHeaders'])
         : <dynamic>[];

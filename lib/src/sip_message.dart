@@ -10,7 +10,7 @@ import 'exceptions.dart' as Exceptions;
 import 'grammar.dart';
 import 'logger.dart';
 import 'name_addr_header.dart';
-import 'transport.dart';
+import 'socket_transport.dart';
 import 'ua.dart';
 import 'uri.dart';
 import 'utils.dart' as utils;
@@ -47,7 +47,9 @@ class OutgoingRequest {
     if (params['route_set'] != null) {
       setHeader('route', params['route_set']);
     } else if (ua.configuration.use_preloaded_route) {
-      setHeader('route', '<${ua.transport!.sip_uri};lr>');
+      if (ua.socketTransport != null) {
+        setHeader('route', '<${ua.socketTransport!.sip_uri};lr>');
+      }
     }
 
     // Via.
@@ -521,7 +523,7 @@ class IncomingRequest extends IncomingMessage {
   }
   UA? ua;
   URI? ruri;
-  Transport? transport;
+  SocketTransport? transport;
   TransactionBase? server_transaction;
   /**
   * Stateful reply.

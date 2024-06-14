@@ -5,15 +5,15 @@ import '../constants.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
 import '../sip_message.dart';
+import '../socket_transport.dart';
 import '../timers.dart';
-import '../transport.dart';
 import '../ua.dart';
 import '../utils.dart';
 import 'transaction_base.dart';
 
 class InviteClientTransaction extends TransactionBase {
-  InviteClientTransaction(UA ua, Transport transport, OutgoingRequest request,
-      EventManager eventHandlers) {
+  InviteClientTransaction(UA ua, SocketTransport transport,
+      OutgoingRequest request, EventManager eventHandlers) {
     id = 'z9hG4bK${(Math.random() * 10000000).floor()}';
     this.ua = ua;
     this.transport = transport;

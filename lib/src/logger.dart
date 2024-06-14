@@ -28,7 +28,7 @@ class MyLogPrinter extends LogPrinter {
   MyLogPrinter(this.currentWorkingDirectory);
 
   static final Map<Level, AnsiColor> levelColors = <Level, AnsiColor>{
-    Level.verbose: AnsiColor.fg(AnsiColor.grey(0.5)),
+    Level.trace: AnsiColor.fg(AnsiColor.grey(0.5)),
     Level.debug: AnsiColor.none(),
     Level.info: AnsiColor.fg(12),
     Level.warning: AnsiColor.fg(208),
@@ -130,7 +130,7 @@ class AnsiColor {
 
   String call(String msg) {
     if (color) {
-      return '$this$msg$ansiDefault';
+      return '$msg$ansiDefault';
     } else {
       return msg;
     }

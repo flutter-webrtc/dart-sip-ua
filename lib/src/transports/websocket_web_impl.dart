@@ -8,8 +8,8 @@ typedef OnMessageCallback = void Function(dynamic msg);
 typedef OnCloseCallback = void Function(int? code, String? reason);
 typedef OnOpenCallback = void Function();
 
-class WebSocketImpl {
-  WebSocketImpl(this._url, this.messageDelay);
+class SIPUAWebSocketImpl {
+  SIPUAWebSocketImpl(this._url, this.messageDelay);
 
   final String _url;
   WebSocket? _socket;
