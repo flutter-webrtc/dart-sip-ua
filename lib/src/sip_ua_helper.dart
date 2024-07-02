@@ -795,7 +795,7 @@ class UaSettings {
   /// Sip Message Delay (in millisecond) (default 0).
   int sip_message_delay = 0;
   List<Map<String, String>> iceServers = <Map<String, String>>[
-    <String, String>{'url': 'stun:stun.l.google.com:19302'},
+    <String, String>{'urls': 'stun:stun.l.google.com:19302'},
 // turn server configuration example.
 //    {
 //      'url': 'turn:123.45.67.89:3478',
