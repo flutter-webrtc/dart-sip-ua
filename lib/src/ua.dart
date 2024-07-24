@@ -880,7 +880,13 @@ class UA extends EventManager {
     // User no_answer_timeout.
     _configuration.no_answer_timeout *= 1000;
 
+    //Default transport initialization
     String transport = _configuration.transportType?.name ?? 'WS';
+
+    //Override transport from socket
+    if(transport == 'WS' && _socketTransport != null){
+      transport = _socketTransport!.via_transport;
+    }
 
     // Via Host.
     if (_configuration.contact_uri != null) {
