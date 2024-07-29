@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
+import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 import 'package:sip_ua/sip_ua.dart';
+import 'package:sip_ua/src/event_manager/internal_events.dart';
 import 'package:sip_ua/src/map_helper.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'package:sip_ua/src/transports/tcp_socket.dart';
@@ -88,12 +90,13 @@ class SIPUAHelper extends EventManager {
   }
 
   Future<bool> call(String target,
-      {bool voiceonly = false,
+      {bool voiceOnly = false,
       MediaStream? mediaStream,
       List<String>? headers,
       Map<String, dynamic>? customOptions}) async {
     if (_ua != null && _ua!.isConnected()) {
-      Map<String, dynamic> options = buildCallOptions(voiceonly);
+      Map<String, dynamic> options = buildCallOptions(voiceOnly);
+
       if (customOptions != null) {
         options = MapHelper.merge(options, customOptions);
       }
@@ -102,6 +105,7 @@ class SIPUAHelper extends EventManager {
       }
       List<dynamic> extHeaders = options['extraHeaders'] as List<dynamic>;
       extHeaders.addAll(headers ?? <String>[]);
+      options['extraHeaders'] = extHeaders;
       _ua!.call(target, options);
       return true;
     } else {
@@ -113,6 +117,17 @@ class SIPUAHelper extends EventManager {
 
   Call? findCall(String id) {
     return _calls[id];
+  }
+
+  Future<void> renegotiate({
+    required Call call,
+    required bool voiceOnly,
+    Map<String, dynamic>? options,
+    bool useUpdate = false,
+    Function(IncomingMessage)? done,
+  }) async {
+    Map<String, dynamic> finalOptions = options ?? buildCallOptions(voiceOnly);
+    call.renegotiate(options: finalOptions, useUpdate: useUpdate, done: done);
   }
 
   Future<void> start(UaSettings uaSettings) async {
@@ -165,6 +180,8 @@ class SIPUAHelper extends EventManager {
     _settings.instance_id = uaSettings.instanceId;
     _settings.registrar_server = uaSettings.registrarServer;
     _settings.contact_uri = uaSettings.contact_uri;
+    _settings.terminateOnAudioMediaPortZero =
+        uaSettings.terminateOnMediaPortZero;
 
     try {
       _ua = UA(_settings);
@@ -217,10 +234,14 @@ class SIPUAHelper extends EventManager {
           session.addAllEventHandlers(
               buildCallOptions()['eventHandlers'] as EventManager);
         }
+        bool hasVideo = session.data?['video'] ?? false;
+
         _calls[event.id] =
-            Call(event.id, session, CallStateEnum.CALL_INITIATION);
+            Call(event.id, session, CallStateEnum.CALL_INITIATION, !hasVideo);
         _notifyCallStateListeners(
-            event, CallState(CallStateEnum.CALL_INITIATION));
+            event,
+            CallState(CallStateEnum.CALL_INITIATION,
+                video: session.data?['video']));
       });
 
       _ua!.on(EventNewMessage(), (EventNewMessage event) {
@@ -315,6 +336,11 @@ class SIPUAHelper extends EventManager {
             CallState(CallStateEnum.STREAM,
                 stream: event.stream, originator: event.originator));
       });
+    });
+
+    handlers.on(EventReInvite(), (EventReInvite event) {
+      logger.d('Reinvite received in helper, notifying listeners');
+      _notifyReInviteListeners(event);
     });
     handlers.on(EventCallRefer(), (EventCallRefer refer) async {
       logger.d('Refer received, Transfer current call to => ${refer.aor}');
@@ -443,6 +469,24 @@ class SIPUAHelper extends EventManager {
     }
   }
 
+  void _notifyReInviteListeners(EventReInvite event) {
+    // Copy to prevent concurrent modification exception
+    List<SipUaHelperListener> listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in listeners) {
+      IncomingRequest request = event.request as IncomingRequest;
+      String body = request.body ?? '';
+      if (request.sdp == null && body.isNotEmpty) {
+        request.sdp = sdp_transform.parse(body);
+      }
+      listener.onNewReinvite(ReInvite(
+          sdp: request.sdp,
+          hasAudio: event.hasAudio,
+          hasVideo: event.hasVideo,
+          accept: event.callback,
+          reject: event.reject));
+    }
+  }
+
   void _notifyNotifyListeners(EventNotify event) {
     // Copy to prevent concurrent modification exception
     List<SipUaHelperListener> listeners = _sipUaHelperListeners.toList();
@@ -466,11 +510,11 @@ enum CallStateEnum {
   REFER,
   HOLD,
   UNHOLD,
-  CALL_INITIATION
+  CALL_INITIATION,
 }
 
 class Call {
-  Call(this._id, this._session, this.state);
+  Call(this._id, this._session, this.state, this.voiceOnly);
   final String? _id;
   final RTCSession _session;
 
@@ -478,6 +522,7 @@ class Call {
   RTCPeerConnection? get peerConnection => _session.connection;
   RTCSession get session => _session;
   CallStateEnum state;
+  bool voiceOnly;
 
   void answer(Map<String, dynamic> options, {MediaStream? mediaStream = null}) {
     assert(_session != null, 'ERROR(answer): rtc session is invalid!');
@@ -500,6 +545,28 @@ class Call {
 
   void hangup([Map<String, dynamic>? options]) {
     assert(_session != null, 'ERROR(hangup): rtc session is invalid!');
+    if (peerConnection != null) {
+      for (MediaStream? stream in peerConnection!.getLocalStreams()) {
+        if (stream == null) return;
+        logger.d(
+            'Stopping local stream with tracks: ${stream.getTracks().length}');
+        for (MediaStreamTrack track in stream.getTracks()) {
+          logger.d('Stopping track: ${track.kind}${track.id} ');
+          track.stop();
+        }
+      }
+      for (MediaStream? stream in peerConnection!.getRemoteStreams()) {
+        if (stream == null) return;
+        logger.d(
+            'Stopping remote stream with tracks: ${stream.getTracks().length}');
+        for (MediaStreamTrack track in stream.getTracks()) {
+          logger.d('Stopping track: ${track.kind}${track.id} ');
+          track.stop();
+        }
+      }
+    } else {
+      logger.d("peerConnection is null, can't stop tracks.");
+    }
     _session.terminate(options);
   }
 
@@ -523,9 +590,13 @@ class Call {
     _session.unmute(audio, video);
   }
 
-  void renegotiate(Map<String, dynamic> options) {
+  void renegotiate({
+    required Map<String, dynamic>? options,
+    bool useUpdate = false,
+    Function(IncomingMessage)? done,
+  }) {
     assert(_session != null, 'ERROR(renegotiate): rtc session is invalid!');
-    _session.renegotiate(options);
+    _session.renegotiate(options: options, useUpdate: useUpdate, done: done);
   }
 
   void sendDTMF(String tones, [Map<String, dynamic>? options]) {
@@ -678,11 +749,21 @@ abstract class SipUaHelperListener {
   //For SIP message coming
   void onNewMessage(SIPMessageRequest msg);
   void onNewNotify(Notify ntf);
+  void onNewReinvite(ReInvite event);
 }
 
 class Notify {
   Notify({this.request});
   IncomingRequest? request;
+}
+
+class ReInvite {
+  ReInvite({this.hasVideo, this.hasAudio, this.sdp, this.accept, this.reject});
+  bool? hasVideo;
+  bool? hasAudio;
+  Map<String, dynamic>? sdp;
+  Future<bool> Function(Map<String, dynamic> options)? accept;
+  bool Function(Map<String, dynamic> options)? reject;
 }
 
 class RegisterParams {
@@ -791,6 +872,8 @@ class UaSettings {
 
   /// ICE Gathering Timeout, default 500ms
   int iceGatheringTimeout = 500;
+
+  bool terminateOnMediaPortZero = false;
 
   /// Sip Message Delay (in millisecond) (default 0).
   int sip_message_delay = 0;
