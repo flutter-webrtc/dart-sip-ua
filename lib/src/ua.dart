@@ -835,6 +835,9 @@ class UA extends EventManager {
     // String containing _configuration.uri without scheme and user.
     URI hostport_params = _configuration.uri.clone();
 
+    _configuration.terminateOnAudioMediaPortZero =
+        configuration.terminateOnAudioMediaPortZero;
+
     hostport_params.user = null;
     _configuration.hostport_params = hostport_params
         .toString()
@@ -963,6 +966,8 @@ class UA extends EventManager {
 
     // Do some sanity check.
     if (!sanityCheck(message, this, transport)) {
+      logger.w(
+          'Incoming message did not pass sanity test, dumping it: \n\n $message');
       return;
     }
 

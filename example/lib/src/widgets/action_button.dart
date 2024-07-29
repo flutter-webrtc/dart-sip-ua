@@ -29,6 +29,10 @@ class ActionButton extends StatefulWidget {
 class _ActionButtonState extends State<ActionButton> {
   @override
   Widget build(BuildContext context) {
+    Color? background =
+        Theme.of(context).buttonTheme.colorScheme?.surfaceContainerLow;
+    Color splashColor = Theme.of(context).splashColor;
+    Color? textColor = Theme.of(context).textTheme.bodyMedium?.color;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -40,9 +44,9 @@ class _ActionButtonState extends State<ActionButton> {
             child: RawMaterialButton(
               onPressed: widget.onPressed,
               splashColor: widget.fillColor ??
-                  (widget.checked ? Colors.white : Colors.blue),
+                  (widget.checked ? splashColor : Colors.blue),
               fillColor: widget.fillColor ??
-                  (widget.checked ? Colors.blue : Colors.white),
+                  (widget.checked ? Colors.blue : background),
               elevation: 10.0,
               shape: CircleBorder(),
               child: Padding(
@@ -54,12 +58,12 @@ class _ActionButtonState extends State<ActionButton> {
                             Text('${widget.title}',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: widget.fillColor ?? Colors.grey[500],
+                                  color: widget.fillColor ?? textColor,
                                 )),
                             Text(widget.subTitle.toUpperCase(),
                                 style: TextStyle(
                                   fontSize: 8,
-                                  color: widget.fillColor ?? Colors.grey[500],
+                                  color: widget.fillColor ?? textColor,
                                 ))
                           ])
                     : Icon(
@@ -82,7 +86,7 @@ class _ActionButtonState extends State<ActionButton> {
                         widget.title!,
                         style: TextStyle(
                           fontSize: 15.0,
-                          color: widget.fillColor ?? Colors.grey[500],
+                          color: widget.fillColor ?? textColor,
                         ),
                       ),
               )
