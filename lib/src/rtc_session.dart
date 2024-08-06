@@ -634,9 +634,10 @@ class RTCSession extends EventManager implements Owner {
     }
 
     logger.d('emit "sdp"');
-    emit(EventSdp(originator: 'remote', type: 'offer', sdp: request.body));
+    final String? processedSDP = _sdpOfferToWebRTC(request.body);
+    emit(EventSdp(originator: 'remote', type: 'offer', sdp: processedSDP));
 
-    RTCSessionDescription offer = RTCSessionDescription(request.body, 'offer');
+    RTCSessionDescription offer = RTCSessionDescription(processedSDP, 'offer');
     try {
       await _connection!.setRemoteDescription(offer);
     } catch (error) {
@@ -1981,9 +1982,10 @@ class RTCSession extends EventManager implements Owner {
     }
 
     logger.d('emit "sdp"');
-    emit(EventSdp(originator: 'remote', type: 'offer', sdp: request.body));
+    final String? processedSDP = _sdpOfferToWebRTC(request.body);
+    emit(EventSdp(originator: 'remote', type: 'offer', sdp: processedSDP));
 
-    RTCSessionDescription offer = RTCSessionDescription(request.body, 'offer');
+    RTCSessionDescription offer = RTCSessionDescription(processedSDP, 'offer');
 
     if (_status == C.STATUS_TERMINATED) {
       throw Exceptions.InvalidStateError('terminated');
@@ -2785,6 +2787,28 @@ class RTCSession extends EventManager implements Owner {
         }
       }
     }
+
+    return sdp_transform.write(sdp, null);
+  }
+
+  /// SDP offers may contain text media channels. e.g. Older clients using linphone.
+  /// 
+  /// WebRTC does not support text media channels, so remove them.
+  String? _sdpOfferToWebRTC(String? sdpInput) {
+    if (sdpInput == null) {
+      return sdpInput;
+    }
+
+    Map<String, dynamic> sdp = sdp_transform.parse(sdpInput);
+
+    final List<Map<String, dynamic>> mediaList = <Map<String, dynamic>>[];
+
+    for (dynamic element in sdp['media']) {
+      if (element['type'] != 'text') {
+        mediaList.add(element);
+      }
+    }
+    sdp['media'] = mediaList;
 
     return sdp_transform.write(sdp, null);
   }
