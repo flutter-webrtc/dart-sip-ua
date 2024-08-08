@@ -28,13 +28,14 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   MediaStream? _remoteStream;
 
   bool _showNumPad = false;
-  String _timeLabel = '00:00';
+  final ValueNotifier<String> _timeLabel = ValueNotifier<String>('00:00');
   bool _audioMuted = false;
   bool _videoMuted = false;
   bool _speakerOn = false;
   bool _hold = false;
   bool _mirror = true;
   String? _holdOriginator;
+  bool _callConfirmed = false;
   CallStateEnum _state = CallStateEnum.NONE;
 
   late String _transferTarget;
@@ -42,9 +43,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   SIPUAHelper? get helper => widget._helper;
 
-  bool get voiceOnly =>
-      (_localStream == null || _localStream!.getVideoTracks().isEmpty) &&
-      (_remoteStream == null || _remoteStream!.getVideoTracks().isEmpty);
+  bool get voiceOnly => call!.voiceOnly && !call!.remote_has_video;
 
   String? get remoteIdentity => call!.remote_identity;
 
@@ -71,11 +70,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
       Duration duration = Duration(seconds: timer.tick);
       if (mounted) {
-        setState(() {
-          _timeLabel = [duration.inMinutes, duration.inSeconds]
-              .map((seg) => seg.remainder(60).toString().padLeft(2, '0'))
-              .join(':');
-        });
+        _timeLabel.value = [duration.inMinutes, duration.inSeconds]
+            .map((seg) => seg.remainder(60).toString().padLeft(2, '0'))
+            .join(':');
       } else {
         _timer.cancel();
       }
@@ -132,7 +129,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
     switch (callState.state) {
       case CallStateEnum.STREAM:
-        _handelStreams(callState);
+        _handleStreams(callState);
         break;
       case CallStateEnum.ENDED:
       case CallStateEnum.FAILED:
@@ -144,6 +141,8 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       case CallStateEnum.PROGRESS:
       case CallStateEnum.ACCEPTED:
       case CallStateEnum.CONFIRMED:
+        setState(() => _callConfirmed = true);
+        break;
       case CallStateEnum.HOLD:
       case CallStateEnum.UNHOLD:
       case CallStateEnum.NONE:
@@ -176,7 +175,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     _cleanUp();
   }
 
-  void _handelStreams(CallState event) async {
+  void _handleStreams(CallState event) async {
     MediaStream? stream = event.stream;
     if (event.originator == 'local') {
       if (_localRenderer != null) {
@@ -221,18 +220,25 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     final mediaConstraints = <String, dynamic>{
       'audio': true,
       'video': remoteHasVideo
+          ? {
+              'mandatory': <String, dynamic>{
+                'minWidth': '640',
+                'minHeight': '480',
+                'minFrameRate': '30',
+              },
+              'facingMode': 'user',
+            }
+          : false
     };
     MediaStream mediaStream;
 
     if (kIsWeb && remoteHasVideo) {
       mediaStream =
           await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
-      mediaConstraints['video'] = false;
       MediaStream userStream =
           await navigator.mediaDevices.getUserMedia(mediaConstraints);
       mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
-      mediaConstraints['video'] = remoteHasVideo;
       mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
 
@@ -322,6 +328,19 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     });
   }
 
+  void _handleVideoUpgrade() {
+    if (voiceOnly) {
+      setState(() {
+        call!.voiceOnly = false;
+      });
+      helper!.renegotiate(
+          call: call!, voiceOnly: false, done: (incomingMessage) {});
+    } else {
+      helper!.renegotiate(
+          call: call!, voiceOnly: true, done: (incomingMessage) {});
+    }
+  }
+
   void _toggleSpeaker() {
     if (_localStream != null) {
       _speakerOn = !_speakerOn;
@@ -388,6 +407,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
     final basicActions = <Widget>[];
     final advanceActions = <Widget>[];
+    final advanceActions2 = <Widget>[];
 
     switch (_state) {
       case CallStateEnum.NONE:
@@ -434,6 +454,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
               icon: _speakerOn ? Icons.volume_off : Icons.volume_up,
               checked: _speakerOn,
               onPressed: () => _toggleSpeaker(),
+            ));
+            advanceActions2.add(ActionButton(
+              title: 'request video',
+              icon: Icons.videocam,
+              onPressed: () => _handleVideoUpgrade(),
             ));
           } else {
             advanceActions.add(ActionButton(
@@ -485,6 +510,16 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     if (_showNumPad) {
       actionWidgets.addAll(_buildNumPad());
     } else {
+      if (advanceActions2.isNotEmpty) {
+        actionWidgets.add(
+          Padding(
+            padding: const EdgeInsets.all(3),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: advanceActions2),
+          ),
+        );
+      }
       if (advanceActions.isNotEmpty) {
         actionWidgets.add(
           Padding(
@@ -514,6 +549,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   Widget _buildContent() {
+    Color? textColor = Theme.of(context).textTheme.bodyMedium?.color;
     final stackWidgets = <Widget>[];
 
     if (!voiceOnly && _remoteStream != null) {
@@ -543,54 +579,60 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         ),
       );
     }
-
-    stackWidgets.addAll(
-      [
-        Positioned(
-          top: voiceOnly ? 48 : 6,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Text(
-                      (voiceOnly ? 'VOICE CALL' : 'VIDEO CALL') +
-                          (_hold
-                              ? ' PAUSED BY ${_holdOriginator!.toUpperCase()}'
-                              : ''),
-                      style: TextStyle(fontSize: 24, color: Colors.black54),
+    if (voiceOnly || !_callConfirmed) {
+      stackWidgets.addAll(
+        [
+          Positioned(
+            top: MediaQuery.of(context).size.height / 8,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Text(
+                        (voiceOnly ? 'VOICE CALL' : 'VIDEO CALL') +
+                            (_hold
+                                ? ' PAUSED BY ${_holdOriginator!.toUpperCase()}'
+                                : ''),
+                        style: TextStyle(fontSize: 24, color: textColor),
+                      ),
                     ),
                   ),
-                ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Text(
-                      '$remoteIdentity',
-                      style: TextStyle(fontSize: 18, color: Colors.black54),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Text(
+                        '$remoteIdentity',
+                        style: TextStyle(fontSize: 18, color: textColor),
+                      ),
                     ),
                   ),
-                ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Text(
-                      _timeLabel,
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: ValueListenableBuilder<String>(
+                        valueListenable: _timeLabel,
+                        builder: (context, value, child) {
+                          return Text(
+                            _timeLabel.value,
+                            style: TextStyle(fontSize: 14, color: textColor),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    }
 
     return Stack(
       children: stackWidgets,
@@ -612,6 +654,46 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         child: _buildActionButtons(),
       ),
     );
+  }
+
+  @override
+  void onNewReinvite(ReInvite event) {
+    if (event.accept == null) return;
+    if (event.reject == null) return;
+    if (voiceOnly && (event.hasVideo ?? false)) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Upgrade to video?'),
+            content: Text('$remoteIdentity is inviting you to video call'),
+            alignment: Alignment.center,
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  event.reject!.call({'status_code': 607});
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  event.accept!.call({});
+                  setState(() {
+                    call!.voiceOnly = false;
+                    _resizeLocalVideo();
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override

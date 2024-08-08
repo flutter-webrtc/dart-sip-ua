@@ -26,6 +26,8 @@ dependencies:
   shared_preferences: ^2.2.0
   permission_handler: ^11.1.0
   flutter_webrtc: ^0.10.4
+  provider: 6.1.2
+  logger: ^2.4.0
 
 dev_dependencies:
   flutter_test:
