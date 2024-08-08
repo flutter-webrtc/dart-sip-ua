@@ -8,7 +8,6 @@ import 'package:sip_ua/src/event_manager/internal_events.dart';
 import 'package:sip_ua/src/map_helper.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'package:sip_ua/src/transports/tcp_socket.dart';
-
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'event_manager/event_manager.dart';
