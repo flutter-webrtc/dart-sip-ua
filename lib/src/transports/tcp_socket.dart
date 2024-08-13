@@ -182,6 +182,6 @@ class SIPUATcpSocket extends SIPUASocketInterface {
     if (_host == null || _port == null) { 
       return null;
     }
-    return 'tcp://$_host:$_port';
+    return '$_host:$_port';
   }
 }
