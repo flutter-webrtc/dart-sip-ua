@@ -975,19 +975,22 @@ class UA extends EventManager {
     * in order to be discarded there.
     */
 
-      switch (message.method) {
-        case SipMethod.REGISTER:
-          String? viaHeader = message.getHeader('via');
-          bool isInvalidHost = _configuration.via_host?.endsWith('.invalid') ?? false;
-          if (viaHeader != null && isInvalidHost) {
-            RegExp receivedRegex = RegExp(r'received=(\d+\.\d+\.\d+\.\d+)');
-            Match? match = receivedRegex.firstMatch(viaHeader);
-            String? receivedIP = match?.group(1);
-            if (receivedIP != null ) {
-              // _configuration.via_host = receivedIP;
-            }
+      String? viaHeader = message.getHeader('via');
+      bool isInvalidHost = _configuration.via_host?.endsWith('.invalid') ?? false;
+      if (viaHeader != null && isInvalidHost) {
+        RegExp receivedRegex = RegExp(r'received=(\d+\.\d+\.\d+\.\d+)');
+        Match? match = receivedRegex.firstMatch(viaHeader);
+        String? receivedIP = match?.group(1);
+        if (receivedIP != null ) {
+          _configuration.via_host = receivedIP;
+          _contact?.uri?.host = receivedIP;
+          if (_contact?.uri != null) {
+            _configuration.contact_uri = _contact?.uri;
           }
-          break;
+        }
+      }
+
+      switch (message.method) {
         case SipMethod.INVITE:
           InviteClientTransaction? transaction = _transactions.getTransaction(
               InviteClientTransaction, message.via_branch!);
