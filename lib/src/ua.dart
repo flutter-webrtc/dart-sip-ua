@@ -976,6 +976,18 @@ class UA extends EventManager {
     */
 
       switch (message.method) {
+        case SipMethod.REGISTER:
+          String? viaHeader = message.getHeader('via');
+          bool isInvalidHost = _configuration.via_host?.endsWith('.invalid') ?? false;
+          if (viaHeader != null && isInvalidHost) {
+            RegExp receivedRegex = RegExp(r'received=(\d+\.\d+\.\d+\.\d+)');
+            Match? match = receivedRegex.firstMatch(viaHeader);
+            String? receivedIP = match?.group(1);
+            if (receivedIP != null ) {
+              // _configuration.via_host = receivedIP;
+            }
+          }
+          break;
         case SipMethod.INVITE:
           InviteClientTransaction? transaction = _transactions.getTransaction(
               InviteClientTransaction, message.via_branch!);
