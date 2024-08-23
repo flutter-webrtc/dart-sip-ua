@@ -165,8 +165,8 @@ class SIPUAHelper extends EventManager {
     _settings.instance_id = uaSettings.instanceId;
     _settings.registrar_server = uaSettings.registrarServer;
     _settings.contact_uri = uaSettings.contact_uri;
-    _settings.connection_recovery_max_interval = uaSettings.connection_recovery_max_interval;
-    _settings.connection_recovery_min_interval = uaSettings.connection_recovery_min_interval;
+    _settings.connection_recovery_max_interval = uaSettings.connectionRecoveryMaxInterval;
+    _settings.connection_recovery_min_interval = uaSettings.connectionRecoveryMinInterval;
 
     try {
       _ua = UA(_settings);
@@ -795,10 +795,10 @@ class UaSettings {
   int iceGatheringTimeout = 500;
 
   /// Max interval between recovery connection, default 30 sec
-  int connection_recovery_max_interval = 30;
+  int connectionRecoveryMaxInterval = 30;
 
   /// Min interval between recovery connection, default 2 sec
-  int connection_recovery_min_interval = 2;
+  int connectionRecoveryMinInterval = 2;
 
   /// Sip Message Delay (in millisecond) (default 0).
   int sip_message_delay = 0;
