@@ -66,6 +66,8 @@ class Settings {
   /// ICE Gathering Timeout (in millisecond).
   int ice_gathering_timeout = 500;
 
+  bool terminateOnAudioMediaPortZero = false;
+
   /// Sip Message Delay (in millisecond) ( default 0 ).
   int sip_message_delay = 0;
 }
