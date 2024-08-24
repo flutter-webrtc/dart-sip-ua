@@ -1,6 +1,21 @@
 # Changelog
 
 --------------------------------------------
+[1.0.0] - 2024.08.24
+
+* allow to change UA uri in runtime (#425)
+* Overriding intervals for recovery connection (#472)
+* TcpSocket: Implement isConnecting & url (#464)
+* Uri configuration for call operation (#448)
+* Update add-line to python3 (#466)
+* Fixed work of calls on webkit browsers (#444)
+* Upgrade to video call implementation and dark mode (#462)
+* Add example apps. (#457)
+* Remove text media channels in SDP offers (#461)
+* set transport value using socket (#449)
+* Add sendInterval to dtmf (#443)
+* Feature/expose ice transport policy (#441)
+
 [0.6.0] - 2024.05.08
 
 * Add status code to CallState on the progress event by @hiratake55 in https://github.com/flutter-webrtc/dart-sip-ua/pull/374
