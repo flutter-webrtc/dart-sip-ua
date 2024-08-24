@@ -1,11 +1,7 @@
 import 'package:sip_ua/sip_ua.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'package:sip_ua/src/transports/tcp_socket_impl.dart';
-import '../grammar.dart';
 import '../logger.dart';
-
-import 'websocket_dart_impl.dart'
-    if (dart.library.js) 'websocket_web_impl.dart';
 
 class SIPUATcpSocket extends SIPUASocketInterface {
   SIPUATcpSocket(String host, String port,
@@ -35,6 +31,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
   SIPUATcpSocketImpl? _tcpSocketImpl;
   bool _closed = false;
   bool _connected = false;
+  bool _connecting = false;
   int? _weight;
   int? status;
   late TcpSocketSettings _tcpSocketSettings;
@@ -68,10 +65,18 @@ class SIPUATcpSocket extends SIPUASocketInterface {
       throw AssertionError('Invalid argument: _port');
     }
 
+    if (isConnected()) {
+      logger.d('TCPSocket $_host:$_port is already connected');
+      return;
+    } else if (isConnecting()) {
+      logger.d('TCPSocket $_host:$_port is connecting');
+      return;
+    }
     if (_tcpSocketImpl != null) {
       disconnect();
     }
     logger.d('connecting to TcpSocket $_host:$_port');
+    _connecting = true;
     try {
       _tcpSocketImpl = SIPUATcpSocketImpl(
           _messageDelay, _host ?? '0.0.0.0', _port ?? '5060');
@@ -79,6 +84,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
       _tcpSocketImpl!.onOpen = () {
         _closed = false;
         _connected = true;
+        _connecting = false;
         logger.d('Tcp Socket is now connected?');
         _onOpen();
       };
@@ -90,6 +96,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
       _tcpSocketImpl!.onClose = (int? closeCode, String? closeReason) {
         logger.d('Closed [$closeCode, $closeReason]!');
         _connected = false;
+        _connecting = false;
         _onClose(true, closeCode, closeReason);
       };
 
@@ -99,6 +106,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
     } catch (e, s) {
       logger.e(e.toString(), stackTrace: s);
       _connected = false;
+      _connecting = false;
       logger.e('TcpSocket error: $e');
     }
   }
@@ -110,6 +118,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
     // Don't wait for the WebSocket 'close' event, do it now.
     _closed = true;
     _connected = false;
+    _connecting = false;
     _onClose(true, 0, 'Client send disconnect');
     try {
       if (_tcpSocketImpl != null) {
@@ -136,9 +145,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
   }
 
   @override
-  bool isConnected() {
-    return _connected;
-  }
+  bool isConnected() => _connected;
 
   /**
    * TcpSocket Event Handlers
@@ -168,12 +175,13 @@ class SIPUATcpSocket extends SIPUASocketInterface {
   }
 
   @override
-  bool isConnecting() {
-    // TODO(cloudwebrtc): implement isConnecting
-    throw UnimplementedError();
-  }
+  bool isConnecting() => _connecting;
 
   @override
-  // TODO(cloudwebrtc): implement url
-  String? get url => throw UnimplementedError();
+  String? get url {
+    if (_host == null || _port == null) { 
+      return null;
+    }
+    return '$_host:$_port';
+  }
 }
