@@ -404,6 +404,10 @@ class SIPUAHelper extends EventManager {
     return defaultOptions;
   }
 
+  bool setUAParam(String parameter, dynamic value) {
+    return _ua!.set(parameter, value);
+  }
+
   Message sendMessage(String target, String body,
       [Map<String, dynamic>? options, Map<String, dynamic>? params]) {
     return _ua!.sendMessage(target, body, options, params);

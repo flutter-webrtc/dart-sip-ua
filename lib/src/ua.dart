@@ -435,6 +435,12 @@ class UA extends EventManager {
           break;
         }
 
+      case 'uri':
+        {
+          _configuration.uri = value;
+          break;
+        }
+
       default:
         logger.e('set() | cannot set "$parameter" parameter in runtime');
 
