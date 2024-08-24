@@ -179,6 +179,10 @@ class SIPUAHelper extends EventManager {
     _settings.instance_id = uaSettings.instanceId;
     _settings.registrar_server = uaSettings.registrarServer;
     _settings.contact_uri = uaSettings.contact_uri;
+    _settings.connection_recovery_max_interval = 
+        uaSettings.connectionRecoveryMaxInterval;
+    _settings.connection_recovery_min_interval = 
+        uaSettings.connectionRecoveryMinInterval;
     _settings.terminateOnAudioMediaPortZero =
         uaSettings.terminateOnMediaPortZero;
 
@@ -871,6 +875,12 @@ class UaSettings {
 
   /// ICE Gathering Timeout, default 500ms
   int iceGatheringTimeout = 500;
+
+  /// Max interval between recovery connection, default 30 sec
+  int connectionRecoveryMaxInterval = 30;
+
+  /// Min interval between recovery connection, default 2 sec
+  int connectionRecoveryMinInterval = 2;
 
   bool terminateOnMediaPortZero = false;
 
