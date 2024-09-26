@@ -1,3 +1,4 @@
+import 'package:sip_ua/src/direction.dart';
 import 'package:sip_ua/src/sip_message.dart';
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
@@ -10,7 +11,7 @@ class Info extends EventManager {
   Info(this._session);
 
   final rtc.RTCSession _session;
-  String? _direction;
+  CallDirection? _direction;
   String? _contentType;
   String? _body;
   IncomingRequest? _request;
@@ -19,10 +20,10 @@ class Info extends EventManager {
 
   String? get body => _body;
 
-  String? get direction => _direction;
+  CallDirection? get direction => _direction;
 
   void send(String contentType, String body, Map<String, dynamic> options) {
-    _direction = 'outgoing';
+    _direction = CallDirection.outgoing;
 
     if (contentType == null) {
       throw Exceptions.TypeError('Not enough arguments');
@@ -68,7 +69,7 @@ class Info extends EventManager {
   }
 
   void init_incoming(IncomingRequest request) {
-    _direction = 'incoming';
+    _direction = CallDirection.incoming;
     _request = request;
 
     request.reply(200);

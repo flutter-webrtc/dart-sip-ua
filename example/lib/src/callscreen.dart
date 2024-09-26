@@ -47,7 +47,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   String? get remoteIdentity => call!.remote_identity;
 
-  String get direction => call!.direction;
+  CallDirection? get direction => call!.direction;
 
   Call? get call => widget._call;
 
@@ -412,7 +412,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     switch (_state) {
       case CallStateEnum.NONE:
       case CallStateEnum.CONNECTING:
-        if (direction == 'INCOMING') {
+        if (direction == CallDirection.incoming) {
           basicActions.add(ActionButton(
             title: "Accept",
             fillColor: Colors.green,
