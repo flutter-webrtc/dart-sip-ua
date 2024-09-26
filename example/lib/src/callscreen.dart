@@ -34,7 +34,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   bool _speakerOn = false;
   bool _hold = false;
   bool _mirror = true;
-  String? _holdOriginator;
+  Originator? _holdOriginator;
   bool _callConfirmed = false;
   CallStateEnum _state = CallStateEnum.NONE;
 
@@ -47,7 +47,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   String? get remoteIdentity => call!.remote_identity;
 
-  CallDirection? get direction => call!.direction;
+  Direction? get direction => call!.direction;
 
   Call? get call => widget._call;
 
@@ -177,7 +177,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _handleStreams(CallState event) async {
     MediaStream? stream = event.stream;
-    if (event.originator == 'local') {
+    if (event.originator == Originator.local) {
       if (_localRenderer != null) {
         _localRenderer!.srcObject = stream;
       }
@@ -186,7 +186,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       }
       _localStream = stream;
     }
-    if (event.originator == 'remote') {
+    if (event.originator == Originator.remote) {
       if (_remoteRenderer != null) {
         _remoteRenderer!.srcObject = stream;
       }
@@ -412,7 +412,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     switch (_state) {
       case CallStateEnum.NONE:
       case CallStateEnum.CONNECTING:
-        if (direction == CallDirection.incoming) {
+        if (direction == Direction.incoming) {
           basicActions.add(ActionButton(
             title: "Accept",
             fillColor: Colors.green,
@@ -597,7 +597,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
                       child: Text(
                         (voiceOnly ? 'VOICE CALL' : 'VIDEO CALL') +
                             (_hold
-                                ? ' PAUSED BY ${_holdOriginator!.toUpperCase()}'
+                                ? ' PAUSED BY ${_holdOriginator!.name}'
                                 : ''),
                         style: TextStyle(fontSize: 24, color: textColor),
                       ),
