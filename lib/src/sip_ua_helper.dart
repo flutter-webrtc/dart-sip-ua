@@ -5,6 +5,7 @@ import 'package:logger/logger.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
 import 'package:sip_ua/sip_ua.dart';
+import 'package:sip_ua/src/direction.dart';
 import 'package:sip_ua/src/event_manager/internal_events.dart';
 import 'package:sip_ua/src/map_helper.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
@@ -233,7 +234,7 @@ class SIPUAHelper extends EventManager {
       _ua!.on(EventNewRTCSession(), (EventNewRTCSession event) {
         logger.d('newRTCSession => $event');
         RTCSession session = event.session!;
-        if (session.direction == 'incoming') {
+        if (session.direction == CallDirection.incoming) {
           // Set event handlers.
           session.addAllEventHandlers(
               buildCallOptions()['eventHandlers'] as EventManager);
@@ -251,7 +252,7 @@ class SIPUAHelper extends EventManager {
       _ua!.on(EventNewMessage(), (EventNewMessage event) {
         logger.d('newMessage => $event');
         //Only notify incoming message to listener
-        if (event.message!.direction == 'incoming') {
+        if (event.message!.direction == CallDirection.incoming) {
           SIPMessageRequest message =
               SIPMessageRequest(event.message, event.originator, event.request);
           _notifyNewMessageListeners(message);
@@ -663,12 +664,9 @@ class Call {
     return '';
   }
 
-  String get direction {
+  CallDirection? get direction {
     assert(_session != null, 'ERROR(get direction): rtc session is invalid!');
-    if (_session.direction != null) {
-      return _session.direction!.toUpperCase();
-    }
-    return '';
+    return _session.direction;
   }
 
   bool get remote_has_audio => _peerHasMediaLine('audio');

@@ -1,6 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import 'package:sip_ua/sip_ua.dart';
+import 'package:sip_ua/src/direction.dart';
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
@@ -24,7 +25,7 @@ class DTMF extends EventManager {
 
   final rtc.RTCSession _session;
   DtmfMode? _mode;
-  String? _direction;
+  CallDirection? _direction;
   String? _tone;
   int? _duration;
   int? _interToneGap;
@@ -35,14 +36,14 @@ class DTMF extends EventManager {
 
   int? get duration => _duration;
 
-  String? get direction => _direction;
+  CallDirection? get direction => _direction;
 
   void send(String tone, Map<String, dynamic> options) {
     if (tone == null) {
       throw Exceptions.TypeError('Not enough arguments');
     }
 
-    _direction = 'outgoing';
+    _direction = CallDirection.outgoing;
 
     // Check RTCSession Status.
     if (_session.status != rtc.C.STATUS_CONFIRMED &&
@@ -112,7 +113,7 @@ class DTMF extends EventManager {
     String reg_tone = r'^(Signal\s*?=\s*?)([0-9A-D#*]{1})(\s)?.*';
     String reg_duration = r'^(Duration\s?=\s?)([0-9]{1,4})(\s)?.*';
 
-    _direction = 'incoming';
+    _direction = CallDirection.incoming;
     _request = request;
 
     request.reply(200);

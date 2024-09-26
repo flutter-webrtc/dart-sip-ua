@@ -1,3 +1,4 @@
+import 'package:sip_ua/src/direction.dart';
 import 'package:sip_ua/src/name_addr_header.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
@@ -17,14 +18,14 @@ class Message extends EventManager with Applicant {
   final UA _ua;
   dynamic _request;
   bool _closed = false;
-  String? _direction;
+  CallDirection? _direction;
   NameAddrHeader? _local_identity;
   NameAddrHeader? _remote_identity;
   // Whether an incoming message has been replied.
   bool _is_replied = false;
   // Custom message empty object for high level use.
   final Map<String, dynamic> _data = <String, dynamic>{};
-  String? get direction => _direction;
+  CallDirection? get direction => _direction;
 
   NameAddrHeader? get local_identity => _local_identity;
 
@@ -103,7 +104,7 @@ class Message extends EventManager with Applicant {
     List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
     String? body = options['body'];
 
-    if (_direction != 'incoming') {
+    if (_direction != CallDirection.incoming) {
       throw Exceptions.NotSupportedError(
           '"accept" not supported for outgoing Message');
     }
@@ -126,7 +127,7 @@ class Message extends EventManager with Applicant {
     List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
     String? body = options['body'];
 
-    if (_direction != 'incoming') {
+    if (_direction != CallDirection.incoming) {
       throw Exceptions.NotSupportedError(
           '"reject" not supported for outgoing Message');
     }
@@ -186,11 +187,11 @@ class Message extends EventManager with Applicant {
 
   void _newMessage(String originator, dynamic request) {
     if (originator == 'remote') {
-      _direction = 'incoming';
+      _direction = CallDirection.incoming;
       _local_identity = request.to;
       _remote_identity = request.from;
     } else if (originator == 'local') {
-      _direction = 'outgoing';
+      _direction = CallDirection.outgoing;
       _local_identity = request.from;
       _remote_identity = request.to;
     }

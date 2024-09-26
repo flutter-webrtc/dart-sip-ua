@@ -7,6 +7,7 @@ import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 import 'package:sdp_transform/sdp_transform.dart';
 
 import 'package:sip_ua/sip_ua.dart';
+import 'package:sip_ua/src/direction.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'dialog.dart';
@@ -124,7 +125,7 @@ class RTCSession extends EventManager implements Owner {
   final SIPTimers _timers = SIPTimers();
 
   // Session info.
-  String? _direction;
+  CallDirection? _direction;
   NameAddrHeader? _local_identity;
   NameAddrHeader? _remote_identity;
   DateTime? _start_time;
@@ -174,7 +175,7 @@ class RTCSession extends EventManager implements Owner {
 
   String? get contact => _contact;
 
-  String? get direction => _direction;
+  CallDirection? get direction => _direction;
 
   NameAddrHeader? get local_identity => _local_identity;
 
@@ -339,7 +340,7 @@ class RTCSession extends EventManager implements Owner {
     await _createRTCConnection(pcConfig, rtcConstraints);
 
     // Set internal properties.
-    _direction = 'outgoing';
+    _direction = CallDirection.outgoing;
     _local_identity = _request.from;
     _remote_identity = _request.to;
 
@@ -426,7 +427,7 @@ class RTCSession extends EventManager implements Owner {
     }
 
     // Set internal properties.
-    _direction = 'incoming';
+    _direction = CallDirection.incoming;
     _local_identity = request.to;
     _remote_identity = request.from;
 
@@ -486,7 +487,7 @@ class RTCSession extends EventManager implements Owner {
     data = options['data'] ?? data;
 
     // Check Session Direction and Status.
-    if (_direction != 'incoming') {
+    if (_direction != CallDirection.incoming) {
       throw Exceptions.NotSupportedError(
           '"answer" not supported for outgoing RTCSession');
     }
@@ -801,7 +802,7 @@ class RTCSession extends EventManager implements Owner {
           * transaction times out."
           */
         if (_status == C.STATUS_WAITING_FOR_ACK &&
-            _direction == 'incoming' &&
+            _direction == CallDirection.incoming &&
             _request.server_transaction.state != TransactionState.TERMINATED) {
           /// Save the dialog for later restoration.
           Dialog dialog = _dialog!;
