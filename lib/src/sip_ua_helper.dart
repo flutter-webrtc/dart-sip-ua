@@ -5,11 +5,11 @@ import 'package:logger/logger.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
 import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/direction.dart';
 import 'package:sip_ua/src/event_manager/internal_events.dart';
 import 'package:sip_ua/src/map_helper.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'package:sip_ua/src/transports/tcp_socket.dart';
+
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'event_manager/event_manager.dart';
@@ -234,7 +234,7 @@ class SIPUAHelper extends EventManager {
       _ua!.on(EventNewRTCSession(), (EventNewRTCSession event) {
         logger.d('newRTCSession => $event');
         RTCSession session = event.session!;
-        if (session.direction == CallDirection.incoming) {
+        if (session.direction == Direction.incoming) {
           // Set event handlers.
           session.addAllEventHandlers(
               buildCallOptions()['eventHandlers'] as EventManager);
@@ -252,7 +252,7 @@ class SIPUAHelper extends EventManager {
       _ua!.on(EventNewMessage(), (EventNewMessage event) {
         logger.d('newMessage => $event');
         //Only notify incoming message to listener
-        if (event.message!.direction == CallDirection.incoming) {
+        if (event.message!.direction == Direction.incoming) {
           SIPMessageRequest message =
               SIPMessageRequest(event.message, event.originator, event.request);
           _notifyNewMessageListeners(message);
@@ -561,7 +561,7 @@ class Call {
     assert(_session != null, 'ERROR(hangup): rtc session is invalid!');
     if (peerConnection != null) {
       for (MediaStream? stream in peerConnection!.getLocalStreams()) {
-        if (stream == null) continue;
+        if (stream == null) return;
         logger.d(
             'Stopping local stream with tracks: ${stream.getTracks().length}');
         for (MediaStreamTrack track in stream.getTracks()) {
@@ -570,7 +570,7 @@ class Call {
         }
       }
       for (MediaStream? stream in peerConnection!.getRemoteStreams()) {
-        if (stream == null) continue;
+        if (stream == null) return;
         logger.d(
             'Stopping remote stream with tracks: ${stream.getTracks().length}');
         for (MediaStreamTrack track in stream.getTracks()) {
@@ -664,7 +664,7 @@ class Call {
     return '';
   }
 
-  CallDirection? get direction {
+  Direction? get direction {
     assert(_session != null, 'ERROR(get direction): rtc session is invalid!');
     return _session.direction;
   }
@@ -713,7 +713,7 @@ class CallState {
       this.refer});
   CallStateEnum state;
   ErrorCause? cause;
-  String? originator;
+  Originator? originator;
   bool? audio;
   bool? video;
   MediaStream? stream;
@@ -749,7 +749,7 @@ class TransportState {
 class SIPMessageRequest {
   SIPMessageRequest(this.message, this.originator, this.request);
   dynamic request;
-  String? originator;
+  Originator? originator;
   Message? message;
 }
 
