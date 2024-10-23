@@ -554,7 +554,7 @@ class Call {
     assert(_session != null, 'ERROR(hangup): rtc session is invalid!');
     if (peerConnection != null) {
       for (MediaStream? stream in peerConnection!.getLocalStreams()) {
-        if (stream == null) return;
+        if (stream == null) continue;
         logger.d(
             'Stopping local stream with tracks: ${stream.getTracks().length}');
         for (MediaStreamTrack track in stream.getTracks()) {
@@ -563,7 +563,7 @@ class Call {
         }
       }
       for (MediaStream? stream in peerConnection!.getRemoteStreams()) {
-        if (stream == null) return;
+        if (stream == null) continue;
         logger.d(
             'Stopping remote stream with tracks: ${stream.getTracks().length}');
         for (MediaStreamTrack track in stream.getTracks()) {
