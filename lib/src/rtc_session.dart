@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
-import 'package:sdp_transform/sdp_transform.dart';
-
 import 'package:sip_ua/sip_ua.dart';
+
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'dialog.dart';
@@ -22,11 +19,9 @@ import 'rtc_session/info.dart' as RTCSession_Info;
 import 'rtc_session/info.dart';
 import 'rtc_session/refer_notifier.dart';
 import 'rtc_session/refer_subscriber.dart';
-import 'sip_message.dart';
 import 'timers.dart';
 import 'transactions/transaction_base.dart';
 import 'ua.dart';
-import 'uri.dart';
 import 'utils.dart' as utils;
 
 class C {
@@ -314,7 +309,7 @@ class RTCSession extends EventManager implements Owner {
       requestParams['from_display_name'] = options['from_display_name'] ?? '';
       requestParams['from_uri'] = URI.parse(options['from_uri']);
       extraHeaders
-        .add('P-Preferred-Identity: ${_ua.configuration.uri.toString()}');
+          .add('P-Preferred-Identity: ${_ua.configuration.uri.toString()}');
     }
 
     if (anonymous) {
@@ -713,21 +708,21 @@ class RTCSession extends EventManager implements Owner {
   /**
    * Terminate the call.
    */
-  void terminate([Map<String, dynamic>? options]) {
+  void terminate([TerminateOptions? options]) {
     logger.d('terminate()');
 
-    options = options ?? <String, dynamic>{};
+    options = options ?? TerminateOptions();
 
-    Object cause = options['cause'] ?? DartSIP_C.CausesType.BYE;
+    String cause = options.cause ?? DartSIP_C.CausesType.BYE;
 
-    List<dynamic> extraHeaders = options['extraHeaders'] != null
-        ? utils.cloneArray(options['extraHeaders'])
+    List<dynamic> extraHeaders = options.extraHeaders != null
+        ? utils.cloneArray(options.extraHeaders)
         : <dynamic>[];
-    Object? body = options['body'];
+    String? body = options.body;
 
     String? cancel_reason;
-    int? status_code = options['status_code'] as int?;
-    String? reason_phrase = options['reason_phrase'] as String?;
+    int? status_code = options.statusCode;
+    String? reason_phrase = options.reasonPhrase;
 
     // Check Session Status.
     if (_status == C.STATUS_TERMINATED) {
@@ -784,8 +779,8 @@ class RTCSession extends EventManager implements Owner {
       case C.STATUS_CONFIRMED:
         logger.d('terminating session');
 
-        reason_phrase = options['reason_phrase'] as String? ??
-            DartSIP_C.REASON_PHRASE[status_code ?? 0];
+        reason_phrase =
+            options.reasonPhrase ?? DartSIP_C.REASON_PHRASE[status_code ?? 0];
 
         if (status_code != null && (status_code < 200 || status_code >= 700)) {
           throw Exceptions.InvalidStateError(
@@ -1060,11 +1055,11 @@ class RTCSession extends EventManager implements Owner {
       }
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
-      terminate(<String, dynamic>{
-        'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
-        'status_code': 500,
-        'reason_phrase': 'Hold Failed'
-      });
+      final TerminateOptions options = TerminateOptions()
+        ..cause = DartSIP_C.CausesType.WEBRTC_ERROR
+        ..statusCode = 500
+        ..reasonPhrase = 'Hold Failed';
+      terminate(options);
     });
 
     if (options['useUpdate'] != null) {
@@ -1110,11 +1105,11 @@ class RTCSession extends EventManager implements Owner {
       }
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
-      terminate(<String, dynamic>{
-        'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
-        'status_code': 500,
-        'reason_phrase': 'Unhold Failed'
-      });
+      final TerminateOptions options = TerminateOptions()
+        ..cause = DartSIP_C.CausesType.WEBRTC_ERROR
+        ..statusCode = 500
+        ..reasonPhrase = 'Unhold Failed';
+      terminate(options);
     });
 
     if (options['useUpdate'] != null) {
@@ -1166,11 +1161,11 @@ class RTCSession extends EventManager implements Owner {
     });
 
     handlers.on(EventCallFailed(), (EventCallFailed event) {
-      terminate(<String, dynamic>{
-        'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
-        'status_code': 500,
-        'reason_phrase': 'Media Renegotiation Failed'
-      });
+      final TerminateOptions options = TerminateOptions()
+        ..cause = DartSIP_C.CausesType.WEBRTC_ERROR
+        ..statusCode = 500
+        ..reasonPhrase = 'Media Renegotiation Failed';
+      terminate(options);
     });
 
     _setLocalMediaStatus();
@@ -1288,10 +1283,10 @@ class RTCSession extends EventManager implements Owner {
 
           if (_late_sdp) {
             if (request.body == null) {
-              terminate(<String, dynamic>{
-                'cause': DartSIP_C.CausesType.MISSING_SDP,
-                'status_code': 400
-              });
+              final TerminateOptions options = TerminateOptions()
+                ..cause = DartSIP_C.CausesType.MISSING_SDP
+                ..statusCode = 400;
+              terminate(options);
               break;
             }
 
@@ -1304,10 +1299,10 @@ class RTCSession extends EventManager implements Owner {
             try {
               await _connection!.setRemoteDescription(answer);
             } catch (error) {
-              terminate(<String, dynamic>{
-                'cause': DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION,
-                'status_code': 488
-              });
+              final TerminateOptions options = TerminateOptions()
+                ..cause = DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION
+                ..statusCode = 488;
+              terminate(options);
               logger.e(
                   'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
               emit(EventSetRemoteDescriptionFailed(exception: error));
@@ -1405,11 +1400,11 @@ class RTCSession extends EventManager implements Owner {
   void onTransportError() {
     logger.e('onTransportError()');
     if (_status != C.STATUS_TERMINATED) {
-      terminate(<String, dynamic>{
-        'status_code': 500,
-        'reason_phrase': DartSIP_C.CausesType.CONNECTION_ERROR,
-        'cause': DartSIP_C.CausesType.CONNECTION_ERROR
-      });
+      final TerminateOptions options = TerminateOptions()
+        ..statusCode = 500
+        ..reasonPhrase = DartSIP_C.CausesType.CONNECTION_ERROR
+        ..cause = DartSIP_C.CausesType.CONNECTION_ERROR;
+      terminate(options);
     }
   }
 
@@ -1417,11 +1412,11 @@ class RTCSession extends EventManager implements Owner {
     logger.e('onRequestTimeout()');
 
     if (_status != C.STATUS_TERMINATED) {
-      terminate(<String, dynamic>{
-        'status_code': 408,
-        'reason_phrase': DartSIP_C.CausesType.REQUEST_TIMEOUT,
-        'cause': DartSIP_C.CausesType.REQUEST_TIMEOUT
-      });
+      final TerminateOptions options = TerminateOptions()
+        ..statusCode = 408
+        ..reasonPhrase = DartSIP_C.CausesType.REQUEST_TIMEOUT
+        ..cause = DartSIP_C.CausesType.REQUEST_TIMEOUT;
+      terminate(options);
     }
   }
 
@@ -1429,11 +1424,11 @@ class RTCSession extends EventManager implements Owner {
     logger.e('onDialogError()');
 
     if (_status != C.STATUS_TERMINATED) {
-      terminate(<String, dynamic>{
-        'status_code': 500,
-        'reason_phrase': DartSIP_C.CausesType.DIALOG_ERROR,
-        'cause': DartSIP_C.CausesType.DIALOG_ERROR
-      });
+      final TerminateOptions options = TerminateOptions()
+        ..statusCode = 500
+        ..reasonPhrase = DartSIP_C.CausesType.DIALOG_ERROR
+        ..cause = DartSIP_C.CausesType.DIALOG_ERROR;
+      terminate(options);
     }
   }
 
@@ -1598,11 +1593,11 @@ class RTCSession extends EventManager implements Owner {
       logger.d('ICE Restart was successful');
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
-      terminate(<String, dynamic>{
-        'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
-        'status_code': 500,
-        'reason_phrase': 'Media Renegotiation Failed'
-      });
+      final TerminateOptions options = TerminateOptions()
+        ..cause = DartSIP_C.CausesType.WEBRTC_ERROR
+        ..statusCode = 500
+        ..reasonPhrase = 'Media Renegotiation Failed';
+      terminate(options);
     });
     offerConstraints['eventHandlers'] = handlers;
     renegotiate(options: offerConstraints);
@@ -1614,11 +1609,11 @@ class RTCSession extends EventManager implements Owner {
     _connection!.onIceConnectionState = (RTCIceConnectionState state) {
       // TODO(cloudwebrtc): Do more with different states.
       if (state == RTCIceConnectionState.RTCIceConnectionStateFailed) {
-        terminate(<String, dynamic>{
-          'cause': DartSIP_C.CausesType.RTP_TIMEOUT,
-          'status_code': 408,
-          'reason_phrase': DartSIP_C.CausesType.RTP_TIMEOUT
-        });
+        final TerminateOptions options = TerminateOptions()
+          ..cause = DartSIP_C.CausesType.RTP_TIMEOUT
+          ..statusCode = 408
+          ..reasonPhrase = DartSIP_C.CausesType.RTP_TIMEOUT;
+        terminate(options);
       } else if (state ==
           RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
         _iceRestart();
@@ -2937,7 +2932,7 @@ class RTCSession extends EventManager implements Owner {
   }
 
   /// SDP offers may contain text media channels. e.g. Older clients using linphone.
-  /// 
+  ///
   /// WebRTC does not support text media channels, so remove them.
   String? _sdpOfferToWebRTC(String? sdpInput) {
     if (sdpInput == null) {
@@ -3065,11 +3060,11 @@ class RTCSession extends EventManager implements Owner {
 
         logger.e('runSessionTimer() | timer expired, terminating the session');
 
-        terminate(<String, dynamic>{
-          'cause': DartSIP_C.CausesType.REQUEST_TIMEOUT,
-          'status_code': 408,
-          'reason_phrase': 'Session Timer Expired'
-        });
+        final TerminateOptions options = TerminateOptions()
+          ..cause = DartSIP_C.CausesType.REQUEST_TIMEOUT
+          ..statusCode = 408
+          ..reasonPhrase = 'Session Timer Expired';
+        terminate(options);
       }, expires! * 1100);
     }
   }
