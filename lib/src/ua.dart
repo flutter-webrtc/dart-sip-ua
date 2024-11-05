@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:sip_ua/src/transport_type.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
+import 'package:sip_ua/src/types.dart';
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -294,7 +295,7 @@ class UA extends EventManager {
   /**
    * Terminate ongoing sessions.
    */
-  void terminateSessions(Map<String, dynamic> options) {
+  void terminateSessions(TerminateOptions? options) {
     logger.d('terminateSessions()');
     _sessions.forEach((String? key, _) {
       if (!_sessions[key]!.isEnded()) {

@@ -211,7 +211,8 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _handleHangup() {
-    call!.hangup({'status_code': 603});
+    final TerminateOptions options = TerminateOptions()..statusCode = 603;
+    call!.hangup(options);
     _timer.cancel();
   }
 
