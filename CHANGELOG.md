@@ -1,6 +1,35 @@
 # Changelog
 
 --------------------------------------------
+[1.0.0] - 2024.08.24
+
+* allow to change UA uri in runtime (#425)
+* Overriding intervals for recovery connection (#472)
+* TcpSocket: Implement isConnecting & url (#464)
+* Uri configuration for call operation (#448)
+* Update add-line to python3 (#466)
+* Fixed work of calls on webkit browsers (#444)
+* Upgrade to video call implementation and dark mode (#462)
+* Add example apps. (#457)
+* Remove text media channels in SDP offers (#461)
+* set transport value using socket (#449)
+* Add sendInterval to dtmf (#443)
+* Feature/expose ice transport policy (#441)
+
+[0.6.0] - 2024.05.08
+
+* Add status code to CallState on the progress event by @hiratake55 in https://github.com/flutter-webrtc/dart-sip-ua/pull/374
+* expose rtc_session to/from-tag by @ftsef in https://github.com/flutter-webrtc/dart-sip-ua/pull/378
+* #376: Added `_settings.session_timers_refresh_method` to UaSettings t… by @komaxx in https://github.com/flutter-webrtc/dart-sip-ua/pull/377
+* expose instance_id by @VictorUvarov in https://github.com/flutter-webrtc/dart-sip-ua/pull/395
+* Example app cleanup by @VictorUvarov in https://github.com/flutter-webrtc/dart-sip-ua/pull/394
+* fix: parse expires from string header. by @cloudwebrtc in https://github.com/flutter-webrtc/dart-sip-ua/pull/396
+* Add support for UAConfiguration registrar_server by @VictorUvarov in https://github.com/flutter-webrtc/dart-sip-ua/pull/397
+* Feature/update dependency to intl v19 by @komaxx in https://github.com/flutter-webrtc/dart-sip-ua/pull/414
+* Tcp socket implementation by @mikaelwills in https://github.com/flutter-webrtc/dart-sip-ua/pull/416
+* feat: Adding extraHeaders in RegisterParams, exposing existing functionality via UaSettings() by @luan-evangelista in https://github.com/flutter-webrtc/dart-sip-ua/pull/432
+* add contact_uri as parameter by @pjalbuquerque in https://github.com/flutter-webrtc/dart-sip-ua/pull/426
+
 [0.5.8] - 2023.05.11
 * Allow await on helper start call (#365)
 * Adding params support for sendMessage (#366)

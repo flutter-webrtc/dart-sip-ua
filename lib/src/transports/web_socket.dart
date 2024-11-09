@@ -1,17 +1,20 @@
 import 'package:sip_ua/sip_ua.dart';
+import 'package:sip_ua/src/transports/socket_interface.dart';
 import '../grammar.dart';
 import '../logger.dart';
-import '../socket.dart';
 
 import 'websocket_dart_impl.dart'
     if (dart.library.js) 'websocket_web_impl.dart';
 
-class WebSocketInterface implements Socket {
-  WebSocketInterface(String url,
-      {required int messageDelay, WebSocketSettings? webSocketSettings})
+class SIPUAWebSocket extends SIPUASocketInterface {
+  SIPUAWebSocket(String url,
+      {required int messageDelay,
+      WebSocketSettings? webSocketSettings,
+      int? weight})
       : _messageDelay = messageDelay {
     logger.d('new() [url:$url]');
     _url = url;
+    _weight = weight;
     dynamic parsed_url = Grammar.parse(url, 'absoluteURI');
     if (parsed_url == -1) {
       logger.e('invalid WebSocket URI: $url');
@@ -38,20 +41,13 @@ class WebSocketInterface implements Socket {
   String? _sip_uri;
   late String _via_transport;
   final String _websocket_protocol = 'sip';
-  WebSocketImpl? _ws;
+  SIPUAWebSocketImpl? _ws;
   bool _closed = false;
   bool _connected = false;
-  int? weight;
+  int? _weight;
   int? status;
   late WebSocketSettings _webSocketSettings;
 
-  @override
-  void Function()? onconnect;
-  @override
-  void Function(WebSocketInterface socket, bool error, int? closeCode,
-      String? reason)? ondisconnect;
-  @override
-  void Function(dynamic data)? ondata;
   @override
   String get via_transport => _via_transport;
 
@@ -62,6 +58,9 @@ class WebSocketInterface implements Socket {
 
   @override
   String? get sip_uri => _sip_uri;
+
+  @override
+  int? get weight => _weight;
 
   @override
   String? get url => _url;
@@ -86,7 +85,7 @@ class WebSocketInterface implements Socket {
     }
     logger.d('connecting to WebSocket $_url');
     try {
-      _ws = WebSocketImpl(_url!, _messageDelay);
+      _ws = SIPUAWebSocketImpl(_url!, _messageDelay);
 
       _ws!.onOpen = () {
         _closed = false;
@@ -147,10 +146,12 @@ class WebSocketInterface implements Socket {
     }
   }
 
+  @override
   bool isConnected() {
     return _connected;
   }
 
+  @override
   bool isConnecting() {
     return _ws != null && _ws!.isConnecting();
   }

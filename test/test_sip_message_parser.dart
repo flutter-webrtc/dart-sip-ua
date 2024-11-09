@@ -1,6 +1,6 @@
-import 'package:sip_ua/src/parser.dart';
 import 'package:test/test.dart';
 
+import 'package:sip_ua/src/parser.dart';
 import 'data/sip_message.dart';
 
 List<void Function()> testFunctions = <void Function()>[
