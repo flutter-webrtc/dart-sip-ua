@@ -181,7 +181,10 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       if (_localRenderer != null) {
         _localRenderer!.srcObject = stream;
       }
-      if (!kIsWeb && !WebRTC.platformIsDesktop) {
+
+      if (!kIsWeb &&
+          !WebRTC.platformIsDesktop &&
+          event.stream?.getAudioTracks().isNotEmpty == true) {
         event.stream?.getAudioTracks().first.enableSpeakerphone(false);
       }
       _localStream = stream;
@@ -334,10 +337,14 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         call!.voiceOnly = false;
       });
       helper!.renegotiate(
-          call: call!, voiceOnly: false, done: (incomingMessage) {});
+          call: call!,
+          voiceOnly: false,
+          done: (IncomingMessage? incomingMessage) {});
     } else {
       helper!.renegotiate(
-          call: call!, voiceOnly: true, done: (incomingMessage) {});
+          call: call!,
+          voiceOnly: true,
+          done: (IncomingMessage? incomingMessage) {});
     }
   }
 
