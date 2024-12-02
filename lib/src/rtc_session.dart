@@ -2354,7 +2354,7 @@ class RTCSession extends EventManager implements Owner {
             'User Denied Media Access');
         logger.e('emit "getusermediafailed" [error:${error.toString()}]');
         emit(EventGetUserMediaFailed(exception: error));
-        throw error;
+        rethrow;
       }
     }
 
@@ -2406,7 +2406,7 @@ class RTCSession extends EventManager implements Owner {
         return;
       }
       logger.e('Failed to _sendInitialRequest: ${error.toString()}');
-      throw error;
+      rethrow;
     }
   }
 

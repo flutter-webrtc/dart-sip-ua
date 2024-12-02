@@ -286,6 +286,6 @@ void load(Settings src, Settings? dst) {
     });
   } catch (e) {
     logger.e('Failed to load config: ${e.toString()}');
-    throw e;
+    rethrow;
   }
 }

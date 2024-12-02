@@ -118,7 +118,7 @@ class SIPUAWebSocketImpl {
       return webSocket;
     } catch (e) {
       logger.e('error $e');
-      throw e;
+      rethrow;
     }
   }
 }
