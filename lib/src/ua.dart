@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:sip_ua/src/enums.dart';
 import 'package:sip_ua/src/transport_type.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'config.dart' as config;
@@ -501,7 +502,7 @@ class UA extends EventManager {
   /**
    *  Message
    */
-  void newMessage(Message message, String originator, dynamic request) {
+  void newMessage(Message message, Originator originator, dynamic request) {
     if (_stopping) {
       return;
     }
@@ -513,7 +514,7 @@ class UA extends EventManager {
   /**
    *  Options
    */
-  void newOptions(Options message, String originator, dynamic request) {
+  void newOptions(Options message, Originator originator, dynamic request) {
     if (_stopping) {
       return;
     }
@@ -547,7 +548,7 @@ class UA extends EventManager {
    * RTCSession
    */
   void newRTCSession(
-      {required RTCSession session, String? originator, dynamic request}) {
+      {required RTCSession session, Originator? originator, dynamic request}) {
     _sessions[session.id] = session;
     emit(EventNewRTCSession(
         session: session, originator: originator, request: request));

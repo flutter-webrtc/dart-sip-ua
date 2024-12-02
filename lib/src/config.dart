@@ -1,13 +1,11 @@
 import 'package:sip_ua/sip_ua.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
-import 'package:sip_ua/src/transports/tcp_socket.dart';
+
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'exceptions.dart' as Exceptions;
 import 'grammar.dart';
 import 'logger.dart';
-import 'transports/web_socket.dart';
-import 'uri.dart';
 import 'utils.dart' as Utils;
 
 // Default settings.
