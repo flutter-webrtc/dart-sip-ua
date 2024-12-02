@@ -123,7 +123,7 @@ class SIPUAHelper extends EventManager {
     required bool voiceOnly,
     Map<String, dynamic>? options,
     bool useUpdate = false,
-    Function(IncomingMessage)? done,
+    Function(IncomingMessage?)? done,
   }) async {
     Map<String, dynamic> finalOptions = options ?? buildCallOptions(voiceOnly);
     call.renegotiate(options: finalOptions, useUpdate: useUpdate, done: done);
@@ -600,7 +600,7 @@ class Call {
   void renegotiate({
     required Map<String, dynamic>? options,
     bool useUpdate = false,
-    Function(IncomingMessage)? done,
+    Function(IncomingMessage?)? done,
   }) {
     assert(_session != null, 'ERROR(renegotiate): rtc session is invalid!');
     _session.renegotiate(options: options, useUpdate: useUpdate, done: done);
