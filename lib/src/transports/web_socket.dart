@@ -142,7 +142,7 @@ class SIPUAWebSocket extends SIPUASocketInterface {
       return true;
     } catch (error) {
       logger.e('send() | error sending message: $error');
-      throw error;
+      rethrow;
     }
   }
 

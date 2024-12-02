@@ -53,7 +53,6 @@ analyzer:
     avoid_types_as_parameter_names: ignore
     empty_catches: ignore
     unawaited_futures: ignore
-    use_rethrow_when_possible: ignore
     unused_import: ignore
     must_be_immutable: ignore
     todo: ignore
