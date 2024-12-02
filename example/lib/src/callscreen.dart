@@ -230,6 +230,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
                 'minFrameRate': '30',
               },
               'facingMode': 'user',
+              'optional': <dynamic>[],
             }
           : false
     };
@@ -242,6 +243,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           await navigator.mediaDevices.getUserMedia(mediaConstraints);
       mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
     } else {
+      if (!remoteHasVideo) {
+        mediaConstraints['video'] = false;
+      }
       mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
 
