@@ -156,6 +156,27 @@ class _MyRegisterWidget extends State<RegisterWidget>
       appBar: AppBar(
         title: Text("SIP Account"),
       ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 40,
+                    child: ElevatedButton(
+                      child: Text('Register'),
+                      onPressed: () => _handleSave(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
         children: <Widget>[
@@ -281,11 +302,6 @@ class _MyRegisterWidget extends State<RegisterWidget>
               ],
             ),
           ],
-          const SizedBox(height: 20),
-          ElevatedButton(
-            child: Text('Register'),
-            onPressed: () => _handleSave(context),
-          ),
         ],
       ),
     );
