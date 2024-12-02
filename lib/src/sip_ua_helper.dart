@@ -2,20 +2,25 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
+import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
+import 'package:sip_ua/sip_ua.dart';
+import 'package:sip_ua/src/event_manager/internal_events.dart';
 import 'package:sip_ua/src/map_helper.dart';
-
+import 'package:sip_ua/src/transports/socket_interface.dart';
+import 'package:sip_ua/src/transports/tcp_socket.dart';
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'event_manager/event_manager.dart';
 import 'event_manager/subscriber_events.dart';
 import 'logger.dart';
 import 'message.dart';
+import 'options.dart';
 import 'rtc_session.dart';
 import 'rtc_session/refer_subscriber.dart';
 import 'sip_message.dart';
 import 'stack_trace_nj.dart';
 import 'subscriber.dart';
-import 'transports/websocket_interface.dart';
+import 'transports/web_socket.dart';
 import 'ua.dart';
 
 class SIPUAHelper extends EventManager {
@@ -51,9 +56,11 @@ class SIPUAHelper extends EventManager {
   }
 
   bool get connecting {
-    if (_ua != null && _ua!.transport != null) {
-      return _ua!.transport!.isConnecting();
-    }
+    if (_ua == null) return false;
+
+    if (_ua!.socketTransport != null)
+      return _ua!.socketTransport!.isConnecting();
+
     return false;
   }
 
@@ -83,12 +90,13 @@ class SIPUAHelper extends EventManager {
   }
 
   Future<bool> call(String target,
-      {bool voiceonly = false,
+      {bool voiceOnly = false,
       MediaStream? mediaStream,
       List<String>? headers,
       Map<String, dynamic>? customOptions}) async {
     if (_ua != null && _ua!.isConnected()) {
-      Map<String, dynamic> options = buildCallOptions(voiceonly);
+      Map<String, dynamic> options = buildCallOptions(voiceOnly);
+
       if (customOptions != null) {
         options = MapHelper.merge(options, customOptions);
       }
@@ -97,6 +105,7 @@ class SIPUAHelper extends EventManager {
       }
       List<dynamic> extHeaders = options['extraHeaders'] as List<dynamic>;
       extHeaders.addAll(headers ?? <String>[]);
+      options['extraHeaders'] = extHeaders;
       _ua!.call(target, options);
       return true;
     } else {
@@ -110,6 +119,17 @@ class SIPUAHelper extends EventManager {
     return _calls[id];
   }
 
+  Future<void> renegotiate({
+    required Call call,
+    required bool voiceOnly,
+    Map<String, dynamic>? options,
+    bool useUpdate = false,
+    Function(IncomingMessage?)? done,
+  }) async {
+    Map<String, dynamic> finalOptions = options ?? buildCallOptions(voiceOnly);
+    call.renegotiate(options: finalOptions, useUpdate: useUpdate, done: done);
+  }
+
   Future<void> start(UaSettings uaSettings) async {
     if (_ua != null) {
       logger.w('UA instance already exist!, stopping UA and creating a one...');
@@ -120,10 +140,25 @@ class SIPUAHelper extends EventManager {
 
     // Reset settings
     _settings = Settings();
-    WebSocketInterface socket = WebSocketInterface(uaSettings.webSocketUrl,
-        messageDelay: _settings.sip_message_delay,
-        webSocketSettings: uaSettings.webSocketSettings);
-    _settings.sockets = <WebSocketInterface>[socket];
+
+    _settings.sockets = <SIPUASocketInterface>[];
+
+    if (uaSettings.transportType == TransportType.TCP) {
+      SIPUATcpSocket socket = SIPUATcpSocket(
+          uaSettings.host ?? '0.0.0.0', uaSettings.port ?? '5060',
+          messageDelay: 1);
+      _settings.sockets!.add(socket);
+    }
+
+    if (uaSettings.transportType == TransportType.WS) {
+      SIPUAWebSocket socket = SIPUAWebSocket(
+          uaSettings.webSocketUrl ?? 'wss://tryit.jssip.net:10443',
+          messageDelay: _settings.sip_message_delay,
+          webSocketSettings: uaSettings.webSocketSettings);
+      _settings.sockets!.add(socket);
+    }
+
+    _settings.transportType = uaSettings.transportType!;
     _settings.uri = uaSettings.uri;
     _settings.sip_message_delay = uaSettings.sip_message_delay;
     _settings.realm = uaSettings.realm;
@@ -134,6 +169,7 @@ class SIPUAHelper extends EventManager {
     _settings.user_agent = uaSettings.userAgent ?? DartSIP_C.USER_AGENT;
     _settings.register = uaSettings.register;
     _settings.register_expires = uaSettings.register_expires;
+    _settings.register_extra_headers = uaSettings.registerParams.extraHeaders;
     _settings.register_extra_contact_uri_params =
         uaSettings.registerParams.extraContactUriParams;
     _settings.dtmf_mode = uaSettings.dtmfMode;
@@ -143,6 +179,13 @@ class SIPUAHelper extends EventManager {
         uaSettings.sessionTimersRefreshMethod;
     _settings.instance_id = uaSettings.instanceId;
     _settings.registrar_server = uaSettings.registrarServer;
+    _settings.contact_uri = uaSettings.contact_uri;
+    _settings.connection_recovery_max_interval = 
+        uaSettings.connectionRecoveryMaxInterval;
+    _settings.connection_recovery_min_interval = 
+        uaSettings.connectionRecoveryMinInterval;
+    _settings.terminateOnAudioMediaPortZero =
+        uaSettings.terminateOnMediaPortZero;
 
     try {
       _ua = UA(_settings);
@@ -195,10 +238,14 @@ class SIPUAHelper extends EventManager {
           session.addAllEventHandlers(
               buildCallOptions()['eventHandlers'] as EventManager);
         }
+        bool hasVideo = session.data?['video'] ?? false;
+
         _calls[event.id] =
-            Call(event.id, session, CallStateEnum.CALL_INITIATION);
+            Call(event.id, session, CallStateEnum.CALL_INITIATION, !hasVideo);
         _notifyCallStateListeners(
-            event, CallState(CallStateEnum.CALL_INITIATION));
+            event,
+            CallState(CallStateEnum.CALL_INITIATION,
+                video: session.data?['video']));
       });
 
       _ua!.on(EventNewMessage(), (EventNewMessage event) {
@@ -294,6 +341,11 @@ class SIPUAHelper extends EventManager {
                 stream: event.stream, originator: event.originator));
       });
     });
+
+    handlers.on(EventReInvite(), (EventReInvite event) {
+      logger.d('Reinvite received in helper, notifying listeners');
+      _notifyReInviteListeners(event);
+    });
     handlers.on(EventCallRefer(), (EventCallRefer refer) async {
       logger.d('Refer received, Transfer current call to => ${refer.aor}');
       _notifyCallStateListeners(
@@ -309,6 +361,9 @@ class SIPUAHelper extends EventManager {
       'extraHeaders': <dynamic>[],
       'pcConfig': <String, dynamic>{
         'sdpSemantics': 'unified-plan',
+        'iceTransportPolicy':
+            (_uaSettings?.iceTransportPolicy ?? IceTransportPolicy.ALL)
+                .toParameterString(),
         'iceServers': _uaSettings?.iceServers
       },
       'mediaConstraints': <String, dynamic>{
@@ -350,9 +405,17 @@ class SIPUAHelper extends EventManager {
     return defaultOptions;
   }
 
+  bool setUAParam(String parameter, dynamic value) {
+    return _ua!.set(parameter, value);
+  }
+
   Message sendMessage(String target, String body,
       [Map<String, dynamic>? options, Map<String, dynamic>? params]) {
     return _ua!.sendMessage(target, body, options, params);
+  }
+
+  Options sendOptions(String target, String body, Map<String, dynamic>? params) {
+    return _ua!.sendOptions(target, body, params);
   }
 
   void subscribe(String target, String event, String contentType) {
@@ -418,6 +481,24 @@ class SIPUAHelper extends EventManager {
     }
   }
 
+  void _notifyReInviteListeners(EventReInvite event) {
+    // Copy to prevent concurrent modification exception
+    List<SipUaHelperListener> listeners = _sipUaHelperListeners.toList();
+    for (SipUaHelperListener listener in listeners) {
+      IncomingRequest request = event.request as IncomingRequest;
+      String body = request.body ?? '';
+      if (request.sdp == null && body.isNotEmpty) {
+        request.sdp = sdp_transform.parse(body);
+      }
+      listener.onNewReinvite(ReInvite(
+          sdp: request.sdp,
+          hasAudio: event.hasAudio,
+          hasVideo: event.hasVideo,
+          accept: event.callback,
+          reject: event.reject));
+    }
+  }
+
   void _notifyNotifyListeners(EventNotify event) {
     // Copy to prevent concurrent modification exception
     List<SipUaHelperListener> listeners = _sipUaHelperListeners.toList();
@@ -441,11 +522,11 @@ enum CallStateEnum {
   REFER,
   HOLD,
   UNHOLD,
-  CALL_INITIATION
+  CALL_INITIATION,
 }
 
 class Call {
-  Call(this._id, this._session, this.state);
+  Call(this._id, this._session, this.state, this.voiceOnly);
   final String? _id;
   final RTCSession _session;
 
@@ -453,6 +534,7 @@ class Call {
   RTCPeerConnection? get peerConnection => _session.connection;
   RTCSession get session => _session;
   CallStateEnum state;
+  bool voiceOnly;
 
   void answer(Map<String, dynamic> options, {MediaStream? mediaStream = null}) {
     assert(_session != null, 'ERROR(answer): rtc session is invalid!');
@@ -475,6 +557,28 @@ class Call {
 
   void hangup([Map<String, dynamic>? options]) {
     assert(_session != null, 'ERROR(hangup): rtc session is invalid!');
+    if (peerConnection != null) {
+      for (MediaStream? stream in peerConnection!.getLocalStreams()) {
+        if (stream == null) continue;
+        logger.d(
+            'Stopping local stream with tracks: ${stream.getTracks().length}');
+        for (MediaStreamTrack track in stream.getTracks()) {
+          logger.d('Stopping track: ${track.kind}${track.id} ');
+          track.stop();
+        }
+      }
+      for (MediaStream? stream in peerConnection!.getRemoteStreams()) {
+        if (stream == null) continue;
+        logger.d(
+            'Stopping remote stream with tracks: ${stream.getTracks().length}');
+        for (MediaStreamTrack track in stream.getTracks()) {
+          logger.d('Stopping track: ${track.kind}${track.id} ');
+          track.stop();
+        }
+      }
+    } else {
+      logger.d("peerConnection is null, can't stop tracks.");
+    }
     _session.terminate(options);
   }
 
@@ -498,9 +602,13 @@ class Call {
     _session.unmute(audio, video);
   }
 
-  void renegotiate(Map<String, dynamic> options) {
+  void renegotiate({
+    required Map<String, dynamic>? options,
+    bool useUpdate = false,
+    Function(IncomingMessage?)? done,
+  }) {
     assert(_session != null, 'ERROR(renegotiate): rtc session is invalid!');
-    _session.renegotiate(options);
+    _session.renegotiate(options: options, useUpdate: useUpdate, done: done);
   }
 
   void sendDTMF(String tones, [Map<String, dynamic>? options]) {
@@ -653,6 +761,7 @@ abstract class SipUaHelperListener {
   //For SIP message coming
   void onNewMessage(SIPMessageRequest msg);
   void onNewNotify(Notify ntf);
+  void onNewReinvite(ReInvite event);
 }
 
 class Notify {
@@ -660,10 +769,20 @@ class Notify {
   IncomingRequest? request;
 }
 
+class ReInvite {
+  ReInvite({this.hasVideo, this.hasAudio, this.sdp, this.accept, this.reject});
+  bool? hasVideo;
+  bool? hasAudio;
+  Map<String, dynamic>? sdp;
+  Future<bool> Function(Map<String, dynamic> options)? accept;
+  bool Function(Map<String, dynamic> options)? reject;
+}
+
 class RegisterParams {
   /// Allow extra headers and Contact Params to be sent on REGISTER
   /// Mainly used for RFC8599 Support
   /// https://github.com/cloudwebrtc/dart-sip-ua/issues/89
+  List<String> extraHeaders = <String>[];
   Map<String, dynamic> extraContactUriParams = <String, dynamic>{};
 }
 
@@ -684,14 +803,51 @@ class WebSocketSettings {
   String? transport_scheme;
 }
 
+class TcpSocketSettings {
+  /// Add additional HTTP headers, such as:'Origin','Host' or others
+  Map<String, dynamic> extraHeaders = <String, dynamic>{};
+
+  /// `User Agent` field for dart http client.
+  String? userAgent;
+
+  /// Don‘t check the server certificate
+  /// for self-signed certificate.
+  bool allowBadCertificate = false;
+}
+
 enum DtmfMode {
   INFO,
   RFC2833,
 }
 
+/// Possible values for the transport policy to be used when selecting ICE
+/// candidates.
+///
+/// See: https://udn.realityripple.com/docs/Web/API/RTCConfiguration
+enum IceTransportPolicy {
+  /// All ICE candidates will be considered.
+  /// This is the default if not specified explicitly.
+  ALL,
+
+  /// Only ICE candidates whose IP addresses are being relayed, such as those
+  /// being passed through a TURN server, will be considered.
+  RELAY,
+}
+
+extension _IceTransportPolicyEncoding on IceTransportPolicy {
+  String toParameterString() {
+    switch (this) {
+      case IceTransportPolicy.ALL:
+        return 'all';
+      case IceTransportPolicy.RELAY:
+        return 'relay';
+    }
+  }
+}
+
 class UaSettings {
-  late String webSocketUrl;
   WebSocketSettings webSocketSettings = WebSocketSettings();
+  TcpSocketSettings tcpSocketSettings = TcpSocketSettings();
 
   /// May not need to register if on a static IP, just Auth
   /// Default is true
@@ -705,7 +861,10 @@ class UaSettings {
 
   /// `User Agent` field for sip message.
   String? userAgent;
+  String? host;
+  String? port;
   String? uri;
+  String? webSocketUrl;
   String? realm;
   String? authorizationUser;
   String? password;
@@ -713,6 +872,9 @@ class UaSettings {
   String? displayName;
   String? instanceId;
   String? registrarServer;
+  String? contact_uri;
+
+  TransportType? transportType;
 
   /// DTMF mode, in band (rfc2833) or out of band (sip info)
   DtmfMode dtmfMode = DtmfMode.INFO;
@@ -723,10 +885,18 @@ class UaSettings {
   /// ICE Gathering Timeout, default 500ms
   int iceGatheringTimeout = 500;
 
+  /// Max interval between recovery connection, default 30 sec
+  int connectionRecoveryMaxInterval = 30;
+
+  /// Min interval between recovery connection, default 2 sec
+  int connectionRecoveryMinInterval = 2;
+
+  bool terminateOnMediaPortZero = false;
+
   /// Sip Message Delay (in millisecond) (default 0).
   int sip_message_delay = 0;
   List<Map<String, String>> iceServers = <Map<String, String>>[
-    <String, String>{'url': 'stun:stun.l.google.com:19302'},
+    <String, String>{'urls': 'stun:stun.l.google.com:19302'},
 // turn server configuration example.
 //    {
 //      'url': 'turn:123.45.67.89:3478',
@@ -734,6 +904,11 @@ class UaSettings {
 //      'credential': 'change_to_real_secret'
 //    },
   ];
+
+  /// Defines the transport policy to be used for ICE.
+  /// See [IceTransportPolicy] for possible values.
+  /// Will default to [IceTransportPolicy.ALL] if not specified.
+  IceTransportPolicy? iceTransportPolicy;
 
   /// Controls which kind of messages are to be sent to keep a SIP session
   /// alive.
