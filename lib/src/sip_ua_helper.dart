@@ -14,6 +14,7 @@ import 'event_manager/event_manager.dart';
 import 'event_manager/subscriber_events.dart';
 import 'logger.dart';
 import 'message.dart';
+import 'options.dart';
 import 'rtc_session.dart';
 import 'rtc_session/refer_subscriber.dart';
 import 'sip_message.dart';
@@ -411,6 +412,10 @@ class SIPUAHelper extends EventManager {
   Message sendMessage(String target, String body,
       [Map<String, dynamic>? options, Map<String, dynamic>? params]) {
     return _ua!.sendMessage(target, body, options, params);
+  }
+
+  Options sendOptions(String target, String body, Map<String, dynamic>? params) {
+    return _ua!.sendOptions(target, body, params);
   }
 
   void subscribe(String target, String event, String contentType) {
