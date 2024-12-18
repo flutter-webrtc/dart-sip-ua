@@ -179,7 +179,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
 
   @override
   String? get url {
-    if (_host == null || _port == null) { 
+    if (_host == null || _port == null) {
       return null;
     }
     return '$_host:$_port';

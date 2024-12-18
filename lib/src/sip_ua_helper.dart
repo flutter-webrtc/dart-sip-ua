@@ -17,7 +17,6 @@ import 'message.dart';
 import 'options.dart';
 import 'rtc_session.dart';
 import 'rtc_session/refer_subscriber.dart';
-import 'sip_message.dart';
 import 'stack_trace_nj.dart';
 import 'subscriber.dart';
 import 'transports/web_socket.dart';
@@ -180,9 +179,9 @@ class SIPUAHelper extends EventManager {
     _settings.instance_id = uaSettings.instanceId;
     _settings.registrar_server = uaSettings.registrarServer;
     _settings.contact_uri = uaSettings.contact_uri;
-    _settings.connection_recovery_max_interval = 
+    _settings.connection_recovery_max_interval =
         uaSettings.connectionRecoveryMaxInterval;
-    _settings.connection_recovery_min_interval = 
+    _settings.connection_recovery_min_interval =
         uaSettings.connectionRecoveryMinInterval;
     _settings.terminateOnAudioMediaPortZero =
         uaSettings.terminateOnMediaPortZero;
@@ -414,7 +413,8 @@ class SIPUAHelper extends EventManager {
     return _ua!.sendMessage(target, body, options, params);
   }
 
-  Options sendOptions(String target, String body, Map<String, dynamic>? params) {
+  Options sendOptions(
+      String target, String body, Map<String, dynamic>? params) {
     return _ua!.sendOptions(target, body, params);
   }
 

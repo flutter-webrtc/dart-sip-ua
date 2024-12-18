@@ -7,7 +7,6 @@ import 'exceptions.dart' as Exceptions;
 import 'grammar.dart';
 import 'logger.dart';
 import 'transports/web_socket.dart';
-import 'uri.dart';
 import 'utils.dart' as Utils;
 
 // Default settings.

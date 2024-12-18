@@ -7,7 +7,6 @@ import '../event_manager/internal_events.dart';
 import '../exceptions.dart' as Exceptions;
 import '../logger.dart';
 import '../rtc_session.dart' as rtc;
-import '../sip_message.dart';
 import '../utils.dart' as Utils;
 
 class C {
