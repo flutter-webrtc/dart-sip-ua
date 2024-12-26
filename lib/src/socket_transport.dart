@@ -12,6 +12,22 @@ import 'timers.dart';
 import 'transports/web_socket.dart';
 import 'utils.dart';
 
+enum TransportStatus { connected, connecting, disconnected }
+
+enum SocketStatus { ready, error }
+
+class SocketInfo {
+  SocketInfo({
+    required this.socket,
+    required this.weight,
+    required this.status,
+  });
+
+  SIPUASocketInterface socket;
+  int weight;
+  SocketStatus status;
+}
+
 /*
  * Manages one or multiple DartSIP.Socket instances.
  * Is reponsible for transport recovery logic among all socket instances.
@@ -27,34 +43,32 @@ class SocketTransport {
 
     // We must recieve at least 1 socket
     if (sockets!.length == 0) {
-      throw Exceptions.TypeError(
-          'invalid argument: Must recieve atleast 1 web socket');
+      throw Exceptions.TypeError('invalid argument: Must recieve atleast 1 web socket');
     }
 
-    for (SIPUASocketInterface socket in sockets) {
-      _socketsMap.add(<String, dynamic>{
-        'socket': socket,
-        'weight': socket.weight ?? 0,
-        'status': C.SOCKET_STATUS_READY
-      });
+    for (final SIPUASocketInterface socket in sockets) {
+      _sockets.add(SocketInfo(
+        socket: socket,
+        weight: socket.weight ?? 0,
+        status: SocketStatus.ready,
+      ));
     }
     // Get the socket with higher weight.
     _getSocket();
   }
 
-  int status = C.STATUS_DISCONNECTED;
+  TransportStatus status = TransportStatus.disconnected;
   // Current socket.
   late SIPUASocketInterface socket;
   // Socket collection.
-  final List<Map<String, dynamic>> _socketsMap = <Map<String, dynamic>>[];
+  final List<SocketInfo> _sockets = <SocketInfo>[];
   late Map<String, int> _recovery_options;
   int _recover_attempts = 0;
   Timer? _recovery_timer;
   bool _close_requested = false;
 
   late void Function(SIPUASocketInterface? socket, int? attempts) onconnecting;
-  late void Function(SIPUASocketInterface? socket, ErrorCause cause)
-      ondisconnect;
+  late void Function(SIPUASocketInterface? socket, ErrorCause cause) ondisconnect;
   late void Function(SocketTransport transport) onconnect;
   late void Function(SocketTransport transport, String messageData) ondata;
 
@@ -82,7 +96,7 @@ class SocketTransport {
     }
 
     _close_requested = false;
-    status = C.STATUS_CONNECTING;
+    status = TransportStatus.connecting;
     onconnecting(socket, _recover_attempts);
 
     if (!_close_requested) {
@@ -100,7 +114,7 @@ class SocketTransport {
 
     _close_requested = true;
     _recover_attempts = 0;
-    status = C.STATUS_DISCONNECTED;
+    status = TransportStatus.disconnected;
 
     // Clear recovery_timer.
     if (_recovery_timer != null) {
@@ -110,26 +124,22 @@ class SocketTransport {
 
     // Unbind socket event callbacks.
     socket.onconnect = () => () {};
-    socket.ondisconnect = (SIPUASocketInterface socket, bool error,
-            int? closeCode, String? reason) =>
-        () {};
+    socket.ondisconnect =
+        (SIPUASocketInterface socket, bool error, int? closeCode, String? reason) => () {};
     socket.ondata = (dynamic data) => () {};
 
     socket.disconnect();
     ondisconnect(
-        socket,
-        ErrorCause(
-            cause: 'disconnect',
-            status_code: 0,
-            reason_phrase: 'close by local'));
+      socket,
+      ErrorCause(cause: 'disconnect', status_code: 0, reason_phrase: 'close by local'),
+    );
   }
 
   bool send(dynamic data) {
     logger.d('Socket Transport send()');
 
     if (!isConnected()) {
-      logger.e(
-          'unable to send message, transport is not connected. Current state is $status',
+      logger.e('unable to send message, transport is not connected. Current state is $status',
           stackTrace: StackTraceNJ());
 
       return false;
@@ -161,8 +171,7 @@ class SocketTransport {
       k = _recovery_options['max_interval']!;
     }
 
-    logger.d(
-        'reconnection attempt: $_recover_attempts. next connection attempt in $k seconds');
+    logger.d('reconnection attempt: $_recover_attempts. next connection attempt in $k seconds');
 
     _recovery_timer = setTimeout(() {
       if (!_close_requested && !(isConnected() || isConnecting())) {
@@ -180,28 +189,28 @@ class SocketTransport {
   void _getSocket() {
     // If we dont have at least 1 socket to try and use, thiw will loop endlessly
 
-    if (_socketsMap.length == 0) {
+    if (_sockets.isEmpty) {
       throw Exceptions.TypeError('invalid argument: too few sockets');
     }
 
-    List<Map<String, dynamic>> candidates = <Map<String, dynamic>>[];
+    List<SocketInfo> candidates = <SocketInfo>[];
 
-    for (Map<String, dynamic> socket in _socketsMap) {
-      if (socket['status'] == C.SOCKET_STATUS_ERROR) {
+    for (final SocketInfo socket in _sockets) {
+      if (socket.status == SocketStatus.error) {
         return; // continue the array iteration
       } else if (candidates.isEmpty) {
         candidates.add(socket);
-      } else if (socket['weight'] > candidates[0]['weight']) {
-        candidates = <Map<String, dynamic>>[socket];
-      } else if (socket['weight'] == candidates[0]['weight']) {
+      } else if (socket.weight > candidates[0].weight) {
+        candidates = <SocketInfo>[socket];
+      } else if (socket.weight == candidates[0].weight) {
         candidates.add(socket);
       }
     }
 
     if (candidates.isEmpty) {
       // All sockets have failed. reset sockets status.
-      for (Map<String, dynamic> socket in _socketsMap) {
-        socket['status'] = C.SOCKET_STATUS_READY;
+      for (final SocketInfo socket in _sockets) {
+        socket.status = SocketStatus.ready;
       }
       // Get next available socket.
       _getSocket();
@@ -210,7 +219,7 @@ class SocketTransport {
 
     num idx = (Math.randomDouble() * candidates.length).floor();
 
-    socket = candidates[idx as int]['socket'];
+    socket = candidates[idx as int].socket;
   }
 
   /**
@@ -219,7 +228,7 @@ class SocketTransport {
 
   void _onConnect() {
     _recover_attempts = 0;
-    status = C.STATUS_CONNECTED;
+    status = TransportStatus.connected;
 
     // Clear recovery_timer.
     if (_recovery_timer != null) {
@@ -229,22 +238,18 @@ class SocketTransport {
     onconnect(this);
   }
 
-  void _onDisconnect(
-      SIPUASocketInterface socket, bool error, int? closeCode, String? reason) {
-    status = C.STATUS_DISCONNECTED;
-    ondisconnect(
-        socket,
-        ErrorCause(
-            cause: 'error', status_code: closeCode, reason_phrase: reason));
+  void _onDisconnect(SIPUASocketInterface socket, bool error, int? closeCode, String? reason) {
+    status = TransportStatus.disconnected;
+    ondisconnect(socket, ErrorCause(cause: 'error', status_code: closeCode, reason_phrase: reason));
 
     if (_close_requested) {
       return;
     }
     // Update socket status.
     else {
-      for (Map<String, dynamic> socket in _socketsMap) {
-        if (socket == socket['socket']) {
-          socket['status'] = C.SOCKET_STATUS_ERROR;
+      for (final SocketInfo s in _sockets) {
+        if (socket == s.socket) {
+          s.status = SocketStatus.error;
         }
       }
     }
@@ -266,8 +271,9 @@ class SocketTransport {
         data = String.fromCharCodes(data);
       } catch (evt) {
         logger.d(
-            'received binary message [${data.runtimeType}]failed to be converted into string,'
-            ' message discarded');
+          'received binary message [${data.runtimeType}]failed to be converted into string,'
+          ' message discarded',
+        );
         return;
       }
       logger.d('received binary message:\n\n$data\n');
