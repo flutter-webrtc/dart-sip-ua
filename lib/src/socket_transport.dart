@@ -1,15 +1,12 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:sip_ua/src/event_manager/events.dart';
-import 'package:sip_ua/src/transport_constants.dart';
-import 'package:sip_ua/src/transports/socket_interface.dart';
-import 'package:sip_ua/src/transports/tcp_socket.dart';
+import './event_manager/events.dart';
+import './transports/socket_interface.dart';
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
 import 'stack_trace_nj.dart';
 import 'timers.dart';
-import 'transports/web_socket.dart';
 import 'utils.dart';
 
 enum TransportStatus { connected, connecting, disconnected }
@@ -28,6 +25,11 @@ class SocketInfo {
   SocketStatus status;
 }
 
+const Map<String, int> defaultRecoveryOptions = <String, int>{
+  'min_interval': 2, // minimum interval in seconds between recover attempts
+  'max_interval': 30 // maximum interval in seconds between recover attempts
+};
+
 /*
  * Manages one or multiple DartSIP.Socket instances.
  * Is reponsible for transport recovery logic among all socket instances.
@@ -35,8 +37,10 @@ class SocketInfo {
  * @socket DartSIP::Socket instance
  */
 class SocketTransport {
-  SocketTransport(List<SIPUASocketInterface>? sockets,
-      [Map<String, int> recovery_options = C.recovery_options]) {
+  SocketTransport(
+    List<SIPUASocketInterface>? sockets, [
+    Map<String, int> recovery_options = defaultRecoveryOptions,
+  ]) {
     logger.d('Socket Transport new()');
 
     _recovery_options = recovery_options;
@@ -149,11 +153,11 @@ class SocketTransport {
   }
 
   bool isConnected() {
-    return status == C.STATUS_CONNECTED;
+    return status == TransportStatus.connected;
   }
 
   bool isConnecting() {
-    return status == C.STATUS_CONNECTING;
+    return status == TransportStatus.connecting;
   }
 
   /**
