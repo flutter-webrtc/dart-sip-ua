@@ -1,12 +1,12 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-import 'package:sip_ua/sip_ua.dart';
+import '../../sip_ua.dart';
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../exceptions.dart' as Exceptions;
 import '../logger.dart';
-import '../rtc_session.dart' as rtc;
+import '../rtc_session.dart';
 import '../utils.dart' as Utils;
 
 class C {
@@ -22,7 +22,7 @@ class DTMF extends EventManager {
     _mode = mode;
   }
 
-  final rtc.RTCSession _session;
+  final RTCSession _session;
   DtmfMode? _mode;
   String? _direction;
   String? _tone;
@@ -45,14 +45,13 @@ class DTMF extends EventManager {
     _direction = 'outgoing';
 
     // Check RTCSession Status.
-    if (_session.status != rtc.C.STATUS_CONFIRMED &&
-        _session.status != rtc.C.STATUS_WAITING_FOR_ACK) {
+    if (_session.state != RtcSessionState.confirmed &&
+        _session.state != RtcSessionState.waitingForAck) {
       throw Exceptions.InvalidStateError(_session.status);
     }
 
-    List<dynamic> extraHeaders = options['extraHeaders'] != null
-        ? Utils.cloneArray(options['extraHeaders'])
-        : <dynamic>[];
+    List<dynamic> extraHeaders =
+        options['extraHeaders'] != null ? Utils.cloneArray(options['extraHeaders']) : <dynamic>[];
 
     _eventHandlers = options['eventHandlers'] ?? EventManager();
 
@@ -69,8 +68,7 @@ class DTMF extends EventManager {
 
     if (_mode == DtmfMode.RFC2833) {
       RTCDTMFSender dtmfSender = _session.dtmfSender;
-      dtmfSender.insertDTMF(_tone!,
-          duration: _duration!, interToneGap: _interToneGap!);
+      dtmfSender.insertDTMF(_tone!, duration: _duration!, interToneGap: _interToneGap!);
     } else if (_mode == DtmfMode.INFO) {
       extraHeaders.add('Content-Type: application/dtmf-relay');
 
@@ -100,11 +98,8 @@ class DTMF extends EventManager {
         _session.onDialogError();
       });
 
-      _session.sendRequest(SipMethod.INFO, <String, dynamic>{
-        'extraHeaders': extraHeaders,
-        'eventHandlers': handlers,
-        'body': body
-      });
+      _session.sendRequest(SipMethod.INFO,
+          <String, dynamic>{'extraHeaders': extraHeaders, 'eventHandlers': handlers, 'body': body});
     }
   }
 
@@ -127,8 +122,7 @@ class DTMF extends EventManager {
       }
       if (body.length >= 2) {
         if (body[1].contains(RegExp(reg_duration))) {
-          _duration =
-              int.tryParse(body[1].replaceAll(reg_duration, '\$2'), radix: 10);
+          _duration = int.tryParse(body[1].replaceAll(reg_duration, '\$2'), radix: 10);
         }
       }
     }
