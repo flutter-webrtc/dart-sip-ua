@@ -172,7 +172,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   List<Widget> _buildDialPad() {
     Color? textFieldColor =
-        Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5);
+        Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5);
     Color? textFieldFill =
         Theme.of(context).buttonTheme.colorScheme?.surfaceContainerLowest;
     return [
@@ -190,15 +190,15 @@ class _MyDialPadWidget extends State<DialPadWidget>
           filled: true,
           fillColor: textFieldFill,
           border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue.withOpacity(0.5)),
+            borderSide: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(5),
           ),
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue.withOpacity(0.5)),
+            borderSide: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(5),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue.withOpacity(0.5)),
+            borderSide: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(5),
           ),
         ),

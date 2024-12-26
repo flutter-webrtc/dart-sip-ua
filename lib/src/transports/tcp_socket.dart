@@ -140,7 +140,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
       return true;
     } catch (error) {
       logger.e('send() | error sending message: $error');
-      throw error;
+      rethrow;
     }
   }
 
@@ -179,7 +179,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
 
   @override
   String? get url {
-    if (_host == null || _port == null) { 
+    if (_host == null || _port == null) {
       return null;
     }
     return '$_host:$_port';

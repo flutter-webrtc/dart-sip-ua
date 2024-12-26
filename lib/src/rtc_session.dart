@@ -22,11 +22,9 @@ import 'rtc_session/info.dart' as RTCSession_Info;
 import 'rtc_session/info.dart';
 import 'rtc_session/refer_notifier.dart';
 import 'rtc_session/refer_subscriber.dart';
-import 'sip_message.dart';
 import 'timers.dart';
 import 'transactions/transaction_base.dart';
 import 'ua.dart';
-import 'uri.dart';
 import 'utils.dart' as utils;
 
 class C {
@@ -2356,7 +2354,7 @@ class RTCSession extends EventManager implements Owner {
             'User Denied Media Access');
         logger.e('emit "getusermediafailed" [error:${error.toString()}]');
         emit(EventGetUserMediaFailed(exception: error));
-        throw error;
+        rethrow;
       }
     }
 
@@ -2408,7 +2406,7 @@ class RTCSession extends EventManager implements Owner {
         return;
       }
       logger.e('Failed to _sendInitialRequest: ${error.toString()}');
-      throw error;
+      rethrow;
     }
   }
 
@@ -3064,7 +3062,7 @@ class RTCSession extends EventManager implements Owner {
   }
 
   /// SDP offers may contain text media channels. e.g. Older clients using linphone.
-  /// 
+  ///
   /// WebRTC does not support text media channels, so remove them.
   String? _sdpOfferToWebRTC(String? sdpInput) {
     if (sdpInput == null) {

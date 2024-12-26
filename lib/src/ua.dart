@@ -95,7 +95,7 @@ class UA extends EventManager {
     } catch (e) {
       _status = C.STATUS_NOT_READY;
       _error = C.CONFIGURATION_ERROR;
-      throw e;
+      rethrow;
     }
 
     // Initialize registrator.
@@ -821,7 +821,7 @@ class UA extends EventManager {
     try {
       config.load(configuration, _configuration);
     } catch (e) {
-      throw e;
+      rethrow;
     }
 
     // Post Configuration Process.
