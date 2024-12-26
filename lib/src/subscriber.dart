@@ -317,7 +317,7 @@ class Subscriber extends EventManager implements Owner {
     }
 
     logger.d('emit "terminated" code=$code');
-    emit(EventTerminated(TerminationCode: code, reason: reason, retryAfter: retryAfter));
+    emit(EventTerminated(TerminationCode: code.index, reason: reason, retryAfter: retryAfter));
   }
 
   void _handlePresence(EventNotify event) {
