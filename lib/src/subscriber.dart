@@ -514,13 +514,6 @@ class Subscriber extends EventManager implements Owner {
         throw exceptions.TypeError('wrong state value');
     }
   }
-
-  /**
-   * Expose C object.
-   */
-  static C getC() {
-    return C();
-  }
 }
 
 class SubscriptionId {
