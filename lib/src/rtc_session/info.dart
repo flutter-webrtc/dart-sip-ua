@@ -1,11 +1,11 @@
 import 'package:sip_ua/src/enums.dart';
-import 'package:sip_ua/src/sip_message.dart';
 
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../exceptions.dart' as Exceptions;
 import '../rtc_session.dart' as rtc;
+import '../sip_message.dart';
 import '../utils.dart' as utils;
 
 class Info extends EventManager {
