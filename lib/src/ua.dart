@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:sip_ua/src/transport_type.dart';
-import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -28,21 +26,13 @@ import 'transactions/non_invite_client.dart';
 import 'transactions/non_invite_server.dart';
 import 'transactions/transaction_base.dart';
 import 'transactions/transactions.dart';
-import 'transports/web_socket.dart';
+import 'transports/socket_interface.dart';
 import 'uri.dart';
 import 'utils.dart' as Utils;
 
-class C {
-  // UA status codes.
-  static const int STATUS_INIT = 0;
-  static const int STATUS_READY = 1;
-  static const int STATUS_USER_CLOSED = 2;
-  static const int STATUS_NOT_READY = 3;
+enum UAStatus { init, ready, userClosed, notReady }
 
-  // UA error codes.
-  static const int CONFIGURATION_ERROR = 1;
-  static const int NETWORK_ERROR = 2;
-}
+enum UAError { configuration, network }
 
 // TODO(Perondas): Figure out what this is
 final bool hasRTCPeerConnection = true;
@@ -93,8 +83,8 @@ class UA extends EventManager {
     try {
       _loadConfig(configuration);
     } catch (e) {
-      _status = C.STATUS_NOT_READY;
-      _error = C.CONFIGURATION_ERROR;
+      _status = UAStatus.notReady;
+      _error = UAError.configuration;
       rethrow;
     }
 
@@ -118,8 +108,8 @@ class UA extends EventManager {
   final Map<String?, RTCSession> _sessions = <String?, RTCSession>{};
   SocketTransport? _socketTransport;
   Contact? _contact;
-  int _status = C.STATUS_INIT;
-  int? _error;
+  UAStatus _status = UAStatus.init;
+  UAError? _error;
   late TransactionBag _transactions;
 
 // Custom UA empty object for high level use.
@@ -128,7 +118,7 @@ class UA extends EventManager {
   Timer? _closeTimer;
   late Registrator _registrator;
 
-  int get status => _status;
+  UAStatus get status => _status;
 
   Contact? get contact => _contact;
 
@@ -154,9 +144,9 @@ class UA extends EventManager {
 
     _transactions = TransactionBag();
 
-    if (_status == C.STATUS_INIT) {
+    if (_status == UAStatus.init) {
       _socketTransport!.connect();
-    } else if (_status == C.STATUS_USER_CLOSED) {
+    } else if (_status == UAStatus.userClosed) {
       logger.d('restarting UA');
 
       // Disconnect.
@@ -167,9 +157,9 @@ class UA extends EventManager {
       }
 
       // Reconnect.
-      _status = C.STATUS_INIT;
+      _status = UAStatus.init;
       _socketTransport!.connect();
-    } else if (_status == C.STATUS_READY) {
+    } else if (_status == UAStatus.ready) {
       logger.d('UA is in READY status, not restarted');
     } else {
       logger.d(
@@ -313,7 +303,7 @@ class UA extends EventManager {
     // Remove dynamic settings.
     _dynConfiguration = null;
 
-    if (_status == C.STATUS_USER_CLOSED) {
+    if (_status == UAStatus.userClosed) {
       logger.d('UA already closed');
 
       return;
@@ -362,7 +352,7 @@ class UA extends EventManager {
       } catch (error) {}
     }
 
-    _status = C.STATUS_USER_CLOSED;
+    _status = UAStatus.userClosed;
 
     int num_transactions = _transactions.countTransactions();
     if (num_transactions == 0 && num_sessions == 0) {
@@ -927,10 +917,10 @@ class UA extends EventManager {
 // Transport connected event.
   void onTransportConnect(SocketTransport transport) {
     logger.d('Transport connected');
-    if (_status == C.STATUS_USER_CLOSED) {
+    if (_status == UAStatus.userClosed) {
       return;
     }
-    _status = C.STATUS_READY;
+    _status = UAStatus.ready;
     _error = null;
 
     emit(EventSocketConnected(socket: transport.socket));
@@ -952,9 +942,9 @@ class UA extends EventManager {
     // Call registrator _onTransportClosed_.
     _registrator.onTransportClosed();
 
-    if (_status != C.STATUS_USER_CLOSED) {
-      _status = C.STATUS_NOT_READY;
-      _error = C.NETWORK_ERROR;
+    if (_status != UAStatus.userClosed) {
+      _status = UAStatus.notReady;
+      _error = UAError.network;
     }
   }
 
@@ -966,7 +956,7 @@ class UA extends EventManager {
       return;
     }
 
-    if (_status == C.STATUS_USER_CLOSED && message is IncomingRequest) {
+    if (_status == UAStatus.userClosed && message is IncomingRequest) {
       return;
     }
 
