@@ -1,5 +1,6 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
+import '../enums.dart';
 import '../rtc_session.dart' show RTCSession;
 import '../rtc_session/dtmf.dart';
 import '../rtc_session/info.dart';
@@ -33,8 +34,8 @@ class EventOnAuthenticated extends EventType {
 
 class EventSdp extends EventType {
   EventSdp({this.originator, this.type, this.sdp});
-  String? originator;
-  String? type;
+  Originator? originator;
+  SdpType? type;
   String? sdp;
 }
 
@@ -55,7 +56,7 @@ class EventSetLocalDescriptionFailed extends EventType {
 
 class EventFailedUnderScore extends EventType {
   EventFailedUnderScore({this.originator, this.cause});
-  String? originator;
+  Originator? originator;
   ErrorCause? cause;
 }
 
@@ -66,14 +67,14 @@ class EventGetUserMediaFailed extends EventType {
 
 class EventNewDTMF extends EventType {
   EventNewDTMF({this.originator, this.request, this.dtmf});
-  String? originator;
+  Originator? originator;
   dynamic request;
   DTMF? dtmf;
 }
 
 class EventNewInfo extends EventType {
   EventNewInfo({this.originator, this.request, this.info});
-  String? originator;
+  Originator? originator;
   dynamic request;
   Info? info;
 }
@@ -127,7 +128,7 @@ class EventOnFialed extends EventType {}
 
 class EventSucceeded extends EventType {
   EventSucceeded({this.response, this.originator});
-  String? originator;
+  Originator? originator;
   IncomingMessage? response;
 }
 

@@ -1,7 +1,7 @@
-import 'package:sip_ua/src/sip_message.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../logger.dart';
+import '../sip_message.dart';
 import '../socket_transport.dart';
 import '../ua.dart';
 import '../utils.dart';

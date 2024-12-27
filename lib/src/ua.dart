@@ -6,6 +6,7 @@ import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'data.dart';
 import 'dialog.dart';
+import 'enums.dart';
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
@@ -491,7 +492,7 @@ class UA extends EventManager {
   /**
    *  Message
    */
-  void newMessage(Message message, String originator, dynamic request) {
+  void newMessage(Message message, Originator originator, dynamic request) {
     if (_stopping) {
       return;
     }
@@ -503,7 +504,7 @@ class UA extends EventManager {
   /**
    *  Options
    */
-  void newOptions(Options message, String originator, dynamic request) {
+  void newOptions(Options message, Originator originator, dynamic request) {
     if (_stopping) {
       return;
     }
@@ -537,7 +538,7 @@ class UA extends EventManager {
    * RTCSession
    */
   void newRTCSession(
-      {required RTCSession session, String? originator, dynamic request}) {
+      {required RTCSession session, Originator? originator, dynamic request}) {
     _sessions[session.id] = session;
     emit(EventNewRTCSession(
         session: session, originator: originator, request: request));

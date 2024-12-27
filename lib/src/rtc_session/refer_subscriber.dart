@@ -1,4 +1,3 @@
-import 'package:sip_ua/src/sip_message.dart';
 import '../constants.dart' as DartSIP_C;
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
@@ -6,6 +5,7 @@ import '../event_manager/internal_events.dart';
 import '../grammar.dart';
 import '../logger.dart';
 import '../rtc_session.dart' as rtc;
+import '../sip_message.dart';
 import '../uri.dart';
 import '../utils.dart' as Utils;
 
