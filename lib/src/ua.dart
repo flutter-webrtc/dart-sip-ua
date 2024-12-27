@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:sip_ua/src/transport_type.dart';
-import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -28,7 +26,7 @@ import 'transactions/non_invite_client.dart';
 import 'transactions/non_invite_server.dart';
 import 'transactions/transaction_base.dart';
 import 'transactions/transactions.dart';
-import 'transports/web_socket.dart';
+import 'transports/socket_interface.dart';
 import 'uri.dart';
 import 'utils.dart' as Utils;
 
