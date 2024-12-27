@@ -1,6 +1,5 @@
 import 'package:sip_ua/src/enums.dart';
 import 'package:sip_ua/src/name_addr_header.dart';
-
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'event_manager/event_manager.dart';

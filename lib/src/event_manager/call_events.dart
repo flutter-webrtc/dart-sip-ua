@@ -1,6 +1,6 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:sip_ua/src/enums.dart';
 
+import '../enums.dart';
 import '../rtc_session.dart';
 import '../sip_message.dart';
 import 'events.dart';

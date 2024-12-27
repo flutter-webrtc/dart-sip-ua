@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:sip_ua/src/event_manager/events.dart';
-import 'package:sip_ua/src/transport_constants.dart';
-import 'package:sip_ua/src/transports/socket_interface.dart';
-import 'package:sip_ua/src/transports/tcp_socket.dart';
+import 'event_manager/events.dart';
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
 import 'stack_trace_nj.dart';
 import 'timers.dart';
+import 'transport_constants.dart';
+import 'transports/socket_interface.dart';
 import 'transports/web_socket.dart';
 import 'utils.dart';
 

@@ -1,7 +1,7 @@
-import 'package:sip_ua/sip_ua.dart';
-import 'package:sip_ua/src/transports/socket_interface.dart';
-import 'package:sip_ua/src/transports/tcp_socket_impl.dart';
+import '../../sip_ua.dart';
 import '../logger.dart';
+import 'socket_interface.dart';
+import 'tcp_socket_impl.dart';
 
 class SIPUATcpSocket extends SIPUASocketInterface {
   SIPUATcpSocket(String host, String port,

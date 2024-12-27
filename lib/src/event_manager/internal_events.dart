@@ -1,6 +1,6 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:sip_ua/src/enums.dart';
 
+import '../enums.dart';
 import '../rtc_session.dart' show RTCSession;
 import '../rtc_session/dtmf.dart';
 import '../rtc_session/info.dart';

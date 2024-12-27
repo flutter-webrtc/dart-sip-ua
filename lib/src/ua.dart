@@ -1,14 +1,12 @@
 import 'dart:async';
 
-import 'package:sip_ua/src/enums.dart';
-import 'package:sip_ua/src/transport_type.dart';
-import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'data.dart';
 import 'dialog.dart';
+import 'enums.dart';
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
@@ -29,6 +27,7 @@ import 'transactions/non_invite_client.dart';
 import 'transactions/non_invite_server.dart';
 import 'transactions/transaction_base.dart';
 import 'transactions/transactions.dart';
+import 'transports/socket_interface.dart';
 import 'transports/web_socket.dart';
 import 'uri.dart';
 import 'utils.dart' as Utils;

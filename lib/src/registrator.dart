@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:sip_ua/src/socket_transport.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'event_manager/event_manager.dart';
@@ -10,6 +9,7 @@ import 'logger.dart';
 import 'name_addr_header.dart';
 import 'request_sender.dart';
 import 'sip_message.dart';
+import 'socket_transport.dart';
 import 'timers.dart';
 import 'ua.dart';
 import 'uri.dart';

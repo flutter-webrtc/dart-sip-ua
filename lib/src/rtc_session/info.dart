@@ -1,6 +1,5 @@
-import 'package:sip_ua/src/enums.dart';
-
 import '../constants.dart';
+import '../enums.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../exceptions.dart' as Exceptions;
