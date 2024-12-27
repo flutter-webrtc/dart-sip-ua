@@ -206,7 +206,7 @@ class Registrator {
 
           expires ??= _expires;
 
-          expires = num.tryParse(expires) ?? 0;
+          expires = num.tryParse(expires.toString()) ?? 0;
 
           if (expires < MIN_REGISTER_EXPIRES) {
             expires = MIN_REGISTER_EXPIRES;
