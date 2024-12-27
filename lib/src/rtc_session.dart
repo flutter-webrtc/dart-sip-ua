@@ -2080,7 +2080,7 @@ class RTCSession extends EventManager implements Owner {
           }
         }
         emit(EventStream(
-            session: this, originator: 'local', stream: localStream));
+            session: this, originator: Originator.local, stream: localStream));
       } else {
         logger.w(
             'Remote wants to upgrade to video but no camera available to send');
@@ -2749,7 +2749,7 @@ class RTCSession extends EventManager implements Owner {
       }
 
       emit(EventStream(
-          session: this, originator: 'local', stream: _localMediaStream));
+          session: this, originator: Originator.local, stream: _localMediaStream));
     } catch (error) {
       if (_status == C.STATUS_TERMINATED) {
         throw Exceptions.InvalidStateError('terminated');
