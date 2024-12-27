@@ -85,7 +85,7 @@ class Checks {
        *  List of Objects and Socket: [{socket: socket1}, socket2]
        */
       List<SIPUASocketInterface> copy = <SIPUASocketInterface>[];
-      if (sockets is List && sockets!.length > 0) {
+      if (sockets is List && sockets!.isNotEmpty) {
         for (SIPUASocketInterface socket in sockets) {
           copy.add(socket);
         }

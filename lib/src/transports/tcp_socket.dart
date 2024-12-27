@@ -166,7 +166,7 @@ class SIPUATcpSocket extends SIPUASocketInterface {
   void _onMessage(dynamic data) {
     logger.d('Received TcpSocket data');
     if (data != null) {
-      if (data.toString().trim().length > 0) {
+      if (data.toString().trim().isNotEmpty) {
         ondata!(data);
       } else {
         logger.d('Received and ignored empty packet');

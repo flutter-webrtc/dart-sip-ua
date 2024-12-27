@@ -120,7 +120,7 @@ class DTMF extends EventManager {
     if (request.body != null) {
       List<String> body = request.body!.split('\n');
 
-      if (body.length >= 1) {
+      if (body.isNotEmpty) {
         if (body[0].contains(RegExp(reg_tone))) {
           _tone = body[0].replaceAll(reg_tone, '\$2');
         }

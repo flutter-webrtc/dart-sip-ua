@@ -46,7 +46,7 @@ class SocketTransport {
     _recovery_options = recovery_options;
 
     // We must recieve at least 1 socket
-    if (sockets!.length == 0) {
+    if (sockets!.isEmpty) {
       throw Exceptions.TypeError(
           'invalid argument: Must recieve atleast 1 web socket');
     }
