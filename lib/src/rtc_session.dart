@@ -53,8 +53,8 @@ class SIPTimers {
 }
 
 class RFC4028Timers {
-  RFC4028Timers(this.enabled, this.refreshMethod, this.defaultExpires, this.currentExpires,
-      this.running, this.refresher, this.timer);
+  RFC4028Timers(this.enabled, this.refreshMethod, this.defaultExpires,
+      this.currentExpires, this.running, this.refresher, this.timer);
   bool enabled;
   SipMethod refreshMethod;
   int? defaultExpires;
@@ -139,7 +139,8 @@ class RTCSession extends EventManager implements Owner {
   late RFC4028Timers _sessionTimers;
 
   // Map of ReferSubscriber instances indexed by the REFER's CSeq number.
-  final Map<int?, ReferSubscriber> _referSubscribers = <int?, ReferSubscriber>{};
+  final Map<int?, ReferSubscriber> _referSubscribers =
+      <int?, ReferSubscriber>{};
 
   // Custom session empty object for high level use.
   Map<String, dynamic>? data = <String, dynamic>{};
@@ -233,23 +234,26 @@ class RTCSession extends EventManager implements Owner {
   }
 
   void connect(dynamic target,
-      [Map<String, dynamic>? options, InitSuccessCallback? initCallback]) async {
+      [Map<String, dynamic>? options,
+      InitSuccessCallback? initCallback]) async {
     logger.d('connect()');
 
     options = options ?? <String, dynamic>{};
     dynamic originalTarget = target;
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
     List<dynamic> extraHeaders = utils.cloneArray(options['extraHeaders']);
-    Map<String, dynamic> mediaConstraints =
-        options['mediaConstraints'] ?? <String, dynamic>{'audio': true, 'video': true};
+    Map<String, dynamic> mediaConstraints = options['mediaConstraints'] ??
+        <String, dynamic>{'audio': true, 'video': true};
     MediaStream? mediaStream = options['mediaStream'];
     Map<String, dynamic> pcConfig =
         options['pcConfig'] ?? <String, dynamic>{'iceServers': <dynamic>[]};
-    Map<String, dynamic> rtcConstraints = options['rtcConstraints'] ?? <String, dynamic>{};
+    Map<String, dynamic> rtcConstraints =
+        options['rtcConstraints'] ?? <String, dynamic>{};
     Map<String, dynamic> rtcOfferConstraints =
         options['rtcOfferConstraints'] ?? <String, dynamic>{};
     _rtcOfferConstraints = rtcOfferConstraints;
-    _rtcAnswerConstraints = options['rtcAnswerConstraints'] ?? <String, dynamic>{};
+    _rtcAnswerConstraints =
+        options['rtcAnswerConstraints'] ?? <String, dynamic>{};
     data = options['data'] ?? data;
     data?['video'] = !(options['mediaConstraints']['video'] == false);
 
@@ -309,13 +313,15 @@ class RTCSession extends EventManager implements Owner {
     if (isFromUriOptionPresent) {
       requestParams['from_display_name'] = options['from_display_name'] ?? '';
       requestParams['from_uri'] = URI.parse(options['from_uri']);
-      extraHeaders.add('P-Preferred-Identity: ${_ua.configuration.uri.toString()}');
+      extraHeaders
+          .add('P-Preferred-Identity: ${_ua.configuration.uri.toString()}');
     }
 
     if (anonymous) {
       requestParams['from_display_name'] = 'Anonymous';
       requestParams['from_uri'] = URI('sip', 'anonymous', 'anonymous.invalid');
-      extraHeaders.add('P-Preferred-Identity: ${_ua.configuration.uri.toString()}');
+      extraHeaders
+          .add('P-Preferred-Identity: ${_ua.configuration.uri.toString()}');
       extraHeaders.add('Privacy: id');
     }
 
@@ -325,7 +331,8 @@ class RTCSession extends EventManager implements Owner {
       extraHeaders.add('Session-Expires: ${_sessionTimers.defaultExpires}');
     }
 
-    _request = InitialOutgoingInviteRequest(target, _ua, requestParams, extraHeaders);
+    _request =
+        InitialOutgoingInviteRequest(target, _ua, requestParams, extraHeaders);
 
     _id = _request.call_id + _from_tag;
 
@@ -343,10 +350,12 @@ class RTCSession extends EventManager implements Owner {
     }
 
     _newRTCSession('local', _request);
-    await _sendInitialRequest(pcConfig, mediaConstraints, rtcOfferConstraints, mediaStream);
+    await _sendInitialRequest(
+        pcConfig, mediaConstraints, rtcOfferConstraints, mediaStream);
   }
 
-  void init_incoming(IncomingRequest request, [Function(RTCSession)? initCallback]) {
+  void init_incoming(IncomingRequest request,
+      [Function(RTCSession)? initCallback]) {
     logger.d('init_incoming()');
 
     int? expires;
@@ -373,7 +382,8 @@ class RTCSession extends EventManager implements Owner {
                 : num.tryParse(request.getHeader('expires'))!) *
             1000;
       } catch (e) {
-        logger.e('Invalid Expires header value: ${request.getHeader('expires')}, error $e');
+        logger.e(
+            'Invalid Expires header value: ${request.getHeader('expires')}, error $e');
       }
     }
 
@@ -399,7 +409,8 @@ class RTCSession extends EventManager implements Owner {
     // Set userNoAnswerTimer.
     _timers.userNoAnswerTimer = setTimeout(() {
       request.reply(408);
-      _failed('local', null, null, null, 408, DartSIP_C.CausesType.NO_ANSWER, 'No Answer');
+      _failed('local', null, null, null, 408, DartSIP_C.CausesType.NO_ANSWER,
+          'No Answer');
     }, _ua.configuration.no_answer_timeout);
 
     /* Set expiresTimer
@@ -409,7 +420,8 @@ class RTCSession extends EventManager implements Owner {
       _timers.expiresTimer = setTimeout(() {
         if (_state == RtcSessionState.waitingForAnswer) {
           request.reply(487);
-          _failed('system', null, null, null, 487, DartSIP_C.CausesType.EXPIRES, 'Timeout');
+          _failed('system', null, null, null, 487, DartSIP_C.CausesType.EXPIRES,
+              'Timeout');
         }
       }, expires);
     }
@@ -447,11 +459,13 @@ class RTCSession extends EventManager implements Owner {
     logger.d('answer()');
     dynamic request = _request;
     List<dynamic> extraHeaders = utils.cloneArray(options['extraHeaders']);
-    Map<String, dynamic> mediaConstraints = options['mediaConstraints'] ?? <String, dynamic>{};
+    Map<String, dynamic> mediaConstraints =
+        options['mediaConstraints'] ?? <String, dynamic>{};
     MediaStream? mediaStream = options['mediaStream'] ?? null;
     Map<String, dynamic> pcConfig =
         options['pcConfig'] ?? <String, dynamic>{'iceServers': <dynamic>[]};
-    Map<String, dynamic> rtcConstraints = options['rtcConstraints'] ?? <String, dynamic>{};
+    Map<String, dynamic> rtcConstraints =
+        options['rtcConstraints'] ?? <String, dynamic>{};
     Map<String, dynamic> rtcAnswerConstraints =
         options['rtcAnswerConstraints'] ?? <String, dynamic>{};
 
@@ -474,7 +488,8 @@ class RTCSession extends EventManager implements Owner {
 
     // Check Session Direction and Status.
     if (_direction != 'incoming') {
-      throw Exceptions.NotSupportedError('"answer" not supported for outgoing RTCSession');
+      throw Exceptions.NotSupportedError(
+          '"answer" not supported for outgoing RTCSession');
     }
 
     // Check Session status.
@@ -576,7 +591,8 @@ class RTCSession extends EventManager implements Owner {
       emit(EventStream(session: this, originator: 'local', stream: stream));
     }
     // Audio and/or video requested, prompt getUserMedia.
-    else if (mediaConstraints['audio'] != null || mediaConstraints['video'] != null) {
+    else if (mediaConstraints['audio'] != null ||
+        mediaConstraints['video'] != null) {
       _localMediaStreamLocallyGenerated = true;
       try {
         stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
@@ -586,7 +602,13 @@ class RTCSession extends EventManager implements Owner {
           throw Exceptions.InvalidStateError('terminated');
         }
         request.reply(480);
-        _failed('local', null, null, null, 480, DartSIP_C.CausesType.USER_DENIED_MEDIA_ACCESS,
+        _failed(
+            'local',
+            null,
+            null,
+            null,
+            480,
+            DartSIP_C.CausesType.USER_DENIED_MEDIA_ACCESS,
             'User Denied Media Access');
         logger.e('emit "getusermediafailed" [error:${error.toString()}]');
         emit(EventGetUserMediaFailed(exception: error));
@@ -629,11 +651,19 @@ class RTCSession extends EventManager implements Owner {
       await _connection!.setRemoteDescription(offer);
     } catch (error) {
       request.reply(488);
-      _failed('system', null, null, null, 488, DartSIP_C.CausesType.WEBRTC_ERROR,
+      _failed(
+          'system',
+          null,
+          null,
+          null,
+          488,
+          DartSIP_C.CausesType.WEBRTC_ERROR,
           'SetRemoteDescription(offer) failed');
-      logger.e('emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
+      logger.e(
+          'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
       emit(EventSetRemoteDescriptionFailed(exception: error));
-      throw Exceptions.TypeError('peerconnection.setRemoteDescription() failed');
+      throw Exceptions.TypeError(
+          'peerconnection.setRemoteDescription() failed');
     }
 
     // Create local description.
@@ -668,14 +698,15 @@ class RTCSession extends EventManager implements Owner {
         _setACKTimer();
         _accepted('local');
       }, () {
-        _failed('system', null, null, null, 500, DartSIP_C.CausesType.CONNECTION_ERROR,
-            'Transport Error');
+        _failed('system', null, null, null, 500,
+            DartSIP_C.CausesType.CONNECTION_ERROR, 'Transport Error');
       });
     } catch (error, s) {
       if (_state == RtcSessionState.terminated) {
         return;
       }
-      logger.e('Failed to answer(): ${error.toString()}', error: error, stackTrace: s);
+      logger.e('Failed to answer(): ${error.toString()}',
+          error: error, stackTrace: s);
     }
   }
 
@@ -689,8 +720,9 @@ class RTCSession extends EventManager implements Owner {
 
     Object cause = options['cause'] ?? DartSIP_C.CausesType.BYE;
 
-    List<dynamic> extraHeaders =
-        options['extraHeaders'] != null ? utils.cloneArray(options['extraHeaders']) : <dynamic>[];
+    List<dynamic> extraHeaders = options['extraHeaders'] != null
+        ? utils.cloneArray(options['extraHeaders'])
+        : <dynamic>[];
     Object? body = options['body'];
 
     String? cancel_reason;
@@ -717,7 +749,8 @@ class RTCSession extends EventManager implements Owner {
         }
 
         // Check Session Status.
-        if (_state == RtcSessionState.none || _state == RtcSessionState.inviteSent) {
+        if (_state == RtcSessionState.none ||
+            _state == RtcSessionState.inviteSent) {
           _is_canceled = true;
           _cancel_reason = cancel_reason;
         } else if (_state == RtcSessionState.provisionalResponse) {
@@ -727,8 +760,8 @@ class RTCSession extends EventManager implements Owner {
         _state = RtcSessionState.canceled;
         cancel_reason = cancel_reason ?? 'Canceled by local';
         status_code = status_code ?? 100;
-        _failed(
-            'local', null, null, null, status_code, DartSIP_C.CausesType.CANCELED, cancel_reason);
+        _failed('local', null, null, null, status_code,
+            DartSIP_C.CausesType.CANCELED, cancel_reason);
 
         break;
       // - UAS -
@@ -739,24 +772,27 @@ class RTCSession extends EventManager implements Owner {
         status_code = status_code ?? 480;
 
         if (status_code < 300 || status_code >= 700) {
-          throw Exceptions.InvalidStateError('Invalid status_code: $status_code');
+          throw Exceptions.InvalidStateError(
+              'Invalid status_code: $status_code');
         }
 
         _request.reply(status_code, reason_phrase, extraHeaders, body);
-        _failed(
-            'local', null, null, null, status_code, DartSIP_C.CausesType.REJECTED, reason_phrase);
+        _failed('local', null, null, null, status_code,
+            DartSIP_C.CausesType.REJECTED, reason_phrase);
         break;
       case RtcSessionState.waitingForAck:
       case RtcSessionState.confirmed:
         logger.d('terminating session');
 
-        reason_phrase =
-            options['reason_phrase'] as String? ?? DartSIP_C.REASON_PHRASE[status_code ?? 0];
+        reason_phrase = options['reason_phrase'] as String? ??
+            DartSIP_C.REASON_PHRASE[status_code ?? 0];
 
         if (status_code != null && (status_code < 200 || status_code >= 700)) {
-          throw Exceptions.InvalidStateError('Invalid status_code: $status_code');
+          throw Exceptions.InvalidStateError(
+              'Invalid status_code: $status_code');
         } else if (status_code != null) {
-          extraHeaders.add('Reason: SIP ;case=$status_code; text="$reason_phrase"');
+          extraHeaders
+              .add('Reason: SIP ;case=$status_code; text="$reason_phrase"');
         }
 
         /* RFC 3261 section 15 (Terminating a session):
@@ -783,10 +819,14 @@ class RTCSession extends EventManager implements Owner {
           };
 
           // .., or when the INVITE transaction times out
-          _request.server_transaction.on(EventStateChanged(), (EventStateChanged state) {
-            if (_request.server_transaction.state == TransactionState.TERMINATED) {
-              sendRequest(
-                  SipMethod.BYE, <String, dynamic>{'extraHeaders': extraHeaders, 'body': body});
+          _request.server_transaction.on(EventStateChanged(),
+              (EventStateChanged state) {
+            if (_request.server_transaction.state ==
+                TransactionState.TERMINATED) {
+              sendRequest(SipMethod.BYE, <String, dynamic>{
+                'extraHeaders': extraHeaders,
+                'body': body
+              });
               dialog.terminate();
             }
           });
@@ -807,14 +847,17 @@ class RTCSession extends EventManager implements Owner {
           // Restore the dialog into 'ua' so the ACK can reach 'this' session.
           _ua.newDialog(dialog);
         } else {
-          sendRequest(SipMethod.BYE, <String, dynamic>{'extraHeaders': extraHeaders, 'body': body});
+          sendRequest(SipMethod.BYE,
+              <String, dynamic>{'extraHeaders': extraHeaders, 'body': body});
           reason_phrase = reason_phrase ?? 'Terminated by local';
           status_code = status_code ?? 200;
           _ended(
             'local',
             null,
             ErrorCause(
-                cause: cause as String?, status_code: status_code, reason_phrase: reason_phrase),
+                cause: cause as String?,
+                status_code: status_code,
+                reason_phrase: reason_phrase),
           );
         }
         break;
@@ -833,7 +876,8 @@ class RTCSession extends EventManager implements Owner {
 
     // sensible defaults
     int duration = options['duration'] ?? RTCSession_DTMF.C.DEFAULT_DURATION;
-    int interToneGap = options['interToneGap'] ?? RTCSession_DTMF.C.DEFAULT_INTER_TONE_GAP;
+    int interToneGap =
+        options['interToneGap'] ?? RTCSession_DTMF.C.DEFAULT_INTER_TONE_GAP;
     int sendInterval = options['sendInterval'] ?? duration + interToneGap;
 
     if (tones == null) {
@@ -841,7 +885,8 @@ class RTCSession extends EventManager implements Owner {
     }
 
     // Check Session Status.
-    if (_state != RtcSessionState.confirmed && _state != RtcSessionState.waitingForAck) {
+    if (_state != RtcSessionState.confirmed &&
+        _state != RtcSessionState.waitingForAck) {
       throw Exceptions.InvalidStateError(_state);
     }
 
@@ -917,7 +962,8 @@ class RTCSession extends EventManager implements Owner {
           options!['eventHandlers'] = handlers;
 
           dtmf.send(tone, options);
-          await Future<void>.delayed(Duration(milliseconds: sendInterval), () {});
+          await Future<void>.delayed(
+              Duration(milliseconds: sendInterval), () {});
         });
       }
     }
@@ -927,7 +973,8 @@ class RTCSession extends EventManager implements Owner {
     logger.d('sendInfo()');
 
     // Check Session Status.
-    if (_state != RtcSessionState.confirmed && _state != RtcSessionState.waitingForAck) {
+    if (_state != RtcSessionState.confirmed &&
+        _state != RtcSessionState.waitingForAck) {
       throw Exceptions.InvalidStateError(_state);
     }
 
@@ -998,7 +1045,8 @@ class RTCSession extends EventManager implements Owner {
 
     options = options ?? <String, dynamic>{};
 
-    if (_state != RtcSessionState.waitingForAck && _state != RtcSessionState.confirmed) {
+    if (_state != RtcSessionState.waitingForAck &&
+        _state != RtcSessionState.confirmed) {
       return false;
     }
 
@@ -1035,19 +1083,23 @@ class RTCSession extends EventManager implements Owner {
         'extraHeaders': options['extraHeaders']
       });
     } else {
-      _sendReinvite(
-          <String, dynamic>{'eventHandlers': handlers, 'extraHeaders': options['extraHeaders']});
+      _sendReinvite(<String, dynamic>{
+        'eventHandlers': handlers,
+        'extraHeaders': options['extraHeaders']
+      });
     }
 
     return true;
   }
 
-  bool unhold([Map<String, dynamic>? options, Function(IncomingMessage?)? done]) {
+  bool unhold(
+      [Map<String, dynamic>? options, Function(IncomingMessage?)? done]) {
     logger.d('unhold()');
 
     options = options ?? <String, dynamic>{};
 
-    if (_state != RtcSessionState.waitingForAck && _state != RtcSessionState.confirmed) {
+    if (_state != RtcSessionState.waitingForAck &&
+        _state != RtcSessionState.confirmed) {
       return false;
     }
 
@@ -1083,15 +1135,19 @@ class RTCSession extends EventManager implements Owner {
         'extraHeaders': options['extraHeaders']
       });
     } else {
-      _sendReinvite(
-          <String, dynamic>{'eventHandlers': handlers, 'extraHeaders': options['extraHeaders']});
+      _sendReinvite(<String, dynamic>{
+        'eventHandlers': handlers,
+        'extraHeaders': options['extraHeaders']
+      });
     }
 
     return true;
   }
 
   bool renegotiate(
-      {Map<String, dynamic>? options, bool useUpdate = false, Function(IncomingMessage?)? done}) {
+      {Map<String, dynamic>? options,
+      bool useUpdate = false,
+      Function(IncomingMessage?)? done}) {
     logger.d('renegotiate()');
 
     options = options ?? <String, dynamic>{};
@@ -1100,11 +1156,14 @@ class RTCSession extends EventManager implements Owner {
     Map<String, dynamic>? rtcOfferConstraints =
         options['rtcOfferConstraints'] ?? _rtcOfferConstraints;
 
-    Map<String, dynamic> mediaConstraints = options['mediaConstraints'] ?? <String, dynamic>{};
+    Map<String, dynamic> mediaConstraints =
+        options['mediaConstraints'] ?? <String, dynamic>{};
 
-    dynamic sdpSemantics = options['pcConfig']?['sdpSemantics'] ?? 'unified-plan';
+    dynamic sdpSemantics =
+        options['pcConfig']?['sdpSemantics'] ?? 'unified-plan';
 
-    if (_state != RtcSessionState.waitingForAck && _state != RtcSessionState.confirmed) {
+    if (_state != RtcSessionState.waitingForAck &&
+        _state != RtcSessionState.confirmed) {
       return false;
     }
 
@@ -1175,7 +1234,8 @@ class RTCSession extends EventManager implements Owner {
 
     dynamic originalTarget = target;
 
-    if (_state != RtcSessionState.waitingForAck && _state != RtcSessionState.confirmed) {
+    if (_state != RtcSessionState.waitingForAck &&
+        _state != RtcSessionState.confirmed) {
       return null;
     }
 
@@ -1195,7 +1255,8 @@ class RTCSession extends EventManager implements Owner {
     _referSubscribers[id] = referSubscriber;
 
     // Listen for ending events so we can remove it from the map.
-    referSubscriber.on(EventReferRequestFailed(), (EventReferRequestFailed data) {
+    referSubscriber.on(EventReferRequestFailed(),
+        (EventReferRequestFailed data) {
       _referSubscribers.remove(id);
     });
     referSubscriber.on(EventReferAccepted(), (EventReferAccepted data) {
@@ -1211,7 +1272,8 @@ class RTCSession extends EventManager implements Owner {
   /**
    * Send a generic in-dialog Request
    */
-  OutgoingRequest sendRequest(SipMethod method, [Map<String, dynamic>? options]) {
+  OutgoingRequest sendRequest(SipMethod method,
+      [Map<String, dynamic>? options]) {
     logger.d('sendRequest()');
 
     return _dialog!.sendRequest(method, options);
@@ -1235,11 +1297,12 @@ class RTCSession extends EventManager implements Owner {
       * Terminate the whole session in case the user didn't accept (or yet send the answer)
       * nor reject the request opening the session.
       */
-      if (_state == RtcSessionState.waitingForAnswer || _state == RtcSessionState.answered) {
+      if (_state == RtcSessionState.waitingForAnswer ||
+          _state == RtcSessionState.answered) {
         _state = RtcSessionState.canceled;
         _request.reply(487);
-        _failed('remote', null, request, null, 487, DartSIP_C.CausesType.CANCELED,
-            request.reason_phrase);
+        _failed('remote', null, request, null, 487,
+            DartSIP_C.CausesType.CANCELED, request.reason_phrase);
       }
     } else {
       // Requests arriving here are in-dialog requests.
@@ -1255,15 +1318,19 @@ class RTCSession extends EventManager implements Owner {
 
           if (_late_sdp) {
             if (request.body == null) {
-              terminate(
-                  <String, dynamic>{'cause': DartSIP_C.CausesType.MISSING_SDP, 'status_code': 400});
+              terminate(<String, dynamic>{
+                'cause': DartSIP_C.CausesType.MISSING_SDP,
+                'status_code': 400
+              });
               break;
             }
 
             logger.d('emit "sdp"');
-            emit(EventSdp(originator: 'remote', type: 'answer', sdp: request.body));
+            emit(EventSdp(
+                originator: 'remote', type: 'answer', sdp: request.body));
 
-            RTCSessionDescription answer = RTCSessionDescription(request.body, 'answer');
+            RTCSessionDescription answer =
+                RTCSessionDescription(request.body, 'answer');
             try {
               await _connection!.setRemoteDescription(answer);
             } catch (error) {
@@ -1323,7 +1390,8 @@ class RTCSession extends EventManager implements Owner {
               _state == RtcSessionState.confirmed) {
             String? contentType = request.getHeader('content-type');
             if (contentType != null &&
-                contentType.contains(RegExp(r'^application\/dtmf-relay', caseSensitive: false))) {
+                contentType.contains(RegExp(r'^application\/dtmf-relay',
+                    caseSensitive: false))) {
               RTCSession_DTMF.DTMF(this).init_incoming(request);
             } else if (contentType != null) {
               RTCSession_Info.Info(this).init_incoming(request);
@@ -1431,8 +1499,10 @@ class RTCSession extends EventManager implements Owner {
     }
 
     // Another INVITE transaction is in progress.
-    if (_dialog!.uac_pending_reply == true || _dialog!.uas_pending_reply == true) {
-      logger.d('_isReadyToReOffer() | there is another INVITE/UPDATE transaction in progress');
+    if (_dialog!.uac_pending_reply == true ||
+        _dialog!.uas_pending_reply == true) {
+      logger.d(
+          '_isReadyToReOffer() | there is another INVITE/UPDATE transaction in progress');
 
       return false;
     }
@@ -1453,7 +1523,8 @@ class RTCSession extends EventManager implements Owner {
         await _connection!.dispose();
         _connection = null;
       } catch (error) {
-        logger.e('close() | error closing the RTCPeerConnection: ${error.toString()}');
+        logger.e(
+            'close() | error closing the RTCPeerConnection: ${error.toString()}');
       }
     }
     // Close local MediaStream if it was not given by the user.
@@ -1554,8 +1625,8 @@ class RTCSession extends EventManager implements Owner {
     renegotiate(options: offerConstraints);
   }
 
-  Future<void> _createRTCConnection(
-      Map<String, dynamic> pcConfig, Map<String, dynamic> rtcConstraints) async {
+  Future<void> _createRTCConnection(Map<String, dynamic> pcConfig,
+      Map<String, dynamic> rtcConstraints) async {
     _connection = await createPeerConnection(pcConfig, rtcConstraints);
     _connection!.onIceConnectionState = (RTCIceConnectionState state) {
       // TODO(cloudwebrtc): Do more with different states.
@@ -1565,7 +1636,8 @@ class RTCSession extends EventManager implements Owner {
           'status_code': 408,
           'reason_phrase': DartSIP_C.CausesType.RTP_TIMEOUT
         });
-      } else if (state == RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
+      } else if (state ==
+          RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
         _iceRestart();
       }
     };
@@ -1580,13 +1652,15 @@ class RTCSession extends EventManager implements Owner {
       case 'unified-plan':
         _connection!.onTrack = (RTCTrackEvent event) {
           if (event.streams.isNotEmpty) {
-            emit(EventStream(session: this, originator: 'remote', stream: event.streams[0]));
+            emit(EventStream(
+                session: this, originator: 'remote', stream: event.streams[0]));
           }
         };
         break;
       case 'plan-b':
         _connection!.onAddStream = (MediaStream stream) {
-          emit(EventStream(session: this, originator: 'remote', stream: stream));
+          emit(
+              EventStream(session: this, originator: 'remote', stream: stream));
         };
         break;
     }
@@ -1600,7 +1674,8 @@ class RTCSession extends EventManager implements Owner {
       String type, Map<String, dynamic>? constraints) async {
     logger.d('createLocalDescription()');
     _iceGatheringState ??= RTCIceGatheringState.RTCIceGatheringStateNew;
-    Completer<RTCSessionDescription> completer = Completer<RTCSessionDescription>();
+    Completer<RTCSessionDescription> completer =
+        Completer<RTCSessionDescription>();
 
     constraints = constraints ??
         <String, dynamic>{
@@ -1608,15 +1683,15 @@ class RTCSession extends EventManager implements Owner {
           'optional': <dynamic>[],
         };
 
-    List<Future<RTCSessionDescription> Function(RTCSessionDescription)> modifiers =
-        constraints['offerModifiers'] ??
+    List<Future<RTCSessionDescription> Function(RTCSessionDescription)>
+        modifiers = constraints['offerModifiers'] ??
             <Future<RTCSessionDescription> Function(RTCSessionDescription)>[];
 
     constraints['offerModifiers'] = null;
 
     if (type != 'offer' && type != 'answer') {
-      completer
-          .completeError(Exceptions.TypeError('createLocalDescription() | invalid type "$type"'));
+      completer.completeError(Exceptions.TypeError(
+          'createLocalDescription() | invalid type "$type"'));
     }
 
     _rtcReady = false;
@@ -1625,7 +1700,8 @@ class RTCSession extends EventManager implements Owner {
       try {
         desc = await _connection!.createOffer(constraints);
       } catch (error) {
-        logger.e('emit "peerconnection:createofferfailed" [error:${error.toString()}]');
+        logger.e(
+            'emit "peerconnection:createofferfailed" [error:${error.toString()}]');
         emit(EventCreateOfferFailed(exception: error));
         completer.completeError(error);
       }
@@ -1633,7 +1709,8 @@ class RTCSession extends EventManager implements Owner {
       try {
         desc = await _connection!.createAnswer(constraints);
       } catch (error) {
-        logger.e('emit "peerconnection:createanswerfailed" [error:${error.toString()}]');
+        logger.e(
+            'emit "peerconnection:createanswerfailed" [error:${error.toString()}]');
         emit(EventCreateAnswerFialed(exception: error));
         completer.completeError(error);
       }
@@ -1642,7 +1719,8 @@ class RTCSession extends EventManager implements Owner {
     // Add 'pc.onicencandidate' event handler to resolve on last candidate.
     bool finished = false;
 
-    for (Future<RTCSessionDescription> Function(RTCSessionDescription) modifier in modifiers) {
+    for (Future<RTCSessionDescription> Function(RTCSessionDescription) modifier
+        in modifiers) {
       desc = await modifier(desc);
     }
 
@@ -1690,13 +1768,15 @@ class RTCSession extends EventManager implements Owner {
       await _connection!.setLocalDescription(desc);
     } catch (error) {
       _rtcReady = true;
-      logger.e('emit "peerconnection:setlocaldescriptionfailed" [error:${error.toString()}]');
+      logger.e(
+          'emit "peerconnection:setlocaldescriptionfailed" [error:${error.toString()}]');
       emit(EventSetLocalDescriptionFailed(exception: error));
       completer.completeError(error);
     }
 
     // Resolve right away if 'pc.iceGatheringState' is 'complete'.
-    if (_iceGatheringState == RTCIceGatheringState.RTCIceGatheringStateComplete) {
+    if (_iceGatheringState ==
+        RTCIceGatheringState.RTCIceGatheringStateComplete) {
       _rtcReady = true;
       RTCSessionDescription? desc = await _connection!.getLocalDescription();
       logger.d('emit "sdp"');
@@ -1725,7 +1805,13 @@ class RTCSession extends EventManager implements Owner {
           early_dialog = Dialog(this, message, type, DialogStatus.STATUS_EARLY);
         } catch (error) {
           logger.d('$error');
-          _failed('remote', message, null, null, 500, DartSIP_C.CausesType.INTERNAL_ERROR,
+          _failed(
+              'remote',
+              message,
+              null,
+              null,
+              500,
+              DartSIP_C.CausesType.INTERNAL_ERROR,
               'Can\'t create Early Dialog');
           return false;
         }
@@ -1752,7 +1838,13 @@ class RTCSession extends EventManager implements Owner {
         return true;
       } catch (error) {
         logger.d(error.toString());
-        _failed('remote', message, null, null, 500, DartSIP_C.CausesType.INTERNAL_ERROR,
+        _failed(
+            'remote',
+            message,
+            null,
+            null,
+            500,
+            DartSIP_C.CausesType.INTERNAL_ERROR,
             'Can\'t create Confirmed Dialog');
         return false;
       }
@@ -1792,7 +1884,8 @@ class RTCSession extends EventManager implements Owner {
       _late_sdp = true;
 
       try {
-        RTCSessionDescription desc = await _createLocalDescription('offer', _rtcOfferConstraints);
+        RTCSessionDescription desc =
+            await _createLocalDescription('offer', _rtcOfferConstraints);
         sendAnswer(desc.sdp);
       } catch (_) {
         request.reply(500);
@@ -1927,7 +2020,8 @@ class RTCSession extends EventManager implements Owner {
     }
   }
 
-  Future<RTCSessionDescription> _processInDialogSdpOffer(IncomingRequest request) async {
+  Future<RTCSessionDescription> _processInDialogSdpOffer(
+      IncomingRequest request) async {
     logger.d('_processInDialogSdpOffer()');
 
     Map<String, dynamic>? sdp = request.parseSDP();
@@ -1970,7 +2064,8 @@ class RTCSession extends EventManager implements Owner {
       };
       bool hasCamera = false;
       try {
-        List<MediaDeviceInfo> devices = await navigator.mediaDevices.enumerateDevices();
+        List<MediaDeviceInfo> devices =
+            await navigator.mediaDevices.enumerateDevices();
         for (MediaDeviceInfo device in devices) {
           if (device.kind == 'videoinput') hasCamera = true;
         }
@@ -1978,18 +2073,22 @@ class RTCSession extends EventManager implements Owner {
         logger.w('Failed to enumerate devices: $e');
       }
       if (hasCamera) {
-        MediaStream localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+        MediaStream localStream =
+            await navigator.mediaDevices.getUserMedia(mediaConstraints);
         if (localStream.getVideoTracks().isEmpty) {
-          logger.w('Remote wants to upgrade to video but failed to get local video');
+          logger.w(
+              'Remote wants to upgrade to video but failed to get local video');
         }
         for (MediaStreamTrack track in localStream.getTracks()) {
           if (track.kind == 'video') {
             _connection!.addTrack(track, localStream);
           }
         }
-        emit(EventStream(session: this, originator: 'local', stream: localStream));
+        emit(EventStream(
+            session: this, originator: 'local', stream: localStream));
       } else {
-        logger.w('Remote wants to upgrade to video but no camera available to send');
+        logger.w(
+            'Remote wants to upgrade to video but no camera available to send');
       }
     }
 
@@ -2006,11 +2105,13 @@ class RTCSession extends EventManager implements Owner {
       await _connection!.setRemoteDescription(offer);
     } catch (error) {
       request.reply(488);
-      logger.e('emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
+      logger.e(
+          'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
 
       emit(EventSetRemoteDescriptionFailed(exception: error));
 
-      throw Exceptions.TypeError('peerconnection.setRemoteDescription() failed');
+      throw Exceptions.TypeError(
+          'peerconnection.setRemoteDescription() failed');
     }
 
     if (_state == RtcSessionState.terminated) {
@@ -2063,21 +2164,25 @@ class RTCSession extends EventManager implements Owner {
 
     ReferNotifier notifier = ReferNotifier(this, request.cseq);
 
-    bool accept2(InitSuccessCallback? initCallback, Map<String, dynamic> options) {
+    bool accept2(
+        InitSuccessCallback? initCallback, Map<String, dynamic> options) {
       initCallback = (initCallback is Function) ? initCallback : null;
 
-      if (_state != RtcSessionState.waitingForAck && _state != RtcSessionState.confirmed) {
+      if (_state != RtcSessionState.waitingForAck &&
+          _state != RtcSessionState.confirmed) {
         return false;
       }
 
       RTCSession session = RTCSession(_ua);
 
       session.on(EventCallProgress(), (EventCallProgress event) {
-        notifier.notify(event.response.status_code, event.response.reason_phrase);
+        notifier.notify(
+            event.response.status_code, event.response.reason_phrase);
       });
 
       session.on(EventCallAccepted(), (EventCallAccepted event) {
-        notifier.notify(event.response.status_code, event.response.reason_phrase);
+        notifier.notify(
+            event.response.status_code, event.response.reason_phrase);
       });
 
       session.on(EventFailedUnderScore(), (EventFailedUnderScore data) {
@@ -2089,7 +2194,8 @@ class RTCSession extends EventManager implements Owner {
       });
       // Consider the Replaces header present in the Refer-To URI.
       if (request.refer_to.uri.hasHeader('replaces')) {
-        String replaces = utils.decodeURIComponent(request.refer_to.uri.getHeader('replaces'));
+        String replaces = utils
+            .decodeURIComponent(request.refer_to.uri.getHeader('replaces'));
 
         options['extraHeaders'] = utils.cloneArray(options['extraHeaders']);
         options['extraHeaders'].add('Replaces: $replaces');
@@ -2108,7 +2214,8 @@ class RTCSession extends EventManager implements Owner {
     emit(EventCallRefer(
         session: this,
         aor: request.refer_to.uri.toAor(),
-        accept: (InitSuccessCallback initCallback, Map<String, dynamic> options) {
+        accept:
+            (InitSuccessCallback initCallback, Map<String, dynamic> options) {
           accept2(initCallback, options);
         },
         reject: (_) {
@@ -2136,7 +2243,8 @@ class RTCSession extends EventManager implements Owner {
             id = int.tryParse(request.event!.params!['id'], radix: 10);
             referSubscriber = _referSubscribers[id];
           } else if (_referSubscribers.length == 1) {
-            referSubscriber = _referSubscribers[_referSubscribers.keys.toList()[0]];
+            referSubscriber =
+                _referSubscribers[_referSubscribers.keys.toList()[0]];
           } else {
             request.reply(400, 'Missing event id parameter');
 
@@ -2169,7 +2277,8 @@ class RTCSession extends EventManager implements Owner {
     logger.d('receiveReplaces()');
 
     bool accept(InitSuccessCallback initCallback) {
-      if (_state != RtcSessionState.waitingForAck && _state != RtcSessionState.confirmed) {
+      if (_state != RtcSessionState.waitingForAck &&
+          _state != RtcSessionState.confirmed) {
         return false;
       }
 
@@ -2238,7 +2347,8 @@ class RTCSession extends EventManager implements Owner {
       stream = mediaStream;
       emit(EventStream(session: this, originator: 'local', stream: stream));
     } // Request for user media access.
-    else if (mediaConstraints['audio'] != null || mediaConstraints['video'] != null) {
+    else if (mediaConstraints['audio'] != null ||
+        mediaConstraints['video'] != null) {
       _localMediaStreamLocallyGenerated = true;
       try {
         stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
@@ -2247,7 +2357,13 @@ class RTCSession extends EventManager implements Owner {
         if (_state == RtcSessionState.terminated) {
           throw Exceptions.InvalidStateError('terminated');
         }
-        _failed('local', null, null, null, 500, DartSIP_C.CausesType.USER_DENIED_MEDIA_ACCESS,
+        _failed(
+            'local',
+            null,
+            null,
+            null,
+            500,
+            DartSIP_C.CausesType.USER_DENIED_MEDIA_ACCESS,
             'User Denied Media Access');
         logger.e('emit "getusermediafailed" [error:${error.toString()}]');
         emit(EventGetUserMediaFailed(exception: error));
@@ -2280,7 +2396,8 @@ class RTCSession extends EventManager implements Owner {
     // TODO(cloudwebrtc): should this be triggered here?
     _connecting(_request);
     try {
-      RTCSessionDescription desc = await _createLocalDescription('offer', rtcOfferConstraints);
+      RTCSessionDescription desc =
+          await _createLocalDescription('offer', rtcOfferConstraints);
       if (_is_canceled || _state == RtcSessionState.terminated) {
         throw Exceptions.InvalidStateError('terminated');
       }
@@ -2317,7 +2434,8 @@ class RTCSession extends EventManager implements Owner {
     response.sdp = sdp_transform.parse(response.body ?? '');
 
     /// Handle 2XX retransmissions and responses from forked requests.
-    if (_dialog != null && (response.status_code >= 200 && response.status_code <= 299)) {
+    if (_dialog != null &&
+        (response.status_code >= 200 && response.status_code <= 299)) {
       ///
       /// If it is a retransmission from the endpoint that established
       /// the dialog, send an ACK
@@ -2352,7 +2470,8 @@ class RTCSession extends EventManager implements Owner {
       return;
     }
 
-    if (_state != RtcSessionState.inviteSent && _state != RtcSessionState.provisionalResponse) {
+    if (_state != RtcSessionState.inviteSent &&
+        _state != RtcSessionState.provisionalResponse) {
       return;
     }
 
@@ -2387,12 +2506,14 @@ class RTCSession extends EventManager implements Owner {
       logger.d('emit "sdp"');
       emit(EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      RTCSessionDescription answer = RTCSessionDescription(response.body, 'answer');
+      RTCSessionDescription answer =
+          RTCSessionDescription(response.body, 'answer');
 
       try {
         await _connection!.setRemoteDescription(answer);
       } catch (error) {
-        logger.e('emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
+        logger.e(
+            'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
         emit(EventSetRemoteDescriptionFailed(exception: error));
       }
     } else if (utils.test2XX(status_code)) {
@@ -2401,8 +2522,8 @@ class RTCSession extends EventManager implements Owner {
 
       if (response.body == null || response.body!.isEmpty) {
         _acceptAndTerminate(response, 400, DartSIP_C.CausesType.MISSING_SDP);
-        _failed('remote', null, null, response, 400, DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION,
-            'Missing SDP');
+        _failed('remote', null, null, response, 400,
+            DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION, 'Missing SDP');
         return;
       }
 
@@ -2410,8 +2531,8 @@ class RTCSession extends EventManager implements Owner {
 
       if (mediaPort == 0 && _ua.configuration.terminateOnAudioMediaPortZero) {
         _acceptAndTerminate(response, 400, DartSIP_C.CausesType.MISSING_SDP);
-        _failed('remote', null, null, response, 400, DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION,
-            'Media port is zero');
+        _failed('remote', null, null, response, 400,
+            DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION, 'Media port is zero');
         return;
       }
 
@@ -2423,18 +2544,28 @@ class RTCSession extends EventManager implements Owner {
       logger.d('emit "sdp"');
       emit(EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      RTCSessionDescription answer = RTCSessionDescription(response.body, 'answer');
+      RTCSessionDescription answer =
+          RTCSessionDescription(response.body, 'answer');
 
       // Be ready for 200 with SDP after a 180/183 with SDP.
       // We created a SDP 'answer' for it, so check the current signaling state.
-      if (_connection!.signalingState == RTCSignalingState.RTCSignalingStateStable ||
-          _connection!.signalingState == RTCSignalingState.RTCSignalingStateHaveLocalOffer) {
+      if (_connection!.signalingState ==
+              RTCSignalingState.RTCSignalingStateStable ||
+          _connection!.signalingState ==
+              RTCSignalingState.RTCSignalingStateHaveLocalOffer) {
         try {
-          RTCSessionDescription offer = await _connection!.createOffer(_rtcOfferConstraints!);
+          RTCSessionDescription offer =
+              await _connection!.createOffer(_rtcOfferConstraints!);
           await _connection!.setLocalDescription(offer);
         } catch (error) {
           _acceptAndTerminate(response, 500, error.toString());
-          _failed('local', null, null, response, 500, DartSIP_C.CausesType.WEBRTC_ERROR,
+          _failed(
+              'local',
+              null,
+              null,
+              response,
+              500,
+              DartSIP_C.CausesType.WEBRTC_ERROR,
               'Can\'t create offer ${error.toString()}');
         }
       }
@@ -2448,14 +2579,16 @@ class RTCSession extends EventManager implements Owner {
         _confirmed('local', ack);
       } catch (error) {
         _acceptAndTerminate(response, 488, 'Not Acceptable Here');
-        _failed('remote', null, null, response, 488, DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION,
-            'Not Acceptable Here');
-        logger.e('emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
+        _failed('remote', null, null, response, 488,
+            DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION, 'Not Acceptable Here');
+        logger.e(
+            'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
         emit(EventSetRemoteDescriptionFailed(exception: error));
       }
     } else {
       String cause = utils.sipErrorCause(response.status_code);
-      _failed('remote', null, null, response, response.status_code, cause, response.reason_phrase);
+      _failed('remote', null, null, response, response.status_code, cause,
+          response.reason_phrase);
     }
   }
 
@@ -2467,8 +2600,9 @@ class RTCSession extends EventManager implements Owner {
 
     options = options ?? <String, dynamic>{};
 
-    List<dynamic> extraHeaders =
-        options['extraHeaders'] != null ? utils.cloneArray(options['extraHeaders']) : <dynamic>[];
+    List<dynamic> extraHeaders = options['extraHeaders'] != null
+        ? utils.cloneArray(options['extraHeaders'])
+        : <dynamic>[];
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
     Map<String, dynamic>? rtcOfferConstraints =
         options['rtcOfferConstraints'] ?? _rtcOfferConstraints;
@@ -2515,20 +2649,23 @@ class RTCSession extends EventManager implements Owner {
       logger.d('emit "sdp"');
       emit(EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      RTCSessionDescription answer = RTCSessionDescription(response.body, 'answer');
+      RTCSessionDescription answer =
+          RTCSessionDescription(response.body, 'answer');
 
       try {
         await _connection!.setRemoteDescription(answer);
         eventHandlers.emit(EventSucceeded(response: response));
       } catch (error) {
         onFailed();
-        logger.e('emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
+        logger.e(
+            'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
         emit(EventSetRemoteDescriptionFailed(exception: error));
       }
     }
 
     try {
-      RTCSessionDescription desc = await _createLocalDescription('offer', rtcOfferConstraints);
+      RTCSessionDescription desc =
+          await _createLocalDescription('offer', rtcOfferConstraints);
       String? sdp = _mangleOffer(desc.sdp);
       logger.d('emit "sdp"');
       emit(EventSdp(originator: 'local', type: 'offer', sdp: sdp));
@@ -2551,8 +2688,11 @@ class RTCSession extends EventManager implements Owner {
         onDialogError(); // Do nothing because session ends.
       });
 
-      sendRequest(SipMethod.INVITE,
-          <String, dynamic>{'extraHeaders': extraHeaders, 'body': sdp, 'eventHandlers': handlers});
+      sendRequest(SipMethod.INVITE, <String, dynamic>{
+        'extraHeaders': extraHeaders,
+        'body': sdp,
+        'eventHandlers': handlers
+      });
     } catch (e, s) {
       logger.e(e.toString(), error: e, stackTrace: s);
       onFailed();
@@ -2567,26 +2707,31 @@ class RTCSession extends EventManager implements Owner {
 
     options = options ?? <String, dynamic>{};
 
-    List<dynamic> extraHeaders =
-        options['extraHeaders'] != null ? utils.cloneArray(options['extraHeaders']) : <dynamic>[];
+    List<dynamic> extraHeaders = options['extraHeaders'] != null
+        ? utils.cloneArray(options['extraHeaders'])
+        : <dynamic>[];
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
     Map<String, dynamic>? rtcOfferConstraints =
         options['rtcOfferConstraints'] ?? _rtcOfferConstraints;
 
-    Map<String, dynamic> mediaConstraints = options['mediaConstraints'] ?? <String, dynamic>{};
+    Map<String, dynamic> mediaConstraints =
+        options['mediaConstraints'] ?? <String, dynamic>{};
 
     mediaConstraints['audio'] = false;
 
-    dynamic sdpSemantics = options['pcConfig']?['sdpSemantics'] ?? 'unified-plan';
+    dynamic sdpSemantics =
+        options['pcConfig']?['sdpSemantics'] ?? 'unified-plan';
 
     try {
-      MediaStream localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      MediaStream localStream =
+          await navigator.mediaDevices.getUserMedia(mediaConstraints);
       _localMediaStreamLocallyGenerated = true;
 
       switch (sdpSemantics) {
         case 'unified-plan':
           localStream.getTracks().forEach((MediaStreamTrack track) {
-            if (track.kind == 'video') _connection!.addTrack(track, localStream);
+            if (track.kind == 'video')
+              _connection!.addTrack(track, localStream);
             _localMediaStream?.addTrack(track);
           });
           break;
@@ -2598,13 +2743,20 @@ class RTCSession extends EventManager implements Owner {
           throw Exceptions.NotReadyError('Unkown sdp semantics $sdpSemantics');
       }
 
-      emit(EventStream(session: this, originator: 'local', stream: _localMediaStream));
+      emit(EventStream(
+          session: this, originator: 'local', stream: _localMediaStream));
     } catch (error) {
       if (_state == RtcSessionState.terminated) {
         throw Exceptions.InvalidStateError('terminated');
       }
       request.reply(480);
-      _failed('local', null, null, null, 480, DartSIP_C.CausesType.USER_DENIED_MEDIA_ACCESS,
+      _failed(
+          'local',
+          null,
+          null,
+          null,
+          480,
+          DartSIP_C.CausesType.USER_DENIED_MEDIA_ACCESS,
           'User Denied Media Access');
       logger.e('emit "getusermediafailed" [error:${error.toString()}]');
       emit(EventGetUserMediaFailed(exception: error));
@@ -2653,20 +2805,23 @@ class RTCSession extends EventManager implements Owner {
       logger.d('emit "sdp"');
       emit(EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-      RTCSessionDescription answer = RTCSessionDescription(response.body, 'answer');
+      RTCSessionDescription answer =
+          RTCSessionDescription(response.body, 'answer');
 
       try {
         await _connection!.setRemoteDescription(answer);
         eventHandlers.emit(EventSucceeded(response: response));
       } catch (error) {
         onFailed();
-        logger.e('emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
+        logger.e(
+            'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
         emit(EventSetRemoteDescriptionFailed(exception: error));
       }
     }
 
     try {
-      RTCSessionDescription desc = await _createLocalDescription('offer', rtcOfferConstraints);
+      RTCSessionDescription desc =
+          await _createLocalDescription('offer', rtcOfferConstraints);
       String? sdp = _mangleOffer(desc.sdp);
       logger.d('emit "sdp"');
       emit(EventSdp(originator: 'local', type: 'offer', sdp: sdp));
@@ -2689,8 +2844,11 @@ class RTCSession extends EventManager implements Owner {
         onDialogError(); // Do nothing because session ends.
       });
 
-      sendRequest(SipMethod.INVITE,
-          <String, dynamic>{'extraHeaders': extraHeaders, 'body': sdp, 'eventHandlers': handlers});
+      sendRequest(SipMethod.INVITE, <String, dynamic>{
+        'extraHeaders': extraHeaders,
+        'body': sdp,
+        'eventHandlers': handlers
+      });
     } catch (e, s) {
       logger.e(e.toString(), error: e, stackTrace: s);
       onFailed();
@@ -2705,10 +2863,12 @@ class RTCSession extends EventManager implements Owner {
 
     options = options ?? <String, dynamic>{};
 
-    List<dynamic> extraHeaders = utils.cloneArray(options['extraHeaders'] ?? <dynamic>[]);
+    List<dynamic> extraHeaders =
+        utils.cloneArray(options['extraHeaders'] ?? <dynamic>[]);
     EventManager eventHandlers = options['eventHandlers'] ?? EventManager();
-    Map<String, dynamic> rtcOfferConstraints =
-        options['rtcOfferConstraints'] ?? _rtcOfferConstraints ?? <String, dynamic>{};
+    Map<String, dynamic> rtcOfferConstraints = options['rtcOfferConstraints'] ??
+        _rtcOfferConstraints ??
+        <String, dynamic>{};
     bool sdpOffer = options['sdpOffer'] ?? false;
 
     bool succeeded = false;
@@ -2749,16 +2909,19 @@ class RTCSession extends EventManager implements Owner {
         }
 
         logger.d('emit "sdp"');
-        emit(EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
+        emit(
+            EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
 
-        RTCSessionDescription answer = RTCSessionDescription(response.body, 'answer');
+        RTCSessionDescription answer =
+            RTCSessionDescription(response.body, 'answer');
 
         try {
           await _connection!.setRemoteDescription(answer);
           eventHandlers.emit(EventSucceeded(response: response));
         } catch (error) {
           onFailed(error);
-          logger.e('emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
+          logger.e(
+              'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
           emit(EventSetRemoteDescriptionFailed(exception: error));
         }
       }
@@ -2771,7 +2934,8 @@ class RTCSession extends EventManager implements Owner {
     if (sdpOffer) {
       extraHeaders.add('Content-Type: application/sdp');
       try {
-        RTCSessionDescription desc = await _createLocalDescription('offer', rtcOfferConstraints);
+        RTCSessionDescription desc =
+            await _createLocalDescription('offer', rtcOfferConstraints);
         String? sdp = _mangleOffer(desc.sdp);
 
         logger.d('emit "sdp"');
@@ -2823,26 +2987,32 @@ class RTCSession extends EventManager implements Owner {
         onDialogError(); // Do nothing because session ends.
       });
 
-      sendRequest(SipMethod.UPDATE,
-          <String, dynamic>{'extraHeaders': extraHeaders, 'eventHandlers': handlers});
+      sendRequest(SipMethod.UPDATE, <String, dynamic>{
+        'extraHeaders': extraHeaders,
+        'eventHandlers': handlers
+      });
     }
   }
 
   void _acceptAndTerminate(IncomingResponse? response,
       [int? status_code, String? reason_phrase]) async {
-    logger.d('acceptAndTerminate() status_code: $status_code reason: $reason_phrase');
+    logger.d(
+        'acceptAndTerminate() status_code: $status_code reason: $reason_phrase');
 
     List<dynamic> extraHeaders = <dynamic>[];
 
     if (status_code != null) {
-      reason_phrase = reason_phrase ?? DartSIP_C.REASON_PHRASE[status_code] ?? '';
-      extraHeaders.add('Reason: SIP ;cause=$status_code; text="$reason_phrase"');
+      reason_phrase =
+          reason_phrase ?? DartSIP_C.REASON_PHRASE[status_code] ?? '';
+      extraHeaders
+          .add('Reason: SIP ;cause=$status_code; text="$reason_phrase"');
     }
 
     // An error on dialog creation will fire 'failed' event.
     if (_dialog != null || _createDialog(response, 'UAC')) {
       sendRequest(SipMethod.ACK);
-      sendRequest(SipMethod.BYE, <String, dynamic>{'extraHeaders': extraHeaders});
+      sendRequest(
+          SipMethod.BYE, <String, dynamic>{'extraHeaders': extraHeaders});
     }
 
     // Update session status.
@@ -3077,14 +3247,18 @@ class RTCSession extends EventManager implements Owner {
     ErrorCause errorCause = ErrorCause(status_code: status_code);
 
     emit(EventCallProgress(
-        session: this, originator: originator, response: response, cause: errorCause));
+        session: this,
+        originator: originator,
+        response: response,
+        cause: errorCause));
   }
 
   void _accepted(String originator, [dynamic message]) {
     logger.d('session accepted');
     _start_time = DateTime.now();
     logger.d('emit "accepted"');
-    emit(EventCallAccepted(session: this, originator: originator, response: message));
+    emit(EventCallAccepted(
+        session: this, originator: originator, response: message));
   }
 
   void _confirmed(String originator, dynamic ack) {
@@ -3099,18 +3273,19 @@ class RTCSession extends EventManager implements Owner {
     _end_time = DateTime.now();
     _close();
     logger.d('emit "ended"');
-    emit(EventCallEnded(session: this, originator: originator, request: request, cause: cause));
+    emit(EventCallEnded(
+        session: this, originator: originator, request: request, cause: cause));
   }
 
-  void _failed(String originator, dynamic message, dynamic request, dynamic response,
-      int? status_code, String cause, String? reason_phrase) {
+  void _failed(String originator, dynamic message, dynamic request,
+      dynamic response, int? status_code, String cause, String? reason_phrase) {
     logger.d('session failed');
 
     // Emit private '_failed' event first.
     logger.d('emit "_failed"');
 
-    ErrorCause errorCause =
-        ErrorCause(cause: cause, status_code: status_code, reason_phrase: reason_phrase);
+    ErrorCause errorCause = ErrorCause(
+        cause: cause, status_code: status_code, reason_phrase: reason_phrase);
 
     emit(EventFailedUnderScore(
       originator: originator,

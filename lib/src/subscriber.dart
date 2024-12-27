@@ -200,12 +200,14 @@ class Subscriber extends EventManager implements Owner {
     SubscriberState newState = _parseStateString(subsState.state);
     SubscriberState prevState = _state;
 
-    if (prevState != SubscriberState.terminated && newState != SubscriberState.terminated) {
+    if (prevState != SubscriberState.terminated &&
+        newState != SubscriberState.terminated) {
       _state = newState;
 
       if (subsState.expires != null) {
         int expires = subsState.expires;
-        DateTime expiresTimestamp = DateTime.now().add(Duration(milliseconds: expires * 1000));
+        DateTime expiresTimestamp =
+            DateTime.now().add(Duration(milliseconds: expires * 1000));
         int maxTimeDeviation = 2000;
 
         // Expiration time is shorter and the difference is not too small.
@@ -218,10 +220,12 @@ class Subscriber extends EventManager implements Owner {
       }
     }
 
-    if (prevState != SubscriberState.pending && newState == SubscriberState.pending) {
+    if (prevState != SubscriberState.pending &&
+        newState == SubscriberState.pending) {
       logger.d('emit "pending"');
       emit(EventPending());
-    } else if (prevState != SubscriberState.active && newState == SubscriberState.active) {
+    } else if (prevState != SubscriberState.active &&
+        newState == SubscriberState.active) {
       logger.d('emit "active"');
       emit(EventActive());
     }
@@ -236,7 +240,11 @@ class Subscriber extends EventManager implements Owner {
       dynamic contentType = request.getHeader('content-type');
 
       logger.d('emit "notify"');
-      emit(EventNotify(isFinal: isFinal, request: request, body: body, contentType: contentType));
+      emit(EventNotify(
+          isFinal: isFinal,
+          request: request,
+          body: body,
+          contentType: contentType));
     }
 
     if (isFinal) {
@@ -247,7 +255,8 @@ class Subscriber extends EventManager implements Owner {
         retryAfter = int.tryParse(subsState.params['retry-after'], radix: 10);
       }
 
-      _dialogTerminated(SubscriberTerminationCode.receiveFinalNotify, reason, retryAfter);
+      _dialogTerminated(
+          SubscriberTerminationCode.receiveFinalNotify, reason, retryAfter);
     }
   }
 
@@ -299,7 +308,8 @@ class Subscriber extends EventManager implements Owner {
     }, final_notify_timeout);
   }
 
-  void _dialogTerminated(SubscriberTerminationCode code, [String? reason, int? retryAfter]) {
+  void _dialogTerminated(SubscriberTerminationCode code,
+      [String? reason, int? retryAfter]) {
     // To prevent duplicate emit terminated event.
     if (_state == SubscriberState.terminated) {
       return;
@@ -317,7 +327,8 @@ class Subscriber extends EventManager implements Owner {
     }
 
     logger.d('emit "terminated" code=$code');
-    emit(EventTerminated(TerminationCode: code.index, reason: reason, retryAfter: retryAfter));
+    emit(EventTerminated(
+        TerminationCode: code.index, reason: reason, retryAfter: retryAfter));
   }
 
   void _handlePresence(EventNotify event) {
@@ -363,7 +374,9 @@ class Subscriber extends EventManager implements Owner {
       // Check expires value.
       String? expires_value = response.getHeader('Expires');
 
-      if (expires_value != null && expires_value == '' && expires_value == '0') {
+      if (expires_value != null &&
+          expires_value == '' &&
+          expires_value == '0') {
         logger.w('response without Expires header');
 
         // RFC 6665 3.1.1 subscribe OK response must contain Expires header.
@@ -377,7 +390,8 @@ class Subscriber extends EventManager implements Owner {
         _scheduleSubscribe(expires);
       }
     } else if (response.status_code == 401 || response.status_code == 407) {
-      _dialogTerminated(SubscriberTerminationCode.subscribeFailedAuthentication);
+      _dialogTerminated(
+          SubscriberTerminationCode.subscribeFailedAuthentication);
     } else if (response.status_code >= 300) {
       _dialogTerminated(SubscriberTerminationCode.subscribeNonOkResponse);
     }
@@ -427,8 +441,8 @@ class Subscriber extends EventManager implements Owner {
 
     _state = SubscriberState.notifyWait;
 
-    OutgoingRequest request = OutgoingRequest(
-        SipMethod.SUBSCRIBE, ua.normalizeTarget(_target)!, ua, _params, headers, body);
+    OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
+        ua.normalizeTarget(_target)!, ua, _params, headers, body);
 
     EventManager handler = EventManager();
 
@@ -484,8 +498,8 @@ class Subscriber extends EventManager implements Owner {
       onTransportError();
     });
 
-    OutgoingRequest request = OutgoingRequest(
-        SipMethod.SUBSCRIBE, ua.normalizeTarget(_target)!, ua, _params, headers, body);
+    OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
+        ua.normalizeTarget(_target)!, ua, _params, headers, body);
 
     RequestSender request_sender = RequestSender(ua, request, manager);
 
