@@ -2749,7 +2749,9 @@ class RTCSession extends EventManager implements Owner {
       }
 
       emit(EventStream(
-          session: this, originator: Originator.local, stream: _localMediaStream));
+          session: this,
+          originator: Originator.local,
+          stream: _localMediaStream));
     } catch (error) {
       if (_status == C.STATUS_TERMINATED) {
         throw Exceptions.InvalidStateError('terminated');
