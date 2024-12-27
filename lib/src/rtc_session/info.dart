@@ -3,14 +3,14 @@ import '../enums.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../exceptions.dart' as Exceptions;
-import '../rtc_session.dart' as rtc;
+import '../rtc_session.dart';
 import '../sip_message.dart';
 import '../utils.dart' as utils;
 
 class Info extends EventManager {
   Info(this._session);
 
-  final rtc.RTCSession _session;
+  final RTCSession _session;
   Direction? _direction;
   String? _contentType;
   String? _body;
@@ -30,8 +30,8 @@ class Info extends EventManager {
     }
 
     // Check RTCSession Status.
-    if (_session.status != rtc.C.STATUS_CONFIRMED &&
-        _session.status != rtc.C.STATUS_WAITING_FOR_ACK) {
+    if (_session.state != RtcSessionState.confirmed &&
+        _session.state != RtcSessionState.waitingForAck) {
       throw Exceptions.InvalidStateError(_session.status);
     }
 

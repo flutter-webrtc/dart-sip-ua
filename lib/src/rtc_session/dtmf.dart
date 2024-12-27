@@ -6,7 +6,7 @@ import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../exceptions.dart' as Exceptions;
 import '../logger.dart';
-import '../rtc_session.dart' as rtc;
+import '../rtc_session.dart';
 import '../utils.dart' as Utils;
 
 class C {
@@ -22,7 +22,7 @@ class DTMF extends EventManager {
     _mode = mode;
   }
 
-  final rtc.RTCSession _session;
+  final RTCSession _session;
   DtmfMode? _mode;
   Direction? _direction;
   String? _tone;
@@ -45,8 +45,8 @@ class DTMF extends EventManager {
     _direction = Direction.outgoing;
 
     // Check RTCSession Status.
-    if (_session.status != rtc.C.STATUS_CONFIRMED &&
-        _session.status != rtc.C.STATUS_WAITING_FOR_ACK) {
+    if (_session.state != RtcSessionState.confirmed &&
+        _session.state != RtcSessionState.waitingForAck) {
       throw Exceptions.InvalidStateError(_session.status);
     }
 
