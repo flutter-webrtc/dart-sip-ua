@@ -45,7 +45,6 @@ analyzer:
     library_prefixes: ignore
     unused_field: ignore
     avoid_init_to_null: ignore
-    prefer_is_empty: ignore
     unused_element: ignore
     curly_braces_in_flow_control_structures: ignore
     unnecessary_null_in_if_null_operators: ignore

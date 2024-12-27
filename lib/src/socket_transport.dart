@@ -26,7 +26,7 @@ class SocketTransport {
     _recovery_options = recovery_options;
 
     // We must recieve at least 1 socket
-    if (sockets!.length == 0) {
+    if (sockets!.isEmpty) {
       throw Exceptions.TypeError(
           'invalid argument: Must recieve atleast 1 web socket');
     }
@@ -180,7 +180,7 @@ class SocketTransport {
   void _getSocket() {
     // If we dont have at least 1 socket to try and use, thiw will loop endlessly
 
-    if (_socketsMap.length == 0) {
+    if (_socketsMap.isEmpty) {
       throw Exceptions.TypeError('invalid argument: too few sockets');
     }
 
