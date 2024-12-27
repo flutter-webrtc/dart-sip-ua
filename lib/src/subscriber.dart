@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 
+import './exceptions.dart' as exceptions;
 import 'constants.dart';
 import 'dialog.dart';
 import 'event_manager/event_manager.dart';
@@ -16,35 +17,31 @@ import 'timers.dart';
 import 'ua.dart';
 import 'utils.dart';
 
-/**
- * Termination codes.
- */
-class C {
-  // Termination codes.
-  static const int SUBSCRIBE_RESPONSE_TIMEOUT = 0;
-  static const int SUBSCRIBE_TRANSPORT_ERROR = 1;
-  static const int SUBSCRIBE_NON_OK_RESPONSE = 2;
-  static const int SUBSCRIBE_BAD_OK_RESPONSE = 3;
-  static const int SUBSCRIBE_FAILED_AUTHENTICATION = 4;
-  static const int UNSUBSCRIBE_TIMEOUT = 5;
-  static const int RECEIVE_FINAL_NOTIFY = 6;
-  static const int RECEIVE_BAD_NOTIFY = 7;
-
-  // Subscriber states.
-  static const int STATE_PENDING = 0;
-  static const int STATE_ACTIVE = 1;
-  static const int STATE_TERMINATED = 2;
-  static const int STATE_INIT = 3;
-  static const int STATE_NOTIFY_WAIT = 4;
+enum SubscriberTerminationCode {
+  subscribeResponseTimeout,
+  subscribeTransportError,
+  subscribeNonOkResponse,
+  subscribeBadOkResponse,
+  subscribeFailedAuthentication,
+  unsubscribeTimeout,
+  receiveFinalNotify,
+  receiveBadNotify
 }
 
+enum SubscriberState { pending, active, terminated, init, notifyWait }
+
 class Subscriber extends EventManager implements Owner {
-  Subscriber(this.ua, this._target, String eventName, String accept,
-      [int expires = 900,
-      String? contentType,
-      String? allowEvents,
-      Map<String, dynamic> requestParams = const <String, dynamic>{},
-      List<String> extraHeaders = const <String>[]]) {
+  Subscriber(
+    this.ua,
+    this._target,
+    String eventName,
+    String accept, [
+    int expires = 900,
+    String? contentType,
+    String? allowEvents,
+    Map<String, dynamic> requestParams = const <String, dynamic>{},
+    List<String> extraHeaders = const <String>[],
+  ]) {
     logger.d('new');
 
     _expires = expires;
@@ -106,7 +103,7 @@ class Subscriber extends EventManager implements Owner {
 
   late Map<String, dynamic> _params;
 
-  int _state = C.STATE_INIT;
+  SubscriberState _state = SubscriberState.init;
 
   Dialog? _dialog;
 
@@ -137,13 +134,13 @@ class Subscriber extends EventManager implements Owner {
   String? get id => _id;
 
   @override
-  int get status => _state;
+  int get status => _state.index;
 
   @override
-  int get TerminatedCode => C.STATE_TERMINATED;
+  int get TerminatedCode => SubscriberState.terminated.index;
 
   void onRequestTimeout() {
-    _dialogTerminated(C.SUBSCRIBE_RESPONSE_TIMEOUT);
+    _dialogTerminated(SubscriberTerminationCode.subscribeResponseTimeout);
   }
 
   /**
@@ -151,7 +148,7 @@ class Subscriber extends EventManager implements Owner {
    */
 
   void onTransportError() {
-    _dialogTerminated(C.SUBSCRIBE_TRANSPORT_ERROR);
+    _dialogTerminated(SubscriberTerminationCode.subscribeTransportError);
   }
 
   /**
@@ -171,7 +168,7 @@ class Subscriber extends EventManager implements Owner {
     if (eventHeader == null) {
       logger.w('missed Event header');
       request.reply(400);
-      _dialogTerminated(C.RECEIVE_BAD_NOTIFY);
+      _dialogTerminated(SubscriberTerminationCode.receiveBadNotify);
 
       return;
     }
@@ -182,7 +179,7 @@ class Subscriber extends EventManager implements Owner {
     if (eventName != _event_name || eventId != _event_id) {
       logger.w('Event header does not match SUBSCRIBE');
       request.reply(489);
-      _dialogTerminated(C.RECEIVE_BAD_NOTIFY);
+      _dialogTerminated(SubscriberTerminationCode.receiveBadNotify);
 
       return;
     }
@@ -193,17 +190,18 @@ class Subscriber extends EventManager implements Owner {
     if (subsState == null) {
       logger.w('missed Subscription-State header');
       request.reply(400);
-      _dialogTerminated(C.RECEIVE_BAD_NOTIFY);
+      _dialogTerminated(SubscriberTerminationCode.receiveBadNotify);
 
       return;
     }
 
     request.reply(200);
 
-    int newState = _stateStringToNumber(subsState.state);
-    int prevState = _state;
+    SubscriberState newState = _parseStateString(subsState.state);
+    SubscriberState prevState = _state;
 
-    if (prevState != C.STATE_TERMINATED && newState != C.STATE_TERMINATED) {
+    if (prevState != SubscriberState.terminated &&
+        newState != SubscriberState.terminated) {
       _state = newState;
 
       if (subsState.expires != null) {
@@ -222,10 +220,12 @@ class Subscriber extends EventManager implements Owner {
       }
     }
 
-    if (prevState != C.STATE_PENDING && newState == C.STATE_PENDING) {
+    if (prevState != SubscriberState.pending &&
+        newState == SubscriberState.pending) {
       logger.d('emit "pending"');
       emit(EventPending());
-    } else if (prevState != C.STATE_ACTIVE && newState == C.STATE_ACTIVE) {
+    } else if (prevState != SubscriberState.active &&
+        newState == SubscriberState.active) {
       logger.d('emit "active"');
       emit(EventActive());
     }
@@ -233,7 +233,7 @@ class Subscriber extends EventManager implements Owner {
     String? body = request.body;
 
     // Check if the notify is final.
-    bool isFinal = newState == C.STATE_TERMINATED;
+    bool isFinal = newState == SubscriberState.terminated;
 
     // Notify event fired only for notify with body.
     if (body != null) {
@@ -255,7 +255,8 @@ class Subscriber extends EventManager implements Owner {
         retryAfter = int.tryParse(subsState.params['retry-after'], radix: 10);
       }
 
-      _dialogTerminated(C.RECEIVE_FINAL_NOTIFY, reason, retryAfter);
+      _dialogTerminated(
+          SubscriberTerminationCode.receiveFinalNotify, reason, retryAfter);
     }
   }
 
@@ -266,7 +267,7 @@ class Subscriber extends EventManager implements Owner {
   void subscribe([String? target, String? body]) {
     logger.d('subscribe()');
 
-    if (_state == C.STATE_INIT) {
+    if (_state == SubscriberState.init) {
       _sendInitialSubscribe(body, _headers);
     } else {
       _sendSubsequentSubscribe(body, _headers);
@@ -292,7 +293,7 @@ class Subscriber extends EventManager implements Owner {
       return header.startsWith('Expires') ? 'Expires: 0' : header;
     }).toList();
 
-    if (_state == C.STATE_INIT) {
+    if (_state == SubscriberState.init) {
       // fetch-subscribe - initial subscribe with Expires: 0.
       _sendInitialSubscribe(body, headers);
     } else {
@@ -303,18 +304,18 @@ class Subscriber extends EventManager implements Owner {
     int final_notify_timeout = 30000;
 
     _unsubscribe_timeout_timer = setTimeout(() {
-      _dialogTerminated(C.UNSUBSCRIBE_TIMEOUT);
+      _dialogTerminated(SubscriberTerminationCode.unsubscribeTimeout);
     }, final_notify_timeout);
   }
 
-  void _dialogTerminated(int terminationCode,
+  void _dialogTerminated(SubscriberTerminationCode code,
       [String? reason, int? retryAfter]) {
     // To prevent duplicate emit terminated event.
-    if (_state == C.STATE_TERMINATED) {
+    if (_state == SubscriberState.terminated) {
       return;
     }
 
-    _state = C.STATE_TERMINATED;
+    _state = SubscriberState.terminated;
 
     // Clear timers.
     clearTimeout(_expires_timer);
@@ -325,11 +326,9 @@ class Subscriber extends EventManager implements Owner {
       _dialog = null;
     }
 
-    logger.d('emit "terminated" code=$terminationCode');
+    logger.d('emit "terminated" code=$code');
     emit(EventTerminated(
-        TerminationCode: terminationCode,
-        reason: reason,
-        retryAfter: retryAfter));
+        TerminationCode: code.index, reason: reason, retryAfter: retryAfter));
   }
 
   void _handlePresence(EventNotify event) {
@@ -350,7 +349,7 @@ class Subscriber extends EventManager implements Owner {
           _dialog = dialog;
         } catch (e) {
           logger.w(e.toString());
-          _dialogTerminated(C.SUBSCRIBE_BAD_OK_RESPONSE);
+          _dialogTerminated(SubscriberTerminationCode.subscribeBadOkResponse);
 
           return;
         }
@@ -391,9 +390,10 @@ class Subscriber extends EventManager implements Owner {
         _scheduleSubscribe(expires);
       }
     } else if (response.status_code == 401 || response.status_code == 407) {
-      _dialogTerminated(C.SUBSCRIBE_FAILED_AUTHENTICATION);
+      _dialogTerminated(
+          SubscriberTerminationCode.subscribeFailedAuthentication);
     } else if (response.status_code >= 300) {
-      _dialogTerminated(C.SUBSCRIBE_NON_OK_RESPONSE);
+      _dialogTerminated(SubscriberTerminationCode.subscribeNonOkResponse);
     }
   }
 
@@ -439,7 +439,7 @@ class Subscriber extends EventManager implements Owner {
       headers.add('Content-Type: $_contentType');
     }
 
-    _state = C.STATE_NOTIFY_WAIT;
+    _state = SubscriberState.notifyWait;
 
     OutgoingRequest request = OutgoingRequest(SipMethod.SUBSCRIBE,
         ua.normalizeTarget(_target)!, ua, _params, headers, body);
@@ -464,7 +464,7 @@ class Subscriber extends EventManager implements Owner {
   }
 
   void _sendSubsequentSubscribe(String? body, List<dynamic> headers) {
-    if (_state == C.STATE_TERMINATED) {
+    if (_state == SubscriberState.terminated) {
       return;
     }
 
@@ -512,28 +512,21 @@ class Subscriber extends EventManager implements Owner {
     });
   }
 
-  int _stateStringToNumber(String? strState) {
+  SubscriberState _parseStateString(String? strState) {
     switch (strState) {
       case 'pending':
-        return C.STATE_PENDING;
+        return SubscriberState.pending;
       case 'active':
-        return C.STATE_ACTIVE;
+        return SubscriberState.active;
       case 'terminated':
-        return C.STATE_TERMINATED;
+        return SubscriberState.terminated;
       case 'init':
-        return C.STATE_INIT;
+        return SubscriberState.init;
       case 'notify_wait':
-        return C.STATE_NOTIFY_WAIT;
+        return SubscriberState.notifyWait;
       default:
-        throw TypeError('wrong state value');
+        throw exceptions.TypeError('wrong state value');
     }
-  }
-
-  /**
-   * Expose C object.
-   */
-  static C getC() {
-    return C();
   }
 }
 
