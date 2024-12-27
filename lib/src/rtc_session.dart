@@ -2652,10 +2652,10 @@ class RTCSession extends EventManager implements Owner {
       }
 
       logger.d('emit "sdp"');
-      emit(EventSdp(originator: 'remote', type: 'answer', sdp: response.body));
+      emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: response.body));
 
       RTCSessionDescription answer =
-          RTCSessionDescription(response.body, 'answer');
+          RTCSessionDescription(response.body, SdpType.answer.name);
 
       try {
         await _connection!.setRemoteDescription(answer);
@@ -2670,10 +2670,10 @@ class RTCSession extends EventManager implements Owner {
 
     try {
       RTCSessionDescription desc =
-          await _createLocalDescription('offer', rtcOfferConstraints);
+          await _createLocalDescription(SdpType.offer, rtcOfferConstraints);
       String? sdp = _mangleOffer(desc.sdp);
       logger.d('emit "sdp"');
-      emit(EventSdp(originator: 'local', type: 'offer', sdp: sdp));
+      emit(EventSdp(originator: Originator.local, type: SdpType.offer, sdp: sdp));
 
       EventManager handlers = EventManager();
       handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
