@@ -182,7 +182,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
         children: <Widget>[
           Center(
             child: Text(
-              'Register Status: ${EnumHelper.getName(_registerState.state)}',
+              'Register Status: ${_registerState.state?.name ?? ''}',
               style: TextStyle(fontSize: 18, color: textColor),
             ),
           ),
