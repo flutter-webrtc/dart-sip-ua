@@ -159,7 +159,7 @@ class SIPUAHelper extends EventManager {
     }
 
     _settings.transportType = uaSettings.transportType!;
-    _settings.uri = uaSettings.uri;
+    _settings.uri = uaSettings.uri != null ? URI.parse(uaSettings.uri!) : null;
     _settings.sip_message_delay = uaSettings.sip_message_delay;
     _settings.realm = uaSettings.realm;
     _settings.password = uaSettings.password;
@@ -179,7 +179,9 @@ class SIPUAHelper extends EventManager {
         uaSettings.sessionTimersRefreshMethod;
     _settings.instance_id = uaSettings.instanceId;
     _settings.registrar_server = uaSettings.registrarServer;
-    _settings.contact_uri = uaSettings.contact_uri;
+    _settings.contact_uri = uaSettings.contact_uri != null
+        ? URI.parse(uaSettings.contact_uri!)
+        : null;
     _settings.connection_recovery_max_interval =
         uaSettings.connectionRecoveryMaxInterval;
     _settings.connection_recovery_min_interval =
