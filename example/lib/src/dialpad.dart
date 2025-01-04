@@ -321,7 +321,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
           SizedBox(height: 8),
           Center(
             child: Text(
-              'Register Status: ${EnumHelper.getName(helper!.registerState.state)}',
+              'Register Status: ${helper!.registerState.state?.name ?? ''}',
               style: TextStyle(fontSize: 18, color: textColor),
             ),
           ),
