@@ -1,13 +1,12 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-import 'package:sip_ua/sip_ua.dart';
+import '../../sip_ua.dart';
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
 import '../event_manager/internal_events.dart';
 import '../exceptions.dart' as Exceptions;
 import '../logger.dart';
-import '../rtc_session.dart' as rtc;
-import '../sip_message.dart';
+import '../rtc_session.dart';
 import '../utils.dart' as Utils;
 
 class C {
@@ -23,9 +22,9 @@ class DTMF extends EventManager {
     _mode = mode;
   }
 
-  final rtc.RTCSession _session;
+  final RTCSession _session;
   DtmfMode? _mode;
-  String? _direction;
+  Direction? _direction;
   String? _tone;
   int? _duration;
   int? _interToneGap;
@@ -36,18 +35,18 @@ class DTMF extends EventManager {
 
   int? get duration => _duration;
 
-  String? get direction => _direction;
+  Direction? get direction => _direction;
 
   void send(String tone, Map<String, dynamic> options) {
     if (tone == null) {
       throw Exceptions.TypeError('Not enough arguments');
     }
 
-    _direction = 'outgoing';
+    _direction = Direction.outgoing;
 
     // Check RTCSession Status.
-    if (_session.status != rtc.C.STATUS_CONFIRMED &&
-        _session.status != rtc.C.STATUS_WAITING_FOR_ACK) {
+    if (_session.state != RtcSessionState.confirmed &&
+        _session.state != RtcSessionState.waitingForAck) {
       throw Exceptions.InvalidStateError(_session.status);
     }
 
@@ -79,16 +78,18 @@ class DTMF extends EventManager {
 
       body += 'Duration=$_duration';
 
-      _session.newDTMF('local', this, _request);
+      _session.newDTMF(Originator.local, this, _request);
 
       EventManager handlers = EventManager();
       handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
-        emit(EventSucceeded(originator: 'remote', response: event.response));
+        emit(EventSucceeded(
+            originator: Originator.remote, response: event.response));
       });
       handlers.on(EventOnErrorResponse(), (EventOnErrorResponse event) {
         _eventHandlers.emit(EventOnFialed());
         emit(EventOnFialed());
-        emit(EventCallFailed(originator: 'remote', response: event.response));
+        emit(EventCallFailed(
+            originator: Originator.remote, response: event.response));
       });
       handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout event) {
         _session.onRequestTimeout();
@@ -113,7 +114,7 @@ class DTMF extends EventManager {
     String reg_tone = r'^(Signal\s*?=\s*?)([0-9A-D#*]{1})(\s)?.*';
     String reg_duration = r'^(Duration\s?=\s?)([0-9]{1,4})(\s)?.*';
 
-    _direction = 'incoming';
+    _direction = Direction.incoming;
     _request = request;
 
     request.reply(200);
@@ -121,7 +122,7 @@ class DTMF extends EventManager {
     if (request.body != null) {
       List<String> body = request.body!.split('\n');
 
-      if (body.length >= 1) {
+      if (body.isNotEmpty) {
         if (body[0].contains(RegExp(reg_tone))) {
           _tone = body[0].replaceAll(reg_tone, '\$2');
         }
@@ -139,7 +140,7 @@ class DTMF extends EventManager {
     if (_tone == null) {
       logger.d('invalid INFO DTMF received, discarded');
     } else {
-      _session.newDTMF('remote', this, request);
+      _session.newDTMF(Originator.remote, this, request);
     }
   }
 }

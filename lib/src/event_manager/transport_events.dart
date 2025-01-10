@@ -1,4 +1,4 @@
-import 'package:sip_ua/src/transports/socket_interface.dart';
+import '../transports/socket_interface.dart';
 import '../transports/web_socket.dart';
 import 'events.dart';
 

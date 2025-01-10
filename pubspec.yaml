@@ -1,5 +1,5 @@
 name: sip_ua
-version: 0.6.0
+version: 1.0.0
 description: A SIP UA stack for Flutter/Dart, based on flutter-webrtc, support iOS/Android/Destkop/Web.
 homepage: https://github.com/cloudwebrtc/dart-sip-ua
 environment:
@@ -9,12 +9,11 @@ environment:
 dependencies:
   collection: ^1.18.0
   crypto: ^3.0.3
-  flutter_webrtc: ^0.10.4
-  intl: ^0.19.0
+  flutter_webrtc: ^0.12.4
+  intl: ^0.20.1
   logger: ^2.0.2+1
   path: ^1.6.4
   random_string: ^2.3.1
-  recase: ^4.1.0
   sdp_transform: ^0.3.2
   text: ^0.2.0
   uuid: ^4.2.1
@@ -22,5 +21,5 @@ dependencies:
 
 dev_dependencies:
   import_sorter: ^4.6.0
-  lints: ^3.0.0
+  lints: ^4.0.0
   test: any

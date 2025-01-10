@@ -1,10 +1,11 @@
-import 'package:sip_ua/src/name_addr_header.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
+import 'enums.dart';
 import 'event_manager/event_manager.dart';
 import 'event_manager/internal_events.dart';
 import 'exceptions.dart' as Exceptions;
 import 'logger.dart';
+import 'name_addr_header.dart';
 import 'request_sender.dart';
 import 'sip_message.dart';
 import 'ua.dart';
@@ -17,14 +18,14 @@ class Message extends EventManager with Applicant {
   final UA _ua;
   dynamic _request;
   bool _closed = false;
-  String? _direction;
+  Direction? _direction;
   NameAddrHeader? _local_identity;
   NameAddrHeader? _remote_identity;
   // Whether an incoming message has been replied.
   bool _is_replied = false;
   // Custom message empty object for high level use.
   final Map<String, dynamic> _data = <String, dynamic>{};
-  String? get direction => _direction;
+  Direction? get direction => _direction;
 
   NameAddrHeader? get local_identity => _local_identity;
 
@@ -76,7 +77,7 @@ class Message extends EventManager with Applicant {
 
     RequestSender request_sender = RequestSender(_ua, _request, handlers);
 
-    _newMessage('local', _request);
+    _newMessage(Originator.local, _request);
 
     request_sender.send();
   }
@@ -84,7 +85,7 @@ class Message extends EventManager with Applicant {
   void init_incoming(IncomingRequest request) {
     _request = request;
 
-    _newMessage('remote', request);
+    _newMessage(Originator.remote, request);
 
     // Reply with a 200 OK if the user didn't reply.
     if (!_is_replied) {
@@ -103,7 +104,7 @@ class Message extends EventManager with Applicant {
     List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
     String? body = options['body'];
 
-    if (_direction != 'incoming') {
+    if (_direction != Direction.incoming) {
       throw Exceptions.NotSupportedError(
           '"accept" not supported for outgoing Message');
     }
@@ -126,7 +127,7 @@ class Message extends EventManager with Applicant {
     List<dynamic> extraHeaders = Utils.cloneArray(options['extraHeaders']);
     String? body = options['body'];
 
-    if (_direction != 'incoming') {
+    if (_direction != Direction.incoming) {
       throw Exceptions.NotSupportedError(
           '"reject" not supported for outgoing Message');
     }
@@ -151,10 +152,11 @@ class Message extends EventManager with Applicant {
       // Ignore provisional responses.
     } else if (RegExp(r'^2[0-9]{2}$')
         .hasMatch(response.status_code.toString())) {
-      _succeeded('remote', response);
+      _succeeded(Originator.remote, response);
     } else {
       String cause = Utils.sipErrorCause(response.status_code);
-      _failed('remote', response.status_code, cause, response.reason_phrase);
+      _failed(Originator.remote, response.status_code, cause,
+          response.reason_phrase);
     }
   }
 
@@ -162,15 +164,15 @@ class Message extends EventManager with Applicant {
     if (_closed) {
       return;
     }
-    _failed(
-        'system', 408, DartSIP_C.CausesType.REQUEST_TIMEOUT, 'Request Timeout');
+    _failed(Originator.system, 408, DartSIP_C.CausesType.REQUEST_TIMEOUT,
+        'Request Timeout');
   }
 
   void _onTransportError() {
     if (_closed) {
       return;
     }
-    _failed('system', 500, DartSIP_C.CausesType.CONNECTION_ERROR,
+    _failed(Originator.system, 500, DartSIP_C.CausesType.CONNECTION_ERROR,
         'Transport Error');
   }
 
@@ -184,13 +186,13 @@ class Message extends EventManager with Applicant {
    * Internal Callbacks
    */
 
-  void _newMessage(String originator, dynamic request) {
-    if (originator == 'remote') {
-      _direction = 'incoming';
+  void _newMessage(Originator originator, dynamic request) {
+    if (originator == Originator.remote) {
+      _direction = Direction.incoming;
       _local_identity = request.to;
       _remote_identity = request.from;
-    } else if (originator == 'local') {
-      _direction = 'outgoing';
+    } else if (originator == Originator.local) {
+      _direction = Direction.outgoing;
       _local_identity = request.from;
       _remote_identity = request.to;
     }
@@ -198,7 +200,7 @@ class Message extends EventManager with Applicant {
     _ua.newMessage(this, originator, request);
   }
 
-  void _failed(String originator, int? status_code, String cause,
+  void _failed(Originator originator, int? status_code, String cause,
       String? reason_phrase) {
     logger.d('MESSAGE failed');
     close();
@@ -211,7 +213,7 @@ class Message extends EventManager with Applicant {
             reason_phrase: reason_phrase)));
   }
 
-  void _succeeded(String originator, IncomingResponse? response) {
+  void _succeeded(Originator originator, IncomingResponse? response) {
     logger.d('MESSAGE succeeded');
 
     close();

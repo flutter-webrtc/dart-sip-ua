@@ -181,7 +181,7 @@ class URI {
       });
     });
 
-    if (headers.length > 0) {
+    if (headers.isNotEmpty) {
       uri += '?${headers.join('&')}';
     }
 
