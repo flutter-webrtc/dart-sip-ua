@@ -2091,10 +2091,13 @@ class RTCSession extends EventManager implements Owner {
         for (MediaStreamTrack track in localStream.getTracks()) {
           if (track.kind == 'video') {
             _connection!.addTrack(track, localStream);
+            _localMediaStream?.addTrack(track);
           }
         }
         emit(EventStream(
-            session: this, originator: Originator.local, stream: localStream));
+            session: this,
+            originator: Originator.local,
+            stream: _localMediaStream));
       } else {
         logger.w(
             'Remote wants to upgrade to video but no camera available to send');
@@ -3249,17 +3252,27 @@ class RTCSession extends EventManager implements Owner {
 
   void _toggleMuteAudio(bool mute) {
     if (_localMediaStream != null) {
+      if (_localMediaStream!.getAudioTracks().isEmpty) {
+        logger.w('Went to mute video but local stream has no video tracks');
+      }
       for (MediaStreamTrack track in _localMediaStream!.getAudioTracks()) {
         track.enabled = !mute;
       }
+    } else {
+      logger.w('Went to mute audio but local stream is null');
     }
   }
 
   void _toggleMuteVideo(bool mute) {
     if (_localMediaStream != null) {
+      if (_localMediaStream!.getVideoTracks().isEmpty) {
+        logger.w('Went to mute video but local stream has no video tracks');
+      }
       for (MediaStreamTrack track in _localMediaStream!.getVideoTracks()) {
         track.enabled = !mute;
       }
+    } else {
+      logger.w('Went to mute video but local stream is null');
     }
   }
 

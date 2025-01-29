@@ -185,11 +185,11 @@ class UA extends EventManager {
   /**
    * Unregister.
    */
-  void unregister({bool all = false}) {
+  Future<bool> unregister({bool all = false}) {
     logger.d('unregister()');
 
     _dynConfiguration!.register = false;
-    _registrator.unregister(all);
+    return _registrator.unregister(all);
   }
 
   /**

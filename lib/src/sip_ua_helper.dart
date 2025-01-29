@@ -86,12 +86,13 @@ class SIPUAHelper extends EventManager {
     _ua!.register();
   }
 
-  void unregister([bool all = true]) {
+  Future<bool> unregister([bool all = true]) async {
     if (_ua != null) {
       assert(registered, 'ERROR: you must call register first.');
-      _ua!.unregister(all: all);
+      return _ua!.unregister(all: all);
     } else {
       logger.e('ERROR: unregister called, you must call start first.');
+      return false;
     }
   }
 
