@@ -1,6 +1,8 @@
+// Dart imports:
 import 'dart:async';
 import 'dart:math';
 
+// Project imports:
 import './event_manager/events.dart';
 import './transports/socket_interface.dart';
 import 'exceptions.dart' as Exceptions;
