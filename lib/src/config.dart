@@ -18,8 +18,8 @@ class Settings {
 
   // SIP account.
   String? display_name;
-  dynamic uri;
-  dynamic contact_uri;
+  URI? uri;
+  URI? contact_uri;
   String user_agent = DartSIP_C.USER_AGENT;
 
   // SIP instance id (GRUU).
