@@ -997,13 +997,10 @@ class RTCSession extends EventManager implements Owner {
     if (!_audioMuted && audio) {
       _audioMuted = true;
       changed = true;
-      _toggleMuteAudio(true);
     }
-
     if (!_videoMuted && video) {
       _videoMuted = true;
       changed = true;
-      _toggleMuteVideo(true);
     }
 
     if (changed) {
@@ -1177,7 +1174,7 @@ class RTCSession extends EventManager implements Owner {
               options['mediaConstraints']?['mandatory']?['video'] != null) &&
           rtcOfferConstraints?['offerToReceiveVideo'] == null;
     } catch (e) {
-      print('Failed to determine upgrade to video: $e');
+      logger.w('Failed to determine upgrade to video: $e');
     }
 
     if (!_isReadyToReOffer()) {
@@ -1197,7 +1194,6 @@ class RTCSession extends EventManager implements Owner {
         'reason_phrase': 'Media Renegotiation Failed'
       });
     });
-
     _setLocalMediaStatus();
 
     if (options['useUpdate'] != null) {
@@ -1644,6 +1640,7 @@ class RTCSession extends EventManager implements Owner {
         });
       } else if (state ==
           RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
+        if (_state == RtcSessionState.terminated) return;
         _iceRestart();
       }
     };
@@ -1921,7 +1918,8 @@ class RTCSession extends EventManager implements Owner {
       if (status_code < 300 || status_code >= 700) {
         throw Exceptions.TypeError('Invalid status_code: $status_code');
       }
-      print('Rejecting with status code: $status_code, reason: $reason_phrase');
+      logger.i(
+          'Rejecting with status code: $status_code, reason: $reason_phrase');
       request.reply(status_code, reason_phrase, extraHeaders);
       return true;
     }
@@ -3136,20 +3134,16 @@ class RTCSession extends EventManager implements Owner {
 
   void _setLocalMediaStatus() {
     bool enableAudio = true, enableVideo = true;
-
     if (_localHold || _remoteHold) {
       enableAudio = false;
       enableVideo = false;
     }
-
     if (_audioMuted) {
       enableAudio = false;
     }
-
     if (_videoMuted) {
       enableVideo = false;
     }
-
     _toggleMuteAudio(!enableAudio);
     _toggleMuteVideo(!enableVideo);
   }
@@ -3266,7 +3260,8 @@ class RTCSession extends EventManager implements Owner {
   void _toggleMuteVideo(bool mute) {
     if (_localMediaStream != null) {
       if (_localMediaStream!.getVideoTracks().isEmpty) {
-        logger.w('Went to mute video but local stream has no video tracks');
+        logger.w(
+            'Went to toggle mute video but local stream has no video tracks');
       }
       for (MediaStreamTrack track in _localMediaStream!.getVideoTracks()) {
         track.enabled = !mute;
