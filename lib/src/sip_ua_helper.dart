@@ -28,6 +28,7 @@ import 'transports/socket_interface.dart';
 import 'transports/tcp_socket.dart';
 import 'transports/web_socket.dart';
 import 'ua.dart';
+import 'utils.dart' as Utils;
 
 class SIPUAHelper extends EventManager {
   SIPUAHelper({Logger? customLogger}) {
@@ -166,7 +167,8 @@ class SIPUAHelper extends EventManager {
     }
 
     _settings.transportType = uaSettings.transportType!;
-    _settings.uri = uaSettings.uri != null ? URI.parse(uaSettings.uri!) : null;
+    _settings.uri =
+        uaSettings.uri != null ? Utils.normalizeTarget(uaSettings.uri!) : null;
     _settings.sip_message_delay = uaSettings.sip_message_delay;
     _settings.realm = uaSettings.realm;
     _settings.password = uaSettings.password;
@@ -187,7 +189,7 @@ class SIPUAHelper extends EventManager {
     _settings.instance_id = uaSettings.instanceId;
     _settings.registrar_server = uaSettings.registrarServer;
     _settings.contact_uri = uaSettings.contact_uri != null
-        ? URI.parse(uaSettings.contact_uri!)
+        ? Utils.normalizeTarget(uaSettings.contact_uri!)
         : null;
     _settings.connection_recovery_max_interval =
         uaSettings.connectionRecoveryMaxInterval;
@@ -589,6 +591,8 @@ class Call {
     } else {
       logger.d("peerConnection is null, can't stop tracks.");
     }
+
+    if (state == CallStateEnum.ENDED) return;
     _session.terminate(options);
   }
 

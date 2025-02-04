@@ -1,4 +1,5 @@
 import 'package:dart_sip_ua_example/src/theme_provider.dart';
+import 'package:dart_sip_ua_example/src/user_state/sip_user_cubit.dart';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
@@ -60,11 +61,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: Provider.of<ThemeProvider>(context).currentTheme,
-      initialRoute: '/',
-      onGenerateRoute: _onGenerateRoute,
+    return MultiProvider(
+      providers: [
+        Provider<SIPUAHelper>.value(value: _helper),
+        Provider<SipUserCubit>(
+            create: (context) => SipUserCubit(sipHelper: _helper)),
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: Provider.of<ThemeProvider>(context).currentTheme,
+        initialRoute: '/',
+        onGenerateRoute: _onGenerateRoute,
+      ),
     );
   }
 }
