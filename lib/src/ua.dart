@@ -319,7 +319,7 @@ class UA extends EventManager {
     int num_sessions = _sessions.length;
 
     // Run  _terminate_ on every Session.
-    _sessions.forEach((String? key, _) {
+    _sessions.keys.toList().forEach((String? key, _) {
       if (_sessions.containsKey(key)) {
         logger.d('closing session $key');
         try {
