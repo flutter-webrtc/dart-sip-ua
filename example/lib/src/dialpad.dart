@@ -1,7 +1,9 @@
 import 'package:dart_sip_ua_example/src/theme_provider.dart';
+import 'package:dart_sip_ua_example/src/user_state/sip_user_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,6 +26,9 @@ class _MyDialPadWidget extends State<DialPadWidget>
   SIPUAHelper? get helper => widget._helper;
   TextEditingController? _textController;
   late SharedPreferences _preferences;
+  late SipUserCubit currentUserCubit;
+
+  final Logger _logger = Logger();
 
   String? receivedMsg;
 
@@ -241,6 +246,8 @@ class _MyDialPadWidget extends State<DialPadWidget>
     Color? textColor = Theme.of(context).textTheme.bodyMedium?.color;
     Color? iconColor = Theme.of(context).iconTheme.color;
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    currentUserCubit = context.watch<SipUserCubit>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Dart SIP UA Demo"),
@@ -345,7 +352,9 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   @override
   void registrationStateChanged(RegistrationState state) {
-    setState(() {});
+    setState(() {
+      _logger.i("Registration state: ${state.state?.name}");
+    });
   }
 
   @override
@@ -353,9 +362,25 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   @override
   void callStateChanged(Call call, CallState callState) {
-    if (callState.state == CallStateEnum.CALL_INITIATION) {
-      Navigator.pushNamed(context, '/callscreen', arguments: call);
+    switch (callState.state) {
+      case CallStateEnum.CALL_INITIATION:
+        Navigator.pushNamed(context, '/callscreen', arguments: call);
+        break;
+      case CallStateEnum.FAILED:
+        reRegisterWithCurrentUser();
+        break;
+      case CallStateEnum.ENDED:
+        reRegisterWithCurrentUser();
+        break;
+      default:
     }
+  }
+
+  void reRegisterWithCurrentUser() async {
+    if (currentUserCubit.state == null) return;
+    if (helper!.registered) await helper!.unregister();
+    _logger.i("Re-registering");
+    currentUserCubit.register(currentUserCubit.state!);
   }
 
   @override

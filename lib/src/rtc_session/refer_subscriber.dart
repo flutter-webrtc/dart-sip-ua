@@ -1,3 +1,4 @@
+// Project imports:
 import '../constants.dart' as DartSIP_C;
 import '../constants.dart';
 import '../event_manager/event_manager.dart';
@@ -45,7 +46,7 @@ class ReferSubscriber extends EventManager {
 
     // Referred-By header field.
     String referredBy =
-        'Referred-By: <${_session.ua.configuration.uri.scheme}:${_session.ua.configuration.uri.user}@${_session.ua.configuration.uri.host}>';
+        'Referred-By: <${_session.ua.configuration.uri!.scheme}:${_session.ua.configuration.uri!.user}@${_session.ua.configuration.uri!.host}>';
 
     extraHeaders.add(referredBy);
     extraHeaders.add('Contact: ${_session.contact}');

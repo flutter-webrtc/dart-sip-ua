@@ -1,5 +1,7 @@
+// Dart imports:
 import 'dart:async';
 
+// Project imports:
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'event_manager/event_manager.dart';
@@ -274,11 +276,11 @@ class Registrator {
     request_sender.send();
   }
 
-  void unregister(bool unregister_all) {
+  Future<bool> unregister(bool unregister_all) async {
     if (_registered == false) {
       logger.d('already unregistered');
 
-      return;
+      return true;
     }
 
     _registered = false;
@@ -312,11 +314,14 @@ class Registrator {
         extraHeaders);
 
     EventManager handlers = EventManager();
+    Completer<bool> completer = Completer<bool>();
     handlers.on(EventOnRequestTimeout(), (EventOnRequestTimeout value) {
       _unregistered(null, DartSIP_C.CausesType.REQUEST_TIMEOUT);
+      completer.complete(false);
     });
     handlers.on(EventOnTransportError(), (EventOnTransportError value) {
       _unregistered(null, DartSIP_C.CausesType.CONNECTION_ERROR);
+      completer.complete(false);
     });
     handlers.on(EventOnAuthenticated(), (EventOnAuthenticated response) {
       // Increase the CSeq on authentication.
@@ -327,17 +332,20 @@ class Registrator {
       String status_code = event.response!.status_code.toString();
       if (utils.test2XX(status_code)) {
         _unregistered(event.response);
+        completer.complete(true);
       } else if (utils.test1XX(status_code)) {
         // Ignore provisional responses.
       } else {
         String cause = utils.sipErrorCause(event.response!.status_code);
         _unregistered(event.response, cause);
+        completer.complete(true);
       }
     });
 
     RequestSender request_sender = RequestSender(_ua, request, handlers);
 
     request_sender.send();
+    return completer.future;
   }
 
   void close() {

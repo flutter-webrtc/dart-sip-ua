@@ -1,5 +1,7 @@
+// Dart imports:
 import 'dart:async';
 
+// Project imports:
 import 'config.dart' as config;
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
@@ -183,11 +185,11 @@ class UA extends EventManager {
   /**
    * Unregister.
    */
-  void unregister({bool all = false}) {
+  Future<bool> unregister({bool all = false}) {
     logger.d('unregister()');
 
     _dynConfiguration!.register = false;
-    _registrator.unregister(all);
+    return _registrator.unregister(all);
   }
 
   /**
@@ -317,7 +319,7 @@ class UA extends EventManager {
     int num_sessions = _sessions.length;
 
     // Run  _terminate_ on every Session.
-    _sessions.forEach((String? key, _) {
+    _sessions.keys.toList().forEach((String? key) {
       if (_sessions.containsKey(key)) {
         logger.d('closing session $key');
         try {
@@ -595,7 +597,7 @@ class UA extends EventManager {
     DartSIP_C.SipMethod? method = request.method;
 
     // Check that request URI points to us.
-    if (request.ruri!.user != _configuration.uri.user &&
+    if (request.ruri!.user != _configuration.uri!.user &&
         request.ruri!.user != _contact!.uri!.user) {
       logger.d('Request-URI does not point to us');
       if (request.method != SipMethod.ACK) {
@@ -830,7 +832,7 @@ class UA extends EventManager {
     _configuration.jssip_id = Utils.createRandomToken(5);
 
     // String containing _configuration.uri without scheme and user.
-    URI hostport_params = _configuration.uri.clone();
+    URI hostport_params = _configuration.uri!.clone();
 
     _configuration.terminateOnAudioMediaPortZero =
         configuration.terminateOnAudioMediaPortZero;
@@ -865,12 +867,12 @@ class UA extends EventManager {
 
     // Check whether authorization_user is explicitly defined.
     // Take '_configuration.uri.user' value if not.
-    _configuration.authorization_user ??= _configuration.uri.user;
+    _configuration.authorization_user ??= _configuration.uri!.user;
 
     // If no 'registrar_server' is set use the 'uri' value without user portion and
     // without URI params/headers.
     if (_configuration.registrar_server == null) {
-      URI registrar_server = _configuration.uri.clone();
+      URI registrar_server = _configuration.uri!.clone();
       registrar_server.user = null;
       registrar_server.clearParams();
       registrar_server.clearHeaders();
@@ -890,7 +892,7 @@ class UA extends EventManager {
 
     // Via Host.
     if (_configuration.contact_uri != null) {
-      _configuration.via_host = _configuration.contact_uri.host;
+      _configuration.via_host = _configuration.contact_uri!.host;
     }
     // Contact URI.
     else {

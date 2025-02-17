@@ -1,8 +1,11 @@
+// Dart imports:
 import 'dart:async';
 
+// Package imports:
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
+// Project imports:
 import '../sip_ua.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
@@ -1005,13 +1008,10 @@ class RTCSession extends EventManager implements Owner {
     if (!_audioMuted && audio) {
       _audioMuted = true;
       changed = true;
-      _toggleMuteAudio(true);
     }
-
     if (!_videoMuted && video) {
       _videoMuted = true;
       changed = true;
-      _toggleMuteVideo(true);
     }
 
     if (changed) {
@@ -1185,7 +1185,7 @@ class RTCSession extends EventManager implements Owner {
               options['mediaConstraints']?['mandatory']?['video'] != null) &&
           rtcOfferConstraints?['offerToReceiveVideo'] == null;
     } catch (e) {
-      print('Failed to determine upgrade to video: $e');
+      logger.w('Failed to determine upgrade to video: $e');
     }
 
     if (!_isReadyToReOffer()) {
@@ -1205,7 +1205,6 @@ class RTCSession extends EventManager implements Owner {
         'reason_phrase': 'Media Renegotiation Failed'
       });
     });
-
     _setLocalMediaStatus();
 
     if (options['useUpdate'] != null) {
@@ -1652,6 +1651,7 @@ class RTCSession extends EventManager implements Owner {
         });
       } else if (state ==
           RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
+        if (_state == RtcSessionState.terminated) return;
         _iceRestart();
       }
     };
@@ -1929,7 +1929,8 @@ class RTCSession extends EventManager implements Owner {
       if (status_code < 300 || status_code >= 700) {
         throw Exceptions.TypeError('Invalid status_code: $status_code');
       }
-      print('Rejecting with status code: $status_code, reason: $reason_phrase');
+      logger.i(
+          'Rejecting with status code: $status_code, reason: $reason_phrase');
       request.reply(status_code, reason_phrase, extraHeaders);
       return true;
     }
@@ -2099,10 +2100,13 @@ class RTCSession extends EventManager implements Owner {
         for (MediaStreamTrack track in localStream.getTracks()) {
           if (track.kind == 'video') {
             _connection!.addTrack(track, localStream);
+            _localMediaStream?.addTrack(track);
           }
         }
         emit(EventStream(
-            session: this, originator: Originator.local, stream: localStream));
+            session: this,
+            originator: Originator.local,
+            stream: _localMediaStream));
       } else {
         logger.w(
             'Remote wants to upgrade to video but no camera available to send');
@@ -3141,20 +3145,16 @@ class RTCSession extends EventManager implements Owner {
 
   void _setLocalMediaStatus() {
     bool enableAudio = true, enableVideo = true;
-
     if (_localHold || _remoteHold) {
       enableAudio = false;
       enableVideo = false;
     }
-
     if (_audioMuted) {
       enableAudio = false;
     }
-
     if (_videoMuted) {
       enableVideo = false;
     }
-
     _toggleMuteAudio(!enableAudio);
     _toggleMuteVideo(!enableVideo);
   }
@@ -3257,17 +3257,28 @@ class RTCSession extends EventManager implements Owner {
 
   void _toggleMuteAudio(bool mute) {
     if (_localMediaStream != null) {
+      if (_localMediaStream!.getAudioTracks().isEmpty) {
+        logger.w('Went to mute video but local stream has no video tracks');
+      }
       for (MediaStreamTrack track in _localMediaStream!.getAudioTracks()) {
         track.enabled = !mute;
       }
+    } else {
+      logger.w('Went to mute audio but local stream is null');
     }
   }
 
   void _toggleMuteVideo(bool mute) {
     if (_localMediaStream != null) {
+      if (_localMediaStream!.getVideoTracks().isEmpty) {
+        logger.w(
+            'Went to toggle mute video but local stream has no video tracks');
+      }
       for (MediaStreamTrack track in _localMediaStream!.getVideoTracks()) {
         track.enabled = !mute;
       }
+    } else {
+      logger.w('Went to mute video but local stream is null');
     }
   }
 
