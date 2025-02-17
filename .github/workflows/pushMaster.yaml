@@ -14,13 +14,13 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: "stable"
+          flutter-version: "3.27.1"
       - name: Install project dependencies
         run: flutter pub get
       - name: Dart Format Check
         run: dart format lib/ test/ --set-exit-if-changed
       - name: Import Sorter Check
-        run: dart run import_sorter:main
+        run: dart run import_sorter:main --exit-if-changed
       - name: Dart Analyze Check
         run: flutter analyze
       - name: Dart Test Check
