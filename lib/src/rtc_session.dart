@@ -829,7 +829,7 @@ class RTCSession extends EventManager implements Owner {
           status_code = status_code ?? 200;
           dialog.terminate();
           _ended(
-              'local',
+              Originator.local,
               null,
               ErrorCause(
                   cause: cause as String?,
