@@ -1,8 +1,6 @@
-// Dart imports:
 import 'dart:html';
 import 'dart:js_util' as JSUtils;
 
-// Project imports:
 import 'package:sip_ua/src/sip_ua_helper.dart';
 import '../logger.dart';
 

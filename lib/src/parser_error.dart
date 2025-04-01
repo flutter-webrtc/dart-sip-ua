@@ -1,4 +1,3 @@
-// Package imports:
 import 'package:text/text.dart';
 
 class ParserErrorMessage {

@@ -1,7 +1,5 @@
-// Package imports:
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-// Project imports:
 import '../../sip_ua.dart';
 import '../constants.dart';
 import '../event_manager/event_manager.dart';

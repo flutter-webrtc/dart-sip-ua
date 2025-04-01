@@ -1,4 +1,3 @@
-// Project imports:
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'enums.dart';

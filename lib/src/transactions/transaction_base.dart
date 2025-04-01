@@ -1,4 +1,3 @@
-// Project imports:
 import '../event_manager/event_manager.dart';
 import '../sip_message.dart';
 import '../socket_transport.dart';

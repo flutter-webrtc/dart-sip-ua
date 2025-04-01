@@ -1,7 +1,5 @@
-// Dart imports:
 import 'dart:async';
 
-// Project imports:
 import '../constants.dart';
 import '../dialog.dart';
 import '../event_manager/event_manager.dart';

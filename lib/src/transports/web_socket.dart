@@ -1,4 +1,3 @@
-// Project imports:
 import '../../sip_ua.dart';
 import '../grammar.dart';
 import '../logger.dart';

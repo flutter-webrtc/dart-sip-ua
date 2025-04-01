@@ -1,4 +1,3 @@
-// Project imports:
 import 'constants.dart';
 import 'data.dart';
 import 'digest_authentication.dart';

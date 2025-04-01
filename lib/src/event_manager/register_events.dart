@@ -1,4 +1,3 @@
-// Project imports:
 import 'events.dart';
 
 class EventRegistrationExpiring extends EventType {

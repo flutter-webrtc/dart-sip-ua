@@ -1,7 +1,5 @@
-// Dart imports:
 import 'dart:convert' show utf8;
 
-// Project imports:
 import 'grammar.dart';
 import 'logger.dart';
 import 'sip_message.dart';

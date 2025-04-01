@@ -1,4 +1,3 @@
-// Project imports:
 import 'constants.dart' as DartSIP_C;
 import 'grammar.dart';
 import 'utils.dart' as utils;

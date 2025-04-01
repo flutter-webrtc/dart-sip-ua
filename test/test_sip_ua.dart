@@ -1,10 +1,7 @@
-// Dart imports:
 import 'dart:async';
 
-// Package imports:
 import 'package:test/test.dart';
 
-// Project imports:
 import 'package:sip_ua/src/config.dart' as config;
 import 'package:sip_ua/src/event_manager/event_manager.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';

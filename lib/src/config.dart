@@ -1,4 +1,3 @@
-// Project imports:
 import '../sip_ua.dart';
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';

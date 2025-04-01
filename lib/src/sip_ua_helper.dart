@@ -1,12 +1,9 @@
-// Dart imports:
 import 'dart:async';
 
-// Package imports:
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
-// Project imports:
 import 'package:sip_ua/src/uri.dart';
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;

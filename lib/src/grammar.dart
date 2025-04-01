@@ -1,4 +1,3 @@
-// Project imports:
 import 'grammar_parser.dart';
 import 'parser_error.dart';
 

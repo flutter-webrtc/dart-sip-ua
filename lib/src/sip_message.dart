@@ -1,10 +1,7 @@
-// Dart imports:
 import 'dart:convert' show utf8;
 
-// Package imports:
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 
-// Project imports:
 import 'constants.dart' as DartSIP_C;
 import 'constants.dart';
 import 'data.dart';

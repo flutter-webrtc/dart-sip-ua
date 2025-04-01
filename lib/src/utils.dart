@@ -1,14 +1,11 @@
-// Dart imports:
 import 'dart:convert';
 import 'dart:core';
 import 'dart:math' as DartMath;
 
-// Package imports:
 import 'package:crypto/crypto.dart';
 import 'package:random_string/random_string.dart';
 import 'package:uuid/uuid.dart';
 
-// Project imports:
 import 'constants.dart' as DartSIP_C;
 import 'grammar.dart';
 import 'uri.dart';

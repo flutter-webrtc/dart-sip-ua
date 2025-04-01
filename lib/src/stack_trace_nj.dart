@@ -1,9 +1,7 @@
-// Dart imports:
 import 'dart:core' as core show StackTrace;
 import 'dart:core';
 import 'dart:io';
 
-// Package imports:
 import 'package:path/path.dart';
 
 class StackTraceNJ implements core.StackTrace {

@@ -1,4 +1,3 @@
-// Project imports:
 import 'utils.dart';
 
 class ErrorImpl extends Error {

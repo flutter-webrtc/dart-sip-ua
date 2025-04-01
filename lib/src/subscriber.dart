@@ -1,10 +1,7 @@
-// Dart imports:
 import 'dart:async';
 
-// Package imports:
 import 'package:collection/collection.dart';
 
-// Project imports:
 import './exceptions.dart' as exceptions;
 import 'constants.dart';
 import 'dialog.dart';

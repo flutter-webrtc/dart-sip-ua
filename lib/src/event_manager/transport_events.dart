@@ -1,4 +1,3 @@
-// Project imports:
 import '../transports/socket_interface.dart';
 import '../transports/web_socket.dart';
 import 'events.dart';
