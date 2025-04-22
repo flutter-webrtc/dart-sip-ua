@@ -10,7 +10,7 @@ dependencies:
   bloc: ^9.0.0
   collection: ^1.18.0
   crypto: ^3.0.3
-  flutter_webrtc: ^0.12.6
+  flutter_webrtc: ^0.12.7
   intl: ^0.20.1
   logger: ^2.0.2+1
   path: ^1.6.4
