@@ -127,6 +127,13 @@ class _MyRegisterWidget extends State<RegisterWidget>
     _saveSettings();
 
        currentUser.register(SipUser(
+        wsUrl: _wsUriController.text,  
+        //this is the websocket url which was missing in the original code hence it
+        //was showing null in the register method of sip_user_cubit.dart and always
+        //redirected to 'wss://tryit.jssip.net:10443', present inside sip_ua_helper.dart
+        //161: uaSettings.webSocketUrl ?? 'wss://tryit.jssip.net:10443',
+        //this will help people trying out the example to register with the correct url
+        //without changing the code in sip_ua_helper.dart
         selectedTransport: _selectedTransport,
         wsExtraHeaders: _wsExtraHeaders,
         sipUri: _sipUriController.text,
