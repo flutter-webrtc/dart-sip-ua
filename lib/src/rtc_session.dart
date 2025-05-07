@@ -3482,12 +3482,11 @@ class RTCSession extends EventManager implements Owner {
       String senderStat = 'Sender stats: \n';
 
       for(StatsReport s in senderStats) {
-        senderStat += '${s.timestamp} ${s.id} ${s.type}\n';
-        senderStat += '----------------------------------------------------\n';
+        senderStat += ' ${s.timestamp} ${s.id} ${s.type}:\n';
         s.values.forEach((key, value) {
-          senderStat += '$key:  $value\n';
+          senderStat += '  $key:  $value\n';
         });
-        senderStat += '----------------------------------------------------\n';
+        senderStat += '\r';
       }
 
       logger.d(senderStat);
@@ -3495,12 +3494,11 @@ class RTCSession extends EventManager implements Owner {
       String receiverStat = 'Receiver stats: \n';
 
       for(StatsReport s in receiverStats) {
-        receiverStat += '${s.timestamp} ${s.id} ${s.type}\n';
-        receiverStat += '----------------------------------------------------\n';
+        receiverStat += ' ${s.timestamp} ${s.id} ${s.type}\n';
         s.values.forEach((key, value) {
-          receiverStat += '$key:  $value\n';
+          receiverStat += '  $key:  $value\n';
         });
-        receiverStat += '----------------------------------------------------\n';
+        receiverStat += '\r';
       }
 
       logger.d(receiverStat);
