@@ -16,3 +16,6 @@ example/lib/generated_plugin_registrant.dart
 
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# FVM Version Cache
+.fvm/
