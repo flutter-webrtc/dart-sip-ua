@@ -337,10 +337,18 @@ class RTCSession extends EventManager implements Owner {
       extraHeaders.add('Session-Expires: ${_sessionTimers.defaultExpires}');
     }
 
+    // If the call_id is provided, pass it along so the request uses it instead of generating one.
+    String? callId = options['call_id'];
+    if (callId != null) {
+      requestParams['call_id'] = callId;
+    }
+
     _request =
         InitialOutgoingInviteRequest(target, _ua, requestParams, extraHeaders);
 
-    _id = _request.call_id + _from_tag;
+    // I removed the `+ _from_tag` because it was causing the call_id to not match our expected value.
+    // We don't do forking on a single callUUID, so this is fine for us.
+    _id = _request.call_id;
 
     // Create a RTCPeerConnection instance.
     await _createRTCConnection(pcConfig, rtcConstraints);
