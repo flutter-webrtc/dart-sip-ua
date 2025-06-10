@@ -124,6 +124,9 @@ class SIPUAHelper extends EventManager {
     return _calls[id];
   }
 
+  /// Get all calls
+  List<Call> get calls => _calls.values.toList();
+
   Future<void> renegotiate({
     required Call call,
     required bool voiceOnly,
