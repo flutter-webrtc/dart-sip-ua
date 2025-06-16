@@ -605,6 +605,9 @@ class UA extends EventManager {
       return;
     }
 
+    print(
+        'UA receiveRequest method: $method request.ruri!.scheme: ${request.ruri!.scheme}');
+
     // Check request URI scheme.
     if (request.ruri!.scheme == DartSIP_C.SIPS) {
       request.reply_sl(416);
