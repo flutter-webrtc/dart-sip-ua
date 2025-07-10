@@ -25,10 +25,11 @@ class SIPUAWebSocketImpl {
     handleQueue();
     logger.i('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
-      if (webSocketSettings.allowBadCertificate) {
-        /// Allow self-signed certificate, for test only.
-        _socket = await _connectForBadCertificate(_url, webSocketSettings);
-      } else {
+      if (webSocketSettings.allowBadCertificate || webSocketSettings.debugCertificate) {
+        // Depending on the settings, it will allow self-signed certificates or debug them.
+        _socket = await _connectWithBadCertificateHandling(_url, webSocketSettings);
+      }
+      else {
         _socket = await WebSocket.connect(_url,
             protocols: protocols, headers: webSocketSettings.extraHeaders);
       }
@@ -69,8 +70,7 @@ class SIPUAWebSocketImpl {
     return _socket != null && _socket!.readyState == WebSocket.connecting;
   }
 
-  /// For test only.
-  Future<WebSocket> _connectForBadCertificate(
+  Future<WebSocket> _connectWithBadCertificateHandling(
       String url, WebSocketSettings webSocketSettings) async {
     try {
       Random r = Random();
@@ -84,8 +84,25 @@ class SIPUAWebSocketImpl {
 
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) {
-        logger.w('Allow self-signed certificate => $host:$port. ');
-        return true;
+        if(webSocketSettings.allowBadCertificate) {
+          logger.w('Allow self-signed certificate => $host:$port. ');
+          return true;
+        }
+        else if(webSocketSettings.debugCertificate){
+          logger.w('Server returns a server certificate that cannot be authenticated => $host:$port. ');
+          String certInfo = '\n';
+          certInfo+= ' Certificate subject: ${cert.subject}\n';
+          certInfo+= ' Certificate issuer: ${cert.issuer}\n';
+          certInfo+= ' Certificate valid from: ${cert.startValidity}\n';
+          certInfo+= ' Certificate valid to: ${cert.endValidity}\n';
+          certInfo+= ' Certificate SHA-1 fingerprint: ${cert.sha1}\n';
+
+          logger.w('Certificate details: {$certInfo}');
+          return false;
+        }
+        else{
+          return false; // reject the certificate
+        }
       };
 
       Uri parsed_uri = Uri.parse(url);

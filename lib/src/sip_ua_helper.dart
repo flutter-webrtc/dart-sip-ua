@@ -805,6 +805,9 @@ class WebSocketSettings {
   /// for self-signed certificate.
   bool allowBadCertificate = false;
 
+  /// If true, debug the certificate.
+  bool debugCertificate = false;
+
   /// Custom transport scheme string to use.
   /// Otherwise the used protocol will be used (for example WS for ws://
   /// or WSS for wss://, based on the given web socket URL).
