@@ -373,8 +373,9 @@ class SIPUAHelper extends EventManager {
             (_uaSettings?.iceTransportPolicy ?? IceTransportPolicy.ALL)
                 .toParameterString(),
         'iceServers': _uaSettings?.iceServers,
-        'tcpCandidatePolicy':  (_uaSettings?.tcpCandidatePolicy ??
-            TcpCandidatePolicy.ENABLED).toParameterString(),
+        'tcpCandidatePolicy':
+            (_uaSettings?.tcpCandidatePolicy ?? TcpCandidatePolicy.ENABLED)
+                .toParameterString(),
         'iceCandidatePoolSize': _uaSettings?.iceCandidatePoolSize
       },
       'mediaConstraints': <String, dynamic>{
@@ -856,10 +857,7 @@ extension _IceTransportPolicyEncoding on IceTransportPolicy {
   }
 }
 
-enum TcpCandidatePolicy{
-  ENABLED,
-  DISABLED
-}
+enum TcpCandidatePolicy { ENABLED, DISABLED }
 
 extension _TcpCandidatePolicyEncoding on TcpCandidatePolicy {
   String toParameterString() {
