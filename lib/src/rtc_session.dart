@@ -3458,8 +3458,7 @@ class RTCSession extends EventManager implements Owner {
   }
 
   Future<void> _logCallStat() async {
-
-    if(!ua.configuration.log_call_statistics) return;
+    if (!ua.configuration.log_call_statistics) return;
 
     try {
       List<RTCRtpSender>? senders = await connection?.senders;
@@ -3471,17 +3470,17 @@ class RTCSession extends EventManager implements Owner {
       List<StatsReport> senderStats = <StatsReport>[];
       List<StatsReport> receiverStats = <StatsReport>[];
 
-      if(sender!=null) {
+      if (sender != null) {
         senderStats = await sender.getStats();
       }
 
-      if(receiver != null) {
+      if (receiver != null) {
         receiverStats = await receiver.getStats();
       }
 
       String senderStat = 'Sender stats: \n';
 
-      for(StatsReport s in senderStats) {
+      for (StatsReport s in senderStats) {
         senderStat += ' ${s.timestamp} ${s.id} ${s.type}:\n';
         s.values.forEach((key, value) {
           senderStat += '  $key:  $value\n';
@@ -3493,7 +3492,7 @@ class RTCSession extends EventManager implements Owner {
 
       String receiverStat = 'Receiver stats: \n';
 
-      for(StatsReport s in receiverStats) {
+      for (StatsReport s in receiverStats) {
         receiverStat += ' ${s.timestamp} ${s.id} ${s.type}\n';
         s.values.forEach((key, value) {
           receiverStat += '  $key:  $value\n';
@@ -3502,7 +3501,6 @@ class RTCSession extends EventManager implements Owner {
       }
 
       logger.d(receiverStat);
-
     } catch (e) {
       return;
     }

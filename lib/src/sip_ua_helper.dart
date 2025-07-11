@@ -194,7 +194,7 @@ class SIPUAHelper extends EventManager {
         uaSettings.connectionRecoveryMinInterval;
     _settings.terminateOnAudioMediaPortZero =
         uaSettings.terminateOnMediaPortZero;
-     _settings.log_call_statistics = uaSettings.logCallStatistics;
+    _settings.log_call_statistics = uaSettings.logCallStatistics;
 
     try {
       _ua = UA(_settings);
