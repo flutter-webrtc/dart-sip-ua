@@ -25,11 +25,12 @@ class SIPUAWebSocketImpl {
     handleQueue();
     logger.i('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
-      if (webSocketSettings.allowBadCertificate || webSocketSettings.debugCertificate) {
+      if (webSocketSettings.allowBadCertificate ||
+          webSocketSettings.debugCertificate) {
         // Depending on the settings, it will allow self-signed certificates or debug them.
-        _socket = await _connectWithBadCertificateHandling(_url, webSocketSettings);
-      }
-      else {
+        _socket =
+            await _connectWithBadCertificateHandling(_url, webSocketSettings);
+      } else {
         _socket = await WebSocket.connect(_url,
             protocols: protocols, headers: webSocketSettings.extraHeaders);
       }
@@ -84,23 +85,22 @@ class SIPUAWebSocketImpl {
 
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) {
-        if(webSocketSettings.allowBadCertificate) {
+        if (webSocketSettings.allowBadCertificate) {
           logger.w('Allow self-signed certificate => $host:$port. ');
           return true;
-        }
-        else if(webSocketSettings.debugCertificate){
-          logger.w('Server returns a server certificate that cannot be authenticated => $host:$port. ');
+        } else if (webSocketSettings.debugCertificate) {
+          logger.w(
+              'Server returns a server certificate that cannot be authenticated => $host:$port. ');
           String certInfo = '\n';
-          certInfo+= ' Certificate subject: ${cert.subject}\n';
-          certInfo+= ' Certificate issuer: ${cert.issuer}\n';
-          certInfo+= ' Certificate valid from: ${cert.startValidity}\n';
-          certInfo+= ' Certificate valid to: ${cert.endValidity}\n';
-          certInfo+= ' Certificate SHA-1 fingerprint: ${cert.sha1}\n';
+          certInfo += ' Certificate subject: ${cert.subject}\n';
+          certInfo += ' Certificate issuer: ${cert.issuer}\n';
+          certInfo += ' Certificate valid from: ${cert.startValidity}\n';
+          certInfo += ' Certificate valid to: ${cert.endValidity}\n';
+          certInfo += ' Certificate SHA-1 fingerprint: ${cert.sha1}\n';
 
           logger.w('Certificate details: {$certInfo}');
           return false;
-        }
-        else{
+        } else {
           return false; // reject the certificate
         }
       };
