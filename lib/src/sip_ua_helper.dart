@@ -186,6 +186,8 @@ class SIPUAHelper extends EventManager {
     _settings.ice_gathering_timeout = uaSettings.iceGatheringTimeout;
     _settings.session_timers_refresh_method =
         uaSettings.sessionTimersRefreshMethod;
+    _settings.sessionTimersForceRefresher =
+        uaSettings.sessionTimersForceRefresher;
     _settings.instance_id = uaSettings.instanceId;
     _settings.registrar_server = uaSettings.registrarServer;
     _settings.contact_uri = uaSettings.contact_uri != null
@@ -925,4 +927,11 @@ class UaSettings {
   /// alive.
   /// Defaults to "UPDATE"
   DartSIP_C.SipMethod sessionTimersRefreshMethod = DartSIP_C.SipMethod.UPDATE;
+
+  /// Force this client to always be the session refresher.
+  /// When true, the client will always take responsibility for sending
+  /// session refresh messages, preventing timeouts when the remote party
+  /// fails to refresh the session.
+  /// Defaults to false
+  bool sessionTimersForceRefresher = false;
 }

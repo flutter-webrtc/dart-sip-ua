@@ -31,6 +31,7 @@ class Settings {
   // Session parameters.
   bool session_timers = true;
   SipMethod session_timers_refresh_method = SipMethod.UPDATE;
+  bool sessionTimersForceRefresher = false;
   int no_answer_timeout = 60;
 
   // Registration parameters.
@@ -192,6 +193,10 @@ class Checks {
       if (method == SipMethod.INVITE || method == SipMethod.UPDATE) {
         dst!.session_timers_refresh_method = method;
       }
+    },
+    'session_timers_force_refresher': (Settings src, Settings? dst) {
+      bool sessionTimersForceRefresher = src.sessionTimersForceRefresher;
+      dst!.sessionTimersForceRefresher = sessionTimersForceRefresher;
     },
     'password': (Settings src, Settings? dst) {
       String? password = src.password;
