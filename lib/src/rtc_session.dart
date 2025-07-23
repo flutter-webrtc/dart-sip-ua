@@ -308,6 +308,7 @@ class RTCSession extends EventManager implements Owner {
     Map<String, dynamic> requestParams = <String, dynamic>{
       'from_tag': _from_tag,
       'to_display_name': options['to_display_name'] ?? '',
+      'call_id': options['call_id'] ?? null,
     };
     _ua.contact!.anonymous = anonymous;
     _ua.contact!.outbound = true;
