@@ -366,7 +366,8 @@ class RTCSession extends EventManager implements Owner {
         pcConfig, mediaConstraints, rtcOfferConstraints, mediaStream);
   }
 
-  void init_incoming(IncomingRequest request, [Function(RTCSession)? initCallback]) {
+  void init_incoming(IncomingRequest request,
+      [Function(RTCSession)? initCallback]) {
     logger.d('init_incoming()');
 
     int? expires;
