@@ -3281,19 +3281,20 @@ class RTCSession extends EventManager implements Owner {
 
     // I'm the refresher.
     if (_sessionTimers.refresher) {
-      _sessionTimers.timer = setTimeout(() {
-        if (_state == RtcSessionState.terminated) {
-          return;
-        }
-
-        logger.d('runSessionTimer() | sending session refresh request');
-
-        if (_sessionTimers.refreshMethod == SipMethod.UPDATE) {
-          _sendUpdate();
-        } else {
-          _sendReinvite();
-        }
-      }, expires! * 500); // Half the given interval (as the RFC states).
+      final int delayMs = expires! * 500;
+      _sessionTimers.timer = Timer.periodic(
+        Duration(milliseconds: delayMs),
+        (_) {
+          if (_state == RtcSessionState.terminated) return;
+          logger.d(
+              'runSessionTimer() | sending session refresh request with expires=$expires, delayMs=$delayMs');
+          if (_sessionTimers.refreshMethod == SipMethod.UPDATE) {
+            _sendUpdate();
+          } else {
+            _sendReinvite();
+          }
+        },
+      );
     }
     // I'm not the refresher.
     else {
