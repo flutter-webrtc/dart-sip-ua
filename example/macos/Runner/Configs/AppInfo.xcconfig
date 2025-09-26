@@ -11,4 +11,4 @@ PRODUCT_NAME = dart_sip_ua_example
 PRODUCT_BUNDLE_IDENTIFIER = com.github.cloudwebrtc.dartSipUaExample
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2024 com.github.cloudwebrtc. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 com.github.cloudwebrtc. All rights reserved.

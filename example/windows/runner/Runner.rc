@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "dart_sip_ua_example" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "dart_sip_ua_example" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.github.cloudwebrtc. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.github.cloudwebrtc. All rights reserved." "\0"
             VALUE "OriginalFilename", "dart_sip_ua_example.exe" "\0"
             VALUE "ProductName", "dart_sip_ua_example" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

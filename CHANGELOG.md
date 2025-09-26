@@ -1,6 +1,21 @@
 # Changelog
 
 --------------------------------------------
+[1.1.0] -2025-09-26
+
+* Bump flutter-webrtc to 1.2.0
+* Docs(readme): replace pub.dartlang.org with pub.dev; normalize macOS; update Flutter docs link (#555)
+* Allow setting call-id (#552)
+* Extend configuration for ice gathering process (#550)
+* Setting for call statistics logs (#549)
+* Session-timers fix (#545)
+* Fix: persist 'ws_uri' in `_saveSettings` to enable proper registration (#542)
+* Sip message stateless reply reason fixes #539
+* Chore: removal of unneccesary pushToMaster work flow and import sorting
+* Fix bug for rfc2833. (#534)
+* Sessions keys toList added (#514)
+* Build fixes
+
 [1.0.1] -2024.12.19
 
 * make sure the session terminates by @victortive in https://github.com/flutter-webrtc/dart-sip-ua/pull/485
