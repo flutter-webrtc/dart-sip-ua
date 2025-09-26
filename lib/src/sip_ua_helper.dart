@@ -194,6 +194,7 @@ class SIPUAHelper extends EventManager {
         uaSettings.connectionRecoveryMinInterval;
     _settings.terminateOnAudioMediaPortZero =
         uaSettings.terminateOnMediaPortZero;
+    _settings.log_call_statistics = uaSettings.logCallStatistics;
 
     try {
       _ua = UA(_settings);
@@ -898,6 +899,9 @@ class UaSettings {
 
   /// Min interval between recovery connection, default 2 sec
   int connectionRecoveryMinInterval = 2;
+
+  /// Allows to write advanced call statistics in the log after the call ends
+  bool logCallStatistics = false;
 
   bool terminateOnMediaPortZero = false;
 
