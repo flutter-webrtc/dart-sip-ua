@@ -373,7 +373,11 @@ class SIPUAHelper extends EventManager {
         'iceTransportPolicy':
             (_uaSettings?.iceTransportPolicy ?? IceTransportPolicy.ALL)
                 .toParameterString(),
-        'iceServers': _uaSettings?.iceServers
+        'iceServers': _uaSettings?.iceServers,
+        'tcpCandidatePolicy':
+            (_uaSettings?.tcpCandidatePolicy ?? TcpCandidatePolicy.ENABLED)
+                .toParameterString(),
+        'iceCandidatePoolSize': _uaSettings?.iceCandidatePoolSize
       },
       'mediaConstraints': <String, dynamic>{
         'audio': true,
@@ -854,6 +858,19 @@ extension _IceTransportPolicyEncoding on IceTransportPolicy {
   }
 }
 
+enum TcpCandidatePolicy { ENABLED, DISABLED }
+
+extension _TcpCandidatePolicyEncoding on TcpCandidatePolicy {
+  String toParameterString() {
+    switch (this) {
+      case TcpCandidatePolicy.ENABLED:
+        return 'enabled';
+      case TcpCandidatePolicy.DISABLED:
+        return 'disabled';
+    }
+  }
+}
+
 class UaSettings {
   WebSocketSettings webSocketSettings = WebSocketSettings();
   TcpSocketSettings tcpSocketSettings = TcpSocketSettings();
@@ -921,6 +938,18 @@ class UaSettings {
   /// See [IceTransportPolicy] for possible values.
   /// Will default to [IceTransportPolicy.ALL] if not specified.
   IceTransportPolicy? iceTransportPolicy;
+
+  /// Allows to disable tcp candidates gathering
+  /// Will default to [TcpCandidatePolicy.ENABLED] if not specified.
+  TcpCandidatePolicy? tcpCandidatePolicy;
+
+  /// An unsigned 16-bit integer value which specifies the size of the prefetched
+  /// ICE candidate pool. The default value is 0 (meaning no candidate prefetching will occur).
+  /// You may find in some cases that connections can be established more quickly
+  /// by allowing the ICE agent to start fetching ICE candidates before you start
+  /// trying to connect, so that they're already available for inspection
+  /// when RTCPeerConnection.setLocalDescription() is called.
+  int iceCandidatePoolSize = 0;
 
   /// Controls which kind of messages are to be sent to keep a SIP session
   /// alive.
