@@ -3484,6 +3484,7 @@ class RTCSession extends EventManager implements Owner {
 
       for (StatsReport s in senderStats) {
         senderStat += ' ${s.timestamp} ${s.id} ${s.type}:\n';
+        // ignore: always_specify_types
         s.values.forEach((key, value) {
           senderStat += '  $key:  $value\n';
         });
@@ -3496,6 +3497,7 @@ class RTCSession extends EventManager implements Owner {
 
       for (StatsReport s in receiverStats) {
         receiverStat += ' ${s.timestamp} ${s.id} ${s.type}\n';
+        // ignore: always_specify_types
         s.values.forEach((key, value) {
           receiverStat += '  $key:  $value\n';
         });
