@@ -1,3 +1,6 @@
+analyzer:
+  errors:
+    depend_on_referenced_packages: ignore
 include: package:lints/recommended.yaml
 
 linter:
