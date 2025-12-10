@@ -1,7 +1,8 @@
 import 'dart:js_interop';
 
-import 'package:sip_ua/src/sip_ua_helper.dart';
 import 'package:web/web.dart';
+
+import 'package:sip_ua/src/sip_ua_helper.dart';
 import '../logger.dart';
 
 typedef OnMessageCallback = void Function(dynamic msg);
