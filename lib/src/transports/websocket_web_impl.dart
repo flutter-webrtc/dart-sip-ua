@@ -1,9 +1,8 @@
 import 'dart:js_interop';
 
-import 'package:web/web.dart';
-
+import 'package:sip_ua/src/logger.dart';
 import 'package:sip_ua/src/sip_ua_helper.dart';
-import '../logger.dart';
+import 'package:web/web.dart';
 
 typedef OnMessageCallback = void Function(dynamic msg);
 typedef OnCloseCallback = void Function(int? code, String? reason);
