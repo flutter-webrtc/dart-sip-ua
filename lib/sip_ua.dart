@@ -1,4 +1,8 @@
 export 'src/enums.dart';
+export 'src/event_manager/attended_transfer_events.dart';
+export 'src/event_manager/refer_events.dart';
+export 'src/replaces.dart';
+export 'src/rtc_session/refer_subscriber.dart';
 export 'src/sip_message.dart';
 export 'src/sip_ua_helper.dart';
 export 'src/transport_type.dart';

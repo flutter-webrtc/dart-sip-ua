@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sip_ua/sip_ua.dart';
 
+import 'attended_transfer_screen.dart';
 import 'widgets/action_button.dart';
 
 class DialPadWidget extends StatefulWidget {
@@ -364,7 +365,11 @@ class _MyDialPadWidget extends State<DialPadWidget>
   void callStateChanged(Call call, CallState callState) {
     switch (callState.state) {
       case CallStateEnum.CALL_INITIATION:
-        Navigator.pushNamed(context, '/callscreen', arguments: call);
+        // Don't navigate to call screen if attended transfer is active
+        // The AttendedTransferScreen will handle the consultation call
+        if (!AttendedTransferScreen.isAttendedTransferActive) {
+          Navigator.pushNamed(context, '/callscreen', arguments: call);
+        }
         break;
       case CallStateEnum.FAILED:
         reRegisterWithCurrentUser();
