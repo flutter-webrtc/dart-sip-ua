@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
+import 'package:sip_ua/src/registrator.dart';
 
 import 'package:sip_ua/src/uri.dart';
 import 'config.dart';
@@ -35,6 +36,7 @@ class SIPUAHelper extends EventManager {
   }
 
   UA? _ua;
+  Registrator? get registrator => _ua?.registratorInstance;
   Settings _settings = Settings();
   UaSettings? _uaSettings;
   final Map<String?, Call> _calls = <String?, Call>{};

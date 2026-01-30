@@ -78,6 +78,7 @@ class Contact {
  * @throws {TypeError} If no configuration is given.
  */
 class UA extends EventManager {
+  Registrator get registratorInstance => _registrator;
   UA(Settings configuration) {
     logger.d('new() [configuration:${configuration.toString()}]');
     // Load configuration.
