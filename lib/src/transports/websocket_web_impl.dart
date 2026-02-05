@@ -1,8 +1,8 @@
-import 'dart:html';
-import 'dart:js_util' as JSUtils;
+import 'dart:js_interop';
 
+import 'package:sip_ua/src/logger.dart';
 import 'package:sip_ua/src/sip_ua_helper.dart';
-import '../logger.dart';
+import 'package:web/web.dart';
 
 typedef OnMessageCallback = void Function(dynamic msg);
 typedef OnCloseCallback = void Function(int? code, String? reason);
@@ -30,8 +30,7 @@ class SIPUAWebSocketImpl {
 
       _socket!.onMessage.listen((MessageEvent e) async {
         if (e.data is Blob) {
-          dynamic arrayBuffer = await JSUtils.promiseToFuture(
-              JSUtils.callMethod(e.data, 'arrayBuffer', <Object>[]));
+          dynamic arrayBuffer = await (e.data as Blob).arrayBuffer().toDart;
           String message = String.fromCharCodes(arrayBuffer.asUint8List());
           onMessage?.call(message);
         } else {
