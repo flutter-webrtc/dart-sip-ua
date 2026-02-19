@@ -124,6 +124,9 @@ class SIPUAHelper extends EventManager {
     return _calls[id];
   }
 
+  /// The current active call, if any (first call in the calls map).
+  Call? get activeCall => _calls.isEmpty ? null : _calls.values.first;
+
   Future<void> renegotiate({
     required Call call,
     required bool voiceOnly,
@@ -232,7 +235,7 @@ class SIPUAHelper extends EventManager {
       });
 
       _ua!.on(EventRegistrationFailed(), (EventRegistrationFailed event) {
-        logger.d('registrationFailed => ${event.cause}');
+        logger.w('Registration failed: ${event.cause?.status_code} ${event.cause?.reason_phrase}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.REGISTRATION_FAILED,
             cause: event.cause);
@@ -618,6 +621,16 @@ class Call {
     _session.unmute(audio, video);
   }
 
+  void setSpeaker(bool enabled) {
+    if (peerConnection == null) return;
+    for (MediaStream? stream in peerConnection!.getLocalStreams()) {
+      if (stream != null && stream.getAudioTracks().isNotEmpty) {
+        stream.getAudioTracks().first.enableSpeakerphone(enabled);
+        return;
+      }
+    }
+  }
+
   void renegotiate({
     required Map<String, dynamic>? options,
     bool useUpdate = false,
@@ -694,8 +707,11 @@ class Call {
       return false;
     }
 
+    final Map<String, dynamic>? sdpMap = _session.request!.parseSDP();
+    if (sdpMap == null) return false;
+
     bool peerHasMediaLine = false;
-    Map<String, dynamic> sdp = _session.request.parseSDP();
+    Map<String, dynamic> sdp = sdpMap;
     // Make sure sdp['media'] is an array, not the case if there is only one media.
     if (sdp['media'] is! List) {
       sdp['media'] = <dynamic>[sdp['media']];

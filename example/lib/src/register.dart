@@ -1,3 +1,4 @@
+import 'package:dart_sip_ua_example/src/test_credentials.dart';
 import 'package:dart_sip_ua_example/src/user_state/sip_user.dart';
 import 'package:dart_sip_ua_example/src/user_state/sip_user_cubit.dart';
 import 'package:flutter/material.dart';
@@ -15,15 +16,13 @@ class RegisterWidget extends StatefulWidget {
   State<RegisterWidget> createState() => _MyRegisterWidget();
 }
 
-class _MyRegisterWidget extends State<RegisterWidget>
-    implements SipUaHelperListener {
+class _MyRegisterWidget extends State<RegisterWidget> implements SipUaHelperListener {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _portController = TextEditingController();
   final TextEditingController _wsUriController = TextEditingController();
   final TextEditingController _sipUriController = TextEditingController();
   final TextEditingController _displayNameController = TextEditingController();
-  final TextEditingController _authorizationUserController =
-      TextEditingController();
+  final TextEditingController _authorizationUserController = TextEditingController();
   final Map<String, String> _wsExtraHeaders = {
     // 'Origin': ' https://tryit.jssip.net',
     // 'Host': 'tryit.jssip.net:10443'
@@ -67,17 +66,15 @@ class _MyRegisterWidget extends State<RegisterWidget>
 
   void _loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
+    final defaultUser = TestCredentials.sipUser;
     setState(() {
-      _portController.text = '5060';
-      _wsUriController.text =
-          _preferences.getString('ws_uri') ?? 'wss://tryit.jssip.net:10443';
-      _sipUriController.text =
-          _preferences.getString('sip_uri') ?? 'hello_flutter@tryit.jssip.net';
-      _displayNameController.text =
-          _preferences.getString('display_name') ?? 'Flutter SIP UA';
-      _passwordController.text = _preferences.getString('password') ?? '';
-      _authorizationUserController.text =
-          _preferences.getString('auth_user') ?? '';
+      _portController.text = _preferences.getString('port') ?? defaultUser.port;
+      _wsUriController.text = _preferences.getString('ws_uri') ?? defaultUser.wsUrl ?? '';
+      _sipUriController.text = _preferences.getString('sip_uri') ?? defaultUser.sipUri ?? '';
+      _displayNameController.text = _preferences.getString('display_name') ?? defaultUser.displayName;
+      _passwordController.text = _preferences.getString('password') ?? defaultUser.password;
+      _authorizationUserController.text = _preferences.getString('auth_user') ?? defaultUser.authUser;
+      if (defaultUser.selectedTransport == TransportType.WS) _selectedTransport = TransportType.WS;
     });
   }
 
@@ -102,32 +99,33 @@ class _MyRegisterWidget extends State<RegisterWidget>
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-            title: Text('$alertFieldName is empty'),
-            content: Text('Please enter $alertFieldName!'),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Ok'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ]);
+        return AlertDialog(title: Text('$alertFieldName is empty'), content: Text('Please enter $alertFieldName!'), actions: <Widget>[
+          TextButton(
+            child: Text('Ok'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ]);
       },
     );
   }
 
   void _register(BuildContext context) {
-    if (_wsUriController.text == '') {
+    if (_wsUriController.text.trim().isEmpty) {
       _alert(context, "WebSocket URL");
-    } else if (_sipUriController.text == '') {
+      return;
+    }
+    if (_sipUriController.text.trim().isEmpty) {
       _alert(context, "SIP URI");
+      return;
     }
 
     _saveSettings();
 
-       currentUser.register(SipUser(
-        wsUrl: _wsUriController.text,  
+    currentUser.register(SipUser(
+        host: '',
+        wsUrl: _wsUriController.text,
         //this is the websocket url which was missing in the original code hence it
         //was showing null in the register method of sip_user_cubit.dart and always
         //redirected to 'wss://tryit.jssip.net:10443', present inside sip_ua_helper.dart
@@ -146,16 +144,14 @@ class _MyRegisterWidget extends State<RegisterWidget>
   @override
   Widget build(BuildContext context) {
     Color? textColor = Theme.of(context).textTheme.bodyMedium?.color;
-    Color? textFieldFill =
-        Theme.of(context).buttonTheme.colorScheme?.surfaceContainerLowest;
+    Color? textFieldFill = Theme.of(context).buttonTheme.colorScheme?.surfaceContainerLowest;
     currentUser = context.watch<SipUserCubit>();
 
     OutlineInputBorder border = OutlineInputBorder(
       borderSide: BorderSide.none,
       borderRadius: BorderRadius.circular(5),
     );
-    Color? textLabelColor =
-        Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5);
+    Color? textLabelColor = Theme.of(context).textTheme.bodyMedium?.color;
     return Scaffold(
       appBar: AppBar(
         title: Text("SIP Account"),
@@ -247,8 +243,7 @@ class _MyRegisterWidget extends State<RegisterWidget>
               border: border,
               enabledBorder: border,
               focusedBorder: border,
-              hintText:
-                  _authorizationUserController.text.isEmpty ? '[Empty]' : null,
+              hintText: _authorizationUserController.text.isEmpty ? '[Empty]' : null,
             ),
           ),
           SizedBox(height: 15),

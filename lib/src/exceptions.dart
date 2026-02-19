@@ -9,6 +9,9 @@ class ErrorImpl extends Error {
   dynamic value;
   String? message;
   dynamic status;
+
+  @override
+  String toString() => message ?? '$name ($code)';
 }
 
 class ConfigurationError extends ErrorImpl {

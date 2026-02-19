@@ -179,7 +179,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     MediaStream? stream = event.stream;
     if (event.originator == Originator.local) {
       if (_localRenderer != null) {
-        _localRenderer!.srcObject = stream;
+        if (stream != null && stream.getVideoTracks().isNotEmpty) {
+          _localRenderer!.srcObject = stream;
+        } else {
+          _localRenderer!.srcObject = null;
+        }
       }
 
       if (!kIsWeb &&
@@ -191,7 +195,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     }
     if (event.originator == Originator.remote) {
       if (_remoteRenderer != null) {
-        _remoteRenderer!.srcObject = stream;
+        if (stream != null && stream.getVideoTracks().isNotEmpty) {
+          _remoteRenderer!.srcObject = stream;
+        } else {
+          _remoteRenderer!.srcObject = null;
+        }
       }
       _remoteStream = stream;
     }

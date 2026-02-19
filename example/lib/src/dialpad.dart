@@ -1,12 +1,13 @@
+import 'package:dart_sip_ua_example/src/test_credentials.dart';
 import 'package:dart_sip_ua_example/src/theme_provider.dart';
 import 'package:dart_sip_ua_example/src/user_state/sip_user_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sip_ua/sip_ua.dart';
 
 import 'widgets/action_button.dart';
@@ -20,17 +21,20 @@ class DialPadWidget extends StatefulWidget {
   State<DialPadWidget> createState() => _MyDialPadWidget();
 }
 
-class _MyDialPadWidget extends State<DialPadWidget>
-    implements SipUaHelperListener {
+class _MyDialPadWidget extends State<DialPadWidget> implements SipUaHelperListener {
   String? _dest;
   SIPUAHelper? get helper => widget._helper;
   TextEditingController? _textController;
-  late SharedPreferences _preferences;
   late SipUserCubit currentUserCubit;
+  final FocusNode _focusNode = FocusNode();
 
   final Logger _logger = Logger();
 
   String? receivedMsg;
+  bool _audioMuted = false;
+  bool _speakerOn = false;
+
+  bool _hasAttemptedAutoRegister = false;
 
   @override
   initState() {
@@ -38,14 +42,75 @@ class _MyDialPadWidget extends State<DialPadWidget>
     receivedMsg = "";
     _bindEventListeners();
     _loadSettings();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeAutoRegister());
   }
 
-  void _loadSettings() async {
-    _preferences = await SharedPreferences.getInstance();
-    _dest = _preferences.getString('dest') ?? 'sip:hello_jssip@tryit.jssip.net';
-    _textController = TextEditingController(text: _dest);
-    _textController!.text = _dest!;
+  void _maybeAutoRegister() {
+    if (!mounted || _hasAttemptedAutoRegister) return;
+    final h = helper;
+    if (h == null) return;
+    if (h.registered) return;
+    if (TestCredentials.username.isEmpty || TestCredentials.password.isEmpty) return;
+    _hasAttemptedAutoRegister = true;
+    context.read<SipUserCubit>().register(TestCredentials.sipUser);
+  }
 
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _textController?.dispose();
+    super.dispose();
+  }
+
+  void _loadSettings() {
+    _dest = '';
+    _textController = TextEditingController(text: _dest);
+    _textController!.text = _dest ?? '';
+    setState(() {});
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (event.logicalKey == LogicalKeyboardKey.backspace) {
+      final text = _textController!.text;
+      if (text.isNotEmpty) {
+        setState(() {
+          _textController!.text = text.substring(0, text.length - 1);
+        });
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    }
+    final character = event.character;
+    if (character != null && character.isNotEmpty) {
+      const validChars = '0123456789*#+';
+      if (validChars.contains(character)) {
+        setState(() {
+          _textController!.text += character;
+        });
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  void _handleMute() {
+    final call = helper?.activeCall;
+    if (call == null) return;
+    _audioMuted = !_audioMuted;
+    if (_audioMuted) {
+      call.mute(true, false);
+    } else {
+      call.unmute(true, false);
+    }
+    setState(() {});
+  }
+
+  void _handleSpeaker() {
+    final call = helper?.activeCall;
+    if (call == null) return;
+    _speakerOn = !_speakerOn;
+    call.setSpeaker(_speakerOn);
     setState(() {});
   }
 
@@ -53,11 +118,9 @@ class _MyDialPadWidget extends State<DialPadWidget>
     helper!.addSipUaHelperListener(this);
   }
 
-  Future<Widget?> _handleCall(BuildContext context,
-      [bool voiceOnly = false]) async {
+  Future<Widget?> _handleCall(BuildContext context) async {
     final dest = _textController?.text;
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS) {
+    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
       await Permission.microphone.request();
       await Permission.camera.request();
     }
@@ -85,48 +148,12 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
     var mediaConstraints = <String, dynamic>{
       'audio': true,
-      'video': {
-        'mandatory': <String, dynamic>{
-          'minWidth': '640',
-          'minHeight': '480',
-          'minFrameRate': '30',
-        },
-        'facingMode': 'user',
-      }
+      'video': false,
     };
 
-    MediaStream mediaStream;
-
-    if (kIsWeb && !voiceOnly) {
-      mediaStream =
-          await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
-      mediaConstraints['video'] = false;
-      MediaStream userStream =
-          await navigator.mediaDevices.getUserMedia(mediaConstraints);
-      final audioTracks = userStream.getAudioTracks();
-      if (audioTracks.isNotEmpty) {
-        mediaStream.addTrack(audioTracks.first, addToNative: true);
-      }
-    } else {
-      if (voiceOnly) {
-        mediaConstraints['video'] = !voiceOnly;
-      }
-      mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-    }
-
-    helper!.call(dest, voiceOnly: voiceOnly, mediaStream: mediaStream);
-    _preferences.setString('dest', dest);
+    final mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    helper!.call(dest, voiceOnly: true, mediaStream: mediaStream);
     return null;
-  }
-
-  void _handleBackSpace([bool deleteAll = false]) {
-    var text = _textController!.text;
-    if (text.isNotEmpty) {
-      setState(() {
-        text = deleteAll ? '' : text.substring(0, text.length - 1);
-        _textController!.text = text;
-      });
-    }
   }
 
   void _handleNum(String number) {
@@ -176,38 +203,30 @@ class _MyDialPadWidget extends State<DialPadWidget>
   }
 
   List<Widget> _buildDialPad() {
-    Color? textFieldColor =
-        Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5);
-    Color? textFieldFill =
-        Theme.of(context).buttonTheme.colorScheme?.surfaceContainerLowest;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textColor = colorScheme.onSurface;
+
+    final hasActiveCall = helper?.activeCall != null;
     return [
-      Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: Text('Destination URL'),
-      ),
       const SizedBox(height: 8),
       TextField(
         keyboardType: TextInputType.text,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 18, color: textFieldColor),
-        maxLines: 2,
+        style: TextStyle(fontSize: 18, color: textColor),
+        maxLines: 1,
+        controller: _textController,
         decoration: InputDecoration(
           filled: true,
-          fillColor: textFieldFill,
+          fillColor: colorScheme.surfaceContainerHighest,
           border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: colorScheme.outline),
           ),
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: colorScheme.outline),
           ),
         ),
-        controller: _textController,
       ),
       SizedBox(height: 20),
       Column(
@@ -222,18 +241,19 @@ class _MyDialPadWidget extends State<DialPadWidget>
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             ActionButton(
-              icon: Icons.videocam,
+              icon: _audioMuted ? Icons.mic_off : Icons.mic,
+              checked: _audioMuted,
+              onPressed: hasActiveCall ? _handleMute : null,
+            ),
+            ActionButton(
+              icon: Icons.call,
+              fillColor: Colors.green,
               onPressed: () => _handleCall(context),
             ),
             ActionButton(
-              icon: Icons.dialer_sip,
-              fillColor: Colors.green,
-              onPressed: () => _handleCall(context, true),
-            ),
-            ActionButton(
-              icon: Icons.keyboard_arrow_left,
-              onPressed: () => _handleBackSpace(),
-              onLongPress: () => _handleBackSpace(true),
+              icon: _speakerOn ? Icons.volume_up : Icons.volume_off,
+              checked: _speakerOn,
+              onPressed: hasActiveCall ? _handleSpeaker : null,
             ),
           ],
         ),
@@ -243,14 +263,15 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
   @override
   Widget build(BuildContext context) {
-    Color? textColor = Theme.of(context).textTheme.bodyMedium?.color;
-    Color? iconColor = Theme.of(context).iconTheme.color;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textColor = colorScheme.onSurface;
+    final iconColor = colorScheme.onSurface;
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     currentUserCubit = context.watch<SipUserCubit>();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Dart SIP UA Demo"),
+        title: Text("CloudCall Demo"),
         actions: <Widget>[
           PopupMenuButton<String>(
               onSelected: (String value) {
@@ -262,9 +283,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
                     Navigator.pushNamed(context, '/about');
                     break;
                   case 'theme':
-                    final themeProvider = Provider.of<ThemeProvider>(context,
-                        listen:
-                            false); // get the provider, listen false is necessary cause is in a function
+                    final themeProvider = Provider.of<ThemeProvider>(context, listen: false); // get the provider, listen false is necessary cause is in a function
 
                     setState(() {
                       isDarkTheme = !isDarkTheme;
@@ -301,19 +320,6 @@ class _MyDialPadWidget extends State<DialPadWidget>
                             color: iconColor,
                           ),
                           SizedBox(width: 12),
-                          Text('About'),
-                        ],
-                      ),
-                      value: 'about',
-                    ),
-                    PopupMenuItem(
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.info,
-                            color: iconColor,
-                          ),
-                          SizedBox(width: 12),
                           Text(isDarkTheme ? 'Light Mode' : 'Dark Mode'),
                         ],
                       ),
@@ -322,30 +328,35 @@ class _MyDialPadWidget extends State<DialPadWidget>
                   ]),
         ],
       ),
-      body: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 12),
-        children: <Widget>[
-          SizedBox(height: 8),
-          Center(
-            child: Text(
-              'Register Status: ${helper!.registerState.state?.name ?? ''}',
-              style: TextStyle(fontSize: 18, color: textColor),
+      body: Focus(
+        autofocus: true,
+        focusNode: _focusNode,
+        onKeyEvent: _handleKeyEvent,
+        child: ListView(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          children: <Widget>[
+            SizedBox(height: 8),
+            Center(
+              child: Text(
+                'Status: ${helper!.registerState.state?.name ?? ''}',
+                style: TextStyle(fontSize: 18, color: textColor),
+              ),
             ),
-          ),
-          SizedBox(height: 8),
-          Center(
-            child: Text(
-              'Received Message: $receivedMsg',
-              style: TextStyle(fontSize: 16, color: textColor),
+            SizedBox(height: 8),
+            Center(
+              child: Text(
+                'Received Message: $receivedMsg',
+                style: TextStyle(fontSize: 16, color: textColor),
+              ),
             ),
-          ),
-          SizedBox(height: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: _buildDialPad(),
-          ),
-        ],
+            SizedBox(height: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: _buildDialPad(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -367,10 +378,24 @@ class _MyDialPadWidget extends State<DialPadWidget>
         Navigator.pushNamed(context, '/callscreen', arguments: call);
         break;
       case CallStateEnum.FAILED:
-        reRegisterWithCurrentUser();
-        break;
       case CallStateEnum.ENDED:
-        reRegisterWithCurrentUser();
+        setState(() {
+          _audioMuted = false;
+          _speakerOn = false;
+        });
+        if (callState.state == CallStateEnum.FAILED) {
+          reRegisterWithCurrentUser();
+        }
+        break;
+      case CallStateEnum.MUTED:
+        setState(() {
+          if (callState.audio == true) _audioMuted = true;
+        });
+        break;
+      case CallStateEnum.UNMUTED:
+        setState(() {
+          if (callState.audio == true) _audioMuted = false;
+        });
         break;
       default:
     }
