@@ -67,6 +67,15 @@ class _MyRegisterWidget extends State<RegisterWidget> implements SipUaHelperList
   void _loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
     final defaultUser = TestCredentials.sipUser;
+
+    // Clear stale cached SIP URI containing protocol prefixes (e.g. "ws://")
+    final cachedSipUri = _preferences.getString('sip_uri');
+    if (cachedSipUri != null && cachedSipUri.contains('://')) {
+      await _preferences.remove('sip_uri');
+      await _preferences.remove('ws_uri');
+      await _preferences.remove('port');
+    }
+
     setState(() {
       _portController.text = _preferences.getString('port') ?? defaultUser.port;
       _wsUriController.text = _preferences.getString('ws_uri') ?? defaultUser.wsUrl ?? '';

@@ -7,24 +7,24 @@ import 'package:sip_ua/sip_ua.dart';
 /// - Self-hosted: Asterisk/FreeSWITCH with WSS, or Jitsi SIP gateway
 /// - Commercial: any SIP trunk with WebRTC/WSS support (e.g. Twilio Elastic SIP, etc.)
 class TestCredentials {
-  static SipUser get sipUser => _edify;
-
-  // static String username = '';
-  // static String password = '';
+  static SipUser get sipUser => _telnyx;
 
   static String username = '';
   static String password = '';
 
-  /// Edify staging (WebSocket)
-  static SipUser get _edify => SipUser(
-        host: 'staging-sip-webrtc.edifycloud.net',
-        wsUrl: 'wss://staging-sip-webrtc.edifycloud.net:19306/ws',
+  static String telnyxUsername = '';
+  static String telnyxPassword = '';
+
+  /// Telnyx (WebSocket)
+  static SipUser get _telnyx => SipUser(
+        host: 'sip.telnyx.com',
+        wsUrl: 'wss://sip.telnyx.com:7443',
         selectedTransport: TransportType.WS,
         wsExtraHeaders: {},
-        sipUri: '$username@staging-sip-webrtc.edifycloud.net',
-        port: '19306',
-        displayName: '+18573962130',
-        password: password,
-        authUser: username,
+        sipUri: '$telnyxUsername@sip.telnyx.com',
+        port: '7443',
+        displayName: '',
+        password: telnyxPassword,
+        authUser: telnyxUsername,
       );
 }

@@ -1194,9 +1194,10 @@ class RTCSession extends EventManager implements Owner {
             }
 
             logger.d('emit "sdp"');
-            emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: request.body));
+            String? processedAnswer = _ensureRtcpMux(request.body);
+            emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: processedAnswer));
 
-            RTCSessionDescription answer = RTCSessionDescription(request.body, SdpType.answer.name);
+            RTCSessionDescription answer = RTCSessionDescription(processedAnswer, SdpType.answer.name);
             try {
               await _connection!.setRemoteDescription(answer);
             } catch (error) {
@@ -2319,28 +2320,44 @@ class RTCSession extends EventManager implements Owner {
       _state = RtcSessionState.provisionalResponse;
       _progress(Originator.remote, response, int.parse(status_code));
 
-      if (response.body == null || response.body!.isEmpty) {
+      if (response.body == null || response.body!.trim().isEmpty) {
+        return;
+      }
+
+      if (!response.body!.trimLeft().startsWith('v=')) {
+        logger.e('183 response body is not valid SDP (${response.body!.length} chars): '
+            '${response.body!.substring(0, response.body!.length > 200 ? 200 : response.body!.length)}');
         return;
       }
 
       logger.d('emit "sdp"');
-      emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: response.body));
+      String? processedAnswer = _ensureRtcpMux(response.body);
+      emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: processedAnswer));
 
-      RTCSessionDescription answer = RTCSessionDescription(response.body, SdpType.answer.name);
+      RTCSessionDescription answer = RTCSessionDescription(processedAnswer, SdpType.answer.name);
 
       try {
         await _connection!.setRemoteDescription(answer);
       } catch (error) {
         logger.e('emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
+        logger.e('Full processed SDP answer (${processedAnswer!.length} chars):\n$processedAnswer');
         emit(EventSetRemoteDescriptionFailed(exception: error));
       }
     } else if (utils.test2XX(status_code)) {
       // 2XX
       _state = RtcSessionState.confirmed;
 
-      if (response.body == null || response.body!.isEmpty) {
+      if (response.body == null || response.body!.trim().isEmpty) {
         _acceptAndTerminate(response, 400, DartSIP_C.CausesType.MISSING_SDP);
         _failed(Originator.remote, null, null, response, 400, DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION, 'Missing SDP');
+        return;
+      }
+
+      if (!response.body!.trimLeft().startsWith('v=')) {
+        logger.e('200 response body is not valid SDP (${response.body!.length} chars): '
+            '${response.body!.substring(0, response.body!.length > 200 ? 200 : response.body!.length)}');
+        _acceptAndTerminate(response, 488, 'Not Acceptable Here');
+        _failed(Originator.remote, null, null, response, 488, DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION, 'Response body is not SDP');
         return;
       }
 
@@ -2358,9 +2375,10 @@ class RTCSession extends EventManager implements Owner {
       }
 
       logger.d('emit "sdp"');
-      emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: response.body));
+      String? processedAnswer = _ensureRtcpMux(response.body);
+      emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: processedAnswer));
 
-      RTCSessionDescription answer = RTCSessionDescription(response.body, SdpType.answer.name);
+      RTCSessionDescription answer = RTCSessionDescription(processedAnswer, SdpType.answer.name);
 
       // Be ready for 200 with SDP after a 180/183 with SDP.
       // We created a SDP 'answer' for it, so check the current signaling state.
@@ -2385,6 +2403,7 @@ class RTCSession extends EventManager implements Owner {
         _acceptAndTerminate(response, 488, 'Not Acceptable Here');
         _failed(Originator.remote, null, null, response, 488, DartSIP_C.CausesType.BAD_MEDIA_DESCRIPTION, 'Not Acceptable Here');
         logger.e('emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
+        logger.e('Full processed SDP answer (${processedAnswer!.length} chars):\n$processedAnswer');
         emit(EventSetRemoteDescriptionFailed(exception: error));
       }
     } else {
@@ -2444,13 +2463,14 @@ class RTCSession extends EventManager implements Owner {
       }
 
       logger.d('emit "sdp"');
+      String? processedAnswer = _ensureRtcpMux(response.body);
       emit(EventSdp(
         originator: Originator.remote,
         type: SdpType.answer,
-        sdp: response.body,
+        sdp: processedAnswer,
       ));
 
-      RTCSessionDescription answer = RTCSessionDescription(response.body, SdpType.answer.name);
+      RTCSessionDescription answer = RTCSessionDescription(processedAnswer, SdpType.answer.name);
 
       try {
         await _connection!.setRemoteDescription(answer);
@@ -2581,9 +2601,10 @@ class RTCSession extends EventManager implements Owner {
       }
 
       logger.d('emit "sdp"');
-      emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: response.body));
+      String? processedAnswer = _ensureRtcpMux(response.body);
+      emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: processedAnswer));
 
-      RTCSessionDescription answer = RTCSessionDescription(response.body, SdpType.answer.name);
+      RTCSessionDescription answer = RTCSessionDescription(processedAnswer, SdpType.answer.name);
 
       try {
         await _connection!.setRemoteDescription(answer);
@@ -2676,9 +2697,10 @@ class RTCSession extends EventManager implements Owner {
         }
 
         logger.d('emit "sdp"');
-        emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: response.body));
+        String? processedAnswer = _ensureRtcpMux(response.body);
+        emit(EventSdp(originator: Originator.remote, type: SdpType.answer, sdp: processedAnswer));
 
-        RTCSessionDescription answer = RTCSessionDescription(response.body, SdpType.answer.name);
+        RTCSessionDescription answer = RTCSessionDescription(processedAnswer, SdpType.answer.name);
 
         try {
           await _connection!.setRemoteDescription(answer);
@@ -2808,9 +2830,114 @@ class RTCSession extends EventManager implements Owner {
     return sdpInput.replaceAllMapped(directionLine, replaceDirection);
   }
 
+  /// Make a traditional SIP SDP compatible with WebRTC unified-plan.
+  ///
+  /// Some SIP endpoints (e.g. Telnyx FreeSWITCH) return SDPs that lack
+  /// attributes mandatory for WebRTC. This function adds them:
+  ///   - `a=rtcp-mux`   (required by WebRTC for RTP/RTCP multiplexing)
+  ///   - `a=mid:N`      (required by unified-plan for BUNDLE)
+  ///   - `a=group:BUNDLE ...` (required by unified-plan at session level)
+  ///
+  /// Uses string manipulation to avoid sdp_transform round-trip issues.
+  String? _ensureRtcpMux(String? sdpInput) {
+    if (sdpInput == null || sdpInput.isEmpty) {
+      return sdpInput;
+    }
+
+    final String lineEnding = sdpInput.contains('\r\n') ? '\r\n' : '\n';
+    final List<String> lines = sdpInput.split(lineEnding);
+
+    // Strip trailing empty lines so we don't insert attributes after blank
+    // lines (blank lines in SDP cause libwebrtc's parser to fail).
+    final bool hadTrailingNewline = lines.isNotEmpty && lines.last.isEmpty;
+    while (lines.isNotEmpty && lines.last.isEmpty) {
+      lines.removeLast();
+    }
+
+    // First pass: scan for what exists
+    bool hasBundleGroup = false;
+    int mediaCount = 0;
+    final List<bool> mediaSectionHasMid = <bool>[];
+    final List<bool> mediaSectionHasRtcpMux = <bool>[];
+    final List<String?> mediaSectionMids = <String?>[];
+
+    for (final String line in lines) {
+      if (line.startsWith('a=group:BUNDLE')) {
+        hasBundleGroup = true;
+      }
+      if (line.startsWith('m=')) {
+        mediaCount++;
+        mediaSectionHasMid.add(false);
+        mediaSectionHasRtcpMux.add(false);
+        mediaSectionMids.add(null);
+      }
+      if (mediaCount > 0) {
+        if (line.trim() == 'a=rtcp-mux') {
+          mediaSectionHasRtcpMux[mediaCount - 1] = true;
+        }
+        if (line.startsWith('a=mid:')) {
+          mediaSectionHasMid[mediaCount - 1] = true;
+          mediaSectionMids[mediaCount - 1] = line.substring(6).trim();
+        }
+      }
+    }
+
+    // Determine mid values to use for sections that lack them
+    for (int i = 0; i < mediaCount; i++) {
+      if (mediaSectionMids[i] == null) {
+        mediaSectionMids[i] = '$i';
+      }
+    }
+
+    // Second pass: rebuild SDP with missing attributes
+    final List<String> result = <String>[];
+    int currentMedia = -1;
+
+    for (int i = 0; i < lines.length; i++) {
+      final String line = lines[i];
+
+      if (line.startsWith('m=')) {
+        // Before starting a new media section, add missing attrs to previous one
+        if (currentMedia >= 0) {
+          if (!mediaSectionHasRtcpMux[currentMedia]) {
+            result.add('a=rtcp-mux');
+          }
+          if (!mediaSectionHasMid[currentMedia]) {
+            result.add('a=mid:${mediaSectionMids[currentMedia]}');
+          }
+        }
+        currentMedia++;
+      }
+
+      // Inject BUNDLE group before first m= line if missing
+      if (line.startsWith('m=') && currentMedia == 0 && !hasBundleGroup && mediaCount > 0) {
+        result.add('a=group:BUNDLE ${mediaSectionMids.join(' ')}');
+      }
+
+      result.add(line);
+    }
+
+    // Add missing attrs for the last media section
+    if (currentMedia >= 0) {
+      if (!mediaSectionHasRtcpMux[currentMedia]) {
+        result.add('a=rtcp-mux');
+      }
+      if (!mediaSectionHasMid[currentMedia]) {
+        result.add('a=mid:${mediaSectionMids[currentMedia]}');
+      }
+    }
+
+    String output = result.join(lineEnding);
+    if (hadTrailingNewline) {
+      output += lineEnding;
+    }
+    return output;
+  }
+
   /// SDP offers may contain text media channels. e.g. Older clients using linphone.
   ///
   /// WebRTC does not support text media channels, so remove them.
+  /// Also ensures RTCP-MUX is present (required by WebRTC).
   String? _sdpOfferToWebRTC(String? sdpInput) {
     if (sdpInput == null) {
       return sdpInput;
@@ -2822,6 +2949,9 @@ class RTCSession extends EventManager implements Owner {
 
     for (dynamic element in sdp?['media']) {
       if (element['type'] != 'text') {
+        if (element['rtcpMux'] == null) {
+          element['rtcpMux'] = 'rtcp-mux';
+        }
         mediaList.add(element);
       }
     }

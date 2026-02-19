@@ -50,9 +50,10 @@ class _MyDialPadWidget extends State<DialPadWidget> implements SipUaHelperListen
     final h = helper;
     if (h == null) return;
     if (h.registered) return;
-    if (TestCredentials.username.isEmpty || TestCredentials.password.isEmpty) return;
+    final user = TestCredentials.sipUser;
+    if (user.authUser.isEmpty || user.password.isEmpty) return;
     _hasAttemptedAutoRegister = true;
-    context.read<SipUserCubit>().register(TestCredentials.sipUser);
+    context.read<SipUserCubit>().register(user);
   }
 
   @override
