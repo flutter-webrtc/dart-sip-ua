@@ -543,11 +543,13 @@ class IncomingRequest extends IncomingMessage {
 
     reason = reason ?? null;
 
-    // Validate code and reason values.
+    // Validate code. Dart's type system already constrains reason to String?,
+    // so the upstream JsSIP runtime type-check is unnecessary — and throwing
+    // on any non-null reason was a port bug that broke valid calls like
+    // `request.reply(403, 'Wrong Status')`. Mirrors the same fix already
+    // applied to reply_sl in #539.
     if (code < 100 || code > 699) {
       throw Exceptions.TypeError('Invalid status_code: $code');
-    } else if (reason != null) {
-      throw Exceptions.TypeError('Invalid reason_phrase: $reason');
     }
 
     reason = reason ?? DartSIP_C.REASON_PHRASE[code] ?? '';

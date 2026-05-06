@@ -242,7 +242,13 @@ class UA extends EventManager {
   RTCSession call(String target, Map<String, dynamic> options) {
     logger.d('call()');
     RTCSession session = RTCSession(this);
-    session.connect(target, options);
+    // Session.connect() is fire-and-forget here; the session reports failures
+    // via its own event emission (_failed/_ended). Attach a no-op catchError
+    // so late-arriving throws (e.g. InvalidStateError when the user cancels
+    // before the INVITE is dispatched) don't escape as unhandled async errors.
+    session.connect(target, options).catchError((Object error, StackTrace st) {
+      logger.w('session.connect failed: $error');
+    });
     return session;
   }
 

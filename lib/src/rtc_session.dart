@@ -239,7 +239,7 @@ class RTCSession extends EventManager implements Owner {
     return <String, dynamic>{'local': _localHold, 'remote': _remoteHold};
   }
 
-  void connect(dynamic target,
+  Future<void> connect(dynamic target,
       [Map<String, dynamic>? options,
       InitSuccessCallback? initCallback]) async {
     logger.d('connect()');
