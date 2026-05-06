@@ -2862,7 +2862,10 @@ class RTCSession extends EventManager implements Owner {
       if (_state == RtcSessionState.terminated) {
         throw Exceptions.InvalidStateError('terminated');
       }
-      request.reply(480);
+      // `request` (i.e. `_request`) here is the session's originating
+      // InitialOutgoingInviteRequest — you cannot `reply` to your own outgoing
+      // INVITE. The `_failed` call below already conveys the 480/Originator.local
+      // failure to listeners.
       _failed(
           Originator.local,
           null,
