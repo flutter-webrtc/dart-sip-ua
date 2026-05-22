@@ -68,6 +68,9 @@ class SIPUAHelper extends EventManager {
     return false;
   }
 
+  /// Contact URI generated for the User-Agent.
+  String? get contactUri => _ua?.contact?.uri?.toString();
+
   RegistrationState get registerState => _registerState;
 
   void stop() async {
