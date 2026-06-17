@@ -845,6 +845,12 @@ enum IceTransportPolicy {
   /// Only ICE candidates whose IP addresses are being relayed, such as those
   /// being passed through a TURN server, will be considered.
   RELAY,
+
+  /// Excludes host candidates (local/private IP addresses).
+  /// Only SRFLX (server reflexive from STUN) and RELAY (from TURN) candidates
+  /// will be gathered. This filters out localhost (127.0.0.1, ::1) and
+  /// private network addresses (192.168.x.x, 10.x.x.x, etc.).
+  NOHOST,
 }
 
 extension _IceTransportPolicyEncoding on IceTransportPolicy {
@@ -854,6 +860,8 @@ extension _IceTransportPolicyEncoding on IceTransportPolicy {
         return 'all';
       case IceTransportPolicy.RELAY:
         return 'relay';
+      case IceTransportPolicy.NOHOST:
+        return 'nohost';
     }
   }
 }
