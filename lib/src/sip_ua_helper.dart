@@ -712,6 +712,33 @@ class Call {
     return peerHasMediaLine;
   }
 
+  Map<String, dynamic> toJson() {
+    var isMuted = _session.isMuted();
+    var isOnHold = _session.isOnHold();
+    return {
+      'id': id,
+      'sessionId': _session.id,
+      'sessionStatus': _session.status,
+      'sessionContact': _session.contact,
+      'sessionDirection': _session.direction?.name,
+      'sessionW2cC2CId': _session.w2cC2CId ?? '',
+      'sessionLocalIdentity': local_identity,
+      'sessionRemoteIdentity': remote_identity,
+      'sessionRemoteDisplayName': remote_display_name,
+      'sessionRemoteHasAudio': remote_has_audio,
+      'sessionRemoteHasVideo': remote_has_video,
+      'sessionStartTime': _session.start_time.toString(),
+      'sessionEndTime': _session.end_time.toString(),
+      'sessionIsInProgress': _session.isInProgress(),
+      'sessionIsEstablished': _session.isEstablished(),
+      'sessionIsEnded': _session.isEnded(),
+      'sessionIsAudioMuted': isMuted['audio'],
+      'sessionIsVideoMuted': isMuted['video'],
+      'sessionIsLocalOnHold': isOnHold['local'],
+      'sessionIsRemoteOnHold': isOnHold['remote'],
+    };
+  }
+
   Future<List<StatsReport>>? getStats([MediaStreamTrack? track]) {
     return peerConnection?.getStats(track);
   }
