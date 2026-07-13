@@ -626,6 +626,10 @@ class RTCSession extends EventManager implements Owner {
     }
 
     if (_state == RtcSessionState.terminated) {
+      // Terminated while getUserMedia was pending (remote CANCEL / fast
+      // failure): _close() already ran with _localMediaStream still null, so
+      // this fresh capture would leak the microphone (stuck mic indicator).
+      await _disposeOrphanedMediaStream(stream);
       throw Exceptions.InvalidStateError('terminated');
     }
 
@@ -1533,6 +1537,35 @@ class RTCSession extends EventManager implements Owner {
     }
 
     return true;
+  }
+
+  /// Dispose a locally-captured MediaStream that arrived AFTER the session was
+  /// terminated. When termination (fast failure, transport drop, instant 4xx,
+  /// user cancel) races a pending getUserMedia, [_close] has already run with
+  /// `_localMediaStream` still null — so the capture that getUserMedia then
+  /// returns is orphaned: [_close] early-returns on terminated and never runs
+  /// again, nothing ever stops the tracks, and the platform keeps the
+  /// microphone open (stuck orange mic indicator on iOS) until the app is
+  /// killed. Call this before bailing out of any post-getUserMedia
+  /// terminated-check.
+  Future<void> _disposeOrphanedMediaStream(MediaStream? stream) async {
+    if (stream == null || !_localMediaStreamLocallyGenerated) {
+      return;
+    }
+    logger.w(
+        'disposing orphaned local MediaStream (session terminated during media setup)');
+    try {
+      for (MediaStreamTrack track in stream.getTracks()) {
+        await track.stop();
+      }
+      await stream.dispose();
+    } catch (error) {
+      logger
+          .e('error disposing orphaned MediaStream: ${error.toString()}');
+    }
+    if (identical(_localMediaStream, stream)) {
+      _localMediaStream = null;
+    }
   }
 
   void _close() async {
@@ -2471,6 +2504,10 @@ class RTCSession extends EventManager implements Owner {
     }
 
     if (_state == RtcSessionState.terminated) {
+      // Terminated while getUserMedia was pending (fast failure / transport
+      // drop / immediate cancel): _close() already ran with _localMediaStream
+      // still null, so this fresh capture would leak the microphone.
+      await _disposeOrphanedMediaStream(stream);
       throw Exceptions.InvalidStateError('terminated');
     }
 
@@ -2499,6 +2536,15 @@ class RTCSession extends EventManager implements Owner {
       RTCSessionDescription desc =
           await _createLocalDescription(SdpType.offer, rtcOfferConstraints);
       if (_is_canceled || _state == RtcSessionState.terminated) {
+        // Same orphan race, one await later. _close() sets terminated
+        // synchronously but disposes _localMediaStream only after awaiting the
+        // peer-connection teardown — if it hasn't gotten there yet
+        // (_localMediaStream still points at our stream), dispose here and
+        // null it so _close()'s own disposal skips. If _close() already
+        // finished, _localMediaStream is null and there is nothing to do.
+        if (identical(_localMediaStream, stream)) {
+          await _disposeOrphanedMediaStream(stream);
+        }
         throw Exceptions.InvalidStateError('terminated');
       }
 

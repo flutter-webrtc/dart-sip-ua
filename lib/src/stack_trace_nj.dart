@@ -92,7 +92,10 @@ class StackTraceNJ implements core.StackTrace {
 
   @override
   String toString() {
-    return formatStackTrace()!;
+    // formatStackTrace() returns null when no frames match the regex (e.g.
+    // obfuscated release stack traces on Android). toString() must never throw,
+    // so fall back to the raw trace instead of a null-check failure.
+    return formatStackTrace() ?? stackTrace.toString();
   }
 
   List<Stackframe> _extractFrames() {

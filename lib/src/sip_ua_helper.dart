@@ -814,6 +814,14 @@ class WebSocketSettings {
   /// Otherwise the used protocol will be used (for example WS for ws://
   /// or WSS for wss://, based on the given web socket URL).
   String? transport_scheme;
+
+  /// Interval between WebSocket PING frames used to keep the connection
+  /// warm. Without this, a flow that only carries sparse SIP traffic
+  /// (e.g. the ~60s session-timer refresh during a call) can be silently
+  /// reaped by NAT/LB/proxy, surfacing as an abnormal 1006 close that
+  /// drops the call. Note: `dart:io` also arms a pong-timeout of the same
+  /// duration, so leave this null for servers that do not answer WS pings.
+  Duration? pingInterval;
 }
 
 class TcpSocketSettings {

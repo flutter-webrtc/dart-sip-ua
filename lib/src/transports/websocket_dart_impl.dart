@@ -19,6 +19,7 @@ class SIPUAWebSocketImpl {
   OnMessageCallback? onMessage;
   OnCloseCallback? onClose;
   final int messageDelay;
+  DateTime? _connectedAt;
   void connect(
       {Iterable<String>? protocols,
       required WebSocketSettings webSocketSettings}) async {
@@ -33,10 +34,28 @@ class SIPUAWebSocketImpl {
             protocols: protocols, headers: webSocketSettings.extraHeaders);
       }
 
+      // Keep the connection warm. Periodic PING frames stop NAT/LB/proxy
+      // idle-reaping of the flow between sparse SIP messages, which would
+      // otherwise surface as an abnormal 1006 close mid-call. Applies to
+      // both the normal and self-signed (fromUpgradedSocket) paths.
+      final Duration? pingInterval = webSocketSettings.pingInterval;
+      if (pingInterval != null) {
+        _socket!.pingInterval = pingInterval;
+        logger.d('WebSocket pingInterval set to ${pingInterval.inSeconds}s');
+      }
+
+      _connectedAt = DateTime.now();
       onOpen?.call();
       _socket!.listen((dynamic data) {
         onMessage?.call(data);
       }, onDone: () {
+        final DateTime? connectedAt = _connectedAt;
+        final String uptime = connectedAt == null
+            ? 'unknown'
+            : '${DateTime.now().difference(connectedAt).inSeconds}s';
+        logger.w(
+            'WebSocket closed [code:${_socket!.closeCode}, reason:${_socket!.closeReason}] '
+            'after $uptime connected');
         onClose?.call(_socket!.closeCode, _socket!.closeReason);
       });
     } catch (e) {
