@@ -33,6 +33,10 @@ class SIPUAWebSocketImpl {
             protocols: protocols, headers: webSocketSettings.extraHeaders);
       }
 
+      // Applies to both branches above. Null keeps dart:io's default of not
+      // pinging at all, so this is a no-op unless a caller opts in.
+      _socket!.pingInterval = webSocketSettings.pingInterval;
+
       onOpen?.call();
       _socket!.listen((dynamic data) {
         onMessage?.call(data);
