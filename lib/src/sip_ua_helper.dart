@@ -841,6 +841,15 @@ class WebSocketSettings {
   /// Otherwise the used protocol will be used (for example WS for ws://
   /// or WSS for wss://, based on the given web socket URL).
   String? transport_scheme;
+
+  /// Interval between the WebSocket ping frames used to detect a half open
+  /// socket (TCP dead on the network but never closed on the client side,
+  /// typically an idle connection dropped by a proxy or a sleeping handset).
+  /// `dart:io` closes the connection when no pong comes back, which arms the
+  /// transport reconnection. Set to `null` to disable the keep alive.
+  ///
+  /// Ignored on web, where the browser handles the keep alive itself.
+  Duration? pingInterval = const Duration(seconds: 30);
 }
 
 class TcpSocketSettings {

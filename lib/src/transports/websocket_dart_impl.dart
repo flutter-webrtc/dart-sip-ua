@@ -10,6 +10,10 @@ typedef OnMessageCallback = void Function(dynamic msg);
 typedef OnCloseCallback = void Function(int? code, String? reason);
 typedef OnOpenCallback = void Function();
 
+/// Close code reported when the socket dies without a close handshake,
+/// i.e. RFC 6455 `1006 abnormal closure`.
+const int abnormalClosure = 1006;
+
 class SIPUAWebSocketImpl {
   SIPUAWebSocketImpl(this._url, this.messageDelay);
 
@@ -19,6 +23,13 @@ class SIPUAWebSocketImpl {
   OnMessageCallback? onMessage;
   OnCloseCallback? onClose;
   final int messageDelay;
+
+  /// Set once the death of the socket has been reported upstream, or once the
+  /// caller closed it on purpose. A socket dying on error usually emits both
+  /// an error and a done event, and each report would arm its own
+  /// reconnection.
+  bool _closeHandled = false;
+
   void connect(
       {Iterable<String>? protocols,
       required WebSocketSettings webSocketSettings}) async {
@@ -33,40 +44,90 @@ class SIPUAWebSocketImpl {
             protocols: protocols, headers: webSocketSettings.extraHeaders);
       }
 
-      onOpen?.call();
+      // Keep alive: `dart:io` emits the ping frames and closes the connection
+      // when no pong comes back, which is the only way to notice a half open
+      // socket (TCP dead on the network but never closed on our side).
+      _socket!.pingInterval = webSocketSettings.pingInterval;
+
+      // Listen before signalling the open state: a message arriving in
+      // between would be lost.
       _socket!.listen((dynamic data) {
         onMessage?.call(data);
+      }, onError: (Object error, StackTrace stackTrace) {
+        logger.e('WebSocket $_url error: $error',
+            error: error, stackTrace: stackTrace);
+        _handleClose(_socket?.closeCode ?? abnormalClosure,
+            _socket?.closeReason ?? error.toString());
       }, onDone: () {
-        onClose?.call(_socket!.closeCode, _socket!.closeReason);
+        _handleClose(_socket?.closeCode, _socket?.closeReason);
       });
+
+      onOpen?.call();
     } catch (e) {
-      onClose?.call(500, e.toString());
+      _handleClose(500, e.toString());
     }
   }
 
   final StreamController<dynamic> queue = StreamController<dynamic>.broadcast();
+  StreamSubscription<dynamic>? _queueSubscription;
   void handleQueue() async {
-    queue.stream.asyncMap((dynamic event) async {
+    _queueSubscription = queue.stream.asyncMap((dynamic event) async {
       await Future<void>.delayed(Duration(milliseconds: messageDelay));
       return event;
-    }).listen((dynamic event) async {
-      _socket!.add(event);
-      logger.d('send: \n\n$event');
+    }).listen((dynamic event) {
+      // This is where the write really happens, `send()` only enqueues. A
+      // failure here must surface as a disconnection, otherwise the message
+      // vanishes while the transport keeps believing it is connected.
+      try {
+        _socket!.add(event);
+        logger.d('send: \n\n$event');
+      } catch (error, stackTrace) {
+        logger.e('WebSocket $_url send failure: $error',
+            error: error, stackTrace: stackTrace);
+        _handleClose(
+            _socket?.closeCode ?? abnormalClosure, 'send failure: $error');
+      }
+    }, onError: (Object error, StackTrace stackTrace) {
+      logger.e('WebSocket $_url send queue failure: $error',
+          error: error, stackTrace: stackTrace);
+      _handleClose(
+          _socket?.closeCode ?? abnormalClosure, 'send queue failure: $error');
     });
   }
 
   void send(dynamic data) async {
-    if (_socket != null) {
-      queue.add(data);
+    if (_socket == null || queue.isClosed) {
+      logger.e('WebSocket $_url not connected, message not sent');
+      return;
     }
+    queue.add(data);
   }
 
   void close() {
+    // Closing on purpose: the caller already knows, nothing to report back.
+    _closeHandled = true;
+    _closeQueue();
     if (_socket != null) _socket!.close();
   }
 
   bool isConnecting() {
     return _socket != null && _socket!.readyState == WebSocket.connecting;
+  }
+
+  /// Reports the death of the socket upstream, at most once.
+  void _handleClose(int? code, String? reason) {
+    if (_closeHandled) return;
+    _closeHandled = true;
+    _closeQueue();
+    onClose?.call(code, reason);
+  }
+
+  /// Releases the send queue: the socket is gone, nothing can be written any
+  /// more, and a brand new instance is built on every reconnection.
+  void _closeQueue() {
+    _queueSubscription?.cancel();
+    _queueSubscription = null;
+    if (!queue.isClosed) queue.close();
   }
 
   /// For test only.
