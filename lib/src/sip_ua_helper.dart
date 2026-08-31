@@ -15,6 +15,7 @@ import 'logger.dart';
 import 'map_helper.dart';
 import 'message.dart';
 import 'options.dart';
+import 'publish.dart';
 import 'rtc_session.dart';
 import 'rtc_session/refer_subscriber.dart';
 import 'sip_message.dart';
@@ -67,6 +68,9 @@ class SIPUAHelper extends EventManager {
 
     return false;
   }
+
+  /// Contact URI generated for the User-Agent.
+  String? get contactUri => _ua?.contact?.uri?.toString();
 
   RegistrationState get registerState => _registerState;
 
@@ -354,6 +358,10 @@ class SIPUAHelper extends EventManager {
       });
     });
 
+    handlers.on(EventNewInfo(), (EventNewInfo event) {
+      _notifyInfoListeners(event);
+    });
+
     handlers.on(EventReInvite(), (EventReInvite event) {
       logger.d('Reinvite received in helper, notifying listeners');
       _notifyReInviteListeners(event);
@@ -445,6 +453,35 @@ class SIPUAHelper extends EventManager {
     s.subscribe();
   }
 
+  /// Send a SIP PUBLISH request (RFC 3903) to publish presence/status.
+  ///
+  /// [target] is the SIP URI to publish to (typically your own AOR).
+  /// [body] is the PIDF XML presence document (RFC 3863).
+  /// [expires] controls how long the server retains this publication.
+  /// [sipIfMatch] is the SIP-ETag for conditional publication.
+  /// Returns the [Publish] instance for event handling.
+  Publish publish(
+    String target,
+    String body, {
+    int expires = 3600,
+    String contentType = 'application/pidf+xml',
+    String? sipIfMatch,
+    Map<String, dynamic>? params,
+    Map<String, dynamic>? options,
+  }) {
+    assert(_ua != null,
+        'publish called but not started, you must call start first.');
+    return _ua!.publish(
+      target,
+      body,
+      expires: expires,
+      contentType: contentType,
+      sipIfMatch: sipIfMatch,
+      params: params,
+      options: options,
+    );
+  }
+
   void terminateSessions(Map<String, dynamic> options) {
     _ua!.terminateSessions(options);
   }
@@ -521,6 +558,24 @@ class SIPUAHelper extends EventManager {
     List<SipUaHelperListener> listeners = _sipUaHelperListeners.toList();
     for (SipUaHelperListener listener in listeners) {
       listener.onNewNotify(Notify(request: event.request));
+    }
+  }
+
+  void _notifyInfoListeners(EventNewInfo event) {
+    // Copy to prevent concurrent modification exception
+    List<SipUaHelperListener> listeners = _sipUaHelperListeners.toList();
+    final IncomingRequest? request = event.request is IncomingRequest
+        ? event.request as IncomingRequest
+        : null;
+    final SipInfo info = SipInfo(
+      contentType:
+          event.info?.contentType ?? request?.getHeader('content-type'),
+      body: event.info?.body ?? request?.body,
+      request: request,
+      originator: event.originator,
+    );
+    for (SipUaHelperListener listener in listeners) {
+      listener.onNewInfo(info);
     }
   }
 }
@@ -791,11 +846,20 @@ abstract class SipUaHelperListener {
   void onNewMessage(SIPMessageRequest msg);
   void onNewNotify(Notify ntf);
   void onNewReinvite(ReInvite event);
+  void onNewInfo(SipInfo info) {}
 }
 
 class Notify {
   Notify({this.request});
   IncomingRequest? request;
+}
+
+class SipInfo {
+  SipInfo({this.contentType, this.body, this.request, this.originator});
+  String? contentType;
+  String? body;
+  IncomingRequest? request;
+  Originator? originator;
 }
 
 class ReInvite {

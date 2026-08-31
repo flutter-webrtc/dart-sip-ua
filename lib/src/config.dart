@@ -150,14 +150,8 @@ class Checks {
       }
     },
     'contact_uri': (Settings src, Settings? dst) {
-      dynamic contact_uri = src.contact_uri;
-      if (contact_uri == null) return;
-      if (contact_uri is String) {
-        dynamic uri = Grammar.parse(contact_uri, 'SIP_URI');
-        if (uri != -1) {
-          dst!.contact_uri = uri;
-        }
-      }
+      if (src.contact_uri == null) return;
+      dst!.contact_uri = src.contact_uri;
     },
     'display_name': (Settings src, Settings? dst) {
       String? display_name = src.display_name;

@@ -14,6 +14,7 @@ import 'logger.dart';
 import 'message.dart';
 import 'options.dart';
 import 'parser.dart' as Parser;
+import 'publish.dart';
 import 'registrator.dart';
 import 'rtc_session.dart';
 import 'sanity_check.dart';
@@ -207,6 +208,39 @@ class UA extends EventManager {
 
     return Subscriber(this, target, eventName, accept, expires, contentType,
         allowEvents, requestParams, extraHeaders);
+  }
+
+  /**
+   * Create a PUBLISH request (RFC 3903).
+   *
+   * Publishes presence/status information to the SIP server using PIDF
+   * (Presence Information Data Format, RFC 3863).
+   *
+   * Returns a [Publish] instance that emits [EventSucceeded] or
+   * [EventCallFailed] events.
+   */
+  Publish publish(
+    String target,
+    String body, {
+    int expires = 3600,
+    String contentType = 'application/pidf+xml',
+    String? sipIfMatch,
+    Map<String, dynamic>? params,
+    Map<String, dynamic>? options,
+  }) {
+    logger.d('publish()');
+
+    final Publish publisher = Publish(this);
+    publisher.send(
+      target,
+      body,
+      expires: expires,
+      contentType: contentType,
+      sipIfMatch: sipIfMatch,
+      params: params,
+      options: options,
+    );
+    return publisher;
   }
 
   /**
