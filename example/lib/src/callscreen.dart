@@ -1,17 +1,24 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:sip_ua/sip_ua.dart';
 
+import 'attended_transfer_screen.dart';
 import 'widgets/action_button.dart';
 
 class CallScreenWidget extends StatefulWidget {
   final SIPUAHelper? _helper;
   final Call? _call;
 
-  CallScreenWidget(this._helper, this._call, {Key? key}) : super(key: key);
+  /// Optional list of other active calls for attended transfer.
+  /// Pass this when you have multiple active calls managed by your app.
+  final List<Call>? otherActiveCalls;
+
+  CallScreenWidget(this._helper, this._call, {Key? key, this.otherActiveCalls})
+      : super(key: key);
 
   @override
   State<CallScreenWidget> createState() => _MyCallScreenWidget();
@@ -101,6 +108,12 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   @override
   void callStateChanged(Call call, CallState callState) {
+    // Only handle state changes for this screen's call
+    // During attended transfer, other calls may fire events that we should ignore
+    if (call.id != this.call?.id) {
+      return;
+    }
+
     if (callState.state == CallStateEnum.HOLD ||
         callState.state == CallStateEnum.UNHOLD) {
       _hold = callState.state == CallStateEnum.HOLD;
@@ -169,10 +182,18 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _backToDialPad() {
     _timer.cancel();
-    Timer(Duration(seconds: 2), () {
-      Navigator.of(context).pop();
-    });
     _cleanUp();
+
+    // Don't navigate if attended transfer is active - let AttendedTransferScreen handle navigation
+    if (AttendedTransferScreen.isAttendedTransferActive) {
+      return;
+    }
+
+    Timer(Duration(seconds: 2), () {
+      if (mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+    });
   }
 
   void _handleStreams(CallState event) async {
@@ -186,10 +207,16 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         }
       }
 
+      // enableSpeakerphone is not available on web, desktop, or macOS
       if (!kIsWeb &&
           !WebRTC.platformIsDesktop &&
+          !Platform.isMacOS &&
           event.stream?.getAudioTracks().isNotEmpty == true) {
-        event.stream?.getAudioTracks().first.enableSpeakerphone(false);
+        try {
+          event.stream?.getAudioTracks().first.enableSpeakerphone(false);
+        } catch (e) {
+          // enableSpeakerphone not available on this platform
+        }
       }
       _localStream = stream;
     }
@@ -297,27 +324,30 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void _handleTransfer() {
     showDialog<void>(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Enter target to transfer.'),
-          content: TextField(
-            onChanged: (String text) {
-              setState(() {
-                _transferTarget = text;
-              });
-            },
-            decoration: InputDecoration(
-              hintText: 'URI or Username',
-            ),
-            textAlign: TextAlign.center,
+          title: Text('Transfer Call'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Choose transfer type:'),
+              SizedBox(height: 16),
+            ],
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Ok'),
+              child: Text('Blind Transfer'),
               onPressed: () {
-                call!.refer(_transferTarget);
                 Navigator.of(context).pop();
+                _showBlindTransferDialog();
+              },
+            ),
+            TextButton(
+              child: Text('Attended Transfer'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showAttendedTransferDialog();
               },
             ),
             TextButton(
@@ -329,6 +359,177 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           ],
         );
       },
+    );
+  }
+
+  /// Shows dialog for blind transfer (simple REFER without Replaces).
+  void _showBlindTransferDialog() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Blind Transfer'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Enter target to transfer call to:'),
+              SizedBox(height: 8),
+              TextField(
+                onChanged: (String text) {
+                  setState(() {
+                    _transferTarget = text;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'URI or Username',
+                  border: OutlineInputBorder(),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Transfer'),
+              onPressed: () {
+                // Use blind transfer (simple REFER without Replaces)
+                call!.refer(_transferTarget);
+                Navigator.of(context).pop();
+                _showTransferProgressSnackBar('Blind transfer initiated...');
+              },
+            ),
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Shows dialog for attended transfer (REFER with Replaces header).
+  /// User enters the target number, then the app holds the current call
+  /// and opens a new screen for the consultation call.
+  void _showAttendedTransferDialog() {
+    String attendedTransferTarget = '';
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Attended Transfer'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.swap_horiz, size: 48, color: Colors.blue),
+              SizedBox(height: 16),
+              Text(
+                'Enter the number to consult with before transferring:',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                autofocus: true,
+                onChanged: (String text) {
+                  attendedTransferTarget = text;
+                },
+                decoration: InputDecoration(
+                  hintText: 'URI or Phone Number',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person_add),
+                ),
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.phone,
+              ),
+              SizedBox(height: 12),
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Your current call will be put on hold while you speak with the transfer target.',
+                        style: TextStyle(fontSize: 12, color: Colors.blue[700]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            ElevatedButton(
+              child: Text('Start Transfer'),
+              onPressed: () {
+                if (attendedTransferTarget.isNotEmpty) {
+                  Navigator.of(context).pop();
+                  _startAttendedTransferFlow(attendedTransferTarget);
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Starts the attended transfer flow by navigating to the AttendedTransferScreen.
+  void _startAttendedTransferFlow(String targetUri) {
+    Navigator.of(context)
+        .push(
+      MaterialPageRoute(
+        builder: (context) => AttendedTransferScreen(
+          args: AttendedTransferArgs(
+            originalCall: call!,
+            targetUri: targetUri,
+            helper: helper!,
+          ),
+        ),
+      ),
+    )
+        .then((result) {
+      // Handle when returning from attended transfer screen
+      if (result == true) {
+        // Transfer was successful - close this call screen too
+        _timer.cancel();
+        _cleanUp();
+        if (mounted && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+      } else {
+        // Transfer was cancelled or failed
+        // Original call should be resumed (unhold is handled by AttendedTransferScreen)
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
+  }
+
+  /// Shows a snackbar with transfer progress information.
+  void _showTransferProgressSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.blue,
+      ),
     );
   }
 
@@ -363,8 +564,16 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void _toggleSpeaker() {
     if (_localStream != null) {
       _speakerOn = !_speakerOn;
-      if (!kIsWeb) {
-        _localStream!.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      // enableSpeakerphone is only available on mobile platforms (iOS/Android)
+      if (!kIsWeb &&
+          !Platform.isMacOS &&
+          !Platform.isLinux &&
+          !Platform.isWindows) {
+        try {
+          _localStream!.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+        } catch (e) {
+          // enableSpeakerphone not available on this platform
+        }
       }
     }
   }

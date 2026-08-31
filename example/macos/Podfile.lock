@@ -32,10 +32,10 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
 
 SPEC CHECKSUMS:
-  flutter_webrtc: f3000fcd54abc3fa966c77ecf7e43ab701793c64
-  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
-  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  flutter_webrtc: 718eae22a371cd94e5d56aa4f301443ebc5bb737
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+  path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
+  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   WebRTC-SDK: 40d4f5ba05cadff14e4db5614aec402a633f007e
 
 PODFILE CHECKSUM: 54d867c82ac51cbd61b565781b9fada492027009
