@@ -15,6 +15,7 @@ import 'logger.dart';
 import 'map_helper.dart';
 import 'message.dart';
 import 'options.dart';
+import 'publish.dart';
 import 'rtc_session.dart';
 import 'rtc_session/refer_subscriber.dart';
 import 'sip_message.dart';
@@ -447,6 +448,35 @@ class SIPUAHelper extends EventManager {
     });
 
     s.subscribe();
+  }
+
+  /// Send a SIP PUBLISH request (RFC 3903) to publish presence/status.
+  ///
+  /// [target] is the SIP URI to publish to (typically your own AOR).
+  /// [body] is the PIDF XML presence document (RFC 3863).
+  /// [expires] controls how long the server retains this publication.
+  /// [sipIfMatch] is the SIP-ETag for conditional publication.
+  /// Returns the [Publish] instance for event handling.
+  Publish publish(
+    String target,
+    String body, {
+    int expires = 3600,
+    String contentType = 'application/pidf+xml',
+    String? sipIfMatch,
+    Map<String, dynamic>? params,
+    Map<String, dynamic>? options,
+  }) {
+    assert(_ua != null,
+        'publish called but not started, you must call start first.');
+    return _ua!.publish(
+      target,
+      body,
+      expires: expires,
+      contentType: contentType,
+      sipIfMatch: sipIfMatch,
+      params: params,
+      options: options,
+    );
   }
 
   void terminateSessions(Map<String, dynamic> options) {
