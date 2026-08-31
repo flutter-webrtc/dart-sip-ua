@@ -561,10 +561,12 @@ class SIPUAHelper extends EventManager {
   void _notifyInfoListeners(EventNewInfo event) {
     // Copy to prevent concurrent modification exception
     List<SipUaHelperListener> listeners = _sipUaHelperListeners.toList();
-    final IncomingRequest? request =
-        event.request is IncomingRequest ? event.request as IncomingRequest : null;
+    final IncomingRequest? request = event.request is IncomingRequest
+        ? event.request as IncomingRequest
+        : null;
     final SipInfo info = SipInfo(
-      contentType: event.info?.contentType ?? request?.getHeader('content-type'),
+      contentType:
+          event.info?.contentType ?? request?.getHeader('content-type'),
       body: event.info?.body ?? request?.body,
       request: request,
       originator: event.originator,

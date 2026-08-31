@@ -49,7 +49,8 @@ class Publish extends EventManager {
     options = options ?? <String, dynamic>{};
 
     if (target.isEmpty || body.isEmpty) {
-      throw Exceptions.TypeError('Not enough arguments: target and body required');
+      throw Exceptions.TypeError(
+          'Not enough arguments: target and body required');
     }
 
     // Check target validity.
@@ -156,9 +157,7 @@ class Publish extends EventManager {
     // Any other failure.
     final String cause = Utils.sipErrorCause(response.status_code);
     _failed(
-        statusCode ?? 500,
-        cause,
-        response.reason_phrase ?? 'PUBLISH failed');
+        statusCode ?? 500, cause, response.reason_phrase ?? 'PUBLISH failed');
   }
 
   void _onRequestTimeout() {
