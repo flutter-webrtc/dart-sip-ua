@@ -586,4 +586,9 @@ class _AttendedTransferScreenState extends State<AttendedTransferScreen>
       ),
     );
   }
+
+  @override
+  void onNewInfo(SipInfo info) {
+    // TODO: implement onNewInfo
+  }
 }

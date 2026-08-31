@@ -404,4 +404,9 @@ class _MyDialPadWidget extends State<DialPadWidget>
   void onNewReinvite(ReInvite event) {
     // TODO: implement onNewReinvite
   }
+
+  @override
+  void onNewInfo(SipInfo info) {
+    // TODO: implement onNewInfo
+  }
 }

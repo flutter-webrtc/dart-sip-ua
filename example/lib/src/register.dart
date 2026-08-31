@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class RegisterWidget extends StatefulWidget {
   final SIPUAHelper? _helper;
 
-  RegisterWidget(this._helper, {Key? key}) : super(key: key);
+  RegisterWidget(this._helper, {super.key});
 
   @override
   State<RegisterWidget> createState() => _MyRegisterWidget();
@@ -332,5 +332,10 @@ class _MyRegisterWidget extends State<RegisterWidget>
   @override
   void onNewReinvite(ReInvite event) {
     // TODO: implement onNewReinvite
+  }
+
+  @override
+  void onNewInfo(SipInfo info) {
+    // TODO: implement onNewInfo
   }
 }
