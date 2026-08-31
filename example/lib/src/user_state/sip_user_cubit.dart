@@ -6,7 +6,6 @@ class SipUserCubit extends Cubit<SipUser?> {
   final SIPUAHelper sipHelper;
   SipUserCubit({required this.sipHelper}) : super(null);
 
-
   void register(SipUser user) {
     UaSettings settings = UaSettings();
     settings.port = user.port;
