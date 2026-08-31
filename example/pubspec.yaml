@@ -15,24 +15,24 @@ version: 1.0.0+1
 publish_to: none
 
 environment:
-  sdk: ">=2.15.0 <3.0.0"
-  flutter: ">=1.10.0"
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
 
 dependencies:
-  bloc: ^9.0.0
+  bloc: ^9.2.1
   flutter:
     sdk: flutter
   sip_ua:
     path: ../
-  shared_preferences: ^2.2.0
-  permission_handler: ^11.1.0
-  provider: 6.1.2
-  logger: ^2.5.0
+  shared_preferences: ^2.5.5
+  permission_handler: ^12.0.3
+  provider: ^6.1.5+1
+  logger: ^2.7.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  lints: ^4.0.0
+  lints: ^6.1.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -1,8 +1,9 @@
 import 'dart:js_interop';
 
+import 'package:web/web.dart';
+
 import 'package:sip_ua/src/logger.dart';
 import 'package:sip_ua/src/sip_ua_helper.dart';
-import 'package:web/web.dart';
 
 typedef OnMessageCallback = void Function(dynamic msg);
 typedef OnCloseCallback = void Function(int? code, String? reason);
@@ -23,7 +24,7 @@ class SIPUAWebSocketImpl {
       required WebSocketSettings webSocketSettings}) async {
     logger.i('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
-      _socket = WebSocket(_url, 'sip'.toJS);
+      _socket = WebSocket(_url, ['sip'.toJS].toJS);
       _socket!.onOpen.listen((Event e) {
         onOpen?.call();
       });
