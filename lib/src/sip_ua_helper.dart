@@ -204,19 +204,35 @@ class SIPUAHelper extends EventManager {
 
     try {
       _ua = UA(_settings);
+      // Handlers stay on the UA they were registered on. stop() can emit
+      // transport and registration events after start() has already replaced
+      // _ua (the close waits 2s while a transaction is still open), so compare
+      // the emitting UA with the one start() holds now.
+      UA ua = _ua!;
+      bool stale() => !identical(ua, _ua);
+
       _ua!.on(EventSocketConnecting(), (EventSocketConnecting event) {
+        if (stale()) {
+          return;
+        }
         logger.d('connecting => $event');
         _notifyTransportStateListeners(
             TransportState(TransportStateEnum.CONNECTING));
       });
 
       _ua!.on(EventSocketConnected(), (EventSocketConnected event) {
+        if (stale()) {
+          return;
+        }
         logger.d('connected => $event');
         _notifyTransportStateListeners(
             TransportState(TransportStateEnum.CONNECTED));
       });
 
       _ua!.on(EventSocketDisconnected(), (EventSocketDisconnected event) {
+        if (stale()) {
+          return;
+        }
         logger.d('disconnected => ${event.cause}');
         _notifyTransportStateListeners(TransportState(
             TransportStateEnum.DISCONNECTED,
@@ -224,6 +240,9 @@ class SIPUAHelper extends EventManager {
       });
 
       _ua!.on(EventRegistered(), (EventRegistered event) {
+        if (stale()) {
+          return;
+        }
         logger.d('registered => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.REGISTERED, cause: event.cause);
@@ -231,6 +250,9 @@ class SIPUAHelper extends EventManager {
       });
 
       _ua!.on(EventUnregister(), (EventUnregister event) {
+        if (stale()) {
+          return;
+        }
         logger.d('unregistered => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.UNREGISTERED, cause: event.cause);
@@ -238,6 +260,9 @@ class SIPUAHelper extends EventManager {
       });
 
       _ua!.on(EventRegistrationFailed(), (EventRegistrationFailed event) {
+        if (stale()) {
+          return;
+        }
         logger.d('registrationFailed => ${event.cause}');
         _registerState = RegistrationState(
             state: RegistrationStateEnum.REGISTRATION_FAILED,
@@ -245,6 +270,11 @@ class SIPUAHelper extends EventManager {
         _notifyRegistrationStateListeners(_registerState);
       });
 
+      // Call events stay. terminate() emits ENDED only after await
+      // _logCallStat(), and start() does not await between stop() and the
+      // new UA, so ENDED of a call cut by stop() arrives when _ua already
+      // points at the replacement. Dropping it would leave the call on
+      // screen. A stopped UA ignores new incoming requests.
       _ua!.on(EventNewRTCSession(), (EventNewRTCSession event) {
         logger.d('newRTCSession => $event');
         RTCSession session = event.session!;
