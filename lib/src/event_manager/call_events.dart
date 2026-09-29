@@ -12,8 +12,7 @@ class CallEvent extends EventType {
 }
 
 class EventNewRTCSession extends CallEvent {
-  EventNewRTCSession(
-      {RTCSession? session, Originator? originator, dynamic request})
+  EventNewRTCSession({RTCSession? session, this.originator, this.request})
       : super(session);
   Originator? originator;
   dynamic request;
@@ -54,8 +53,7 @@ class EventCallHold extends CallEvent {
 }
 
 class EventCallUnhold extends CallEvent {
-  EventCallUnhold({RTCSession? session, Originator? originator})
-      : super(session);
+  EventCallUnhold({RTCSession? session, this.originator}) : super(session);
   Originator? originator;
 }
 
