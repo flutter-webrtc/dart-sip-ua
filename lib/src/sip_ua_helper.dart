@@ -810,6 +810,13 @@ class WebSocketSettings {
   /// for self-signed certificate.
   bool allowBadCertificate = false;
 
+  /// The `dart:io` `SecurityContext` that verifies the server certificate when
+  /// [allowBadCertificate] is false, e.g. one that also trusts a pinned CA so
+  /// verification doesn't depend on a device's own trust store. Null uses the
+  /// platform default. Typed [Object] so this file stays importable on the
+  /// web, where it is ignored.
+  Object? securityContext;
+
   /// Custom transport scheme string to use.
   /// Otherwise the used protocol will be used (for example WS for ws://
   /// or WSS for wss://, based on the given web socket URL).
