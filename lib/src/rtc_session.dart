@@ -1316,8 +1316,10 @@ class RTCSession extends EventManager implements Owner {
           _state == RtcSessionState.answered) {
         _state = RtcSessionState.canceled;
         _request.reply(487);
+        // The CANCEL's Reason header (RFC 3326), e.g. `SIP;cause=200;text="Call
+        // completed elsewhere"`: a request has no reason phrase of its own.
         _failed(Originator.remote, null, request, null, 487,
-            DartSIP_C.CausesType.CANCELED, request.reason_phrase);
+            DartSIP_C.CausesType.CANCELED, request.getHeader('reason'));
       }
     } else {
       // Requests arriving here are in-dialog requests.
