@@ -317,7 +317,8 @@ class SIPUAHelper extends EventManager {
     });
     handlers.on(EventCallAccepted(), (EventCallAccepted event) {
       logger.d('call accepted');
-      _notifyCallStateListeners(event, CallState(CallStateEnum.ACCEPTED));
+      _notifyCallStateListeners(
+          event, CallState(CallStateEnum.ACCEPTED, response: event.response));
     });
     handlers.on(EventCallConfirmed(), (EventCallConfirmed event) {
       logger.d('call confirmed');
@@ -1024,8 +1025,13 @@ class CallState {
       this.video,
       this.stream,
       this.cause,
-      this.refer});
+      this.refer,
+      this.response});
   CallStateEnum state;
+
+  /// ACCEPTED only: the remote `200 OK` of an outgoing call (an
+  /// `IncomingResponse`), for headers the app reads; null otherwise.
+  dynamic response;
   ErrorCause? cause;
   Originator? originator;
   bool? audio;
