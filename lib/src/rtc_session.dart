@@ -1085,6 +1085,13 @@ class RTCSession extends EventManager implements Owner {
       }
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
+      int? status = _reOfferRefused(event);
+      if (status != null) {
+        _localHold = false;
+        _onunhold(Originator.local);
+        options!['onFailed']?.call(status);
+        return;
+      }
       terminate(<String, dynamic>{
         'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
         'status_code': 500,
@@ -1137,6 +1144,13 @@ class RTCSession extends EventManager implements Owner {
       }
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
+      int? status = _reOfferRefused(event);
+      if (status != null) {
+        _localHold = true;
+        _onhold(Originator.local);
+        options!['onFailed']?.call(status);
+        return;
+      }
       terminate(<String, dynamic>{
         'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
         'status_code': 500,
@@ -1203,6 +1217,11 @@ class RTCSession extends EventManager implements Owner {
     });
 
     handlers.on(EventCallFailed(), (EventCallFailed event) {
+      int? status = _reOfferRefused(event);
+      if (status != null) {
+        options!['onFailed']?.call(status);
+        return;
+      }
       terminate(<String, dynamic>{
         'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
         'status_code': 500,
@@ -1504,6 +1523,36 @@ class RTCSession extends EventManager implements Owner {
     logger.d('newInfo()');
 
     emit(EventNewInfo(originator: originator, info: info, request: request));
+  }
+
+  /**
+   * A re-INVITE or UPDATE refused with a final error response (491 Request
+   * Pending, 488, 5xx...) leaves the session and its media as they were
+   * (RFC 3261 14.1), so the call goes on: the local offer is rolled back and
+   * the status returned. Null when the session can't go on (no error
+   * response: no answer SDP, or an answer that could not be applied).
+   * 408 / 481 end the dialog through onDialogError and never come here.
+   */
+  int? _reOfferRefused(EventCallFailed event) {
+    dynamic response = event.response;
+    if (response is! IncomingResponse || _state == RtcSessionState.terminated) {
+      return null;
+    }
+    int? status = response.status_code;
+    if (status == null || status < 300) {
+      return null;
+    }
+    _rollbackLocalOffer();
+    return status;
+  }
+
+  void _rollbackLocalOffer() async {
+    try {
+      await _connection
+          ?.setLocalDescription(RTCSessionDescription('', 'rollback'));
+    } catch (e) {
+      logger.d('rollback after a refused re-offer failed: $e');
+    }
   }
 
   /**
