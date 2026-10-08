@@ -635,10 +635,10 @@ class RTCSession extends EventManager implements Owner {
     if (stream != null) {
       switch (sdpSemantics) {
         case 'unified-plan':
-          stream.getTracks().forEach((MediaStreamTrack track) async {
-            RTCRtpSender sender = await _connection!.addTrack(track, stream!);
+          for (MediaStreamTrack track in stream.getTracks()) {
+            RTCRtpSender sender = await _connection!.addTrack(track, stream);
             _senders.add(sender);
-          });
+          }
           break;
         case 'plan-b':
           _connection!.addStream(stream);
@@ -2479,10 +2479,10 @@ class RTCSession extends EventManager implements Owner {
     if (stream != null) {
       switch (sdpSemantics) {
         case 'unified-plan':
-          stream.getTracks().forEach((MediaStreamTrack track) async {
-            RTCRtpSender sender = await _connection!.addTrack(track, stream!);
+          for (MediaStreamTrack track in stream.getTracks()) {
+            RTCRtpSender sender = await _connection!.addTrack(track, stream);
             _senders.add(sender);
-          });
+          }
           break;
         case 'plan-b':
           _connection!.addStream(stream);
