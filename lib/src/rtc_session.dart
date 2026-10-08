@@ -608,7 +608,7 @@ class RTCSession extends EventManager implements Owner {
             session: this, originator: Originator.local, stream: stream));
       } catch (error) {
         if (_state == RtcSessionState.terminated) {
-          throw Exceptions.InvalidStateError('terminated');
+          return;
         }
         request.reply(480);
         _failed(
@@ -621,12 +621,12 @@ class RTCSession extends EventManager implements Owner {
             'User Denied Media Access');
         logger.e('emit "getusermediafailed" [error:${error.toString()}]');
         emit(EventGetUserMediaFailed(exception: error));
-        throw Exceptions.InvalidStateError('getUserMedia() failed');
+        return;
       }
     }
 
     if (_state == RtcSessionState.terminated) {
-      throw Exceptions.InvalidStateError('terminated');
+      return;
     }
 
     // Attach MediaStream to RTCPeerconnection.
@@ -674,13 +674,12 @@ class RTCSession extends EventManager implements Owner {
       logger.e(
           'emit "peerconnection:setremotedescriptionfailed" [error:${error.toString()}]');
       emit(EventSetRemoteDescriptionFailed(exception: error));
-      throw Exceptions.TypeError(
-          'peerconnection.setRemoteDescription() failed');
+      return;
     }
 
     // Create local description.
     if (_state == RtcSessionState.terminated) {
-      throw Exceptions.InvalidStateError('terminated');
+      return;
     }
 
     // TODO(cloudwebrtc): Is this event already useful?
@@ -700,7 +699,7 @@ class RTCSession extends EventManager implements Owner {
     }
 
     if (_state == RtcSessionState.terminated) {
-      throw Exceptions.InvalidStateError('terminated');
+      return;
     }
 
     // Send reply.
