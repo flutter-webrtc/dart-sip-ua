@@ -24,7 +24,7 @@ class SIPUAWebSocketImpl {
       required WebSocketSettings webSocketSettings}) async {
     logger.i('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
     try {
-      _socket = WebSocket(_url, ['sip'.toJS].toJS);
+      _socket = WebSocket(_url, 'sip'.toJS);
       _socket!.onOpen.listen((Event e) {
         onOpen?.call();
       });

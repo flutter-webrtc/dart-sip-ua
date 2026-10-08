@@ -241,6 +241,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _handleHangup() {
+    if (kIsWeb) {
+      call!.session.terminate({'status_code': 603});
+      _timer.cancel();
+      return;
+    }
     call!.hangup({'status_code': 603});
     _timer.cancel();
   }
