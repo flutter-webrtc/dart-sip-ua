@@ -1694,13 +1694,21 @@ class RTCSession extends EventManager implements Owner {
   }
 
   void _iceRestart() async {
-    Map<String, dynamic> offerConstraints = _rtcOfferConstraints ??
-        <String, dynamic>{
-          'mandatory': <String, dynamic>{},
-          'optional': <dynamic>[],
-        };
-    offerConstraints['mandatory']['IceRestart'] = true;
-    renegotiate(options: offerConstraints);
+    // A copy, so later offers don't restart ICE too.
+    Map<String, dynamic> offerConstraints = <String, dynamic>{
+      'optional': <dynamic>[],
+      ...?_rtcOfferConstraints,
+      'mandatory': <String, dynamic>{
+        ...?_rtcOfferConstraints?['mandatory'],
+        'IceRestart': true,
+      },
+    };
+    // The constraints go in 'rtcOfferConstraints', and 'video: false' keeps
+    // renegotiate() from taking the restart for an upgrade to video.
+    renegotiate(options: <String, dynamic>{
+      'rtcOfferConstraints': offerConstraints,
+      'mediaConstraints': <String, dynamic>{'audio': true, 'video': false},
+    });
   }
 
   Future<void> _createRTCConnection(Map<String, dynamic> pcConfig,
