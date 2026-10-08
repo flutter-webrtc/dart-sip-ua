@@ -1130,6 +1130,17 @@ class WebSocketSettings {
   /// or WSS for wss://, based on the given web socket URL).
   String? transport_scheme;
 
+  /// Interval between WebSocket ping frames.
+  ///
+  /// A pong must arrive within the same interval, otherwise the peer is
+  /// assumed disconnected and the socket is closed — which lets the UA notice
+  /// a silently dead connection and re-register, instead of believing it is
+  /// registered while nothing can reach it. On mobile networks the pings also
+  /// keep the carrier's NAT binding alive, so the connection is far less
+  /// likely to die in the first place.
+  ///
+  /// Null (the default) means no pings are sent — previous behaviour.
+  Duration? pingInterval;
   /// How long to wait for the WebSocket handshake on dart:io.
   ///
   /// Null (the default) adds no deadline. A second connect() is then still
