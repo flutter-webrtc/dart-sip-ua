@@ -19,19 +19,59 @@ class SIPUAWebSocketImpl {
   OnMessageCallback? onMessage;
   OnCloseCallback? onClose;
   final int messageDelay;
+
+  /// Identifies the handshake currently in flight. close() and a connect
+  /// timeout bump it so a socket that completes afterwards is discarded.
+  int _attempt = 0;
+  bool _connecting = false;
+
+  /// True only when [WebSocketSettings.connectTimeout] is set. Without a
+  /// deadline, [isConnecting] stays false during the await and a second
+  /// connect() may overlap this one — that overlap is what recovers a
+  /// handshake the OS never finishes.
+  bool _blockOverlap = false;
+  Timer? _connectTimer;
+
   void connect(
       {Iterable<String>? protocols,
       required WebSocketSettings webSocketSettings}) async {
     handleQueue();
     logger.i('connect $_url, ${webSocketSettings.extraHeaders}, $protocols');
+    int attempt = ++_attempt;
+    _connecting = true;
+    _blockOverlap = webSocketSettings.connectTimeout != null;
+    _connectTimer?.cancel();
+    Duration? timeout = webSocketSettings.connectTimeout;
+    if (timeout != null) {
+      _connectTimer = Timer(timeout, () {
+        if (attempt != _attempt) {
+          return;
+        }
+        _connecting = false;
+        _connectTimer = null;
+        _attempt++;
+        onClose?.call(1006, 'connect timeout');
+      });
+    }
     try {
+      WebSocket socket;
       if (webSocketSettings.allowBadCertificate) {
         /// Allow self-signed certificate, for test only.
-        _socket = await _connectForBadCertificate(_url, webSocketSettings);
+        socket = await _connectForBadCertificate(_url, webSocketSettings);
       } else {
-        _socket = await WebSocket.connect(_url,
+        socket = await WebSocket.connect(_url,
             protocols: protocols, headers: webSocketSettings.extraHeaders);
       }
+
+      if (attempt != _attempt) {
+        socket.close();
+        return;
+      }
+
+      _connectTimer?.cancel();
+      _connectTimer = null;
+      _connecting = false;
+      _socket = socket;
 
       // Applies to both branches above. Null keeps dart:io's default of not
       // pinging at all, so this is a no-op unless a caller opts in.
@@ -39,11 +79,23 @@ class SIPUAWebSocketImpl {
 
       onOpen?.call();
       _socket!.listen((dynamic data) {
+        if (attempt != _attempt) {
+          return;
+        }
         onMessage?.call(data);
       }, onDone: () {
-        onClose?.call(_socket!.closeCode, _socket!.closeReason);
+        if (attempt != _attempt) {
+          return;
+        }
+        onClose?.call(_socket?.closeCode, _socket?.closeReason);
       });
     } catch (e) {
+      if (attempt != _attempt) {
+        return;
+      }
+      _connecting = false;
+      _connectTimer?.cancel();
+      _connectTimer = null;
       onClose?.call(500, e.toString());
     }
   }
@@ -66,10 +118,22 @@ class SIPUAWebSocketImpl {
   }
 
   void close() {
-    if (_socket != null) _socket!.close();
+    _attempt++;
+    _connecting = false;
+    _blockOverlap = false;
+    _connectTimer?.cancel();
+    _connectTimer = null;
+    WebSocket? socket = _socket;
+    _socket = null;
+    if (socket != null) {
+      socket.close();
+    }
   }
 
   bool isConnecting() {
+    if (_blockOverlap && _connecting) {
+      return true;
+    }
     return _socket != null && _socket!.readyState == WebSocket.connecting;
   }
 

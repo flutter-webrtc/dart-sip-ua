@@ -635,10 +635,10 @@ class RTCSession extends EventManager implements Owner {
     if (stream != null) {
       switch (sdpSemantics) {
         case 'unified-plan':
-          stream.getTracks().forEach((MediaStreamTrack track) async {
-            RTCRtpSender sender = await _connection!.addTrack(track, stream!);
+          for (MediaStreamTrack track in stream.getTracks()) {
+            RTCRtpSender sender = await _connection!.addTrack(track, stream);
             _senders.add(sender);
-          });
+          }
           break;
         case 'plan-b':
           _connection!.addStream(stream);
@@ -1085,6 +1085,13 @@ class RTCSession extends EventManager implements Owner {
       }
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
+      int? status = _reOfferRefused(event);
+      if (status != null) {
+        _localHold = false;
+        _onunhold(Originator.local);
+        options!['onFailed']?.call(status);
+        return;
+      }
       terminate(<String, dynamic>{
         'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
         'status_code': 500,
@@ -1137,6 +1144,13 @@ class RTCSession extends EventManager implements Owner {
       }
     });
     handlers.on(EventCallFailed(), (EventCallFailed event) {
+      int? status = _reOfferRefused(event);
+      if (status != null) {
+        _localHold = true;
+        _onhold(Originator.local);
+        options!['onFailed']?.call(status);
+        return;
+      }
       terminate(<String, dynamic>{
         'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
         'status_code': 500,
@@ -1203,6 +1217,11 @@ class RTCSession extends EventManager implements Owner {
     });
 
     handlers.on(EventCallFailed(), (EventCallFailed event) {
+      int? status = _reOfferRefused(event);
+      if (status != null) {
+        options!['onFailed']?.call(status);
+        return;
+      }
       terminate(<String, dynamic>{
         'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
         'status_code': 500,
@@ -1316,8 +1335,10 @@ class RTCSession extends EventManager implements Owner {
           _state == RtcSessionState.answered) {
         _state = RtcSessionState.canceled;
         _request.reply(487);
+        // The CANCEL's Reason header (RFC 3326), e.g. `SIP;cause=200;text="Call
+        // completed elsewhere"`: a request has no reason phrase of its own.
         _failed(Originator.remote, null, request, null, 487,
-            DartSIP_C.CausesType.CANCELED, request.reason_phrase);
+            DartSIP_C.CausesType.CANCELED, request.getHeader('reason'));
       }
     } else {
       // Requests arriving here are in-dialog requests.
@@ -1507,6 +1528,36 @@ class RTCSession extends EventManager implements Owner {
   }
 
   /**
+   * A re-INVITE or UPDATE refused with a final error response (491 Request
+   * Pending, 488, 5xx...) leaves the session and its media as they were
+   * (RFC 3261 14.1), so the call goes on: the local offer is rolled back and
+   * the status returned. Null when the session can't go on (no error
+   * response: no answer SDP, or an answer that could not be applied).
+   * 408 / 481 end the dialog through onDialogError and never come here.
+   */
+  int? _reOfferRefused(EventCallFailed event) {
+    dynamic response = event.response;
+    if (response is! IncomingResponse || _state == RtcSessionState.terminated) {
+      return null;
+    }
+    int? status = response.status_code;
+    if (status == null || status < 300) {
+      return null;
+    }
+    _rollbackLocalOffer();
+    return status;
+  }
+
+  void _rollbackLocalOffer() async {
+    try {
+      await _connection
+          ?.setLocalDescription(RTCSessionDescription('', 'rollback'));
+    } catch (e) {
+      logger.d('rollback after a refused re-offer failed: $e');
+    }
+  }
+
+  /**
    * Check if RTCSession is ready for an outgoing re-INVITE or UPDATE with SDP.
    */
   bool _isReadyToReOffer() {
@@ -1643,13 +1694,21 @@ class RTCSession extends EventManager implements Owner {
   }
 
   void _iceRestart() async {
-    Map<String, dynamic> offerConstraints = _rtcOfferConstraints ??
-        <String, dynamic>{
-          'mandatory': <String, dynamic>{},
-          'optional': <dynamic>[],
-        };
-    offerConstraints['mandatory']['IceRestart'] = true;
-    renegotiate(options: offerConstraints);
+    // A copy, so later offers don't restart ICE too.
+    Map<String, dynamic> offerConstraints = <String, dynamic>{
+      'optional': <dynamic>[],
+      ...?_rtcOfferConstraints,
+      'mandatory': <String, dynamic>{
+        ...?_rtcOfferConstraints?['mandatory'],
+        'IceRestart': true,
+      },
+    };
+    // The constraints go in 'rtcOfferConstraints', and 'video: false' keeps
+    // renegotiate() from taking the restart for an upgrade to video.
+    renegotiate(options: <String, dynamic>{
+      'rtcOfferConstraints': offerConstraints,
+      'mediaConstraints': <String, dynamic>{'audio': true, 'video': false},
+    });
   }
 
   Future<void> _createRTCConnection(Map<String, dynamic> pcConfig,
@@ -2479,10 +2538,10 @@ class RTCSession extends EventManager implements Owner {
     if (stream != null) {
       switch (sdpSemantics) {
         case 'unified-plan':
-          stream.getTracks().forEach((MediaStreamTrack track) async {
-            RTCRtpSender sender = await _connection!.addTrack(track, stream!);
+          for (MediaStreamTrack track in stream.getTracks()) {
+            RTCRtpSender sender = await _connection!.addTrack(track, stream);
             _senders.add(sender);
-          });
+          }
           break;
         case 'plan-b':
           _connection!.addStream(stream);
@@ -2736,7 +2795,7 @@ class RTCSession extends EventManager implements Owner {
       sendRequest(SipMethod.ACK);
 
       // If it is a 2XX retransmission exit now.
-      if (succeeded != null) {
+      if (succeeded) {
         return;
       }
 
@@ -3011,13 +3070,13 @@ class RTCSession extends EventManager implements Owner {
       _handleSessionTimersInIncomingResponse(response);
 
       // If it is a 2XX retransmission exit now.
-      if (succeeded != null) {
+      if (succeeded) {
         return;
       }
 
       // Must have SDP answer.
       if (sdpOffer) {
-        if (response!.body != null && response.body!.trim().isNotEmpty) {
+        if (response!.body == null || response.body!.trim().isEmpty) {
           onFailed();
           return;
         } else if (response.getHeader('Content-Type') != 'application/sdp') {

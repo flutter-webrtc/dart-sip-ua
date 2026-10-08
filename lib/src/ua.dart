@@ -781,6 +781,23 @@ class UA extends EventManager {
         }
       }
 
+      /* A CANCEL only gets here once checkTransaction() has matched it to an
+       * INVITE still in progress and answered it 200 (statelessly: CANCEL has
+       * no server transaction). Its To tag can name no dialog of ours, e.g. a
+       * tag from a provisional response sent before this UA restarted. Apply
+       * it to that INVITE's session, as for a CANCEL without a To tag; it
+       * must not get a second response.
+       */
+      else if (method == SipMethod.CANCEL) {
+        session =
+            _findSession(request.call_id!, request.from_tag, request.to_tag);
+        if (session != null) {
+          session.receiveRequest(request);
+        } else {
+          logger.d('received CANCEL request for a non existent session');
+        }
+      }
+
       /* RFC3261 12.2.2
        * Request with to tag, but no matching dialog found.
        * Exception: ACK for an Invite request for which a dialog has not

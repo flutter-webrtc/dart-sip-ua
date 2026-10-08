@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logger/logger.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
-import 'package:sip_ua/src/uri.dart';
 
+import 'package:sip_ua/src/uri.dart';
 import 'config.dart';
 import 'constants.dart' as DartSIP_C;
 import 'enums.dart';
@@ -16,8 +16,8 @@ import 'logger.dart';
 import 'map_helper.dart';
 import 'message.dart';
 import 'options.dart';
-import 'replaces.dart';
 import 'publish.dart';
+import 'replaces.dart';
 import 'rtc_session.dart';
 import 'rtc_session/refer_subscriber.dart';
 import 'sip_message.dart';
@@ -317,7 +317,8 @@ class SIPUAHelper extends EventManager {
     });
     handlers.on(EventCallAccepted(), (EventCallAccepted event) {
       logger.d('call accepted');
-      _notifyCallStateListeners(event, CallState(CallStateEnum.ACCEPTED));
+      _notifyCallStateListeners(
+          event, CallState(CallStateEnum.ACCEPTED, response: event.response));
     });
     handlers.on(EventCallConfirmed(), (EventCallConfirmed event) {
       logger.d('call confirmed');
@@ -1024,8 +1025,13 @@ class CallState {
       this.video,
       this.stream,
       this.cause,
-      this.refer});
+      this.refer,
+      this.response});
   CallStateEnum state;
+
+  /// ACCEPTED only: the remote `200 OK` of an outgoing call (an
+  /// `IncomingResponse`), for headers the app reads; null otherwise.
+  dynamic response;
   ErrorCause? cause;
   Originator? originator;
   bool? audio;
@@ -1135,6 +1141,18 @@ class WebSocketSettings {
   ///
   /// Null (the default) means no pings are sent — previous behaviour.
   Duration? pingInterval;
+  /// How long to wait for the WebSocket handshake on dart:io.
+  ///
+  /// Null (the default) adds no deadline. A second connect() is then still
+  /// allowed to overlap the first, which is what recovers a handshake the
+  /// operating system never finishes. When set, a second connect() waits
+  /// until this attempt finishes or times out. On timeout the socket reports
+  /// onClose so the usual recovery path runs, and that onClose is the one
+  /// connect() itself did not emit: the disconnect() a new connect() uses to
+  /// drop the previous socket still fails transactions that were pending on
+  /// it. A handshake that completes after its impl was replaced is closed
+  /// and ignored whether or not a timeout is set.
+  Duration? connectTimeout;
 }
 
 class TcpSocketSettings {
