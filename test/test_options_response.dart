@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:test/test.dart';
+
 import 'package:sip_ua/sip_ua.dart';
 import 'package:sip_ua/src/event_manager/event_manager.dart';
 import 'package:sip_ua/src/event_manager/internal_events.dart';
-import 'package:test/test.dart';
 
 /// Local SIP OPTIONS peer. Copies the request's Via, From, To, Call-ID and
 /// CSeq into a single 200, which is what the stack's sanity check accepts.

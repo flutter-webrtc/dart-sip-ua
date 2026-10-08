@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:test/test.dart';
+
 import 'package:sip_ua/sip_ua.dart';
 import 'package:sip_ua/src/transports/socket_interface.dart';
 import 'package:sip_ua/src/transports/web_socket.dart';
-import 'package:test/test.dart';
 
 void main() {
   test('a late WebSocket open does not connect twice', () async {
