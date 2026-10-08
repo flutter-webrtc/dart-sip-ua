@@ -85,26 +85,45 @@ class SIPUAWebSocket extends SIPUASocketInterface {
     }
     logger.d('connecting to WebSocket $_url');
     try {
-      _ws = SIPUAWebSocketImpl(_url!, _messageDelay);
+      SIPUAWebSocketImpl impl = SIPUAWebSocketImpl(_url!, _messageDelay);
+      _ws = impl;
 
-      _ws!.onOpen = () {
+      // Callbacks are captured by the impl. A handshake that finishes after
+      // connect() has already replaced it must not mark this socket connected
+      // or deliver bytes: send() would write to the new impl, which may not
+      // be open yet, and the REGISTER is lost.
+      bool current() => identical(_ws, impl);
+
+      impl.onOpen = () {
+        if (!current()) {
+          impl.close();
+          return;
+        }
         _closed = false;
         _connected = true;
         logger.d('Web Socket is now connected');
         _onOpen();
       };
 
-      _ws!.onMessage = (dynamic data) {
+      impl.onMessage = (dynamic data) {
+        if (!current()) {
+          impl.close();
+          return;
+        }
         _onMessage(data);
       };
 
-      _ws!.onClose = (int? closeCode, String? closeReason) {
+      impl.onClose = (int? closeCode, String? closeReason) {
+        if (!current()) {
+          impl.close();
+          return;
+        }
         logger.d('Closed [$closeCode, $closeReason]!');
         _connected = false;
         _onClose(true, closeCode, closeReason);
       };
 
-      _ws!.connect(
+      impl.connect(
           protocols: <String>[_websocket_protocol],
           webSocketSettings: _webSocketSettings);
     } catch (e, s) {
