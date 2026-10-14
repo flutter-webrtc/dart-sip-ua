@@ -1879,10 +1879,7 @@ class RTCSession extends EventManager implements Owner {
         _iceGatheringState = RTCIceGatheringState.RTCIceGatheringStateComplete;
         _rtcReady = true;
         RTCSessionDescription? desc = await _connection!.getLocalDescription();
-        logger.d('emit "sdp"');
-        emit(
-            EventSdp(originator: Originator.local, type: type, sdp: desc!.sdp));
-        completer.complete(desc);
+        completer.complete(_emitLocalSdp(type, desc!));
       }
     }
 
@@ -1927,12 +1924,23 @@ class RTCSession extends EventManager implements Owner {
         RTCIceGatheringState.RTCIceGatheringStateComplete) {
       _rtcReady = true;
       RTCSessionDescription? desc = await _connection!.getLocalDescription();
-      logger.d('emit "sdp"');
-      emit(EventSdp(originator: Originator.local, type: type, sdp: desc!.sdp));
-      return desc;
+      return _emitLocalSdp(type, desc!);
     }
 
     return completer.future;
+  }
+
+  /// Emits the local SDP just before it goes out and returns it as the
+  /// listeners left it. As in JsSIP, an 'sdp' listener may rewrite the
+  /// outgoing SDP by assigning `event.sdp`; the peer connection's own local
+  /// description is not touched.
+  RTCSessionDescription _emitLocalSdp(
+      SdpType type, RTCSessionDescription desc) {
+    logger.d('emit "sdp"');
+    EventSdp event =
+        EventSdp(originator: Originator.local, type: type, sdp: desc.sdp);
+    emit(event);
+    return RTCSessionDescription(event.sdp, desc.type);
   }
 
   /**
