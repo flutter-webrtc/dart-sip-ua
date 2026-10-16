@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:sip_ua/sip_ua.dart';
 import 'package:test/test.dart';
+
+import 'package:sip_ua/sip_ua.dart';
 
 /// Accepts the socket and records REGISTER, but never answers it, so the
 /// client transaction is still alive when start() is called again.
