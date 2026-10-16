@@ -2844,8 +2844,11 @@ class RTCSession extends EventManager implements Owner {
           await _createLocalDescription(SdpType.offer, rtcOfferConstraints);
       String? sdp = _mangleOffer(desc.sdp);
       logger.d('emit "sdp"');
-      emit(EventSdp(
-          originator: Originator.local, type: SdpType.offer, sdp: sdp));
+      EventSdp sdpEvent =
+          EventSdp(originator: Originator.local, type: SdpType.offer, sdp: sdp);
+      emit(sdpEvent);
+      // Send what the listeners left, as in _createLocalDescription.
+      sdp = sdpEvent.sdp;
 
       EventManager handlers = EventManager();
       handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
@@ -3006,8 +3009,11 @@ class RTCSession extends EventManager implements Owner {
           await _createLocalDescription(SdpType.offer, rtcOfferConstraints);
       String? sdp = _mangleOffer(desc.sdp);
       logger.d('emit "sdp"');
-      emit(EventSdp(
-          originator: Originator.local, type: SdpType.offer, sdp: sdp));
+      EventSdp sdpEvent =
+          EventSdp(originator: Originator.local, type: SdpType.offer, sdp: sdp);
+      emit(sdpEvent);
+      // Send what the listeners left, as in _createLocalDescription.
+      sdp = sdpEvent.sdp;
 
       EventManager handlers = EventManager();
       handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
@@ -3124,8 +3130,11 @@ class RTCSession extends EventManager implements Owner {
         String? sdp = _mangleOffer(desc.sdp);
 
         logger.d('emit "sdp"');
-        emit(EventSdp(
-            originator: Originator.local, type: SdpType.offer, sdp: sdp));
+        EventSdp sdpEvent = EventSdp(
+            originator: Originator.local, type: SdpType.offer, sdp: sdp);
+        emit(sdpEvent);
+        // Send what the listeners left, as in _createLocalDescription.
+        sdp = sdpEvent.sdp;
 
         EventManager handlers = EventManager();
         handlers.on(EventOnSuccessResponse(), (EventOnSuccessResponse event) {
