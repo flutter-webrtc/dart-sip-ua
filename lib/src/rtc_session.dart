@@ -1091,6 +1091,11 @@ class RTCSession extends EventManager implements Owner {
         options!['onFailed']?.call(status);
         return;
       }
+      if (_mediaFailureHandled(options, event)) {
+        _localHold = false;
+        _onunhold(Originator.local);
+        return;
+      }
       terminate(<String, dynamic>{
         'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
         'status_code': 500,
@@ -1150,6 +1155,11 @@ class RTCSession extends EventManager implements Owner {
         options!['onFailed']?.call(status);
         return;
       }
+      if (_mediaFailureHandled(options, event)) {
+        _localHold = true;
+        _onhold(Originator.local);
+        return;
+      }
       terminate(<String, dynamic>{
         'cause': DartSIP_C.CausesType.WEBRTC_ERROR,
         'status_code': 500,
@@ -1171,6 +1181,37 @@ class RTCSession extends EventManager implements Owner {
     }
 
     return true;
+  }
+
+  /// Give the application the first say when a media renegotiation fails.
+  ///
+  /// A refused re-offer (4xx) is already surfaced through
+  /// `options['onFailed']` and never ends the call. A *media* failure
+  /// (`setRemoteDescription` rejecting the answer, no acceptable codec, an
+  /// SDP the local stack cannot apply) currently ends the whole dialog with
+  /// `500 Media Renegotiation Failed` / `Hold Failed` / `Unhold Failed`.
+  /// That is not recoverable from the application's side: the SIP dialog is
+  /// still valid, the previously negotiated SDP is still in force, and a
+  /// softphone that just moved from Wi-Fi to mobile data wants to retry the
+  /// ICE restart rather than drop the call.
+  ///
+  /// `options['onMediaFailure']` is called with the [EventCallFailed] before
+  /// the session terminates. Return `true` to take ownership of the failure
+  /// (retry, rebuild the peer connection, or end the call yourself); return
+  /// anything else - or omit the handler - and the session terminates exactly
+  /// as before.
+  bool _mediaFailureHandled(
+      Map<String, dynamic>? options, EventCallFailed event) {
+    final dynamic handler = options?['onMediaFailure'];
+    if (handler is! Function) {
+      return false;
+    }
+    try {
+      return handler(event) == true;
+    } catch (e) {
+      logger.w('onMediaFailure handler threw: $e');
+      return false;
+    }
   }
 
   bool renegotiate(
@@ -1219,6 +1260,9 @@ class RTCSession extends EventManager implements Owner {
       int? status = _reOfferRefused(event);
       if (status != null) {
         options!['onFailed']?.call(status);
+        return;
+      }
+      if (_mediaFailureHandled(options, event)) {
         return;
       }
       terminate(<String, dynamic>{
